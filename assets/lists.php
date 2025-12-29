@@ -72,14 +72,14 @@ define("FIELDS",array(
         array("field_name"=>"area_id", "type"=>"int"),
         array("field_name"=>"is_area", "type"=>"bool"),
     ),
-    "collection" => array(
+    "supplier_invoices" => array(
         array("field_name"=>"supplier_id", "type"=>"int"),
         array("field_name"=>"client_id", "type"=>"int"),
         array("field_name"=>"obligation", "type"=>"float"),
-        array("field_name"=>"doc_number", "type"=>"int"),
+        array("field_name"=>"invoic_number", "type"=>"int"),
         array("field_name"=>"date", "type"=>"date"),
         array("field_name"=>"payment_date", "type"=>"date"),
-        array("field_name"=>"credit_doc", "type"=>"int"),
+        array("field_name"=>"credit_number", "type"=>"int"),
         array("field_name"=>"payment_type", "type"=>"int"),
         array("field_name"=>"check_number", "type"=>"text"),
     )
