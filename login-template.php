@@ -16,7 +16,7 @@ get_header();?>
 
 <div id="primary" class="login-container">
     <section class="login-section flex-display">
-        <div class="login-image part-50">
+        <div class="login-image part-80">
         </div>
         <div class="login-area part-50 background-black flex-display direction-column space-between">
             <form id="login_form" class="site_form flex-display direction-column space-between" data-success="reload_page" data-error="show_error_messages">

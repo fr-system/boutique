@@ -1,0 +1,19 @@
+.boutique-header{
+    height: 65px;
+    background-color: white;
+    border: 0;
+    border-bottom:1px solid  #C4C4C4;
+    padding: 0 0 0 40px;
+}
+
+.boutique-header .search-site{
+    padding: 0 40px;
+}
+.boutique-header .search-site input{
+    background: none;
+    border: 0 !important;
+}
+.boutique-header .user-logged{
+    border-radius: 5px;
+    border: var(--b-global-color-dark-gray) solid 0.5px;
+}
