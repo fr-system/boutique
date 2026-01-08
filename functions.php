@@ -6,10 +6,10 @@
  * @package boutique
  */
 
-/*require_once dirname(__FILE__) . "/assets/lists.php";
+require_once dirname(__FILE__) . "/assets/lists.php";
 require_once dirname(__FILE__) . "/users.php";
 require_once dirname(__FILE__) . "/queries.php";
-require_once dirname(__FILE__) . "/popups.php";*/
+require_once dirname(__FILE__) . "/popups.php";
 function boutique_enqueue_scripts()
 {
     wp_enqueue_style(
@@ -19,14 +19,19 @@ function boutique_enqueue_scripts()
         '1.0.0'
     );
 
+    wp_register_style( 'assets-style', get_template_directory_uri(). '/assets/style.css' );
+    wp_enqueue_style( 'assets-style' );
+
     wp_enqueue_script('jquery');
 
     wp_register_script('script', get_template_directory_uri() . '/script.js');
     wp_enqueue_script('script');
 
     wp_enqueue_media();
+
 }
 add_action('wp_enqueue_scripts', 'boutique_enqueue_scripts', 98);
+
 
 function send_site_forms()
 {

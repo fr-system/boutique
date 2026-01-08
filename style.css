@@ -9,6 +9,9 @@ Text Domain: boutique
 */
 
 :root {
+    --b-global-color-dark-gray: #AFAFAF;
+
+
     font-size: 62.5%;
 }
 
@@ -28,6 +31,9 @@ body{
 }
 input, textarea, select, button{
     font-family:"Noto Sans Hebrew","Heebo",Arial,sans-serif;
+}
+img{
+    height: 100%;
 }
 .font-12{
     font-size: 1.2rem;
@@ -96,6 +102,9 @@ input, textarea, select, button{
 .flex-display.center{
     justify-content: center;
 }
+.flex-display.direction-column {
+    flex-direction: column;
+}
 .flex-display .part-10{
     flex-basis:10% !important;
 }
@@ -108,7 +117,6 @@ input, textarea, select, button{
 .flex-display .part-40{
     flex-basis:40% !important;
 }
-
 .flex-display .part-50{
     flex-basis:50% !important;
 }
@@ -121,8 +129,8 @@ input, textarea, select, button{
 .flex-display .part-80{
     flex-basis:80% !important;
 }
-.flex-display.direction-column {
-    flex-direction: column;
+.flex-display .grow{
+    flex-grow: 1;
 }
 .grid-display {
     display: grid;
@@ -319,6 +327,7 @@ label span{
 
 /* slider-message */
 .slider-message{
+    display: none;
     width: 400px;
     /* height: 400px;*/
     position: fixed;
@@ -346,4 +355,6 @@ label span{
     background-repeat: no-repeat;
     padding: 10px;
 }
+
+
 

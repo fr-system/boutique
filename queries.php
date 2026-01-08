@@ -13,7 +13,7 @@ function run_query($query, $type="")
     return $result;
 }
 
-function build_query($table_name)
+function build_query_boutique($table_name)
 {
     $update = array();
     $fields = array();
