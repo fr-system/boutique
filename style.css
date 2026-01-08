@@ -16,6 +16,7 @@ Text Domain: boutique
 
 html { margin:0 !important; }
 body{
+    direction: rtl;
     background:white;
     font-family:"Noto Sans Hebrew","Heebo",Arial,sans-serif;
     font-weight:400;
@@ -177,11 +178,12 @@ button, .pointer{
 }
 
 section.page{
-    //background-color: var(--a-global-color-light_gray);
+    /*background-color: var(--a-global-color-light_gray);*/
     flex-grow: 1;
     padding: 3% 5%;
     /*padding: 40px 100px;*/
     line-height: 1.3;
+    height: 100%;
 }
 
 .box{
@@ -333,6 +335,15 @@ label span{
 }
 
 .login-section{
-    padding-right: 20px;
+    padding: 20px;
+}
+
+.login-image {
+    height: 100%;
+    background-image: url(/assets/images/login.jpg);
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    padding: 10px;
 }
 

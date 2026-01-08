@@ -6,10 +6,10 @@
  * @package boutique
  */
 
-require_once dirname(__FILE__) . "/assets/lists.php";
+/*require_once dirname(__FILE__) . "/assets/lists.php";
 require_once dirname(__FILE__) . "/users.php";
 require_once dirname(__FILE__) . "/queries.php";
-require_once dirname(__FILE__) . "/popups.php";
+require_once dirname(__FILE__) . "/popups.php";*/
 function boutique_enqueue_scripts()
 {
     wp_enqueue_style(

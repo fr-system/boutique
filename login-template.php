@@ -16,9 +16,7 @@ get_header();?>
 
 <div id="primary" class="login-container">
     <section class="login-section flex-display">
-        <div class="part-50">
-            <?write_log("ffddfdf");?>
-            <img src="<?= get_stylesheet_directory_uri().'/assets/images/login.jpg'?>">
+        <div class="login-image part-50">
         </div>
         <div class="login-area part-50 background-black flex-display direction-column space-between">
             <form id="login_form" class="site_form flex-display direction-column space-between" data-success="reload_page" data-error="show_error_messages">
