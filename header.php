@@ -29,8 +29,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 <body <?php body_class(); ?>
 
 <a class="skip-link screen-reader-text" href="#content"></a>
-<div class="boutique-header flex-display start align-center font-17">
-    <img class="part-10" src="<?= get_stylesheet_directory_uri()."/assets/images/logo_header.png"?>">
+<header class="boutique-header flex-display start align-center font-17">
+    <img class="part-10 logo-header" src="<?= get_stylesheet_directory_uri()."/assets/images/logo_header.png"?>">
     <div class="search-site grow">
         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 14 14" fill="none">
             <g clip-path="url(#clip0_27_100)">
@@ -46,11 +46,13 @@ if ( ! defined( 'ABSPATH' ) ) {
         <input id="search_site" type="search" placeholder="חיפוש">
     </div>
 
-    <div class="user-logged part-10 flex-display space-between align-center padding-10">
+    <div class="user-logged pointer part-10 flex-display space-between align-center">
         <img class="user-logo" src="<?=wp_get_attachment_url(9)?>">
         <span class="user-name"><?= get_user_display_name();?></span>
         <svg xmlns="http://www.w3.org/2000/svg" width="7" height="4" viewBox="0 0 7 4" fill="none">
             <path d="M6.13282 0L3.5 2.41146L0.86718 0L0 0.79427L3.5 4L7 0.79427L6.13282 0Z" fill="black"/>
         </svg>
     </div>
-</div>
+</header>
+<main id="main" class="site-main flex-display" role="main">
+      <?php get_side_menu();?>

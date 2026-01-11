@@ -1,8 +1,6 @@
 <?php
 function function_login()
 {
-    //error_log("function_login");
-
     $email = fixXSS($_POST['username']);
     $pass = fixXSS($_POST['password']);
 
@@ -16,17 +14,9 @@ function function_login()
         );
 
         $user = wp_signon($creds, false);
-        if(get_user_role($user)=="administrator"){
-            $redirect = 'clients';
-        }
-        else{
-            $client_id = get_user_meta($user->ID, 'client_id',true);
-            $redirect = 'tasks-list/?clientId='.$client_id;
-        }
 
         echo json_encode(array(
             'status' => 'success',
-            'redirect' => get_site_url() .'/'.$redirect
         ));
 
     } else {
@@ -41,12 +31,48 @@ function function_login()
             echo json_encode(array(
                 'status' => 'error',
                 'reason' => 'no_registration',
-                'msg' => 'אינך מזוהה במערכת, פנה למנהל שמחה רוטנברג',
+                'msg' => 'אינך מזוהה במערכת',
             ));
         }
     }
     die();
 
+}
+
+function function_register()
+{
+    $email = fixXSS($_POST['username']);
+    $pass = fixXSS($_POST['password']);
+    if (strlen($email) < 5 || strlen($pass) < 6) {
+        echo json_encode(array(
+            'status' => 'error',
+            'msg' => "הכנס את המייל שלך וסיסמא"
+        ));
+        die;
+    }
+
+    if (email_exists($email) || username_exists($email)) {
+        echo json_encode(array(
+            'status' => 'error',
+            'msg' => "המייל רשום כבר במערכת"
+        ));
+        die;
+    }
+
+    $userdata = array(
+        'user_login' => $email,
+        'user_pass' => $pass,
+        'user_email' => $email,
+    );
+
+    $user_id = wp_insert_user($userdata);
+    if (!is_wp_error($user_id)) {
+        echo json_encode(array(
+            'status' => 'success',
+        ));
+    }
+
+    die();
 }
 
 add_action('wp_ajax_user_logout', 'user_logout');
@@ -63,7 +89,8 @@ function is_manager($user = null){
     return get_user_role($user) == "administrator";
 }
 function get_user_display_name($user_obj = null){
-    return get_user_connected($user_obj)->data->display_name;
+    $user = get_user_connected($user_obj);
+    return $user ?  $user->data->display_name : null;
 }
 function get_user_connected($user = null)
 {

@@ -5,7 +5,13 @@
     border-bottom:1px solid  #C4C4C4;
     padding: 0 0 0 40px;
 }
-
+.logo-header{
+    height: 100%;
+}
+.user-name{
+    width: max-content;
+    margin: 0 15px;
+}
 .boutique-header .search-site{
     padding: 0 40px;
 }
@@ -13,7 +19,36 @@
     background: none;
     border: 0 !important;
 }
+.boutique-header .search-site input::placeholder {
+    color: black;
+}
+
 .boutique-header .user-logged{
+    height: 40px;
+    padding: 0 10px;
     border-radius: 5px;
     border: var(--b-global-color-dark-gray) solid 0.5px;
+}
+
+ul.menu{
+    list-style-type: none;
+    margin: 0;
+    padding: 0 15%;
+    height: 60%;
+    justify-content: space-around;
+}
+
+ul.menu li {
+    /*height: 35px;
+    margin-bottom: 20px;*/
+}
+
+ul.menu li a{
+    text-decoration: none;
+    color: black;
+}
+.boutique-menu ul.menu li svg{
+    margin-left: 10px;
+    height: 15px;
+    width: 15px;
 }

@@ -1,4 +1,4 @@
-
+let xhr;
 jQuery(document).ready(function($){
 
 

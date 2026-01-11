@@ -32,16 +32,22 @@ function boutique_enqueue_scripts()
 }
 add_action('wp_enqueue_scripts', 'boutique_enqueue_scripts', 98);
 
+function boutique_setup_theme(){
+    register_nav_menu("main_menu","תפריט");
+}
+add_action( 'after_setup_theme', 'boutique_setup_theme' );
 
+add_action('wp_ajax_send_site_forms', 'send_site_forms');
+add_action('wp_ajax_nopriv_send_site_forms', 'send_site_forms');
 function send_site_forms()
 {
     $func_name = 'function_' . $_POST['form_func'];
     $func_name($_POST);
-    echo json_encode(array(
+    /*echo json_encode(array(
         'status' => 'success',
     ));
 
-    die();
+    die();*/
 }
 
 function fixXSS($str)
