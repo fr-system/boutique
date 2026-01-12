@@ -29,6 +29,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 <body <?php body_class(); ?>
 
 <a class="skip-link screen-reader-text" href="#content"></a>
+<?php if(is_user_logged_in()){ ?>
 <header class="boutique-header flex-display start align-center font-17">
     <img class="part-10 logo-header" src="<?= get_stylesheet_directory_uri()."/assets/images/logo_header.png"?>">
     <div class="search-site grow">
@@ -53,6 +54,8 @@ if ( ! defined( 'ABSPATH' ) ) {
             <path d="M6.13282 0L3.5 2.41146L0.86718 0L0 0.79427L3.5 4L7 0.79427L6.13282 0Z" fill="black"/>
         </svg>
     </div>
+    <div class="part-5"></div>
 </header>
+<?php } ?>
 <main id="main" class="site-main flex-display" role="main">
-      <?php get_side_menu();?>
+      <?php if(is_user_logged_in()) { get_side_menu(); }?>

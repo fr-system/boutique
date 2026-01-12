@@ -19,8 +19,6 @@ function build_query_boutique($table_name)
     $fields = array();
     $values = array();
 
-    //write_log("CLIENTS_FIELDS ".json_encode(CLIENTS_FIELDS));
-
     foreach ($_POST as $key => $value) {
         $type = get_field_type($table_name, $key);
         if($type !== false){
@@ -49,9 +47,24 @@ function build_query_boutique($table_name)
     return  $ok;
 
 }
+
+function get_table_ogj($table_name)
+{
+    $table_ogj = array_filter(BOUTIQUE_TABLES, function ($table) use ($table_name) {
+        return $table["subject"] == $table_name;
+    });
+    return $table_ogj;
+}
+function get_table_by_parameter($table_name,$parameter)
+{
+    $table_ogj = get_table_ogj($table_name);
+    return $table_ogj[$parameter];
+}
+
 function get_field_type($table_name, $field_name)
 {
-    $field = array_filter(FIELDS[$table_name], function ($field_row) use ($field_name) {
+    $fields = get_table_fields($table_name,"fields");
+    $field = array_filter($fields, function ($field_row) use ($field_name) {
         return $field_row["field_name"] == $field_name;
     });
     if (count($field) > 0) {

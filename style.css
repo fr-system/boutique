@@ -21,6 +21,12 @@ Text Domain: boutique
     background-color:var(--b-global-color-gold);
     color: white;
 }
+.black{
+    color: black;
+}
+.border-dark-gray{
+    border: var(--b-global-color-dark-gray) 1px solid;
+}
 html { margin:0 !important; }
 body{
     direction: rtl;
@@ -85,6 +91,9 @@ input, textarea, select, button{
 .underline {
     text-decoration: underline
 }
+.hidden, .d-none{
+    display: none;
+}
 .flex-display{
     display:flex;
 }
@@ -112,6 +121,9 @@ input, textarea, select, button{
 .flex-display.direction-column {
     flex-direction: column;
 }
+.flex-display .part-5{
+    flex-basis: 5% !important;
+}
 .flex-display .part-10{
     flex-basis:10% !important;
 }
@@ -123,6 +135,9 @@ input, textarea, select, button{
 }
 .flex-display .part-40{
     flex-basis:40% !important;
+}
+.flex-display .part-45{
+    flex-basis:45% !important;
 }
 .flex-display .part-50{
     flex-basis:50% !important;
@@ -141,9 +156,10 @@ input, textarea, select, button{
 }
 .grid-display {
     display: grid;
-    grid-template-columns: repeat(3, 1fr); /* 3 טורים */
-    /*grid-template-rows: repeat(2, auto); !* 2 שורות, ניתן לשנות ל-auto או גובה קבוע *!*/
     grid-gap: 25px;
+}
+.grid-display.cols-4{
+    grid-template-columns: repeat(4, 1fr); /* 3 טורים */
 }
 .margin-bottom-10{
     margin-bottom: 10px;
@@ -358,7 +374,7 @@ label span{
 
 .login-image {
     height: 100%;
-    background-image: url(/assets/images/login.jpg);
+    background-image:url(https://kosherboutique.co.il/wp-content/themes/boutique/assets/images/login.jpg);
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;

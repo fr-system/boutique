@@ -2,8 +2,8 @@
     height: 65px;
     background-color: white;
     border: 0;
-    border-bottom:1px solid  #C4C4C4;
-    padding: 0 0 0 40px;
+    border-bottom:1px solid #C4C4C4;
+    /*padding: 0 0 0 40px;*/
 }
 .logo-header{
     height: 100%;
@@ -30,25 +30,43 @@
     border: var(--b-global-color-dark-gray) solid 0.5px;
 }
 
+#sidebar-menu{
+    border-left: #C4C4C4 solid 0.5px;
+}
+
 ul.menu{
     list-style-type: none;
-    margin: 0;
-    padding: 0 15%;
+    margin: 70px 0 0 0;
+    padding: 0 20px;
     height: 60%;
     justify-content: space-around;
 }
 
 ul.menu li {
-    /*height: 35px;
-    margin-bottom: 20px;*/
+    height: 35px;
+    padding: 5px 15%;
 }
-
-ul.menu li a{
+ul.menu li.selected {
+    background-color: #F9F9F9;
+}
+ul.menu li:hover {
+    background-color: #F9F9F9;
+}
+a.not-link{
     text-decoration: none;
     color: black;
 }
-.boutique-menu ul.menu li svg{
+ul.menu li svg{
     margin-left: 10px;
     height: 15px;
     width: 15px;
+
+}
+
+.quick-action{
+    padding: 12px 25px;
+    border-radius: 12px;
+}
+.quick-action svg{
+    margin-left: 10px;
 }

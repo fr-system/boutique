@@ -118,20 +118,19 @@ function function_send_password_reset_link() {
         $unique     = get_password_reset_key( $user_info );
         $unique_url = get_reset_password_page() . "?action=reset_pass&key=$unique&login=" . rawurlencode( $user_email );
 
-        $subject = "איפוס סיסמה בתוכנה של שמחה רוטנברג";
+        $subject = "איפוס סיסמה בתוכנה של בוטיק כשר";
 
         $headers = 'MIME-Version: 1.0' . "\r\n";
         $headers .= 'Content-type: text/html; charset=utf-8' . "\r\n";
-        $headers .= "From: ".get_option("blogname")." <wordpress@simcha.f-rotenberg.com> \r\n";
+        //$headers .= "From: ".get_option("blogname")." <wordpress@kosherboutique.co.il/> \r\n";
         $headers .= "Reply-To: ".get_option("blogname")." <".get_option('admin_email')."> \r\n";
         $to = $user_email;
 
-        $message = '<div style="direction: rtl;font-family:Georgia,Verdana; font-size:25px; color:black"">
-                        <span style="font-weight: bold; color: #0166FF">'.get_user_display_name($user).',</span><br><br>
-                            התקבלה בקשה לאיפוס הסיסמא<br><br>
-                            <a 
-                            style="background-color:#0166FF; color:white; display: block; padding: 0 20px;width: fit-content; text-decoration: none; font-weight: 700; 
-                            border-radius: 64px; border: 1px solid #0166FF;" 
+        $message = '<div style="direction: rtl;font-family:Arial,Georgia,Verdana; color:black"">
+                        <span style="font-size:25px; font-weight: bold;">'.get_user_display_name($user).',</span><br><br>
+                            <span style="margin-bottom: 10px">התקבלה בקשה לאיפוס הסיסמא</span>
+                            <a style="background-color:#E2B252; color:white; display: block; padding: 0 20px;width: fit-content; text-decoration: none; font-weight: 700; 
+                            border-radius: 64px; border: none" 
                             href="'.$unique_url.'">לסיסמא חדשה לחץ כאן 
                             <svg xmlns="http://www.w3.org/2000/svg" width="102" height="21" viewBox="0 0 102 21" fill="none" class="">
                                 <path d="M101 10H2" stroke="#0166FF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
@@ -200,26 +199,26 @@ function function_reset_password() {
     }
 }
 
-function forgot_password_form($login_page = true){
+function display_forgot_password_form($login_page = true){
     ?>
-    <div class="forgot-password-form d-none <?=(!$login_page?'flex-display center':'')?>">
+    <div class="forgot-password-form d-none <?php echo(!$login_page?'flex-display center':'')?>">
         <form novalidate="" id="forgot_password_form" class="site_form row" data-success="show_success_msg" data-failed="show_error_messages">
-            <?if($login_page){ ?>
+            <?php if($login_page){ ?>
                 <p class="font-18">שכחת את הסיסמה? יש להזין כתובת מייל.
                     קישור לאיפוס הסיסמה יישלח אליך במייל</p>
-            <?}
+            <?php }
             else {
                 ?>
                 <div class="margin-bottom-10">שכחת את הסיסמה? יש להזין כתובת מייל.</div>
                 <div class="margin-bottom-10">קישור לאיפוס הסיסמה יישלח אליך במייל</div>
-                <?
+                <?php
             }
             ?>
             <input type="hidden" name="form_func" value="send_password_reset_link">
             <?php /*wp_nonce_field( 'ajax-lostpass-nonce', 'security' ); */?>
             <div class="flex-display  <?=(!$login_page?' direction-column space-between':'')?>">
                 <input class="margin-after-10 font-18 <?=(!$login_page?' margin-bottom-20':'')?>" required="" type="email" name="email"  id="email" placeholder="הכנס כתובת אימייל">
-                <button  id="reset_pass_button" type="submit" class="btn-login font-18 bold background-blue margin-after-10 margin-bottom-20">איפוס סיסמא</button>
+                <button  id="reset_pass_button" type="submit" class="btn-login font-18 bold background-gold margin-after-10 margin-bottom-20">איפוס סיסמא</button>
             </div>
             <div id="form_error_msgs_container"></div>
         </form>

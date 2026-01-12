@@ -14,9 +14,7 @@ if(is_user_logged_in()){
 ?>
     <section class="login-section flex-display">
         <div class="login-rigth part-50">
-            <div class="login-image">
-                <!--<img class="" src="<?php /*= get_stylesheet_directory_uri()."/assets/images/login.png"*/?>">-->
-            </div>
+            <div class="login-image"></div>
         </div>
         <div class="login-area part-50 background-black flex-display end direction-column">
             <form id="login_form" class="site_form flex-display direction-column space-between" data-success="reload_page" data-error="show_error_messages">
@@ -25,16 +23,19 @@ if(is_user_logged_in()){
                 <div class="font-17">בואו נתחבר</div>
                 <input class="font-18" required="" type="text" name="username"  autocomplete='off' placeholder="מייל">
                 <input class="font-18" required="" type="password" name="password"  autocomplete='off' placeholder="סיסמא">
-                <div class="underline pointer text-align-end" id="login_forgot_password_btn">שכחתי סיסמא</div>
-                <button type="submit" class="btn-login background-gold font-18 bold">נכנסתי</button>
+                <div class="flex-display space-between align-center">
+                    <button type="submit" class="btn-login background-gold font-18 bold">נכנסתי</button>
+                    <div class="underline pointer text-align-end" id="login_forgot_password_btn">שכחתי סיסמא</div>
+                </div>
+
                 <div id="form_error_msgs_container" class="red" style="margin-bottom: 10px;"></div>
             </form>
-            <?php //= forgot_password_form()?>
-            <form id="registration" class="site_form flex-display direction-column space-between" data-success="reload_page" data-error="show_error_messages">
+            <?php echo display_forgot_password_form()?>
+            <!--<form id="registration" class="site_form flex-display direction-column space-between" data-success="reload_page" data-error="show_error_messages">
                 <input type="hidden" name="form_func" value="register">
                 <div class="font-18">חדש פה? <button type="submit" class="underline pointer font-18" id="">הירשם</button></div>
                 <div id="form_error_msgs_container" class="red" style="margin-bottom: 10px;"></div>
-            </form>
+            </form>-->
         </div>
     </section>
 <?php
