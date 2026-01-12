@@ -48,22 +48,24 @@ function build_query_boutique($table_name)
 
 }
 
-function get_table_ogj($table_name)
+function get_table_obj($table_name)
 {
-    $table_ogj = array_filter(BOUTIQUE_TABLES, function ($table) use ($table_name) {
+    $table_obj = array_filter(BOUTIQUE_TABLES, function ($table) use ($table_name) {
+        //write_log("fff ".json_encode($table). "fff ".$table_name);
         return $table["subject"] == $table_name;
     });
-    return $table_ogj;
+    return $table_obj[0];
 }
 function get_table_by_parameter($table_name,$parameter)
 {
-    $table_ogj = get_table_ogj($table_name);
+    $table_ogj = get_table_obj($table_name);
+    write_log("table ".json_encode($table_ogj)." param ".$parameter);
     return $table_ogj[$parameter];
 }
 
 function get_field_type($table_name, $field_name)
 {
-    $fields = get_table_fields($table_name,"fields");
+    $fields = get_table_by_parameter($table_name,"columns");
     $field = array_filter($fields, function ($field_row) use ($field_name) {
         return $field_row["field_name"] == $field_name;
     });
@@ -89,10 +91,10 @@ function get_query($table_name,$field_name=null,$field_value=null)
 }
 function get_page_query($table_name,$field_filter=null ,$filter_value=null)
 {
-    $page_info = FIELDS[$table_name];
+    $columns = get_table_by_parameter($table_name,"columns");
     $join = "";
     $query = "SELECT ";
-    foreach ($page_info["columns"] as $column) {
+    foreach ($columns as $column) {
         if ($column["type"] == "action") continue;
         $query .=$table_name.".". $column["field_name"] . ", ";
         if (isset($column['join_table'])) {

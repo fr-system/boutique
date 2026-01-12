@@ -11,7 +11,8 @@ if(!isset($_GET["subject"])) return;
    // print_r ("aa ".$query."<br>");
     $result =run_query ($query);
 
-    $fields_arr = FIELDS[$table_name];
+    $fields_arr  = get_table_obj($table_name);
+    write_log("cols  ".json_encode( $fields_arr["columns"]));
 ?>
 <section class="page">
      <h1 class="page-title  font-40 bold"><?= $fields_arr["title"]; ?></h1>
@@ -19,7 +20,9 @@ if(!isset($_GET["subject"])) return;
         <thead><tr>
             <?php
             foreach($fields_arr["columns"] as $column){
-            ?>
+                write_log("column  ".json_encode( $column));
+
+                ?>
                 <th><?= $column["label"]?></th>
             <?php } ?>
         </tr></thead>
@@ -35,7 +38,7 @@ if(!isset($_GET["subject"])) return;
 function get_tr_data($page_name, $data, $id_column){
     //error_log ("add_tr_data");
     global $actions_icons;
-    $page_info = FIELDS[$page_name];
+    $page_info = get_table_obj($page_name);
     $row = is_array ($data)? $data[0]:$data;
     //error_log ('row '.json_encode ($row));
     $html='<tr>';

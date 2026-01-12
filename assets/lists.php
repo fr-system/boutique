@@ -1,28 +1,28 @@
 <?php
 
-define("BOUTIQUE_TABLES"    ,array(
+define("BOUTIQUE_TABLES"  ,array(
     array(
     "subject" => "clients",
-    "text" => "לקוחות",
+    "title" => "לקוחות",
     "single"=> "לקוח",
-    "fields" => array(
-    array("field_name"=>"name", "type"=>"text"),
-    array("field_name"=>"mobile", "type"=>"text"),
-    array("field_name"=>"BnNumber", "type"=>"text"),
-    array("field_name"=>"address", "type"=>"text"),
-    array("field_name"=>"city_id", "type"=>"int"),
-    array("field_name"=>"note", "type"=>"text"),
-    array("field_name"=>"payment_term_id", "type"=>"int"),
-   // array("field_name"=>"agent_id", "type"=>"int"),
-    array("field_name"=>"email", "type"=>"text"),
-    array("field_name"=>"obligo", "type"=>"int"),
-    array("field_name"=>"exceeding_conditions", "type"=>"bool"),
+    "columns" => array(
+        array("field_name"=>"name", "type"=>"text","label"=>"שם הלקוח"),
+        array("field_name"=>"mobile", "type"=>"text","label"=>"נייד"),
+        array("field_name"=>"BnNumber", "type"=>"text","label"=>"ח\"פ"),
+        array("field_name"=>"address", "type"=>"text","label"=>"כתובת"),
+        array("field_name"=>"city_id","type"=>"int","join_table" => "cities",  "join_value" => "name", "label"=>"עיר"),
+        array("field_name"=>"note", "type"=>"text","label"=>"הערה"),
+        array("field_name"=>"payment_term_id", "type"=>"int","label"=>"תנאי תשלום"),
+        // array("field_name"=>"agent_id", "type"=>"int","label"=>"סוכן","join_table" => "agents",  "join_value" => "user_id"),
+        array("field_name"=>"email", "type"=>"text","label"=>"דוא\"ל"),
+        array("field_name"=>"obligo", "type"=>"int","label"=>"אובליגו"),
+        array("field_name"=>"exceeding_conditions", "type"=>"bool","label"=>"חריגה מתנאי תשלום"),
 )),
     array(
         "subject" => "products",
-        "text" => "מוצרים",
+        "title"  => "מוצרים",
         "single"=> "מוצר חדש",
-        "fields" => array(
+        "columns" => array(
         array("field_name"=>"name", "type"=>"text"),
         array("field_name"=>"barcode", "type"=>"text"),
         array("field_name"=>"supplier_id", "type"=>"int"),
@@ -36,9 +36,9 @@ define("BOUTIQUE_TABLES"    ,array(
     )),
     array(
         "subject" => "tasks",
-        "text" => "משימות",
+        "title"  => "משימות",
         "single"=> "משימה",
-        "fields" => array(
+        "columns" => array(
         array("field_name"=>"client_id", "type"=>"int"),
         array("field_name"=>"subject", "type"=>"text"),
         array("field_name"=>"open_date", "type"=>"date"),
@@ -50,9 +50,9 @@ define("BOUTIQUE_TABLES"    ,array(
     )),
     array(
         "subject" => "suppliers",
-        "text" => "ספקים",
+        "title"  => "ספקים",
         "single"=> "ספק",
-        "fields" => array(
+        "columns" => array(
         array("field_name"=>"name", "type"=>"text"),
         array("field_name"=>"email", "type"=>"text"),
         array("field_name"=>"phone", "type"=>"text"),
@@ -63,9 +63,9 @@ define("BOUTIQUE_TABLES"    ,array(
     )),
     array(
         "subject" => "orders",
-        "text" => "הזמנות",
+        "title"  => "הזמנות",
         "single"=> "הזמנה",
-        "fields" => array(
+        "columns" => array(
         array("field_name"=>"order_date", "type"=>"date"),
         array("field_name"=>"client_id", "type"=>"int"),
         array("field_name"=>"doc_type", "type"=>"int"),
@@ -75,8 +75,8 @@ define("BOUTIQUE_TABLES"    ,array(
     )),
     array(
         "subject" => "orders_products",
-        "text" => "הזמנות מוצרים",
-            "fields" => array(
+        "title"  => "הזמנות מוצרים",
+            "columns" => array(
         array("field_name"=>"order_id", "type"=>"int"),
         array("field_name"=>"product_id", "type"=>"int"),
         array("field_name"=>"price", "type"=>"float"),
@@ -85,9 +85,9 @@ define("BOUTIQUE_TABLES"    ,array(
     )),
     array(
         "subject" => "agents",
-        "text" => "סוכנים",
+        "title"  => "סוכנים",
         "single"=> "סוכן",
-        "fields" => array(
+        "columns" => array(
         array("field_name"=>"user_id", "type"=>"int"),
         array("field_name"=>"mobile", "type"=>"text"),
         array("field_name"=>"work_area_id", "type"=>"int"),
@@ -96,18 +96,18 @@ define("BOUTIQUE_TABLES"    ,array(
     )),
     array(
         "subject" => "cities",
-        "text" => "ערים",
+        "title"  => "ערים",
         "single"=> "עיר",
-        "fields" => array(
+        "columns" => array(
         array("field_name"=>"name", "type"=>"text"),
         array("field_name"=>"area_id", "type"=>"int"),
         array("field_name"=>"is_area", "type"=>"bool"),
     )),
     array(
         "subject" => "supplier_invoices",
-        "text" => "חשבוניות ספקים",
+        "title"  => "חשבוניות ספקים",
         "single"=> "",
-        "fields" => array(
+        "columns" => array(
         array("field_name"=>"supplier_id", "type"=>"int"),
         array("field_name"=>"client_id", "type"=>"int"),
         array("field_name"=>"obligation", "type"=>"float"),
