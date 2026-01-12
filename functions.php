@@ -48,9 +48,6 @@ function fixXSS($str)
 {
     return htmlspecialchars($str);
 }
-
-
-
 function write_log($text)
 {
     $log  = date("d-m-Y h:i:s").' ' . $text.' '.PHP_EOL;

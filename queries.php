@@ -74,5 +74,31 @@ function get_query($table_name,$field_name=null,$field_value=null)
     $results = run_query($query);
     return $results;
 }
-
+function get_page_query($table_name,$field_filter=null ,$filter_value=null)
+{
+    $page_info = FIELDS[$table_name];
+    $join = "";
+    $query = "SELECT ";
+    foreach ($page_info["columns"] as $column) {
+        if ($column["type"] == "action") continue;
+        $query .=$table_name.".". $column["field_name"] . ", ";
+        if (isset($column['join_table'])) {
+            $query .= $column['join_table'] . "." . $column['join_value'] . " AS ".substr($column['join_table'], 0, -1)  . "_" . $column['join_value'].", ";
+            $join .= " LEFT JOIN " . $column['join_table'] . " ON " . $table_name . "." . $column["field_name"] . " = " . $column['join_table'] . ".id";
+        }
+    }
+    $query = substr($query,0,-2);
+    $query .= " FROM ".$table_name. $join;
+    if($field_filter=!null && $filter_value!=null){
+        $type = get_field_type($table_name, $field_filter);
+        if($type !== false){
+            $delimiter = $type == "text" || $type == "date" ? "'" : "";
+            $query.=" WHERE ".$field_filter." = ".$delimiter.$filter_value.$delimiter;
+        }
+    }
+//    if($filter_value!= 0){
+//        $query .= " WHERE ".get_id_column_in_page($page_name)." = ".$filter_value;
+//    }
+    return $query ;
+}
 ?>

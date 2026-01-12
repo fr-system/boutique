@@ -1,19 +1,18 @@
 <?php
-
 define("FIELDS",array(
-    "clients" => array(
-    array("field_name"=>"name", "type"=>"text"),
-    array("field_name"=>"mobile", "type"=>"text"),
-    array("field_name"=>"BnNumber", "type"=>"text"),
-    array("field_name"=>"address", "type"=>"text"),
-    array("field_name"=>"city_id", "type"=>"int"),
-    array("field_name"=>"note", "type"=>"text"),
-    array("field_name"=>"payment_term_id", "type"=>"int"),
-    array("field_name"=>"agent_id", "type"=>"int"),
-    array("field_name"=>"email", "type"=>"text"),
-    array("field_name"=>"obligo", "type"=>"int"),
-    array("field_name"=>"exceeding_conditions", "type"=>"bool"),
-),
+    "clients" =>array("title" => "לקוחות","singular"=>"לקוח","columns" => array(
+    array("field_name"=>"name", "type"=>"text","label"=>"שם הלקוח"),
+    array("field_name"=>"mobile", "type"=>"text","label"=>"נייד"),
+    array("field_name"=>"BnNumber", "type"=>"text","label"=>"ח\"פ"),
+    array("field_name"=>"address", "type"=>"text","label"=>"כתובת"),
+    array("field_name"=>"city_id","type"=>"int","join_table" => "cities",  "join_value" => "name", "label"=>"עיר"),
+    array("field_name"=>"note", "type"=>"text","label"=>"הערה"),
+    array("field_name"=>"payment_term_id", "type"=>"int","label"=>"תנאי תשלום"),
+   // array("field_name"=>"agent_id", "type"=>"int","label"=>"סוכן","join_table" => "agents",  "join_value" => "user_id"),
+    array("field_name"=>"email", "type"=>"text","label"=>"דוא\"ל"),
+    array("field_name"=>"obligo", "type"=>"int","label"=>"אובליגו"),
+    array("field_name"=>"exceeding_conditions", "type"=>"bool","label"=>"חריגה מתנאי תשלום"),
+)),
     "products" => array(
         array("field_name"=>"name", "type"=>"text"),
         array("field_name"=>"barcode", "type"=>"text"),
