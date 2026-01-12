@@ -11,7 +11,7 @@ if(!isset($_GET["subject"])) return;
    // print_r ("aa ".$query."<br>");
     $result =run_query ($query);
 
-    $fields_arr  = get_table_obj($table_name);
+    $fields_arr  = BOUTIQUE_TABLES[$table_name];
     write_log("cols  ".json_encode( $fields_arr["columns"]));
 ?>
 <section class="page">
@@ -38,7 +38,7 @@ if(!isset($_GET["subject"])) return;
 function get_tr_data($page_name, $data, $id_column){
     //error_log ("add_tr_data");
     global $actions_icons;
-    $page_info = get_table_obj($page_name);
+    $page_info = BOUTIQUE_TABLES[$page_name];
     $row = is_array ($data)? $data[0]:$data;
     //error_log ('row '.json_encode ($row));
     $html='<tr>';
