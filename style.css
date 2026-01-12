@@ -10,13 +10,17 @@ Text Domain: boutique
 
 :root {
     --b-global-color-dark-gray: #AFAFAF;
-
+    --b-global-color-gold: #E2B252;
 
     font-size: 62.5%;
 }
-
-
-
+.gold {
+   color:var(--b-global-color-gold);
+}
+.background-gold {
+    background-color:var(--b-global-color-gold);
+    color: white;
+}
 html { margin:0 !important; }
 body{
     direction: rtl;
@@ -29,11 +33,11 @@ body{
     margin:0;
     font-size: 1.7rem;
 }
+section{
+    height: 100%;
+}
 input, textarea, select, button{
     font-family:"Noto Sans Hebrew","Heebo",Arial,sans-serif;
-}
-img{
-    height: 100%;
 }
 .font-12{
     font-size: 1.2rem;
@@ -60,6 +64,9 @@ img{
     font-size: 3rem;
 }
 .font-40{
+    font-size: calc(22px + 1.15vw);
+}
+.font-50{
     font-size: calc(22px + 1.15vw);
 }
 
@@ -129,7 +136,7 @@ img{
 .flex-display .part-80{
     flex-basis:80% !important;
 }
-.flex-display .grow{
+.flex-display .grow, #primary{
     flex-grow: 1;
 }
 .grid-display {
@@ -218,6 +225,7 @@ table {
 /* popups */
 
 .popup_page_overlay{
+    display: none;
     position: fixed;
     top: 0px;
     right: 0px;
@@ -266,9 +274,10 @@ table {
     padding: 0 50px 30px 50px;
 
 }
-.close-popup{
+.text-align-end, .close-popup{
     text-align: end;
 }
+
 .small-popup{
     position: absolute;
     z-index: 999;
@@ -343,8 +352,8 @@ label span{
     z-index: 999
 }
 
-.login-section{
-    padding: 20px;
+.login-rigth{
+    padding: 2%;
 }
 
 .login-image {
@@ -353,8 +362,32 @@ label span{
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
-    padding: 10px;
+    border-radius: 30px;
 }
 
+.login-area{
+    padding: 50px 7%;
+}
+.login-area form > * {
+    margin-bottom: 10px;
+}
 
+.login-area input{
+    background-color: white;
+    border: var(--b-global-color-dark-gray) solid 1px;
+    border-radius: 12px;
+    padding: 0 15px;
+    height: 40px;
+}
+.login-area button{
+    border: none;
+    padding: 10px 40px;
+ border-radius:   100px;
+    width: fit-content;
+}
+
+form#registration button{
+    background: none;
+    padding: 0;
+}
 
