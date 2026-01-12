@@ -13,7 +13,7 @@ define("BOUTIQUE_TABLES"    ,array(
     array("field_name"=>"city_id", "type"=>"int"),
     array("field_name"=>"note", "type"=>"text"),
     array("field_name"=>"payment_term_id", "type"=>"int"),
-    array("field_name"=>"agent_id", "type"=>"int"),
+   // array("field_name"=>"agent_id", "type"=>"int"),
     array("field_name"=>"email", "type"=>"text"),
     array("field_name"=>"obligo", "type"=>"int"),
     array("field_name"=>"exceeding_conditions", "type"=>"bool"),
