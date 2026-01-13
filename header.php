@@ -47,7 +47,7 @@ if ( ! defined( 'ABSPATH' ) ) {
         <input id="search_site" type="search" placeholder="חיפוש">
     </div>
 
-    <div class="user-logged pointer part-10 flex-display space-between align-center">
+    <div class="user-logged pointer part-10 flex-display space-between align-center border-dark-gray">
         <img class="user-logo" src="<?=wp_get_attachment_url(9)?>">
         <span class="user-name"><?= get_user_display_name();?></span>
         <svg xmlns="http://www.w3.org/2000/svg" width="7" height="4" viewBox="0 0 7 4" fill="none">

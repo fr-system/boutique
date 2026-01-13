@@ -12,7 +12,7 @@ if(!isset($_GET["subject"])) return;
     $result =run_query ($query);
 
     $fields_arr  = BOUTIQUE_TABLES[$table_name];
-    write_log("cols  ".json_encode( $fields_arr["columns"]));
+    //write_log("cols  ".json_encode( $fields_arr["columns"]));
 ?>
 <section class="page">
      <h1 class="page-title  font-40 bold"><?= $fields_arr["title"]; ?></h1>
@@ -20,7 +20,7 @@ if(!isset($_GET["subject"])) return;
         <thead><tr>
             <?php
             foreach($fields_arr["columns"] as $column){
-                write_log("column  ".json_encode( $column));
+                //write_log("column  ".json_encode( $column));
 
                 ?>
                 <th><?= $column["label"]?></th>

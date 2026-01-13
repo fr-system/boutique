@@ -19,7 +19,7 @@ define("BOUTIQUE_TABLES"  ,array(
 )),
    "products"=> array(
         "title"  => "מוצרים",
-        "single"=> "מוצר חדש",
+        "single"=> "מוצר",
         "columns" => array(
         array("field_name"=>"name", "type"=>"text"),
         array("field_name"=>"barcode", "type"=>"text"),
@@ -61,13 +61,15 @@ define("BOUTIQUE_TABLES"  ,array(
         "title"  => "הזמנות",
         "single"=> "הזמנה",
         "columns" => array(
-        array("field_name"=>"order_date", "type"=>"date"),
-        array("field_name"=>"client_id", "type"=>"int"),
-        array("field_name"=>"doc_type", "type"=>"int"),
-        array("field_name"=>"notes", "type"=>"text"),
-        array("field_name"=>"user_opens", "type"=>"int"),
-        array("field_name"=>"user_confirms", "type"=>"int"),
-    )),
+        array("field_name"=>"order_date", "type"=>"date","label"=>"תאריך הזמנה"),
+        array("field_name"=>"client_id", "type"=>"int","label"=>"שם הלקוח"),
+        array("field_name"=>"doc_type", "type"=>"int","label"=>"מסמך"),
+        array("field_name"=>"notes", "type"=>"text","label"=>"הערות"),
+        array("field_name"=>"user_opens", "type"=>"int","label"=>"מקים ההזמנה"),
+        array("field_name"=>"user_confirms", "type"=>"int","label"=>"מאשר ההזמנה"),
+        array("field_name"=>"nisayon", "type"=>"select","label"=>"ניסיון","options"=>array(array("value"=>"1","text"=>"shoshanana"))),
+
+        )),
     "orders_products"=> array(
         "title"  => "הזמנות מוצרים",
         "columns" => array(

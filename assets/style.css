@@ -1,9 +1,15 @@
+.input-label{
+    background-color: var(--b-global-color-light-gray);
+    border: none;
+    padding: 0 10px;
+}
+
 .boutique-header{
     height: 65px;
     background-color: white;
     border: 0;
     border-bottom:1px solid #C4C4C4;
-    /*padding: 0 0 0 40px;*/
+
 }
 .logo-header{
     height: 100%;
@@ -26,8 +32,6 @@
 .boutique-header .user-logged{
     height: 40px;
     padding: 0 10px;
-    border-radius: 5px;
-    border: var(--b-global-color-dark-gray) solid 0.5px;
 }
 
 #sidebar-menu{

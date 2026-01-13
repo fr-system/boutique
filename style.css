@@ -10,6 +10,7 @@ Text Domain: boutique
 
 :root {
     --b-global-color-dark-gray: #AFAFAF;
+    --b-global-color-light-gray: #F9F9F9;
     --b-global-color-gold: #E2B252;
 
     font-size: 62.5%;
@@ -26,6 +27,7 @@ Text Domain: boutique
 }
 .border-dark-gray{
     border: var(--b-global-color-dark-gray) 1px solid;
+    border-radius: 12px;
 }
 html { margin:0 !important; }
 body{
@@ -159,8 +161,11 @@ input, textarea, select, button{
     grid-gap: 25px;
 }
 .grid-display.cols-4{
-    grid-template-columns: repeat(4, 1fr); /* 3 טורים */
+    grid-template-columns: repeat(4, 1fr);
 }
+.grid-display.cols-2{
+     grid-template-columns: repeat(2, 1fr);
+ }
 .margin-bottom-10{
     margin-bottom: 10px;
 }
@@ -184,6 +189,9 @@ input, textarea, select, button{
 }
 .padding-40{
     padding: 40px;
+}
+.padding-20{
+    padding: 20px;
 }
 .padding-left-40{
     padding-left: 40px;
@@ -309,15 +317,13 @@ table {
     width: 100%;
 }
 
-input, textarea, select{
-    background-color: #F0F0F0;
+input, textarea, select, .input-acting{
+    background-color: transparent;
     border: none;
     outline: none;
     padding: 3px 7px;
 }
-select{
-    border-left: 5px solid #F0F0F0;
-}
+
 select{
     height: 40px;
 }
@@ -326,7 +332,7 @@ select{
     width: 200px;
     height: 36px;
 }
-input, input[type="datetime-local"], input[type="date"], input[type="time"]{
+input, input[type="datetime-local"], input[type="date"], input[type="time"],.input-acting{
     height: 26px;
 }
 .flex-display.expanding{
@@ -390,8 +396,6 @@ label span{
 
 .login-area input{
     background-color: white;
-    border: var(--b-global-color-dark-gray) solid 1px;
-    border-radius: 12px;
     padding: 0 15px;
     height: 40px;
 }
