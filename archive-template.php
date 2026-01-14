@@ -43,9 +43,8 @@ function get_tr_data($page_name, $data, $id_column){
     $html='<tr class="border-dark-gray">';
 //        <td data-id="checkbox" class="td-checkbox"><input type="checkbox" class="checkbox-row" value="'.$row->$id_column.'" id=""/></td>';
     foreach($page_info["columns"] as $column) {
-
-        $field = isset($column['join_table']) ? substr($column['join_table'], 0, -1)  . "_" . $column['join_value'] : $column["field_name"];
-        $list = isset($column['list_name']) ? constant ($column['list_name']) : null;
+        $field = isset($column['join_table']) ?  $column['join_value'] : $column["field_name"];
+        $list = isset($column['list_name'])? constant($column['list_name']):null;
 
         if($field != $id_column){
             if($column['type']=="user_data"){

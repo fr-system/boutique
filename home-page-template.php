@@ -11,19 +11,19 @@ if(!is_user_logged_in()){
         <div class="font-30 bold margin-bottom-30">פעולות מהירות</div>
         <div class="grid-display cols-4 margin-bottom-20">
             <?php $actions_list = array(
-                array("text"=>"הזמנה חדשה","type"=>"single","subject"=>"new_order"),
-                array("text"=>"ספק חדש","type"=>"single","subject"=>"new_supplier"),
-                array("text"=>"מוצר חדש","type"=>"single","subject"=>"new_product"),
-                array("text"=>"לקוח חדש","type"=>"single","subject"=>"new_client"),
+                array("text"=>"הזמנה חדשה","type"=>"single","subject"=>"orders","action"=>"new"),
+                array("text"=>"ספק חדש","type"=>"single","subject"=>"suppliers","action"=>"new"),
+                array("text"=>"מוצר חדש","type"=>"single","subject"=>"products","action"=>"new"),
+                array("text"=>"לקוח חדש","type"=>"single","subject"=>"clients","action"=>"new"),
                 array("text"=>"קטלוג","type"=>"archive","subject"=>"products"),
             );
             foreach ($actions_list as $act){
                 //write_log("gg ". json_encode($action));
                 ?>
-                <div class="quick-action flex-display align-center border-dark-gray pointer">
-                    <?php echo get_svg($act["subject"],false); ?>
-                    <a href="<?php echo $act["type"].'?subject='.$act["subject"] ?>" class="not-link"><?php echo $act["text"] ?></a>
-                </div>
+                <a href="<?php echo $act["type"].'?subject='.$act["subject"].(isset($act["action"]) ? '&action='.$act["action"]:'') ?>" class="quick-action flex-display align-center border-dark-gray pointer not-link">
+                    <?php echo get_svg($act["subject"],(isset($act["action"]) ? '$action='.$act["action"]:''),false); ?>
+                    <div><?php echo $act["text"] ?></div>
+                </a>
             <?php } ?>
         </div>
     </div>
