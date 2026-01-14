@@ -141,7 +141,7 @@ function create_input($field,$value = null)
                         <?php }
                         else { ?>
                             <option value="<?php echo $option["value"] ?>" <?php echo ($value ==  $option["value"] ?  "selected" : "")?>><?php echo $option["text"] ?></option>
-                        <?}
+                        <?php }
                     }
                 }
                 else if(isset($field["list_name"])){
