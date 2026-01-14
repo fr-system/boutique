@@ -80,7 +80,7 @@ function get_page_query($table_name,$field_filter=null ,$filter_value=null)
     $join = "";
     $query = "SELECT ";
     foreach ($columns as $column) {
-        if ($column["type"] == "action") continue;
+        if ($column["type"] == "action" || $column["type"] == "user_data" && !isset($column['join_table'])) continue;
         $query .=$table_name.".". $column["field_name"] . ", ";
         if (isset($column['join_table'])) {
             $query .= $column['join_table'] . "." . $column['join_value'] . " AS ".substr($column['join_table'], 0, -1)  . "_" . $column['join_value'].", ";

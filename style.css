@@ -26,6 +26,7 @@ Text Domain: boutique
 }
 .border-dark-gray{
     border: var(--b-global-color-dark-gray) 1px solid;
+    border-radius: 12px;
 }
 html { margin:0 !important; }
 body{
@@ -207,7 +208,9 @@ button, .pointer{
 }
 .logout_button{
 }
-
+h1,h2,h3{
+    margin:0 3px;
+}
 section.page{
     /*background-color: var(--a-global-color-light_gray);*/
     flex-grow: 1;
@@ -225,18 +228,18 @@ section.page{
 table {
     width: 100%;
     text-align: center;
-    border: none;
-    border-style: hidden;
+    /*border: none;*/
+    /*border-style: hidden;*/
     border-collapse: collapse;
     border-spacing: 0;
 }
 
-.tasks-table thead {
+.archive-table thead {
     height: 55px;
     background-color: var(--a-global-color-light_gray);
 }
-.tasks-table thead tr{ position: sticky;}
-
+.archive-table thead tr{ position: sticky;}
+.archive-table tr {height: 50px}
 
 /* popups */
 
