@@ -21,7 +21,7 @@ if(!is_user_logged_in()){
                 //write_log("gg ". json_encode($action));
                 ?>
                 <a href="<?php echo $act["type"].'?subject='.$act["subject"].(isset($act["action"]) ? '&action='.$act["action"]:'') ?>" class="quick-action flex-display align-center border-dark-gray pointer not-link">
-                    <?php echo get_svg($act["subject"],(isset($act["action"]) ? '$action='.$act["action"]:''),false); ?>
+                    <?php echo get_svg($act["subject"],(isset($act["action"]) ? $act["action"] :null),false); ?>
                     <div><?php echo $act["text"] ?></div>
                 </a>
             <?php } ?>

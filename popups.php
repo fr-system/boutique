@@ -56,9 +56,9 @@ function get_svg($svg_name,$action='',$side_menu = true)
 </svg>';
         case "orders":
             if($action == "new")  return '<svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 30 30" fill="none">
-                    <rect width="30" height="30" rx="5" fill="#D9F5F3"/>
-                    <path d="M15.359 14.3333H17.359V15.6667H15.359V17.6667H14.0256V15.6667H12.0256V14.3333H14.0256V12.3333H15.359V14.3333ZM21.359 10.6667V17.6667L17.359 21.6667H10.359C9.0923 21.6667 8.02563 20.6 8.02563 19.3333V10.6667C8.02563 9.39999 9.0923 8.33333 10.359 8.33333H19.0256C20.2923 8.33333 21.359 9.39999 21.359 10.6667ZM20.0256 10.8667C20.0256 10.2 19.4923 9.66666 18.8256 9.66666H10.559C9.8923 9.66666 9.35897 10.2 9.35897 10.8667V19.2C9.35897 19.8667 9.8923 20.4 10.559 20.4H16.6923V19.4C16.6923 18.1333 17.759 17.0667 19.0256 17.0667H20.0256V10.8667Z" fill="black"/>
-                </svg>';
+<rect width="30" height="30" rx="5" fill="#D9F5F3"/>
+<path d="M15.359 14.3333H17.359V15.6667H15.359V17.6667H14.0256V15.6667H12.0256V14.3333H14.0256V12.3333H15.359V14.3333ZM21.359 10.6667V17.6667L17.359 21.6667H10.359C9.0923 21.6667 8.02563 20.6 8.02563 19.3333V10.6667C8.02563 9.39999 9.0923 8.33333 10.359 8.33333H19.0256C20.2923 8.33333 21.359 9.39999 21.359 10.6667ZM20.0256 10.8667C20.0256 10.2 19.4923 9.66666 18.8256 9.66666H10.559C9.8923 9.66666 9.35897 10.2 9.35897 10.8667V19.2C9.35897 19.8667 9.8923 20.4 10.559 20.4H16.6923V19.4C16.6923 18.1333 17.759 17.0667 19.0256 17.0667H20.0256V10.8667Z" fill="black"/>
+</svg>';
             return '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12" fill="none">
                 <path d="M6.5 5.5H8V6.5H6.5V8H5.5V6.5H4V5.5H5.5V4H6.5V5.5ZM11 2.75V8L8 11H2.75C1.8 11 1 10.2 1 9.25V2.75C1 1.8 1.8 1 2.75 1H9.25C10.2 1 11 1.8 11 2.75ZM10 2.9C10 2.4 9.6 2 9.1 2H2.9C2.4 2 2 2.4 2 2.9V9.15C2 9.65 2.4 10.05 2.9 10.05H7.5V9.3C7.5 8.35 8.3 7.55 9.25 7.55H10V2.9Z" fill="black"/>
             </svg>';
@@ -115,12 +115,15 @@ function option_if_set($set,$option){
 
 function create_input($field,$value = null)
 {
-    switch($field["type"]){
-        case $field["type"] == "text" || $field["type"] == "email" || $field["type"] == "number":
-            return '<input type="'.$field["type"].'"  class="grow font-17" id="'.$field["field_name"].'" name="'.$field["field_name"].'" 
+    switch($field["widget"]){
+        case "text":
+        case "email":
+        case "number":
+        case "date":
+            return '<input type="'.$field["widget"].'"  class="grow font-17" id="'.$field["field_name"].'" name="'.$field["field_name"].'" 
             value="'.esc_attr($value).'" '.
                 option_if_set($field,"class").
-                ($field["type"] == "number" ? option_if_set($field,"step").option_if_set($field,"min"). option_if_set($field,"max")."style=\"width: 70px\"" : "" ).'/>';
+                ($field["widget"] == "number" ? option_if_set($field,"step").option_if_set($field,"min"). option_if_set($field,"max")."style=\"width: 70px\"" : "" ).'/>';
         case "checkbox":
             ?>
             <input type="checkbox" id="<?php echo $field["field_name"]?>" name="<?php echo $field["field_name"]?>" id="<?php echo $field["field_name"]?>" value="1" <?php echo checked($value == "1") ?> />
@@ -132,6 +135,7 @@ function create_input($field,$value = null)
             <select class="<?php echo $field['field_name']?>  font-17 grow" id="<?php echo $field["field_name"]?>"
             name="<?php echo $field["field_name"].(isset($field["multiple"]) ? "[]" : "" )?>" <?php echo (isset($field["multiple"]) ? "multiple=\"multiple\" size=\"10\"" : "" )?>
                     onchange="onchangeSelect(event,this, this.value)" data-fill-select="<?php echo (isset($field["select_to_fill"]) ? $field["select_to_fill"] : "") ?>" >
+                <option value="" disabled <?php echo empty($value) ? 'selected' : ''?> ></option>
                 <?php
                 if(isset($field["options"])){
                     $options = $field["options"];
@@ -144,8 +148,8 @@ function create_input($field,$value = null)
                         <?php }
                     }
                 }
-                else if(isset($field["list_name"])){
-                        $list = get_list($field["list_name"]);
+                else if(isset($field["join_table"])){
+                        $list = get_list($field["join_table"]);
                         foreach($list as $row){?>
                             <option value="<?php echo $row->value ?>" <?php echo (!empty($value) && in_array($row->value, $value) ? "selected" : "")?>><?php echo $row->text ?></option>
                         <?php }

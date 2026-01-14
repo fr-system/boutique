@@ -18,9 +18,16 @@ Text Domain: boutique
 .gold {
    color:var(--b-global-color-gold);
 }
+.background-white{
+    background-color:white;
+}
+.background-white.gold{
+    border: var(--b-global-color-gold) 1px solid;
+}
 .background-gold {
     background-color:var(--b-global-color-gold);
     color: white;
+    border: var(--b-global-color-gold) 1px solid;
 }
 .black{
     color: black;
@@ -120,6 +127,9 @@ input, textarea, select, button{
 .flex-display.center{
     justify-content: center;
 }
+.flex-display .align-self-center{
+    align-self: center;
+}
 .flex-display.direction-column {
     flex-direction: column;
 }
@@ -207,6 +217,15 @@ input, textarea, select, button{
 
 button, .pointer{
     cursor: pointer;
+}
+
+
+button{
+    width: 130px;
+    height: 40px;
+    border-radius: 50px;
+    outline: none;
+    margin: 0 10px;
 }
 .site-main{
     height: 100vh;
@@ -324,19 +343,16 @@ input, textarea, select, .input-acting{
     border: none;
     outline: none;
     padding: 3px 7px;
+
 }
 
-select{
-    height: 40px;
+input, input[type="datetime-local"], input[type="date"], input[type="time"],.input-acting {
+    height: 30px;
 }
-
-select{
-    width: 200px;
+select {
     height: 36px;
 }
-input, input[type="datetime-local"], input[type="date"], input[type="time"],.input-acting{
-    height: 26px;
-}
+
 .flex-display.expanding{
     flex-grow: 1
 }

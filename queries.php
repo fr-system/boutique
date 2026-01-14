@@ -20,12 +20,12 @@ function build_query_boutique($table_name)
     $values = array();
 
     foreach ($_POST as $key => $value) {
-        $type = get_field_type($table_name, $key);
-        if($type !== false){
-            $delimiter = $type == "text" || $type == "date" ? "'" : "";
+        $field = get_field($table_name, $key);
+        if($field != null){
+            $apostrophe = is_needed_apostrophe($field["widget"],isset($field["un_apostrophe"]));
             array_push($fields,$key);
-            array_push($values,$delimiter . $value . $delimiter );
-            array_push($update, $key." = " . $delimiter . $value . $delimiter );
+            array_push($values,$apostrophe . $value . $apostrophe );
+            array_push($update, $key." = " . $apostrophe . $value . $apostrophe );
         }
     }
 
@@ -48,27 +48,24 @@ function build_query_boutique($table_name)
 
 }
 
-function get_field_type($table_name, $field_name)
+function get_field($table_name, $field_name)
 {
     $fields = BOUTIQUE_TABLES[$table_name]["columns"];
     $field = array_filter($fields, function ($field_row) use ($field_name) {
         return $field_row["field_name"] == $field_name;
     });
-    if (count($field) > 0) {
-        $type = array_pop($field)["type"];
-        return $type;
-    }
-    return false;
+
+    return count($field) > 0 ? array_pop($field) : null;
 }
 
 function get_query($table_name,$field_name=null,$field_value=null)
 {
     $query = "SELECT * FROM " .$table_name;
     if($field_name=!null && $field_value!=null){
-        $type = get_field_type($table_name, $field_name);
-        if($type !== false){
-            $delimiter = $type == "text" || $type == "date" ? "'" : "";
-            $query.=" WHERE ".$field_name." = ".$delimiter.$field_value.$delimiter;
+        $field = get_field($table_name, $field_name);
+        if($field != null){
+            $apostrophe = is_needed_apostrophe($field["widget"],isset($field["un_apostrophe"]));
+            $query.=" WHERE ".$field_name." = ".$apostrophe.$field_value.$apostrophe;
         }
     }
     $results = run_query($query);
@@ -90,15 +87,52 @@ function get_page_query($table_name,$field_filter=null ,$filter_value=null)
     $query = substr($query,0,-2);
     $query .= " FROM ".$table_name. $join;
     if($field_filter=!null && $filter_value!=null){
-        $type = get_field_type($table_name, $field_filter);
-        if($type !== false){
-            $delimiter = $type == "text" || $type == "date" ? "'" : "";
-            $query.=" WHERE ".$field_filter." = ".$delimiter.$filter_value.$delimiter;
+        $field = get_field($table_name, $field_filter);
+        if($field != null){
+            $apostrophe = is_needed_apostrophe($field["widget"],isset($field["un_apostrophe"]));
+            $query.=" WHERE ".$field_filter." = ".$apostrophe.$filter_value.$apostrophe;
         }
     }
 //    if($filter_value!= 0){
 //        $query .= " WHERE ".get_id_column_in_page($page_name)." = ".$filter_value;
 //    }
     return $query ;
+}
+
+function is_needed_apostrophe($widget,$un_apostrophe)
+{
+    if($un_apostrophe)return "";
+    $widgets = array("text","date","textarea");
+    if(in_array($widget, $widgets)){
+        return "'";
+    }
+    return "";
+}
+
+function get_fields_list($list_name)
+{
+    switch($list_name) {
+        case "cities":
+            return array( "field_name" => "name", "filter"=>"area_id != true");
+    }
+    return array();
+}
+
+function get_list($list_name){
+
+    $fields_list = get_fields_list($list_name);
+    $query = "SELECT id as value,".$fields_list["field_name"]." as text 
+              FROM ".$list_name;
+    /*if(isset($fields_list["join_table"]) && $fields_list["join_table"] != "" && isset($fields_list["join_table_value"])){
+        $query.=" JOIN #_".$fields_list["join_table"]." on #_".$fields_list["join_table"].".".$fields_list["join_table_value"]." = #_".$fields_list["table_name"].".".$fields_list["field_value"];
+    }
+    $query .= " group by #_".$fields_list["table_name"].".".$fields_list["field_value"].", #_".$fields_list["table_name"].".".$fields_list["field_name"];*/
+
+    if(isset($fields_list["filter"])){
+        $query .= " WHERE ".$fields_list["filter"];
+    }
+
+    $list = run_query($query);
+    return $list;
 }
 ?>
