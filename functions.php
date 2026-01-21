@@ -27,6 +27,15 @@ function boutique_enqueue_scripts()
     wp_register_script('script', get_template_directory_uri() . '/script.js');
     wp_enqueue_script('script');
 
+    wp_register_script('autoNumeric', get_template_directory_uri() . '/assets/autoNumeric.js');
+    wp_enqueue_script('autoNumeric');
+
+    wp_register_script('jquery-validate', get_template_directory_uri() . '/assets/jquery.validate.js');
+    wp_enqueue_script('jquery-validate');
+    wp_register_script('messages_he', get_template_directory_uri() . '/assets/messages_he.js');
+    wp_enqueue_script('messages_he');
+
+
     wp_enqueue_media();
 
 }
@@ -41,7 +50,7 @@ add_action('wp_ajax_send_site_forms', 'send_site_forms');
 add_action('wp_ajax_nopriv_send_site_forms', 'send_site_forms');
 function send_site_forms()
 {
-    $func_name = 'function_' . $_POST['form_func'];
+    $func_name = /*'function_' .*/ $_POST['form_func'];
     $func_name($_POST);
     /*echo json_encode(array(
         'status' => 'success',

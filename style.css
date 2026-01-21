@@ -429,3 +429,7 @@ form#registration button{
     padding: 0;
 }
 
+label.error{
+    color: red;
+}
+
