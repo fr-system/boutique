@@ -53,6 +53,9 @@ ul.menu li {
 ul.menu li.selected {
     background-color: #F9F9F9;
 }
+ul.menu li.selected a{
+    font-weight: bold;
+}
 ul.menu li:hover {
     background-color: #F9F9F9;
 }

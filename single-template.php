@@ -10,7 +10,7 @@ $table_name = $_GET["subject"];
 $action = $_GET["action"];//new
 
 $fields_arr = BOUTIQUE_TABLES[$table_name];
-$title_page = "הוספת ". $fields_arr["single"]." חדשה";
+$title_page = "הוספת ". $fields_arr["single"]." חדש".($fields_arr["male_female"] == "female" ? "ה":"");
 $row = (object)array();
 if($action == "edit") {
     $id = $_GET["id"];

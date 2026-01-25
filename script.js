@@ -155,6 +155,22 @@ jQuery(document).ready(function($){
         call_ajax_function(postData,"remove_row",id);
 
     })
+
+    jQuery('.open-file-uploader').click(function () {
+        jQuery('input[name=upload-file]').click();
+    });
+
+    jQuery('input[name=upload-file]').change(function () {
+        jQuery('.file-name').text(this.files[0].name);
+    });
+
+    jQuery('.open-img-uploader').click(function () {
+        jQuery('input[name=upload-img]').click();
+    });
+
+    jQuery('input[name=upload-img]').change(function () {
+        jQuery('.img-name').text(this.files[0].name);
+    });
 })
 
 function reload_page($form, data){

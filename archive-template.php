@@ -9,7 +9,7 @@ if(!isset($_GET["subject"]) || !is_manager() && $_GET["subject"] == "clients") r
 $table_name = $_GET["subject"];
 $query = get_page_query($table_name);
    // print_r ("aa ".$query."<br>");
-$result =run_query ($query);
+$result = run_query ($query);
 $fields_arr  = BOUTIQUE_TABLES[$table_name];
   //  write_log("cols  ".json_encode( $fields_arr["columns"]));
 ?>
@@ -26,6 +26,13 @@ $fields_arr  = BOUTIQUE_TABLES[$table_name];
         </a>
 
     </div>
+    <?php
+    $user_meta = get_user_meta( get_current_user_id(), "products_view", true);
+    if($table_name == "products" && $user_meta == "gallery"){
+        view_catalog_gallery($result);
+    }
+    else{
+    ?>
     <table name="" class="archive-table">
         <thead><tr class="gold">
             <?php
@@ -39,6 +46,7 @@ $fields_arr  = BOUTIQUE_TABLES[$table_name];
             echo get_tr_data($table_name,$row ,"id");
         }?>
     </table>
+    <?php } ?>
 </section>
 <?php
 function get_tr_data($page_name, $data, $id_column){

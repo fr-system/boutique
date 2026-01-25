@@ -4,6 +4,7 @@ const BOUTIQUE_TABLES = array(
     "clients" => array(
         "title" => "לקוחות",
         "single" => "לקוח",
+        "male_female" => "male",
         "columns" => array(
             array("field_name" => "name", "widget" => "text", "label" => "שם הלקוח","required"=>true),
             array("field_name" => "mobile", "widget" => "text", "label" => "נייד"),
@@ -24,23 +25,25 @@ const BOUTIQUE_TABLES = array(
             array("field_name" => "exceeding_conditions", "widget" => "bool", "label" => "חריגה מתנאי תשלום"),
         )),
     "products" => array(
-        "title" => "מוצרים",
+        "title" => "קטלוג המוצרים",
         "single" => "מוצר",
+        "male_female" => "male",
         "columns" => array(
-            array("field_name" => "name", "widget" => "text"),
-            array("field_name" => "barcode", "widget" => "text"),
-            array("field_name" => "supplier_id", "widget" => "select"),
-            array("field_name" => "price", "type" => "float", "widget" => "text", "un_apostrophe" => true),
-            array("field_name" => "description", "widget" => "textarea"),
-            array("field_name" => "file_id", "widget" => "select"),
-            array("field_name" => "image_id", "widget" => "image"),
-            array("field_name" => "blocked", "widget" => "bool"),
-            array("field_name" => "factor_of_friction", "widget" => "select"),
-            array("field_name" => "individually", "widget" => "bool"),
+            array("field_name" => "name", "widget" => "text","label"=>"שם"),
+            array("field_name" => "barcode", "widget" => "text","label"=>"ברקוד"),
+            array("field_name" => "supplier_id", "widget" => "select","label"=>"ספק"),
+            array("field_name" => "price", "type" => "float", "widget" => "text","label"=>"מחיר", "un_apostrophe" => true),
+            array("field_name" => "description", "widget" => "textarea","label"=>"תיאור"),
+            array("field_name" => "file_id", "widget" => "file","label"=>"דף מוצר"),
+            array("field_name" => "image_id", "widget" => "image","label"=>"תמונה"),
+            array("field_name" => "blocked", "widget" => "bool","label"=>"מוצר חסום"),
+            array("field_name" => "factor_of_friction", "widget" => "select","label"=>"גורם אירוז"),
+            array("field_name" => "individually", "widget" => "bool","label"=>"ניתן למכירה בבודדים"),
         )),
     "tasks" => array(
         "title" => "משימות",
         "single" => "משימה",
+        "male_female" => "female",
         "columns" => array(
             array("field_name" => "client_id", "join_table" => "clients", "join_value" => "name", "label" => "שם לקוח","hidden"=>true),
             array("field_name" => "subject", "widget" => "select", "label" => "משימה"),
@@ -54,6 +57,7 @@ const BOUTIQUE_TABLES = array(
     "suppliers" => array(
         "title" => "ספקים",
         "single" => "ספק",
+        "male_female" => "male",
         "columns" => array(
             array("field_name" => "name", "widget" => "text", "label" => "שם"),
             array("field_name" => "email", "widget" => "email", "label" => "דוא\"ל"),
@@ -66,6 +70,7 @@ const BOUTIQUE_TABLES = array(
     "orders" => array(
         "title" => "הזמנות",
         "single" => "הזמנה",
+        "male_female" => "female",
         "columns" => array(
             array("field_name" => "order_date", "widget" => "date", "label" => "תאריך הזמנה"),
             array("field_name" => "client_id","widget" => "select", "join_table" => "clients", "join_value" => "name", "label" => "שם הלקוח"),
@@ -86,6 +91,7 @@ const BOUTIQUE_TABLES = array(
     "agents" => array(
         "title" => "סוכנים",
         "single" => "סוכן",
+        "male_female" => "male",
         "columns" => array(
             array("field_name" => "user_id", "type" => "user_data", "label" => "שם", "user_field" => "display_name"),
             array("field_name" => "user_id", "type" => "user_data", "label" => "שם משתמש", "user_field" => "user_login"),
@@ -102,6 +108,7 @@ const BOUTIQUE_TABLES = array(
         array(
         "title" => "ערים",
         "single" => "עיר",
+            "male_female" => "female",
         "columns" => array(
             array("field_name" => "name", "widget" => "text"),
             array("field_name" => "area_id","widget" => "select"),
