@@ -226,5 +226,49 @@ function display_forgot_password_form($login_page = true){
     </div>
     <?php
 }
-
+// Add the field to user's own profile editing screen.
+add_action('show_user_profile','wporg_usermeta_form_field_lang',90);
+// Add the field to user profile editing screen.
+add_action('edit_user_profile','wporg_usermeta_form_field_lang',90);
+// Add the save action to user's own profile editing screen update.
+add_action('personal_options_update', 'wporg_usermeta_form_field_lang_update');
+// Add the save action to user profile editing screen update.
+add_action('edit_user_profile_update', 'wporg_usermeta_form_field_lang_update');
+function wporg_usermeta_form_field_lang( $user ) {
+    ?>
+    <h3>מצב עבודה</h3>
+    <table class="form-table">
+        <tr>
+            <th>
+                <label for="test_mode">מצב בדיקות</label>
+            </th>
+            <td>
+                <input type="number" id="test_mode" name="test_mode" max="1" value="<?= get_user_test_mode($user->data->ID);?>"/>
+                <p class="description">לבדיקות ללא שימוש בנתוני אמת.</p>
+            </td>
+        </tr>
+    </table>
+    <?php
+}
+function get_user_test_mode($user_id=null)
+{
+    if(empty($user_id)){
+        $user_id = get_user_connected()->ID;
+    }
+    return get_user_meta($user_id,'test_mode',true) ?? 0;
+}
+/**
+ * The save action.
+ *
+ * @param $user_id int the ID of the current user.
+ *
+ * @return bool Meta ID if the key didn't exist, true on successful update, false on failure.
+ */
+function wporg_usermeta_form_field_lang_update( $user_id ) {
+    // check that the current user have the capability to edit the $user_id
+    if ( ! current_user_can( 'edit_user', $user_id ) ) {
+        return false;
+    }
+    return update_user_meta($user_id,'test_mode',$_POST['test_mode']);
+}
 ?>

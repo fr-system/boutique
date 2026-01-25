@@ -58,16 +58,16 @@ function get_tr_data($page_name, $data, $id_column){
     $html='<tr class="border-dark-gray" data-id="'.$row->id.'">';
 //        <td data-id="checkbox" class="td-checkbox"><input type="checkbox" class="checkbox-row" value="'.$row->$id_column.'" id=""/></td>';
     foreach($page_info["columns"] as $column) {
-        $field = isset($column['join_table']) ?  $column['join_value'] : $column["field_name"];
+        $field = isset($column['join_table']) ? substr($column['join_table'], 0, -1)  . "_" . $column['join_value']: $column["field_name"];
         $list = isset($column['table_name'])? constant($column['table_name']):null;
 
         if($field != $id_column){
-            if(isset($column['type']) && $column['type']=="user_data"){
-                write_log ('fiel '.$field);
-                write_log ('row '.json_encode ($row));
-                $user_field =$column["user_field"];
-                $column_value="aaa";
-               // $column_value = get_userdata($row->$field)->$user_field;
+            if(isset($column['type']) && $column['type']=="user_data") {
+                //write_log ('fiel ' . $field);
+               // write_log ('row ' . json_encode ($row));
+                $user_field = $column["user_field"];
+                $column_value = empty($row->$field) ? '' : get_userdata ($row->$field)->$user_field;
+
             }
             //else if($column['type']=="action"){
                 //$column_value = '<button  class="action bg-lightblue" name="'.$column['field_name'].'" onclick="action_func(this)"><i class="'.$actions_icons[$column['field_name']].'"></i><span>פעולה</span></button>';

@@ -34,6 +34,7 @@ if (isset($_SERVER['HTTP_REFERER'])) {
     <form class="site_form border-dark-gray padding-20 flex-display direction-column part-60 " novalidate="" data-success='reload_page' data-failed='show_error_messages'>
         <input type="hidden" name="form_func" value="build_query_boutique" />
         <input type="hidden" name="table_name" value="<?php echo $table_name ?>" />
+        <input type="hidden" name="id" value="<?php echo $id ?>" />
         <input type="hidden" name="previous_page" value="<?php echo $previous_page ?>" />
         <div class="grid-display cols-2 margin-bottom-40">
             <?php

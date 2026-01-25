@@ -16,7 +16,7 @@ add_action('wp_ajax_build_query_boutique', 'build_query_boutique');
 function build_query_boutique()
 {
     $table_name = $_POST["table_name"];
-
+    global $wpdb;
     $update = array();
     $fields = array();
     $values = array();
@@ -42,9 +42,9 @@ function build_query_boutique()
 
     if($_POST["id"]) {
         if (isset($_POST["remove"])) {//remove
-            $query = "DELETE FROM ". $table_name;
+            $query = "DELETE FROM {$wpdb->prefix}". $table_name;
         } else {//"update"
-            $query = "UPDATE " . $table_name . " set " . implode(",", $update);
+            $query = "UPDATE {$wpdb->prefix}" . $table_name . " set " . implode(",", $update);
         }
         $query .= " where id = " . $_POST["id"];
     }
@@ -55,11 +55,11 @@ function build_query_boutique()
             $values .= " NOW(), ". get_current_user_id() ." ,";
         }*/
 
-        $query = "INSERT INTO ".$table_name." (".implode(",", $fields)." ) select " . implode(",", $values);
+        $query = "INSERT INTO {$wpdb->prefix}".$table_name." (".implode(",", $fields)." ) select " . implode(",", $values);
     }
     write_log(" query " . $query);
-    //$ok = run_query($query, "execute");
-    //write_log("ok run_query " . $ok);
+    $ok = run_query($query, "execute");
+    write_log("ok run_query " . $ok);
     //return  $ok;
     echo json_encode( array(
         'status'   => 'success',
@@ -81,22 +81,23 @@ function get_field($table_name, $field_name)
 
 function get_page_query($table_name,$field_filter=null ,$filter_value=null)
 {
-
+    global $wpdb;
     $columns = BOUTIQUE_TABLES[$table_name]["columns"];
     $join = "";
-    $query = "SELECT ".$table_name.".id, ";
+
+    $query = "SELECT ".$wpdb->prefix.$table_name.".id, ";
     foreach ($columns as $column) {
-        if (/*$column["type"] == "action" ||*/isset($column["type"]) && $column["type"] == "user_data" && !isset($column['join_table'])) continue;
-        $query .=$table_name.".". $column["field_name"] . ", ";
+       // if (/*$column["type"] == "action" ||*/isset($column["type"]) && $column["type"] == "user_data" && !isset($column['join_table'])) continue;
+        $query .=$wpdb->prefix.$table_name.".". $column["field_name"] . ", ";
         if (isset($column['join_table'])) {
-            $query .= $column['join_table'] . "." . $column['join_value'] . " AS ".substr($column['join_table'], 0, -1)  . "_" . $column['join_value'].", ";
-            $join .= " LEFT JOIN " . $column['join_table'] . " ON " . $table_name . "." . $column["field_name"] . " = " . $column['join_table'] . ".id";
+            $query .= $wpdb->prefix.$column['join_table'] . "." . $column['join_value'] . " AS ".substr($column['join_table'], 0, -1)  . "_" . $column['join_value'].", ";
+            $join .= " LEFT JOIN " . $wpdb->prefix.$column['join_table'] . " ON " .$wpdb->prefix. $table_name . "." . $column["field_name"] . " = " . $wpdb->prefix.$column['join_table'] . ".id";
         }
     }
 
     $query = substr($query,0,-2);
     //write_log("f1 ".$field_filter);
-    $query .= " FROM ".$table_name. $join;
+    $query .= " FROM ".$wpdb->prefix.$table_name. $join;
     if($field_filter=!null && $filter_value!=null){
 
         $field = get_field($table_name, $field_filter);
@@ -109,13 +110,14 @@ function get_page_query($table_name,$field_filter=null ,$filter_value=null)
 //    if($filter_value!= 0){
 //        $query .= " WHERE ".get_id_column_in_page($page_name)." = ".$filter_value;
 //    }
+    write_log ('select '.$query);
     return $query ;
 }
 
 function is_needed_apostrophe($widget,$un_apostrophe)
 {
     if($un_apostrophe)return "";
-    $widgets = array("text","date","textarea");
+    $widgets = array("text","date","textarea","email");
     if(in_array($widget, $widgets)){
         return "'";
     }
@@ -135,7 +137,6 @@ function get_fields_list($table_name)
 
 function build_options($table_name,$value=null,$filter=null)
 {
-
     $fields_list = BOUTIQUE_TABLES[$table_name];
     if(isset($fields_list["data-field"])) {
         $field = $fields_list["data-field"];
@@ -147,18 +148,16 @@ function build_options($table_name,$value=null,$filter=null)
         //$options .= '<option '.(isset($fields_list["data-field"])?'data-field="'.$row[$fields_list["data-field"]].'"':'').' value="' . $row->value . '"' . (!empty($value) && in_array($row->value, $value) ? 'selected' : '') . '>' . $row->text . '</option>';
         $data_field = "";
         if(isset($fields_list["data-field"])){
-
             $data_field =' data-field="'.$row->$field.'"';
         }
-        $options .= '<option '.$data_field.' value="' . $row->value . '"' . (!empty($value) && in_array($row->value, $value) ? 'selected' : '') . '>' . $row->text . '</option>';
+        $options .= '<option '.$data_field.' value="' . $row->value . '"' . (!empty($value)&& is_array($value) && in_array($row->value, $value) ? 'selected' : '') . '>' . $row->text . '</option>';
     }
     //write_log("options" .$options);
     return $options;
 }
 
 function get_list($table_name,$filter){
-
-
+    global $wpdb;
     $fields_list = BOUTIQUE_TABLES[$table_name];
     $field_name = $fields_list["columns"][0]["field_name"];
     $fields=array();
@@ -167,7 +166,7 @@ function get_list($table_name,$filter){
     if(isset($fields_list["data-field"])) {
         $query .= ", ".$fields_list["data-field"];
     }
-    $query .= " FROM ".$table_name;
+    $query .= " FROM ".$wpdb->prefix.$table_name;
     /*if(isset($fields_list["join_table"]) && $fields_list["join_table"] != "" && isset($fields_list["join_table_value"])){
         $query.=" JOIN #_".$fields_list["join_table"]." on #_".$fields_list["join_table"].".".$fields_list["join_table_value"]." = #_".$fields_list["table_name"].".".$fields_list["field_value"];
     }
@@ -198,4 +197,12 @@ function get_list($table_name,$filter){
     //write_log("list ".json_encode($list));
     return $list;
 }
+function test_mode_table_prefix() {
+    if(get_user_test_mode()) {
+        global $wpdb;
+        $wpdb->prefix = 'test_';
+        //write_log ("prefix ".$wpdb->prefix);
+    }
+}
+add_action('init', 'test_mode_table_prefix');
 ?>
