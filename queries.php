@@ -135,13 +135,13 @@ function get_fields_list($table_name)
     return array();
 }
 
-function build_options($table_name,$value=null,$filter=null)
+function build_options($list_name,$value=null,$filter=null)
 {
-    $fields_list = BOUTIQUE_TABLES[$table_name];
+    $fields_list = BOUTIQUE_LISTS[$list_name];
     if(isset($fields_list["data-field"])) {
         $field = $fields_list["data-field"];
     }
-    $list = get_list($table_name,$filter);
+    $list = get_list($list_name,$filter);
     //write_log("list " .json_encode($fields_list));
     $options = '<option value=""></option>';
     foreach ($list as $row) {
@@ -156,9 +156,9 @@ function build_options($table_name,$value=null,$filter=null)
     return $options;
 }
 
-function get_list($table_name,$filter){
+function get_list($list_name,$filter){
     global $wpdb;
-    $fields_list = BOUTIQUE_TABLES[$table_name];
+    $fields_list = BOUTIQUE_LISTS[$list_name];
     $field_name = $fields_list["columns"][0]["field_name"];
     $fields=array();
 
@@ -166,6 +166,7 @@ function get_list($table_name,$filter){
     if(isset($fields_list["data-field"])) {
         $query .= ", ".$fields_list["data-field"];
     }
+    $table_name=$list_name;
     $query .= " FROM ".$wpdb->prefix.$table_name;
     /*if(isset($fields_list["join_table"]) && $fields_list["join_table"] != "" && isset($fields_list["join_table_value"])){
         $query.=" JOIN #_".$fields_list["join_table"]." on #_".$fields_list["join_table"].".".$fields_list["join_table_value"]." = #_".$fields_list["table_name"].".".$fields_list["field_value"];

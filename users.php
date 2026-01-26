@@ -1,5 +1,5 @@
 <?php
-function function_login()
+function login()
 {
     $email = fixXSS($_POST['username']);
     $pass = fixXSS($_POST['password']);

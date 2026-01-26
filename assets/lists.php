@@ -98,41 +98,88 @@ const BOUTIQUE_TABLES = array(
             array("field_name" => "user_id", "type" => "user_data", "label" => "דוא\"ל", "user_field" => "user_email"),
 
             array("field_name" => "mobile", "widget" => "text", "label" => "נייד"),
-            array("field_name" => "work_area_id","widget" => "select", "join_table" => "cities", "join_value" => "name", "label" => "אזור עבודה"),// סינון אזור
+            array("field_name" => "work_area_id","widget" => "select", "join_table" => "areas", "join_value" => "area", "label" => "אזור עבודה"),// סינון אזור
             array("field_name" => "notes", "widget" => "textarea", "label" => "הערה"),
             array("field_name" => "target","widget" => "number", "label" => "יעד כללי"),
         ),
         //"filter"=>"area_id == []"
     ),
-    "cities" =>
+//    "cities" =>
+//        array(
+//        "title" => "ערים",
+//        "single" => "עיר",
+//            "male_female" => "female",
+//        "columns" => array(
+//            array("field_name" => "name", "widget" => "text"),
+//            array("field_name" => "area_id","widget" => "select"),
+//            array("field_name" => "is_area", "widget" => "bool"),
+//        ),
+//        "filter"=>"is_area != true",
+//        "data-field"=>"area_id"
+//        ),
+    "collection" =>
         array(
-        "title" => "ערים",
-        "single" => "עיר",
-            "male_female" => "female",
-        "columns" => array(
-            array("field_name" => "name", "widget" => "text"),
-            array("field_name" => "area_id","widget" => "select"),
-            array("field_name" => "is_area", "widget" => "bool"),
-        ),
-        "filter"=>"is_area != true",
-        "data-field"=>"area_id"
-        ),
-    "supplier_invoices" =>
-        array(
-        "title" => "חשבוניות ספקים",
-        "single" => "",
+        "title" => "חשבוניות",
+        "single" => "חשבונית",
         "columns" => array(
             array("field_name" => "supplier_id","widget" => "select", "join_table" => "suppliers", "join_value" => "name", "label" => "שם הספק"),
             array("field_name" => "client_id","widget" => "select", "join_table" => "clients", "join_value" => "name", "label" => "שם הלקוח"),
             array("field_name" => "obligation", "widget" => "text","un_apostrophe" => true, "label" => "חיוב"),
-            array("field_name" => "invoic_number", "type" => "text","un_apostrophe" => true, "label" => "מס' חשבונית"),
+            array("field_name" => "doc_number", "type" => "text","un_apostrophe" => true, "label" => "מס' חשבונית"),
             array("field_name" => "date", "widget" => "date", "label" => "תאריך"),
-            array("field_name" => "payment_date", "widget" => "date", "label" => "סוג חשבונית"),
-            array("field_name" => "credit_number", "widget" => "text", "label" => "מספר כרטיס אשראי"),
+            array("field_name" => "doc_type", "widget" => "select", "label" => "סוג חשבונית"),
+            array("field_name" => "payment_date", "widget" => "date", "label" => "תאריך תשלום"),
+            //array("field_name" => "credit_number", "widget" => "text", "label" => "מספר כרטיס אשראי"),
             array("field_name" => "payment_type", "widget" => "select", "label" => "אופן תשלום"),
             array("field_name" => "check_number", "widget" => "text", "label" => "מספר צ'ק"),
         ))
 
 );
-
+const BOUTIQUE_LISTS = array(
+    "cities" =>
+        array(
+            "title" => "ערים",
+            "single" => "עיר",
+            "male_female" => "female",
+            "columns" => array(
+                array("field_name" => "name","widget" => "text"),
+                array("field_name" => "area_id","widget" => "select", "join_table" => "areas", "join_value" => "area", "label" => "איזור"),
+            ),
+            "filter"=>"is_area != true",
+            "data-field"=>"area_id"
+        ),
+    "areas" =>
+        array(
+            "title" => "איזורים",
+            "single" => "אזור",
+            "columns" => array(
+                array("field_name" => "area","widget" => "text"),
+            )
+        ),
+    "importance" =>
+        array(
+            "title" => "חשיבות",
+            "single" => "חשיבות",
+            "columns" => array(
+                array("field_name" => "importance","widget" => "text"),
+            )
+        ),
+    "payment_terms" =>
+        array(
+            "title" => "תנאי תשלום",
+            "single" => "תנאי תשלום",
+            "columns" => array(
+                array("field_name" => "importance","widget" => "text"),
+            )
+        ),
+    "specials" =>
+        array(
+            "title" => "הטבות ומבצעים",
+            "single" => "מבצע",
+            "columns" => array(
+                array("field_name" => "descript","widget" => "text"),
+                array("field_name" => "discount","widget" => "text","un_apostrophe" => true),
+            )
+        ),
+    );
 ?>

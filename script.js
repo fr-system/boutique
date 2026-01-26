@@ -171,6 +171,16 @@ jQuery(document).ready(function($){
     jQuery('input[name=upload-img]').change(function () {
         jQuery('.img-name').text(this.files[0].name);
     });
+    jQuery('select.list-combo').change(function () {
+        //var listName=this.value;
+        var postData = [
+            {name: "table_display", value: "1"},
+            {name: "action", value: "get_list_ajax"},
+            {name: "table_name", value: this.value},
+        ];
+        call_ajax_function(postData,"fillListTable","list-table");
+        //call_ajax_function(postData,"get_list",id);
+    });
 })
 
 function reload_page($form, data){
@@ -269,7 +279,7 @@ function onchangeSelect(e,element,value){
                 {name: "action", value: "get_list_ajax"},
                 {name: "table_name", value: "agents"},
             ];
-            call_ajax_function(postData,"fillAgentsSelect","agent_id");
+        call_ajax_function(postData,"fillAgentsSelect","agent_id");
     }
 }
 
@@ -285,4 +295,9 @@ function fillAgentsSelect(result,targetElement){
 function remove_row(result,id){
     var tr = jQuery(".archive-table tr[data-id="+id+"]");
     tr.remove();
+}
+function fillListTable(result,targetElement){
+    if(result.tableData) {
+        jQuery("." + targetElement).html(result.tableData);
+    }
 }
