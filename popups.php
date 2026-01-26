@@ -197,9 +197,16 @@ function get_list_ajax(){
     if(isset($_POST['filter'])){
         $filter = $_POST['filter'];
     }
-    $options = build_options($table_name,null,$filter);
-    write_log("options" .$options);
-    echo json_encode (array("options" => $options ));
+   $options=$table=null;
+    if(isset($_POST['table_display'])){
+        $table = build_table_rows($table_name);
+        write_log ("rows " . $table);
+    }
+    else {
+        $options = build_options ($table_name, null, $filter);
+        write_log ("options" . $options);
+    }
+    echo json_encode (array("options" => $options ,"tableData"=>$table));
     die();
 }
 
@@ -222,3 +229,20 @@ function view_catalog_gallery($products)
         <?php
 }
 
+function build_table_rows($list_name)
+{
+    $fields_list = BOUTIQUE_LISTS[$list_name];
+    $list = get_list($list_name);
+    //write_log("list " .json_encode($fields_list));
+    $rows = '';
+    foreach ($list as $row) {
+        $rows .= '<tr>';
+        foreach (BOUTIQUE_LISTS[$list_name]["columns"] as $column) {
+            $field =$column["field_name"];
+            $rows .= '<td >' . $row->$field . ' </td>';
+        }
+        $rows .= '</tr>';
+    }
+    write_log("rows " .$rows);
+    return $rows;
+}

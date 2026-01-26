@@ -14,7 +14,20 @@ $fields_arr  = BOUTIQUE_TABLES[$table_name];
   //  write_log("cols  ".json_encode( $fields_arr["columns"]));
 ?>
 <section class="page">
-     <h1 class="page-title  font-40 bold"><?= $fields_arr["title"]; ?></h1>
+    <?php
+    if($table_name == "lists"){   ?>
+    <h1 class="page-title  font-30 bold">רשימות</h1>
+        <select><?php
+            foreach (BOUTIQUE_LISTS as $B_LIST){
+               echo "<option>".$B_LIST->title."</option>";
+            }
+            ?>
+
+        </select>
+     <?php
+    }
+    ?>
+
     <div class="archive-actions flex-display end">
         <?php //get_svg ("clients","new",false,"class-name"); ?>
         <a href="<?php echo 'single?subject='.$table_name.'&action=new' ?>">
