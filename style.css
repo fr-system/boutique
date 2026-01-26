@@ -170,6 +170,12 @@ input, textarea, select, button{
     display: grid;
     grid-gap: 25px;
 }
+.grid-display .stretch{
+     grid-column: 1 / -1;
+ }
+.grid-display.cols-5{
+      grid-template-columns: repeat(5, 1fr);
+  }
 .grid-display.cols-4{
     grid-template-columns: repeat(4, 1fr);
 }

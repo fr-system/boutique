@@ -31,14 +31,14 @@ const BOUTIQUE_TABLES = array(
         "columns" => array(
             array("field_name" => "name", "widget" => "text","label"=>"שם"),
             array("field_name" => "barcode", "widget" => "text","label"=>"ברקוד"),
-            array("field_name" => "supplier_id", "widget" => "select","label"=>"ספק"),
+            array("field_name" => "supplier_id", "widget" => "select","label"=>"ספק", "join_table" => "suppliers", "join_value" => "name"),
             array("field_name" => "price", "type" => "float", "widget" => "text","label"=>"מחיר", "un_apostrophe" => true),
             array("field_name" => "description", "widget" => "textarea","label"=>"תיאור"),
-            array("field_name" => "file_id", "widget" => "file","label"=>"דף מוצר"),
-            array("field_name" => "image_id", "widget" => "image","label"=>"תמונה"),
-            array("field_name" => "blocked", "widget" => "bool","label"=>"מוצר חסום"),
-            array("field_name" => "factor_of_friction", "widget" => "select","label"=>"גורם אירוז"),
-            array("field_name" => "individually", "widget" => "bool","label"=>"ניתן למכירה בבודדים"),
+            array("field_name" => "file_id", "widget" => "file","label"=>"העלאת דף מוצר"),
+            array("field_name" => "image_id", "widget" => "image","label"=>"העלאת תמונת המוצר"),
+            array("field_name" => "blocked", "widget" => "bool","label"=>"מוצר חסום","display"=>false),
+            array("field_name" => "factor_of_friction", "widget" => "select","label"=>"גורם אירוז","display"=>false),
+            array("field_name" => "individually", "widget" => "bool","label"=>"ניתן למכירה בבודדים","display"=>false),
         )),
     "tasks" => array(
         "title" => "משימות",
@@ -46,9 +46,9 @@ const BOUTIQUE_TABLES = array(
         "male_female" => "female",
         "columns" => array(
             array("field_name" => "client_id", "join_table" => "clients", "join_value" => "name", "label" => "שם לקוח","hidden"=>true),
-            array("field_name" => "subject", "widget" => "select", "label" => "משימה"),
+            array("field_name" => "subject", "widget" => "text", "label" => "משימה"),
             array("field_name" => "open_date", "widget" => "date", "label" => "תאריך פתיחה"),
-            array("field_name" => "agent_id", "widget" => "select", "label" => "סוכן"),//להביא מטבלת יוזר
+            array("field_name" => "agent_id", "widget" => "select", "type" => "user_data", "label" => "סוכן", "join_table" => "agents", "join_value" => "user_id", "user_field" => "display_name"),
             array("field_name" => "details", "widget" => "textarea", "label" => "פירוט"),
             array("field_name" => "importance_id", "widget" => "select", "label" => "חשיבות"),
             array("field_name" => "status_id", "widget" => "select", "label" => "מצב משימה"),
@@ -93,12 +93,12 @@ const BOUTIQUE_TABLES = array(
         "single" => "סוכן",
         "male_female" => "male",
         "columns" => array(
-            array("field_name" => "user_id", "type" => "user_data", "label" => "שם", "user_field" => "display_name"),
-            array("field_name" => "user_id", "type" => "user_data", "label" => "שם משתמש", "user_field" => "user_login"),
-            array("field_name" => "user_id", "type" => "user_data", "label" => "דוא\"ל", "user_field" => "user_email"),
+            array("field_name" => "user_id", "widget" => "text", "type" => "user_data", "label" => "שם", "user_field" => "display_name"),
+            array("field_name" => "user_id", "widget" => "text", "type" => "user_data", "label" => "שם משתמש", "user_field" => "user_login"),
+            array("field_name" => "user_id", "widget" => "email", "type" => "user_data", "label" => "דוא\"ל", "user_field" => "user_email"),
 
             array("field_name" => "mobile", "widget" => "text", "label" => "נייד"),
-            array("field_name" => "work_area_id","widget" => "select", "join_table" => "cities", "join_value" => "name", "label" => "אזור עבודה"),// סינון אזור
+            array("field_name" => "work_area_id","widget" => "select", "join_table" => "cities", "join_value" => "name", "label" => "אזור עבודה","filter"=>"is_area == true",),// סינון אזור
             array("field_name" => "notes", "widget" => "textarea", "label" => "הערה"),
             array("field_name" => "target","widget" => "number", "label" => "יעד כללי"),
         ),

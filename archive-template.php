@@ -28,6 +28,7 @@ $fields_arr  = BOUTIQUE_TABLES[$table_name];
     </div>
     <?php
     $user_meta = get_user_meta( get_current_user_id(), "products_view", true);
+    $user_meta = true;
     if($table_name == "products" && $user_meta == "gallery"){
         view_catalog_gallery($result);
     }

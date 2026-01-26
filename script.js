@@ -59,7 +59,11 @@ jQuery(document).ready(function($){
         }*/
     });
 
-    jQuery('.logout_button').click(function(){
+    jQuery('.user-logged').click(function(){
+        jQuery('.popup-logout').toggleClass("hidden");
+    });
+
+    jQuery('.logout-button').click(function(){
         jQuery.ajax({
             type: "GET",
             url: "/wp-admin/admin-ajax.php",
@@ -156,20 +160,35 @@ jQuery(document).ready(function($){
 
     })
 
-    jQuery('.open-file-uploader').click(function () {
-        jQuery('input[name=upload-file]').click();
+    jQuery('.open-file-uploader, .file-name').click(function () {
+        jQuery('input.upload-file').click();
     });
 
-    jQuery('input[name=upload-file]').change(function () {
+    jQuery('input.upload-file').change(function () {
         jQuery('.file-name').text(this.files[0].name);
+
     });
 
-    jQuery('.open-img-uploader').click(function () {
-        jQuery('input[name=upload-img]').click();
+    jQuery('.open-image-uploader , .image-name').click(function () {
+        jQuery('input.upload-image').click();
     });
 
-    jQuery('input[name=upload-img]').change(function () {
-        jQuery('.img-name').text(this.files[0].name);
+    jQuery('input.upload-image').change(function () {
+        jQuery('.image-name').text(this.files[0].name);
+        const file = this.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = jQuery('.protuct-image');
+                e.target.result.replace("data:image/png;base64,","");
+                //img.src = e.target.result;
+                img.attr('src', e.target.result).show(); // מציג את התמונה
+
+                //img.style.display = 'block'; // מציג את התמונה
+            }
+            reader.readAsDataURL(file);
+        }
+
     });
 })
 

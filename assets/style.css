@@ -1,7 +1,14 @@
 .input-label{
     background-color: var(--b-global-color-light-gray);
     border: none;
-    padding: 0 10px;
+    padding: 5px 10px;
+}
+.input-label span{
+    height: 100%;
+}
+.single img {
+    max-width: 30%;
+    height: auto;
 }
 
 .boutique-header{
@@ -32,6 +39,22 @@
 .boutique-header .user-logged{
     height: 40px;
     padding: 0 10px;
+    position: relative;
+}
+
+.popup-logout{
+    position: absolute;
+    top: 50px;
+    width: 100%;
+    left: 0;
+}
+
+.box-shadow{
+    box-shadow: 1px 2px 14.4px 1px rgba(0, 0, 0, 0.13);
+    background: rgba(255, 255, 255, 1);
+    border-radius:  5px;
+    box-sizing: border-box;
+    padding: 15px;
 }
 
 #sidebar-menu{

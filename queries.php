@@ -13,7 +13,7 @@ function run_query($query, $type="")
     return $result;
 }
 add_action('wp_ajax_build_query_boutique', 'build_query_boutique');
-function build_query_boutique()
+function build_query_boutique($from_ajax = true)
 {
     $table_name = $_POST["table_name"];
     global $wpdb;
@@ -26,8 +26,8 @@ function build_query_boutique()
             $field = get_field($table_name, $key);
             if ($field != null) {
                 if (!empty($value) && isset($field["un_apostrophe"])) {
-                    write_log("val " . PHP_FLOAT_MAX);
-                    write_log("val2 " . str_replace("₪", "", $value));
+                    //write_log("val " . PHP_FLOAT_MAX);
+                    //write_log("val2 " . str_replace("₪", "", $value));
 
                     $value = floatval(str_replace("₪", "", $value));
                 }
@@ -61,11 +61,13 @@ function build_query_boutique()
     $ok = run_query($query, "execute");
     write_log("ok run_query " . $ok);
     //return  $ok;
-    echo json_encode( array(
-        'status'   => 'success',
-        //'redirect' => $_POST["previous_page"],
-    ) );
-    die();
+    if($from_ajax) {
+        echo json_encode(array(
+            'status' => 'success',
+            //'redirect' => $_POST["previous_page"],
+        ));
+        die();
+    }
 
 }
 
@@ -150,7 +152,7 @@ function build_options($table_name,$value=null,$filter=null)
         if(isset($fields_list["data-field"])){
             $data_field =' data-field="'.$row->$field.'"';
         }
-        $options .= '<option '.$data_field.' value="' . $row->value . '"' . (!empty($value)&& is_array($value) && in_array($row->value, $value) ? 'selected' : '') . '>' . $row->text . '</option>';
+        $options .= '<option '.$data_field.' value="' . $row->value . '"' . (!empty($value)&& (is_array($value) && in_array($row->value, $value) || !is_array($value) && $row->value == $value) ? 'selected' : '') . '>' . $row->text . '</option>';
     }
     //write_log("options" .$options);
     return $options;
@@ -205,4 +207,102 @@ function test_mode_table_prefix() {
     }
 }
 add_action('init', 'test_mode_table_prefix');
+
+function get_post_by_name($file_name,$type)
+{
+    $args = array(
+        'name' => $file_name, // הכנס את הכותרת כאן
+        'post_type' => $type,
+        //'post_status' => 'publish',
+        'numberposts' => 1
+    );
+
+    $pages = get_posts($args);
+
+    if (!empty($pages)) {
+        $page = $pages[0]; // הדף הראשון שנמצא
+        return $page->id;
+    }
+    return null;
+}
+
+function save_media($file,$file_name)
+{
+    $file_attr = wp_handle_upload ($file, array('test_form' => FALSE));
+    if ($file_attr && !isset($file_attr['error'])) {
+
+        setlocale (LC_ALL, 'he_IL.UTF-8');
+        $attachment = array(
+            'guid' => $file_attr['url'],
+            'post_mime_type' => $file_attr['type'],
+            'post_title' => basename ($file_attr['file']),
+            'post_content' => '',
+            'post_status' => 'inherit'
+        );
+        $attachment_id = wp_insert_attachment ($attachment, $file_attr['file'], null,$file_name);
+        $attachedData = wp_generate_attachment_metadata ($attachment_id, $file_attr['file']);
+
+        wp_update_attachment_metadata ($attachment_id, $attachedData);
+
+        return $attachment_id;
+    }
+}
+
+
+if(isset($_POST['save_product']) && $_SERVER["REQUEST_METHOD"] == "POST") {
+//write_log("save_product");
+    test_mode_table_prefix();
+
+    $fields_arr = BOUTIQUE_TABLES[$_POST['table_name']]["columns"];
+    $array_uploads = array_filter($fields_arr, function ($field_row) {
+        return ($field_row["widget"] == "image" || $field_row["widget"] == "file");
+    });
+    foreach ($array_uploads as $field) {
+        $field_name = $field["field_name"];
+        if (isset($_FILES[$field_name]['name']) && $_FILES[$field_name]["size"] > 0) {
+            write_log("file!!!!! ");
+            require_once(ABSPATH . 'wp-admin/includes/media.php');
+            require_once(ABSPATH . 'wp-admin/includes/file.php');
+            require_once(ABSPATH . 'wp-admin/includes/image.php');
+            $file = array(
+                'name' => $_FILES[$field_name]['name'],
+                'type' => $_FILES[$field_name]['type'],
+                'tmp_name' => $_FILES[$field_name]['tmp_name'],
+                'error' => $_FILES[$field_name]['error'],
+                'size' => $_FILES[$field_name]['size']
+            );
+            if ($file["error"] == 1) {
+                $error_msg = '&error_msg=upload_err_ini_size&file_index=';
+                write_log("upload_image err " . $error_msg);
+            }
+            $exist_image = get_post_by_name($file["name"], 'attachment');
+            //write_log ("exist_image ".json_encode ( $exist_image));
+            $exist_image = true;
+            $image_id = null;
+            if ($exist_image) {
+                //$image_id = $exist_image->id;
+                $image_id = 38;
+            } else {
+                if ($file["size"] > 0) {
+                    write_log("upload_".$field_name);
+                    $image_id = save_media($file,$_POST['name']);
+                }
+            }
+
+            if ($image_id) {
+                write_log("imag ".$image_id);
+                $_POST[$field_name] = $image_id;
+            }
+        }
+    }
+
+    write_log("post ".json_encode($_POST));
+
+    build_query_boutique(false);
+    wp_redirect($_SERVER['REQUEST_URI']);
+    exit();
+
+
+
+}
 ?>
