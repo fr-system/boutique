@@ -217,11 +217,11 @@ function view_catalog_gallery($products)
         <?php
     foreach ($products as $product){
     ?>
-    <div class="border-dark-gray padding-20 direction-column">
-        <img src="<?php echo wp_get_attachment_url($product->image_id) ?>" />
-        <div><?php echo $product->name ?></div>
-        <div><?php echo $product->price ?></div>
-        <a href="single?subject=products&action=edit&id=<?php echo $product->id?>" class="background-white gold bold font-18">מעבר למוצר</a>
+    <div class="border-dark-gray product padding-15">
+        <img class="margin-bottom-5" src="<?php echo wp_get_attachment_url($product->image_id) ?>" />
+        <div class="margin-bottom-5 bold"><?php echo $product->name ?></div>
+        <div class="margin-bottom-5"><?php echo $product->price ?></div>
+        <a href="single?subject=products&action=edit&id=<?php echo $product->id?>" class="button background-white gold bold font-15">מעבר למוצר</a>
     </div>
 <?php
     }?>

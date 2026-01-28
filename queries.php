@@ -77,11 +77,10 @@ function get_field($table_name, $field_name)
     $field = array_filter($fields, function ($field_row) use ($field_name) {
         return $field_row["field_name"] == $field_name;
     });
-
     return count($field) > 0 ? array_pop($field) : null;
 }
 
-function get_page_query($table_name,$field_filter=null ,$filter_value=null)
+function get_page_query($table_name,$filter_field=null ,$filter_value=null)
 {
     global $wpdb;
     $columns = BOUTIQUE_TABLES[$table_name]["columns"];
@@ -98,21 +97,23 @@ function get_page_query($table_name,$field_filter=null ,$filter_value=null)
     }
 
     $query = substr($query,0,-2);
-    //write_log("f1 ".$field_filter);
     $query .= " FROM ".$wpdb->prefix.$table_name. $join;
-    if($field_filter=!null && $filter_value!=null){
-
-        $field = get_field($table_name, $field_filter);
-        if($field != null){
-            $apostrophe = is_needed_apostrophe($field["widget"],isset($field["un_apostrophe"]));
-            //write_log("f2 ".$field_filter);
-            $query.=" WHERE ".$field_filter." = ".$apostrophe.$filter_value.$apostrophe;
+    if($filter_field!=null && $filter_value!=null) {
+        if ($filter_field == "id") {
+            $filter_field=$wpdb->prefix.$table_name.".".$filter_field;
+            $apostrophe = "";
+        } else {
+            $field = get_field($table_name, $filter_field);
+            if ($field != null) {
+                $apostrophe = is_needed_apostrophe($field["widget"], isset($field["un_apostrophe"]));
+            }
         }
+        $query .= " WHERE " . $filter_field . " = " . $apostrophe . $filter_value . $apostrophe;
     }
 //    if($filter_value!= 0){
 //        $query .= " WHERE ".get_id_column_in_page($page_name)." = ".$filter_value;
 //    }
-    write_log ('select '.$query);
+    //write_log ('select '.$query);
     return $query ;
 }
 
@@ -139,30 +140,34 @@ function get_fields_list($table_name)
 
 function build_options($list_name,$value=null,$filter=null)
 {
+    //write_log("list name " .$list_name);
     $fields_list = BOUTIQUE_LISTS[$list_name];
     if(isset($fields_list["data-field"])) {
         $field = $fields_list["data-field"];
     }
     $list = get_list($list_name,$filter);
-    //write_log("list " .json_encode($fields_list));
     $options = '<option value=""></option>';
     foreach ($list as $row) {
-        //$options .= '<option '.(isset($fields_list["data-field"])?'data-field="'.$row[$fields_list["data-field"]].'"':'').' value="' . $row->value . '"' . (!empty($value) && in_array($row->value, $value) ? 'selected' : '') . '>' . $row->text . '</option>';
         $data_field = "";
         if(isset($fields_list["data-field"])){
             $data_field =' data-field="'.$row->$field.'"';
         }
         $options .= '<option '.$data_field.' value="' . $row->value . '"' . (!empty($value)&& (is_array($value) && in_array($row->value, $value) || !is_array($value) && $row->value == $value) ? 'selected' : '') . '>' . $row->text . '</option>';
     }
-    //write_log("options" .$options);
     return $options;
 }
 
 function get_list($list_name,$filter){
     global $wpdb;
-    $fields_list = BOUTIQUE_LISTS[$list_name];
+
+    if (array_key_exists($list_name, BOUTIQUE_LISTS)) {
+        $fields_list = BOUTIQUE_LISTS[$list_name];
+    }
+    else if (array_key_exists($list_name, BOUTIQUE_TABLES)) {
+        $fields_list = BOUTIQUE_TABLES[$list_name];
+    }
+
     $field_name = $fields_list["columns"][0]["field_name"];
-    $fields=array();
 
     $query = "SELECT id as value, ".$field_name." as text";
     if(isset($fields_list["data-field"])) {
@@ -276,19 +281,18 @@ if(isset($_POST['save_product']) && $_SERVER["REQUEST_METHOD"] == "POST") {
                 $error_msg = '&error_msg=upload_err_ini_size&file_index=';
                 write_log("upload_image err " . $error_msg);
             }
-            $exist_image = get_post_by_name($file["name"], 'attachment');
+            //$exist_image = get_post_by_name($file["name"], 'attachment');
             //write_log ("exist_image ".json_encode ( $exist_image));
-            $exist_image = true;
             $image_id = null;
-            if ($exist_image) {
+            //if ($exist_image) {
                 //$image_id = $exist_image->id;
-                $image_id = 38;
-            } else {
+                //$image_id = 38;
+            //} else {
                 if ($file["size"] > 0) {
-                    write_log("upload_".$field_name);
-                    $image_id = save_media($file,$_POST['name']);
+                    write_log("upload_" . $field_name);
+                    $image_id = save_media($file, $_POST['name']);
                 }
-            }
+            //}
 
             if ($image_id) {
                 write_log("imag ".$image_id);

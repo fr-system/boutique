@@ -78,7 +78,7 @@ jQuery(document).ready(function($){
         forgot_password_state();
     });
 
-    jQuery('.popup .btn.cancel').click(function(){
+    jQuery('.popup .button.cancel').click(function(){
         closePopup();
     });
 
@@ -200,9 +200,18 @@ jQuery(document).ready(function($){
         call_ajax_function(postData,"fillListTable","list-table");
         //call_ajax_function(postData,"get_list",id);
     });
+
+    jQuery('[data-view]').click(function () {
+        var postData = [
+            {name: "action", value: "update_user_meta_value"},
+            {name: "meta_key", value: "products_view" },
+            {name: "meta_value", value: jQuery(this).data("view")},
+        ];
+        call_ajax_function(postData,"reload_page");
+    });
 })
 
-function reload_page($form, data){
+function reload_page(data){
     if(data.redirect) {
         window.location.href = data.redirect;
     }

@@ -7,8 +7,20 @@
     height: 100%;
 }
 .single img {
-    max-width: 30%;
+/*    max-width: 30%;
+    height: auto;*/
+    width: 30%;
+    height: 100%;
+}
+
+.product .button{
+    height: 30px;
+    margin: 0;
+}
+.product img{
+    width: 100%;
     height: auto;
+    border-radius: 10px;
 }
 
 .boutique-header{
@@ -99,4 +111,15 @@ ul.menu li svg{
 }
 .quick-action svg{
     margin-left: 10px;
+}
+
+.archive-search {
+    width: 220px;
+    height: 40px;
+    padding: 0 15px;
+    border-radius: 100px;
+    /*background: url(/wp-content/uploads/2022/03/icon-search-library.png) no-repeat scroll 10px 12px;*/
+}
+.archive-search input{
+    width: 100%;
 }

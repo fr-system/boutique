@@ -9,7 +9,7 @@ if(!is_user_logged_in()){
 if(!isset($_GET["subject"])) wp_redirect(get_site_url());
 $table_name = $_GET["subject"];
 
-$action = $_GET["action"];//new
+$action = $_GET["action"];
 
 $fields_arr = BOUTIQUE_TABLES[$table_name];
 $title_page = "הוספת ". $fields_arr["single"]." חדש".($fields_arr["male_female"] == "female" ? "ה":"");
@@ -17,12 +17,12 @@ $row = (object)array();
 if($action == "edit") {
     $id = $_GET["id"];
     $title_page = "עדכון ". $fields_arr["single"];
-    $query = get_page_query($table_name," id " ,$id);
+    $query = get_page_query($table_name,"id" ,$id);
     $result =run_query ($query);
     if(count($result)>0){
         $row= $result[0];
     }
-    write_log(" row ".json_encode($row));
+    //write_log(" row ".json_encode($row));
 }
 $previous_page = null;
 if (isset($_SERVER['HTTP_REFERER'])) {
@@ -51,7 +51,7 @@ $class_form = "border-dark-gray padding-20 flex-display direction-column part-60
             <div class="grid-display cols-2 margin-bottom-40">
                 <?php
                 foreach($fields_arr["columns"] as $column){
-                    if(isset($column["hidden"]) || !isset($column["widget"])){continue;}
+                    if(!isset($column["widget"])){continue;}
                     ?>
                     <div class="input-label flex-display <?php echo $column["widget"] != "textarea" ? 'align-center' :'stretch'?> ">
                         <?php if (isset($column["label"])){?>
@@ -65,17 +65,18 @@ $class_form = "border-dark-gray padding-20 flex-display direction-column part-60
 
             </div>
             <div class="buttons flex-display align-self-center">
-                <button type="post" class="save btn background-gold bold font-18">שמור</button>
+                <button type="post" class="save background-gold bold font-18">שמור</button>
                 <?php if($previous_page) { ?>
-                    <a href="<?php echo $previous_page?>" >
-                        <button type="button" class="cancel btn background-white gold bold font-18">בטל</button>
-                    </a>
+                    <a href="<?php echo $previous_page?>" class="cancel button background-white gold bold font-18">בטל</a>
                 <?php } ?>
             </div>
 
         </form>
-         <?php if($table_name == "products"){?>
-                <img class="part-30 protuct-image" src="<?php echo isset($row->image_id) ? wp_get_attachment_url($row->image_id) : ''?>"/>
+         <?php if($table_name == "products"){
+             if(isset($row->image_id) && !empty($row->image_id))
+                 //write_log("fff".$row->image_id);
+                 ?>
+                <img class="part-30 protuct-image" src="<?php echo wp_get_attachment_url($row->image_id)?>"/>
          <?php } ?>
     </div>
 </section>
