@@ -140,6 +140,7 @@ function create_input($field,$value = null)
             name="<?php echo $field["field_name"].(isset($field["multiple"]) ? "[]" : "" )?>" <?php echo (isset($field["multiple"]) ? "multiple=\"multiple\" size=\"10\"" : "" )?>
                     onchange="onchangeSelect(event,this, this.value)" data-fill-select="<?php echo (isset($field["select_to_fill"]) ? $field["select_to_fill"] : "") ?>" >
                 <?php
+                //write_log("value ".$value);
                 if(isset($field["options"])){
                     ?><option value=""  <?php echo empty($value) ? 'selected' : ''?> ></option><?php
                     $options = $field["options"];
@@ -159,24 +160,29 @@ function create_input($field,$value = null)
                 ?>
             </select>
             <?php break;
-        case "file":?>
-            <!--<span class="margin-after-10 bold">העלאת לוגו</span>-->
-            <svg class="open-file-uploader" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
-                <path d="M6 22C5.46957 22 4.96086 21.7893 4.58579 21.4142C4.21071 21.0391 4 20.5304 4 20V4C4 3.46957 4.21071 2.96086 4.58579 2.58579C4.96086 2.21072 5.46957 2 6 2H14C14.3166 1.99949 14.6301 2.06161 14.9225 2.18277C15.215 2.30394 15.4806 2.48176 15.704 2.706L19.292 6.294C19.5168 6.51751 19.6952 6.78335 19.8167 7.07616C19.9382 7.36898 20.0005 7.68297 20 8V20C20 20.5304 19.7893 21.0391 19.4142 21.4142C19.0391 21.7893 18.5304 22 18 22H6Z" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                <path d="M14 2V7C14 7.26522 14.1054 7.51957 14.2929 7.70711C14.4804 7.89464 14.7348 8 15 8H20M12 12V18M12 12L15 15M12 12L9 15" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-                <input type="file" id="upload-file" name="upload-file" style="display: none;" required  accept=".pdf, .xls, .xlsx, .csv"/>
-                <span class="file-name"></span>
-           <?php break;
-        case "image":?>
-            <svg class="open-img-uploader" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+        case "file":
+        case "image":
+            ?>
+        <span class="grow pointer <?php echo $field["widget"]?>-name"></span>
+        <?php if($field["widget"] ==  "file"){
+                $accept = ".pdf, .xls, .xlsx, .csv";?>
+                <svg class="open-file-uploader" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+                    <path d="M6 22C5.46957 22 4.96086 21.7893 4.58579 21.4142C4.21071 21.0391 4 20.5304 4 20V4C4 3.46957 4.21071 2.96086 4.58579 2.58579C4.96086 2.21072 5.46957 2 6 2H14C14.3166 1.99949 14.6301 2.06161 14.9225 2.18277C15.215 2.30394 15.4806 2.48176 15.704 2.706L19.292 6.294C19.5168 6.51751 19.6952 6.78335 19.8167 7.07616C19.9382 7.36898 20.0005 7.68297 20 8V20C20 20.5304 19.7893 21.0391 19.4142 21.4142C19.0391 21.7893 18.5304 22 18 22H6Z" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M14 2V7C14 7.26522 14.1054 7.51957 14.2929 7.70711C14.4804 7.89464 14.7348 8 15 8H20M12 12V18M12 12L15 15M12 12L9 15" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+        <?php }
+        else{
+            $accept = "image/png, image/jpeg";?>
+
+            <svg class="open-image-uploader" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
                 <path d="M10.3 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H19C19.5304 3 20.0391 3.21071 20.4142 3.58579C20.7893 3.96086 21 4.46957 21 5V15L17.9 11.9C17.5237 11.5312 17.017 11.3258 16.4901 11.3284C15.9632 11.331 15.4586 11.5415 15.086 11.914L6 21" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                 <path d="M14 19.5L17 16.5M17 16.5L20 19.5M17 16.5V22" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                 <path d="M9 11C10.1046 11 11 10.1046 11 9C11 7.89543 10.1046 7 9 7C7.89543 7 7 7.89543 7 9C7 10.1046 7.89543 11 9 11Z" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
-            <input type="file" id="upload-img" name="upload-img" style="display: none;" required  accept="image/png, image/jpeg"/>
-            <span class="img-name"></span>
-            <?php  break;
+        <?php } ?>
+        <input class="upload-<?php echo $field["widget"]?>" type="file" id="<?php echo $field["field_name"]?>" name="<?php echo $field["field_name"]?>" style="display: none;" required  accept="<?php echo $accept ?>"/>
+
+    <?php break;
         default:
             break;
     }
@@ -212,11 +218,11 @@ function view_catalog_gallery($products)
         <?php
     foreach ($products as $product){
     ?>
-    <div class="border-dark-gray padding-20 direction-column">
-        <img src="<?php echo wp_get_attachment_url($product->image_id) ?>" />
-        <div><?php echo $product->name ?></div>
-        <div><?php echo $product->price ?></div>
-        <a href="single?subject=products&action=edit&id=<?php echo $product->id?>" class="background-white gold bold font-18">מעבר למוצר</a>
+    <div class="border-dark-gray product padding-15">
+        <img class="margin-bottom-5" src="<?php echo wp_get_attachment_url($product->image_id) ?>" />
+        <div class="margin-bottom-5 bold"><?php echo $product->name ?></div>
+        <div class="margin-bottom-5"><?php echo $product->price ?></div>
+        <a href="single?subject=products&action=edit&id=<?php echo $product->id?>" class="button background-white gold bold font-15">מעבר למוצר</a>
     </div>
 <?php
     }?>

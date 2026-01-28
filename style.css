@@ -54,6 +54,17 @@ section{
 input, textarea, select, button{
     font-family:"Noto Sans Hebrew","Heebo",Arial,sans-serif;
 }
+
+input:-webkit-autofill {
+    background-color: white;
+}
+
+input:-webkit-autofill:-internal-autofill-selected {
+    background-color: white;
+}
+input:-webkit-autofill {
+    -webkit-box-shadow: 0 0 0 1000px white inset; /* צבע הרקע */
+}
 .font-12{
     font-size: 1.2rem;
 }
@@ -170,12 +181,21 @@ input, textarea, select, button{
     display: grid;
     grid-gap: 25px;
 }
+.grid-display .stretch{
+     grid-column: 1 / -1;
+ }
+.grid-display.cols-5{
+      grid-template-columns: repeat(5, 1fr);
+  }
 .grid-display.cols-4{
     grid-template-columns: repeat(4, 1fr);
 }
 .grid-display.cols-2{
      grid-template-columns: repeat(2, 1fr);
  }
+.margin-bottom-5{
+    margin-bottom: 5px;
+}
 .margin-bottom-10{
     margin-bottom: 10px;
 }
@@ -196,6 +216,9 @@ input, textarea, select, button{
 }
 .padding-10{
     padding: 10px;
+}
+.padding-15{
+    padding: 15px;
 }
 .padding-40{
     padding: 40px;
@@ -220,12 +243,20 @@ button, .pointer{
 }
 
 
-button{
+button, .button{
     width: 130px;
     height: 40px;
     border-radius: 50px;
     outline: none;
     margin: 0 10px;
+}
+a.button{
+    text-align: center;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    justify-content: center;
 }
 .site-main{
     height: 100vh;

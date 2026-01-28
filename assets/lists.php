@@ -11,8 +11,8 @@ const BOUTIQUE_TABLES = array(
             array("field_name" => "BnNumber", "widget" => "text", "label" => "ח\"פ"),
             array("field_name" => "address", "widget" => "text", "label" => "כתובת"),
             array("field_name" => "city_id", "widget" => "select", "join_table" => "cities", "join_value" => "name", "label" => "עיר"),
-            array("field_name" => "note", "widget" => "text", "label" => "הערה"),
-            array("field_name" => "payment_term_id", "widget" => "select", "label" => "תנאי תשלום",
+            array("field_name" => "note", "widget" => "text", "label" => "הערה","hidden"=>true),
+            array("field_name" => "payment_term_id", "widget" => "select", "label" => "תנאי תשלום","hidden"=>true,
                 "options"=>array(
                     array("value"=>"1","text"=>"מזומן"),
                     array("value"=>"2","text"=>"שוטף+60"),
@@ -22,7 +22,7 @@ const BOUTIQUE_TABLES = array(
             array("field_name" => "agent_id", "widget" => "select", "type" => "user_data", "label" => "סוכן", "join_table" => "agents", "join_value" => "user_id", "user_field" => "display_name"),
             array("field_name" => "email", "widget" => "text", "label" => "דוא\"ל"),
             array("field_name" => "obligo", "un_apostrophe" => true, "widget" => "text", "label" => "אובליגו"),
-            array("field_name" => "exceeding_conditions", "widget" => "bool", "label" => "חריגה מתנאי תשלום"),
+            array("field_name" => "exceeding_conditions", "widget" => "bool", "label" => "חריגה מתנאי תשלום","hidden"=>true),
         )),
     "products" => array(
         "title" => "קטלוג המוצרים",
@@ -31,14 +31,14 @@ const BOUTIQUE_TABLES = array(
         "columns" => array(
             array("field_name" => "name", "widget" => "text","label"=>"שם"),
             array("field_name" => "barcode", "widget" => "text","label"=>"ברקוד"),
-            array("field_name" => "supplier_id", "widget" => "select","label"=>"ספק"),
+            array("field_name" => "supplier_id", "widget" => "select","label"=>"ספק", "join_table" => "suppliers", "join_value" => "name"),
             array("field_name" => "price", "type" => "float", "widget" => "text","label"=>"מחיר", "un_apostrophe" => true),
             array("field_name" => "description", "widget" => "textarea","label"=>"תיאור"),
-            array("field_name" => "file_id", "widget" => "file","label"=>"דף מוצר"),
+            array("field_name" => "file_id", "widget" => "file","label"=>"דף מוצר","hidden"=>true),
             array("field_name" => "image_id", "widget" => "image","label"=>"תמונה"),
-            array("field_name" => "blocked", "widget" => "bool","label"=>"מוצר חסום"),
-            array("field_name" => "factor_of_friction", "widget" => "select","label"=>"גורם אירוז"),
-            array("field_name" => "individually", "widget" => "bool","label"=>"ניתן למכירה בבודדים"),
+            array("field_name" => "blocked", "widget" => "bool","label"=>"מוצר חסום","hidden"=>true),
+            array("field_name" => "factor_of_friction", "widget" => "select","label"=>"גורם אירוז","hidden"=>true),
+            array("field_name" => "individually", "widget" => "bool","label"=>"ניתן למכירה בבודדים","hidden"=>true),
         )),
     "tasks" => array(
         "title" => "משימות",
@@ -93,9 +93,9 @@ const BOUTIQUE_TABLES = array(
         "single" => "סוכן",
         "male_female" => "male",
         "columns" => array(
-            array("field_name" => "user_id", "type" => "user_data", "label" => "שם", "user_field" => "display_name"),
-            array("field_name" => "user_id", "type" => "user_data", "label" => "שם משתמש", "user_field" => "user_login"),
-            array("field_name" => "user_id", "type" => "user_data", "label" => "דוא\"ל", "user_field" => "user_email"),
+            array("field_name" => "user_id", "widget" => "text", "type" => "user_data", "label" => "שם", "user_field" => "display_name"),
+            array("field_name" => "user_id", "widget" => "text", "type" => "user_data", "label" => "שם משתמש", "user_field" => "user_login"),
+            array("field_name" => "user_id", "widget" => "email", "type" => "user_data", "label" => "דוא\"ל", "user_field" => "user_email"),
 
             array("field_name" => "mobile", "widget" => "text", "label" => "נייד"),
             array("field_name" => "work_area_id","widget" => "select", "join_table" => "areas", "join_value" => "area", "label" => "אזור עבודה"),// סינון אזור
