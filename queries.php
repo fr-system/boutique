@@ -157,7 +157,7 @@ function build_options($list_name,$value=null,$filter=null)
     return $options;
 }
 
-function get_list($list_name,$filter){
+function get_list($list_name,$filter = ''){
     global $wpdb;
 
     if (array_key_exists($list_name, BOUTIQUE_LISTS)) {
@@ -186,7 +186,7 @@ function get_list($list_name,$filter){
     else if(!empty($filter)){
         $query .= " WHERE ".$filter;
     }
-    //write_log("quert ".$query." table_name ".$table_name." field_name ".$field_name);
+    write_log("quert ".$query." table_name ".$table_name." field_name ".$field_name);
     $list = run_query($query);
 
     if($table_name == "agents") {

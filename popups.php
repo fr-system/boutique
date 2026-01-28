@@ -191,7 +191,7 @@ function create_input($field,$value = null)
 
 add_action('wp_ajax_get_list_ajax', 'get_list_ajax');
 function get_list_ajax(){
-
+    write_log ("get_list_ajax " );
     $table_name = $_POST['table_name'];
     $filter="";
     if(isset($_POST['filter'])){
@@ -199,6 +199,7 @@ function get_list_ajax(){
     }
    $options=$table=null;
     if(isset($_POST['table_display'])){
+        write_log ("table_display " );
         $table = build_table_rows($table_name);
         write_log ("rows " . $table);
     }
@@ -232,8 +233,9 @@ function view_catalog_gallery($products)
 function build_table_rows($list_name)
 {
     $fields_list = BOUTIQUE_LISTS[$list_name];
+    write_log("build_table_rows list name " .$list_name);
     $list = get_list($list_name);
-    //write_log("list " .json_encode($fields_list));
+    write_log("list " .json_encode($list));
     $rows = '';
     foreach ($list as $row) {
         $rows .= '<tr>';
