@@ -178,6 +178,7 @@ jQuery(document).ready(function($){
             {name: "action", value: "get_list_ajax"},
             {name: "table_name", value: this.value},
         ];
+        //123
         call_ajax_function(postData,"fillListTable","list-table");
         //call_ajax_function(postData,"get_list",id);
     });
