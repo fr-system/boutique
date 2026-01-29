@@ -47,6 +47,7 @@ body{
     overflow: auto;
     margin:0;
     font-size: 1.7rem;
+    overflow-y: hidden;
 }
 section{
     height: 100%;
@@ -55,16 +56,6 @@ input, textarea, select, button{
     font-family:"Noto Sans Hebrew","Heebo",Arial,sans-serif;
 }
 
-input:-webkit-autofill {
-    background-color: white;
-}
-
-input:-webkit-autofill:-internal-autofill-selected {
-    background-color: white;
-}
-input:-webkit-autofill {
-    -webkit-box-shadow: 0 0 0 1000px white inset; /* צבע הרקע */
-}
 .font-12{
     font-size: 1.2rem;
 }
@@ -275,6 +266,7 @@ section.page{
     /*padding: 40px 100px;*/
     line-height: 1.3;
     height: 100%;
+    overflow-y: scroll;
 }
 
 .box{
@@ -382,7 +374,16 @@ td:last-child {
 .small-popup input{
     width: 100%;
 }
+input:-webkit-autofill {
+    background-color: white;
+}
 
+input:-webkit-autofill:-internal-autofill-selected {
+    background-color: white;
+}
+input:-webkit-autofill {
+    -webkit-box-shadow: 0 0 0 1000px white inset; /* צבע הרקע */
+}
 input, textarea, select, .input-acting{
     background-color: transparent;
     border: none;
@@ -393,6 +394,14 @@ input, textarea, select, .input-acting{
 
 input, input[type="datetime-local"], input[type="date"], input[type="time"],.input-acting {
     height: 30px;
+}
+input[type="checkbox"]{
+    accent-color: black;
+    width: 18px;
+    margin-right: 10px;
+    /*
+    height: 17px;
+    */
 }
 select {
     height: 36px;
@@ -474,7 +483,7 @@ form#registration button{
     padding: 0;
 }
 
-label.error{
+label.error, #form_error_msgs_container{
     color: red;
 }
 

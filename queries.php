@@ -16,6 +16,19 @@ add_action('wp_ajax_build_query_boutique', 'build_query_boutique');
 function build_query_boutique($from_ajax = true)
 {
     $table_name = $_POST["table_name"];
+
+    if($table_name == "agents" && empty($_POST["id"])){
+       $result = register_new_user1( $_POST["display_name"], $_POST["user_email"]);
+       if($result == null || $result["status"] == "failed") {
+           echo json_encode($result);
+           die();
+       }
+       unset($_POST["display_name"]);
+        unset($_POST["user_email"]);
+        $_POST["user_id"] = $result["user_id"];
+    }
+
+
     global $wpdb;
     $update = array();
     $fields = array();
@@ -59,12 +72,13 @@ function build_query_boutique($from_ajax = true)
     }
     write_log(" query " . $query);
     $ok = run_query($query, "execute");
+
     write_log("ok run_query " . $ok);
     //return  $ok;
     if($from_ajax) {
         echo json_encode(array(
             'status' => 'success',
-            //'redirect' => $_POST["previous_page"],
+            'redirect' => $_POST["previous_page"],
         ));
         die();
     }
@@ -75,7 +89,7 @@ function get_field($table_name, $field_name)
 {
     $fields = BOUTIQUE_TABLES[$table_name]["columns"];
     $field = array_filter($fields, function ($field_row) use ($field_name) {
-        return $field_row["field_name"] == $field_name;
+        return isset($field_row["field_name"]) && $field_row["field_name"] == $field_name;
     });
     return count($field) > 0 ? array_pop($field) : null;
 }
@@ -88,10 +102,16 @@ function get_page_query($table_name,$filter_field=null ,$filter_value=null)
 
     $query = "SELECT ".$wpdb->prefix.$table_name.".id, ";
     foreach ($columns as $column) {
+        if(!isset($column["field_name"]) || isset($column["type"]) && $column["type"] == "user_data"  )continue;
        // if (/*$column["type"] == "action" ||*/isset($column["type"]) && $column["type"] == "user_data" && !isset($column['join_table'])) continue;
         $query .=$wpdb->prefix.$table_name.".". $column["field_name"] . ", ";
         if (isset($column['join_table'])) {
-            $query .= $wpdb->prefix.$column['join_table'] . "." . $column['join_value'] . " AS ".substr($column['join_table'], 0, -1)  . "_" . $column['join_value'].", ";
+            if(isset($column['join_value'])) {
+                $query .= $wpdb->prefix . $column['join_table'] . "." . $column['join_value'] . " AS " . substr($column['join_table'], 0, -1) . "_" . $column['join_value'] . ", ";
+            }
+            else{
+                $query .= $wpdb->prefix . $column['join_table'] . ".*, " ;
+            }
             $join .= " LEFT JOIN " . $wpdb->prefix.$column['join_table'] . " ON " .$wpdb->prefix. $table_name . "." . $column["field_name"] . " = " . $wpdb->prefix.$column['join_table'] . ".id";
         }
     }
@@ -127,25 +147,16 @@ function is_needed_apostrophe($widget,$un_apostrophe)
     return "";
 }
 
-function get_fields_list($table_name)
-{
-    switch($table_name) {
-        case "agents":
-            break;
-        default:
-
-    }
-    return array();
-}
 
 function build_options($list_name,$value=null,$filter=null)
 {
-    //write_log("list name " .$list_name);
+    write_log("list name " .$list_name);
     $fields_list = BOUTIQUE_LISTS[$list_name];
     if(isset($fields_list["data-field"])) {
         $field = $fields_list["data-field"];
     }
     $list = get_list($list_name,$filter);
+    write_log("list  " .json_encode($list));
     $options = '<option value=""></option>';
     foreach ($list as $row) {
         $data_field = "";
