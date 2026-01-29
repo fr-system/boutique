@@ -73,6 +73,8 @@ function get_svg($svg_name,$action='',$side_menu = true)
                 <path d="M12.4394 5.36625C12.4097 5.29842 12.3683 5.23641 12.3169 5.18313L8.56687 1.43312C8.51359 1.38174 8.45158 1.34026 8.38375 1.31062C8.365 1.30187 8.345 1.29687 8.325 1.29C8.2727 1.2722 8.21826 1.26148 8.16313 1.25813C8.15 1.25688 8.13812 1.25 8.125 1.25H3.75C3.06062 1.25 2.5 1.81062 2.5 2.5V12.5C2.5 13.1894 3.06062 13.75 3.75 13.75H11.25C11.9394 13.75 12.5 13.1894 12.5 12.5V5.625C12.5 5.61188 12.4931 5.6 12.4919 5.58625C12.4888 5.53107 12.4781 5.47659 12.46 5.42438C12.4538 5.40438 12.4481 5.385 12.4394 5.36625ZM10.3663 5H8.75V3.38375L10.3663 5ZM3.75 12.5V2.5H7.5V5.625C7.5 5.79076 7.56585 5.94973 7.68306 6.06694C7.80027 6.18415 7.95924 6.25 8.125 6.25H11.25L11.2513 12.5H3.75Z" fill="black"/>
                 <path d="M5 7.5H10V8.75H5V7.5ZM5 10H10V11.25H5V10ZM5 5H6.25V6.25H5V5Z" fill="black"/>
             </svg>';
+        default:
+            return '<div></div>';
     }
 }
 function get_side_menu()
@@ -89,7 +91,7 @@ function get_side_menu()
                 $url.="?subject=".$name;
             }
             ?>
-            <li class="pointer flex-display align-center <?=($subject == $name ? 'selected':'') ?> ">
+            <li class="pointer flex-display space-between align-center <?=($subject == $name ? 'selected':'') ?> ">
                 <?= get_svg($name) ?>
                 <a class="not-link" href="<?= esc_url($url)?>"><?=esc_html($item->title)?></a>
             </li>
@@ -119,9 +121,9 @@ function create_input($field,$value = null)
         case "date":
 
             if($field["widget"] == "email"){
-                $autocomplete = ' autocomplete="email" ';
+                $autocomplete = ' autocomplete="email"';
             } else {
-                $autocomplete = ' autocomplete="off "';
+                $autocomplete = ' autocomplete="off"';
             }
             return '<input type="'.$field["widget"].'"  class="grow font-17" id="'.$field["field_name"].'" name="'.$field["field_name"].'" '
              .($field["widget"]=="text" && isset($field["un_apostrophe"]) ? 'data-a-sign="₪"':'').  'value="'.esc_attr($value).'" '.
@@ -131,6 +133,10 @@ function create_input($field,$value = null)
         case "checkbox":
             ?>
             <input type="checkbox" id="<?php echo $field["field_name"]?>" name="<?php echo $field["field_name"]?>" id="<?php echo $field["field_name"]?>" value="1" <?php echo checked($value == "1") ?> />
+<!--        כן
+            <input type="checkbox" id="<?php /*echo $field["field_name"]*/?>2" name="<?php /*echo $field["field_name"]*/?>" id="<?php /*echo $field["field_name"]*/?>" value="0" <?php /*echo checked($value == "0") */?> />
+            לא
+-->
             <?php
             break;
         case "textarea":
@@ -163,10 +169,10 @@ function create_input($field,$value = null)
         case "file":
         case "image":
             ?>
-        <span class="grow pointer <?php echo $field["widget"]?>-name"></span>
-        <?php if($field["widget"] ==  "file"){
+<!--        <span class="grow pointer <?php /*echo $field["widget"]*/?>-name"></span>
+-->        <?php if($field["widget"] ==  "file"){
                 $accept = ".pdf, .xls, .xlsx, .csv";?>
-                <svg class="open-file-uploader" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+                <svg class="open-file-uploader pointer" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
                     <path d="M6 22C5.46957 22 4.96086 21.7893 4.58579 21.4142C4.21071 21.0391 4 20.5304 4 20V4C4 3.46957 4.21071 2.96086 4.58579 2.58579C4.96086 2.21072 5.46957 2 6 2H14C14.3166 1.99949 14.6301 2.06161 14.9225 2.18277C15.215 2.30394 15.4806 2.48176 15.704 2.706L19.292 6.294C19.5168 6.51751 19.6952 6.78335 19.8167 7.07616C19.9382 7.36898 20.0005 7.68297 20 8V20C20 20.5304 19.7893 21.0391 19.4142 21.4142C19.0391 21.7893 18.5304 22 18 22H6Z" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                     <path d="M14 2V7C14 7.26522 14.1054 7.51957 14.2929 7.70711C14.4804 7.89464 14.7348 8 15 8H20M12 12V18M12 12L15 15M12 12L9 15" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                 </svg>
@@ -174,7 +180,7 @@ function create_input($field,$value = null)
         else{
             $accept = "image/png, image/jpeg";?>
 
-            <svg class="open-image-uploader" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+            <svg class="open-image-uploader pointer" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
                 <path d="M10.3 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H19C19.5304 3 20.0391 3.21071 20.4142 3.58579C20.7893 3.96086 21 4.46957 21 5V15L17.9 11.9C17.5237 11.5312 17.017 11.3258 16.4901 11.3284C15.9632 11.331 15.4586 11.5415 15.086 11.914L6 21" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                 <path d="M14 19.5L17 16.5M17 16.5L20 19.5M17 16.5V22" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                 <path d="M9 11C10.1046 11 11 10.1046 11 9C11 7.89543 10.1046 7 9 7C7.89543 7 7 7.89543 7 9C7 10.1046 7.89543 11 9 11Z" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -183,10 +189,36 @@ function create_input($field,$value = null)
         <input class="upload-<?php echo $field["widget"]?>" type="file" id="<?php echo $field["field_name"]?>" name="<?php echo $field["field_name"]?>" style="display: none;" required  accept="<?php echo $accept ?>"/>
 
     <?php break;
+        case "products":
+            ?>
+        <div class="products flex-display space-between padding-10">
+        <?php
+            if($value && is_array($value)){
+                foreach ($value as $product) {
+
+                    create_product_view($product);
+                 }
+                create_product_view($product);?>
+        </div>
+        <?php
+            }
+            break;
         default:
             break;
     }
 
+}
+
+function create_product_view($product=null)
+{
+    ?>
+    <div class="border-dark-gray flex-display direction-column space-between product padding-15">
+        <div class="product-img part-60"><?php if($product->image_id){  ?><img class="" src="<?php echo wp_get_attachment_url($product->image_id) ?>" /><?php } ?></div>
+        <div class="part-10 bold"><?php echo $product->name ?></div>
+        <div class="part-10"><?php echo $product->price ?></div>
+        <a href="single?subject=products&action=edit&id=<?php echo $product->id?>" class="part-10 button background-white gold bold font-15">מעבר למוצר</a>
+    </div>
+    <?php
 }
 
 add_action('wp_ajax_get_list_ajax', 'get_list_ajax');
@@ -217,14 +249,7 @@ function view_catalog_gallery($products)
     <div class="grid-display cols-5">
         <?php
     foreach ($products as $product){
-    ?>
-    <div class="border-dark-gray product padding-15">
-        <img class="margin-bottom-5" src="<?php echo wp_get_attachment_url($product->image_id) ?>" />
-        <div class="margin-bottom-5 bold"><?php echo $product->name ?></div>
-        <div class="margin-bottom-5"><?php echo $product->price ?></div>
-        <a href="single?subject=products&action=edit&id=<?php echo $product->id?>" class="button background-white gold bold font-15">מעבר למוצר</a>
-    </div>
-<?php
+        create_product_view($product);
     }?>
     </div>
         <?php

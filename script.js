@@ -10,13 +10,9 @@ jQuery(document).ready(function($){
 
     jQuery('input[data-a-sign=₪]').autoNumeric('init', { vMin: '-9999999999999.99' });
 
-    jQuery("form.site_form").validate({
+    jQuery("form").validate({
         rules: {
             'input, textarea':{ required: true},
-            /*name: {
-                required: true,
-                minlength: 2
-            },*/
             email: {
                 required: true,
                 email: true
@@ -32,14 +28,6 @@ jQuery(document).ready(function($){
 
         },
         messages: {
-            /*'input, textarea': {
-                required: function () {
-                    return "אנא הזן ערך עבור " + jQuery(this).attr("name");
-                }
-            },*/
-           /* name:{
-                required:true,
-            },*/
             email: {
                 //required: "אנא הזן כתובת אימייל",
                 email: "אנא הזן כתובת אימייל תקינה"
@@ -53,11 +41,7 @@ jQuery(document).ready(function($){
                 equalTo: "סיסמת האישור אינה תואמת"
             }
 
-        },
-       /* submitHandler: function(form) {
-            form.submit(); // שלח את הטופס אם הוולידציה מצליחה
-        }*/
-    });
+        }});
 
     jQuery('.user-logged').click(function(){
         jQuery('.popup-logout').toggleClass("hidden");
@@ -165,7 +149,7 @@ jQuery(document).ready(function($){
     });
 
     jQuery('input.upload-file').change(function () {
-        jQuery('.file-name').text(this.files[0].name);
+       /* jQuery('.file-name').text(this.files[0].name);*/
 
     });
 
@@ -174,7 +158,7 @@ jQuery(document).ready(function($){
     });
 
     jQuery('input.upload-image').change(function () {
-        jQuery('.image-name').text(this.files[0].name);
+        /*jQuery('.image-name').text(this.files[0].name);*/
         const file = this.files[0];
         if (file) {
             const reader = new FileReader();
@@ -183,7 +167,7 @@ jQuery(document).ready(function($){
                 e.target.result.replace("data:image/png;base64,","");
                 //img.src = e.target.result;
                 img.attr('src', e.target.result).show(); // מציג את התמונה
-
+                img.removeClass("hidden");
                 //img.style.display = 'block'; // מציג את התמונה
             }
             reader.readAsDataURL(file);

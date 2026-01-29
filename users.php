@@ -39,40 +39,46 @@ function login()
 
 }
 
-function function_register()
+function register_new_user1($display_name, $email)
 {
-    $email = fixXSS($_POST['username']);
-    $pass = fixXSS($_POST['password']);
-    if (strlen($email) < 5 || strlen($pass) < 6) {
+    $email = fixXSS($email);
+    //$pass = fixXSS($_POST['password']);
+    /*if (strlen($email) < 5) {
         echo json_encode(array(
             'status' => 'error',
-            'msg' => "הכנס את המייל שלך וסיסמא"
+            'msg' => "הכנס את המייל שלך"
         ));
         die;
-    }
-
+    }*/
+    write_log("em ".$email);
     if (email_exists($email) || username_exists($email)) {
-        echo json_encode(array(
+        return array("status" => "failed", "msg" => "המייל רשום כבר במערכת");
+        /*echo json_encode(array(
             'status' => 'error',
             'msg' => "המייל רשום כבר במערכת"
         ));
-        die;
+        die;*/
     }
 
     $userdata = array(
         'user_login' => $email,
-        'user_pass' => $pass,
+        'user_pass' => null,
         'user_email' => $email,
+        'last_name' => fixXSS($display_name),
     );
-
+    write_log("em1 ".$email);
     $user_id = wp_insert_user($userdata);
-    if (!is_wp_error($user_id)) {
+    write_log("em3 ".$user_id);
+    if ($user_id)
+        return array("status" => "success", "user_id" => $user_id);
+    return null;
+    /*if (!is_wp_error($user_id)) {
         echo json_encode(array(
             'status' => 'success',
         ));
     }
 
-    die();
+    die();*/
 }
 
 add_action('wp_ajax_user_logout', 'user_logout');

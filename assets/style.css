@@ -1,10 +1,20 @@
 .input-label{
     background-color: var(--b-global-color-light-gray);
     border: none;
-    padding: 5px 10px;
+    padding: 0 10px;
+}
+input:-webkit-autofill {
+    -webkit-box-shadow: 0 0 0 1000px var(--b-global-color-light-gray) inset; /* צבע הרקע */
+}
+
+.input-label input:-webkit-autofill:-internal-autofill-selected {
+    background-color: var(--b-global-color-light-gray);;
 }
 .input-label span{
     height: 100%;
+}
+.input-label svg{
+    padding: 3px 7px;
 }
 .single img {
 /*    max-width: 30%;
@@ -13,15 +23,22 @@
     height: 100%;
 }
 
+.product .product-img{
+    height: 100%;
+    overflow: hidden;
+}
+
+.product img{
+    height: 100%;
+    object-fit: cover;
+    width: 100%;
+    border-radius: 10px;
+}
 .product .button{
     height: 30px;
     margin: 0;
 }
-.product img{
-    width: 100%;
-    height: auto;
-    border-radius: 10px;
-}
+
 
 .boutique-header{
     height: 65px;
@@ -76,18 +93,20 @@
 ul.menu{
     list-style-type: none;
     margin: 70px 0 0 0;
-    padding: 0 20px;
+    padding: 0 15px;
     height: 60%;
     justify-content: space-around;
 }
 
 ul.menu li {
     height: 35px;
-    padding: 5px 15%;
+   /* padding: 10px 15%;*/
+    border-radius: 6px;
 }
 ul.menu li.selected {
     background-color: #F9F9F9;
 }
+
 ul.menu li.selected a{
     font-weight: bold;
 }
@@ -99,12 +118,14 @@ a.not-link{
     color: black;
 }
 ul.menu li svg{
-    margin-left: 10px;
+    /*margin-left: 10px;*/
     height: 15px;
     width: 15px;
-
+    flex-basis:30% !important;
 }
-
+ul.menu li a{
+    flex-basis:60% !important;
+}
 .quick-action{
     padding: 12px 25px;
     border-radius: 12px;

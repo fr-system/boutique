@@ -73,7 +73,7 @@ $fields_arr  = BOUTIQUE_TABLES[$table_name];
     <?php
     }
     $user_meta = get_user_meta( get_current_user_id(), "products_view", true);
-    write_log("meta ".$user_meta);
+    //write_log("meta ".$user_meta);
     //$user_meta = true;
     if($table_name == "products" && $user_meta == "gallery"){
         view_catalog_gallery($result);
@@ -84,7 +84,7 @@ $fields_arr  = BOUTIQUE_TABLES[$table_name];
         <thead><tr class="gold">
             <?php
             foreach($fields_arr["columns"] as $column){
-                if(isset($column["hidden"])){continue;}
+                if(isset($column["hidden"]) ||!isset($column["label"]) ){continue;}
                 ?>
                 <th><?= $column["label"]?></th>
             <?php } ?>
@@ -109,13 +109,12 @@ function get_tr_data($page_name, $data, $id_column){
         $field = isset($column['join_table']) ? substr($column['join_table'], 0, -1)  . "_" . $column['join_value']: $column["field_name"];
         $list = isset($column['table_name'])? constant($column['table_name']):null;
 
-        if($field != $id_column && !isset($column["hidden"])){
+        if($field != $id_column && !isset($column["hidden"]) && isset($column["label"])){
             if(isset($column['type']) && $column['type']=="user_data") {
                 //write_log ('fiel ' . $field);
-               // write_log ('row ' . json_encode ($row));
-                $user_field = $column["user_field"];
-                $column_value = empty($row->$field) ? '' : get_userdata ($row->$field)->$user_field;
-
+                //write_log ('row ' . json_encode ($row));
+                $user_field = $column["field_name"];
+                $column_value = empty($row->user_id) ? '' : get_userdata ($row->user_id)->$user_field;
             }
             //else if($column['type']=="action"){
                 //$column_value = '<button  class="action bg-lightblue" name="'.$column['field_name'].'" onclick="action_func(this)"><i class="'.$actions_icons[$column['field_name']].'"></i><span>פעולה</span></button>';

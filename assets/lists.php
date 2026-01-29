@@ -34,11 +34,11 @@ const BOUTIQUE_TABLES = array(
             array("field_name" => "supplier_id", "widget" => "select","label"=>"ספק", "join_table" => "suppliers", "join_value" => "name"),
             array("field_name" => "price", "type" => "float", "widget" => "text","label"=>"מחיר", "un_apostrophe" => true),
             array("field_name" => "description", "widget" => "textarea","label"=>"תיאור"),
-            array("field_name" => "file_id", "widget" => "file","label"=>"דף מוצר","hidden"=>true),
-            array("field_name" => "image_id", "widget" => "image","label"=>"תמונה"),
-            array("field_name" => "blocked", "widget" => "bool","label"=>"מוצר חסום","hidden"=>true),
+            array("field_name" => "file_id", "widget" => "file","label"=>"העלאת דף מוצר","hidden"=>true),
+            array("field_name" => "image_id", "widget" => "image","label"=>"העלאת תמונת מוצר"),
+            array("field_name" => "blocked", "widget" => "checkbox","label"=>"מוצר חסום","hidden"=>true),
             array("field_name" => "factor_of_friction", "widget" => "select","label"=>"גורם אירוז","hidden"=>true),
-            array("field_name" => "individually", "widget" => "bool","label"=>"ניתן למכירה בבודדים","hidden"=>true),
+            array("field_name" => "individually", "widget" => "checkbox","label"=>"ניתן למכירה בבודדים","hidden"=>true),
         )),
     "tasks" => array(
         "title" => "משימות",
@@ -72,20 +72,22 @@ const BOUTIQUE_TABLES = array(
         "single" => "הזמנה",
         "male_female" => "female",
         "columns" => array(
-            array("field_name" => "order_date", "widget" => "date", "label" => "תאריך הזמנה","required"=>true),
             array("field_name" => "client_id","widget" => "select", "join_table" => "clients", "join_value" => "name", "label" => "שם הלקוח","required"=>true),
+            array("field_name" => "order_date", "widget" => "date", "label" => "תאריך הזמנה","required"=>true),
+            array("widget" => "products","label"=>"מוצרים"),
+
             array("field_name" => "doc_type","widget" => "file", "label" => "מסמך"),
             array("field_name" => "notes","widget" => "textarea", "label" => "הערות"),
-            array("field_name" => "user_opens","widget" => "text","locked"=>true, "label" => "מקים ההזמנה"),
-            array("field_name" => "user_confirms","widget" => "text","locked"=>true, "label" => "מאשר ההזמנה"),
+            array("field_name" => "user_opens","widget" => null,"locked"=>true, "label" => "מקים ההזמנה"),
+            array("field_name" => "user_confirms","widget" => null,"locked"=>true, "label" => "מאשר ההזמנה"),
         )),
-    "orders_products" => array(
+    "order_products" => array(
         "title" => "הזמנות מוצרים",
         "columns" => array(
-            array("field_name" => "order_id"),
-            array("field_name" => "product_id"),
+            array("field_name" => "order_id", "widget" => "number"),
+            array("field_name" => "product_id", "widget" => "number", "join_table" => "products"),
             array("field_name" => "price", "widget" => "text", "un_apostrophe" => true),
-            array("field_name" => "bonus", "widget" => "bool"),
+            array("field_name" => "bonus", "widget" => "checkbox"),
             array("field_name" => "discount_percent", "widget" => "text", "un_apostrophe" => true),
         )),
     "agents" => array(
@@ -93,14 +95,14 @@ const BOUTIQUE_TABLES = array(
         "single" => "סוכן",
         "male_female" => "male",
         "columns" => array(
-            array("field_name" => "user_id", "widget" => "text", "type" => "user_data", "label" => "שם", "user_field" => "display_name","required"=>true),
-            array("field_name" => "user_id", "widget" => "text", "type" => "user_data", "label" => "שם משתמש", "user_field" => "user_login","required"=>true),
-            array("field_name" => "user_id", "widget" => "email", "type" => "user_data", "label" => "דוא\"ל", "user_field" => "user_email","required"=>true),
-
+            array("field_name" => "display_name", "widget" => "text", "type" => "user_data", "label" => "שם", "user_field" => "display_name","required"=>true),
+/*            array("field_name" => "user_login", "widget" => "text", "type" => "user_data", "label" => "שם משתמש", "user_field" => "user_login","required"=>true,"hidden"=>true),*/
+            array("field_name" => "user_email", "widget" => "email", "type" => "user_data", "label" => "דוא\"ל", "user_field" => "user_email","required"=>true),
+            array("field_name" => "user_id", "widget" => null),
             array("field_name" => "mobile", "widget" => "text", "label" => "נייד"),
             array("field_name" => "work_area_id","widget" => "select", "join_table" => "areas", "join_value" => "area", "label" => "אזור עבודה","required"=>true),// סינון אזור
-            array("field_name" => "notes", "widget" => "textarea", "label" => "הערה"),
             array("field_name" => "target","widget" => "number", "label" => "יעד כללי"),
+            array("field_name" => "notes", "widget" => "textarea", "label" => "הערה","hidden"=>true),
         ),
         //"filter"=>"area_id == []"
     ),
@@ -112,7 +114,7 @@ const BOUTIQUE_TABLES = array(
 //        "columns" => array(
 //            array("field_name" => "name", "widget" => "text"),
 //            array("field_name" => "area_id","widget" => "select"),
-//            array("field_name" => "is_area", "widget" => "bool"),
+//            array("field_name" => "is_area", "widget" => "checkbox"),
 //        ),
 //        "filter"=>"is_area != true",
 //        "data-field"=>"area_id"
