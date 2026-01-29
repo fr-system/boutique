@@ -285,12 +285,26 @@ section.page{
 table {
     width: 100%;
     text-align: center;
-    /*border: none;*/
-    /*border-style: hidden;*/
-    border-collapse: collapse;
-    border-spacing: 0;
+    border-collapse: separate;
+    border-spacing: 0 10px;
 }
 
+td {
+    border-top: var(--b-global-color-dark-gray) 1px solid;
+    border-bottom: var(--b-global-color-dark-gray) 1px solid;
+}
+/* עיצוב לעמודה הראשונה */
+td:first-child {
+   border-top-right-radius: 12px;
+    border-bottom-right-radius: 12px;
+   border-right: var(--b-global-color-dark-gray) 1px solid;
+}
+/* עיצוב לעמודה האחרונה */
+td:last-child {
+    border-top-left-radius: 12px;
+    border-bottom-left-radius: 12px;
+    border-left: var(--b-global-color-dark-gray) 1px solid;
+}
 .archive-table thead {
     height: 55px;
     background-color: var(--a-global-color-light_gray);
