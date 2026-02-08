@@ -101,6 +101,40 @@ function get_side_menu()
     <?php
 }
 
+function get_single_view($table_name,$row)
+{?>
+    <div class="grid-display cols-2 margin-bottom-40">
+                <?php
+                $columns = BOUTIQUE_TABLES[$table_name]["columns"];
+                foreach($columns as $column){
+                    if(!isset($column["widget"])){continue;}
+                    ?>
+                    <div class="input-label flex-display <?php echo $column["widget"] != "textarea" && $column["widget"] != "products"  ? 'align-center' :'stretch'?> ">
+                        <?php if (isset($column["label"])){?>
+                            <label class="bold" for="<?php echo $column["field_name"] ?>"><?php echo $column["label"].":"?></label>
+                        <?php }
+                        $value = "";
+                        //write_log("q p ".json_encode( $column));
+                        if(isset($column["field_name"])){
+                            $field_name = isset($column["field_name"]) ? $column["field_name"] : null;
+                            $value = isset($row->$field_name) ? $row->$field_name :"";
+                        }
+                        else if($column["widget"] == "products" && isset($row->id)){
+
+                            $value = get_page_data("order_products","order_id",$row->id);
+                            //write_log("q p ".$query);
+
+                            //write_log("prods ".json_encode($value));
+                        }
+
+                        echo create_input($column,$value);
+                        ?>
+                    </div>
+                <?php } ?>
+
+    </div><?php
+}
+
 function option_if_set($set,$option){
     return  (isset($set[$option]) ? "$option=\"".$set[$option]."\"" : "" );
 }
@@ -119,6 +153,9 @@ function create_input($field,$value = null)
         case "email":
         case "number":
         case "date":
+            if($field["widget"] == "date" && !empty($value)) {
+                $value = date('Y-m-d', strtotime($value));
+            }
 
             if($field["widget"] == "email"){
                 $autocomplete = ' autocomplete="email"';
@@ -191,17 +228,18 @@ function create_input($field,$value = null)
     <?php break;
         case "products":
             ?>
-        <div class="products flex-display space-between padding-10">
+        <div class="products flex-display padding-10 start ">
+            <div class="add-order-product border-dark-gray flex-display direction-column space-between product padding-15 margin-after-10">
+                הוספת מוצר להזמנה
+            </div>
         <?php
             if($value && is_array($value)){
-                foreach ($value as $product) {
-
-                    create_product_view($product);
+                foreach ($value as $key=>$product) {
+                    create_product_view($product,array("table_name"=>"orders","key"=>$key));
                  }
-                create_product_view($product);?>
+            } ?>
         </div>
         <?php
-            }
             break;
         default:
             break;
@@ -209,14 +247,43 @@ function create_input($field,$value = null)
 
 }
 
-function create_product_view($product=null)
+function create_product_view($product=null,$options=null)
 {
+    //$add_class="";
+    if($options == null){
+        $options = array();
+    }
+    if(!isset($options["key"])){
+        $options["key"] = 0;
+    }
     ?>
-    <div class="border-dark-gray flex-display direction-column space-between product padding-15">
+    <div class="border-dark-gray flex-display direction-column space-between product padding-15" data-id="<?php echo $product->id?>">
+        <?php if($options["table_name"]=="orders"){ ?>
+        <input type="hidden" name="products[<?php echo $options["key"]?>][id]" value="<?php echo $product->id?>"><!--id של השורה של מוצר_הזמנה-->
+        <input type="hidden" name="products[<?php echo $options["key"]?>][order_id]" value="<?php echo $product->order_id?>">
+        <input type="hidden" name="products[<?php echo $options["key"]?>][product_id]" value="<?php echo $product->product_id?>">
+        <input type="hidden" name="products[<?php echo $options["key"]?>][count]" value="">
+    <?php } ?>
         <div class="product-img part-60"><?php if($product->image_id){  ?><img class="" src="<?php echo wp_get_attachment_url($product->image_id) ?>" /><?php } ?></div>
-        <div class="part-10 bold"><?php echo $product->name ?></div>
+        <div class="part-10 bold product-name"><?php echo $product->name ?></div>
         <div class="part-10"><?php echo $product->price ?></div>
-        <a href="single?subject=products&action=edit&id=<?php echo $product->id?>" class="part-10 button background-white gold bold font-15">מעבר למוצר</a>
+        <div class="flex-display end part-15">
+        <?php //if($options["table_name"]=="products"){?>
+            <a href="single?subject=products&action=edit&id=<?php echo $product->id?>" class="part-15 button background-white gold bold font-15 <?php echo $options["table_name"]=="products" ? '':"hidden" ?>">מעבר למוצר</a>
+      <?php //} ?>
+        <?php //if($options["table_name"]=="orders"){
+            //$link = "single?subject=products&action=edit&id=".$product->id;
+            ?>
+
+                <button type="button" class="background-white gold bold font-15 <?php echo $options["table_name"]=="orders" ? '':"hidden" ?>">פרטים</button>
+
+        <?php
+        //}
+        //else if ($options["table_name"]=="order_products"){?>
+            <button type="button" class="background-white gold bold font-15 order-product <?php echo $options["table_name"]=="order_products" ? '':"hidden" ?>">הזמן מוצר</button>
+        </div>
+        <?php //}
+        ?>
     </div>
     <?php
 }
@@ -243,16 +310,87 @@ function get_list_ajax(){
     die();
 }
 
-function view_catalog_gallery($products)
+function view_archive_actions($table_name,$view_only = false)
 {
+    ob_start();
+    ?>
+    <div class="archive-actions flex-display space-between <?php echo $view_only?'margin-bottom-20':'' ?>">
+        <div class="flex-display space-between">
+            <?php if($table_name=="products" && !$view_only){ ?>
+                <svg class="margin-after-10 pointer" data-view="gallery" xmlns="http://www.w3.org/2000/svg" width="44" height="44" viewBox="0 0 44 44" fill="none">
+                    <circle cx="22" cy="22" r="22" fill="#D9F5F3"/>
+                    <rect x="13" y="13" width="7.55827" height="7.23077" rx="1" stroke="#1A7870" stroke-width="2"/>
+                    <rect x="24.1511" y="13" width="7.55827" height="7.23077" rx="1" stroke="#1A7870" stroke-width="2"/>
+                    <rect x="13" y="23.7692" width="7.55827" height="7.23077" rx="1" stroke="#1A7870" stroke-width="2"/>
+                    <rect x="24.1511" y="23.7692" width="7.55827" height="7.23077" rx="1" stroke="#1A7870" stroke-width="2"/>
+                </svg>
+                <svg class="margin-after-10 pointer" data-view=table" xmlns="http://www.w3.org/2000/svg" width="44" height="44" viewBox="0 0 44 44" fill="none">
+                    <circle cx="22" cy="22" r="22" fill="#D9F5F3"/>
+                    <path d="M12.5 13.2412C12.5 12.1534 13.382 11.2725 14.4688 11.2725H28.5312C29.618 11.2725 30.5 12.1534 30.5 13.2412V16.0537C30.5 16.5759 30.2926 17.0767 29.9234 17.4459C29.5542 17.8151 29.0534 18.0225 28.5312 18.0225H14.4688C13.9466 18.0225 13.4458 17.8151 13.0766 17.4459C12.7074 17.0767 12.5 16.5759 12.5 16.0537V13.2412ZM14.4688 12.96C14.3942 12.96 14.3226 12.9896 14.2699 13.0424C14.2171 13.0951 14.1875 13.1667 14.1875 13.2412V16.0537C14.1875 16.209 14.3135 16.335 14.4688 16.335H28.5312C28.6058 16.335 28.6774 16.3054 28.7301 16.2526C28.7829 16.1999 28.8125 16.1283 28.8125 16.0537V13.2412C28.8125 13.1667 28.7829 13.0951 28.7301 13.0424C28.6774 12.9896 28.6058 12.96 28.5312 12.96H14.4688ZM12.5 21.1162C12.5 20.0284 13.382 19.1475 14.4688 19.1475H28.5312C29.618 19.1475 30.5 20.0284 30.5 21.1162V23.9287C30.5 24.4509 30.2926 24.9517 29.9234 25.3209C29.5542 25.6901 29.0534 25.8975 28.5312 25.8975H14.4688C13.9466 25.8975 13.4458 25.6901 13.0766 25.3209C12.7074 24.9517 12.5 24.4509 12.5 23.9287V21.1162ZM14.4688 20.835C14.3942 20.835 14.3226 20.8646 14.2699 20.9174C14.2171 20.9701 14.1875 21.0417 14.1875 21.1162V23.9287C14.1875 24.084 14.3135 24.21 14.4688 24.21H28.5312C28.6058 24.21 28.6774 24.1804 28.7301 24.1276C28.7829 24.0749 28.8125 24.0033 28.8125 23.9287V21.1162C28.8125 21.0417 28.7829 20.9701 28.7301 20.9174C28.6774 20.8646 28.6058 20.835 28.5312 20.835H14.4688ZM14.4688 27.0225C13.9466 27.0225 13.4458 27.2299 13.0766 27.5991C12.7074 27.9683 12.5 28.4691 12.5 28.9912V31.8037C12.5 32.8905 13.382 33.7725 14.4688 33.7725H28.5312C29.0534 33.7725 29.5542 33.5651 29.9234 33.1959C30.2926 32.8267 30.5 32.3259 30.5 31.8037V28.9912C30.5 28.4691 30.2926 27.9683 29.9234 27.5991C29.5542 27.2299 29.0534 27.0225 28.5312 27.0225H14.4688ZM14.1875 28.9912C14.1875 28.9167 14.2171 28.8451 14.2699 28.7924C14.3226 28.7396 14.3942 28.71 14.4688 28.71H28.5312C28.6058 28.71 28.6774 28.7396 28.7301 28.7924C28.7829 28.8451 28.8125 28.9167 28.8125 28.9912V31.8037C28.8125 31.8783 28.7829 31.9499 28.7301 32.0026C28.6774 32.0554 28.6058 32.085 28.5312 32.085H14.4688C14.3942 32.085 14.3226 32.0554 14.2699 32.0026C14.2171 31.9499 14.1875 31.8783 14.1875 31.8037V28.9912Z" fill="#1A7870"/>
+                </svg>
+            <?php }//get_svg ("clients","new",false,"class-name"); ?>
+            <h1 class="page-title font-30 bold"><?php echo BOUTIQUE_TABLES[$table_name]["title"] ?></h1>
+        </div>
+        <div class="flex-display space-between">
+            <div class="border-dark-gray archive-search flex-display align-center align-self-center margin-after-10">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 14 14" fill="none">
+                    <g clip-path="url(#clip0_39_370)">
+                        <path fill-rule="evenodd" clip-rule="evenodd" d="M5.6875 10.5C6.31949 10.5 6.94528 10.3755 7.52916 10.1337C8.11304 9.89182 8.64357 9.53733 9.09045 9.09045C9.53733 8.64357 9.89182 8.11304 10.1337 7.52916C10.3755 6.94528 10.5 6.31949 10.5 5.6875C10.5 5.05551 10.3755 4.42972 10.1337 3.84584C9.89182 3.26196 9.53733 2.73143 9.09045 2.28455C8.64357 1.83767 8.11304 1.48318 7.52916 1.24133C6.94528 0.999479 6.31949 0.875 5.6875 0.875C4.41115 0.875 3.18707 1.38203 2.28455 2.28455C1.38203 3.18707 0.875 4.41115 0.875 5.6875C0.875 6.96385 1.38203 8.18793 2.28455 9.09045C3.18707 9.99297 4.41115 10.5 5.6875 10.5ZM11.375 5.6875C11.375 7.19592 10.7758 8.64256 9.70917 9.70917C8.64256 10.7758 7.19592 11.375 5.6875 11.375C4.17908 11.375 2.73244 10.7758 1.66583 9.70917C0.599217 8.64256 0 7.19592 0 5.6875C0 4.17908 0.599217 2.73244 1.66583 1.66583C2.73244 0.599217 4.17908 0 5.6875 0C7.19592 0 8.64256 0.599217 9.70917 1.66583C10.7758 2.73244 11.375 4.17908 11.375 5.6875Z" fill="black"/>
+                        <path d="M9.33337 10.5575C9.35962 10.5925 9.38762 10.6257 9.41912 10.6581L12.7879 14.0268C12.9519 14.191 13.1745 14.2833 13.4066 14.2834C13.6387 14.2835 13.8614 14.1913 14.0256 14.0273C14.1897 13.8632 14.282 13.6406 14.2821 13.4085C14.2822 13.1764 14.1901 12.9538 14.026 12.7896L10.6572 9.42083C10.626 9.38916 10.5923 9.35991 10.5566 9.33333C10.2134 9.80135 9.8009 10.2144 9.33337 10.5583V10.5575Z" fill="black"/>
+                    </g>
+                    <defs>
+                        <clipPath id="clip0_39_370">
+                            <rect width="14" height="14" fill="white"/>
+                        </clipPath>
+                    </defs>
+                </svg>
+                <input type="search" id="search" class="" placeholder="חיפוש" />
+            </div>
+            <?php if(!$view_only){?>
+                <a href="<?php echo 'single?subject='.$table_name.'&action=new' ?>">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="60" height="60" viewBox="0 0 60 60" fill="none">
+                        <circle cx="30" cy="30" r="29.5" fill="#1A7870" stroke="white"/>
+                        <line x1="30" y1="20" x2="30" y2="42" stroke="white" stroke-width="2"/>
+                        <line x1="41" y1="31" x2="19" y2="31" stroke="white" stroke-width="2"/>
+                    </svg>
+                </a>
+            <?php }?>
+        </div>
+    </div>
+        <?php
+    return ob_get_clean();
+}
+
+add_action('wp_ajax_view_catalog_gallery_ajax', 'view_catalog_gallery_ajax');
+function view_catalog_gallery_ajax(){
+
+    //$cache_key = 'catalog_result';
+
+    //$result = $cached_output = get_transient($cache_key);
+   /* if ($cached_output === false || !is_array ($cached_output) || get_option("catalog_result_changed")) {
+        update_option("catalog_result_changed", 0);
+        $result = get_page_data("products");
+        set_transient ($cache_key, $result, 12 * 3600 );
+    }*/
+    $result = get_page_data("products");
+    $archive_actions = view_archive_actions("products",true);
+    $html = view_catalog_gallery($result,array("table_name"=>"order_products"));
+    echo json_encode (array("html" => $archive_actions.$html));
+    die();
+
+}
+function view_catalog_gallery($products,$options = null)
+{
+    ob_start();
     ?>
     <div class="grid-display cols-5">
         <?php
     foreach ($products as $product){
-        create_product_view($product);
+        create_product_view($product,$options);
     }?>
     </div>
         <?php
+    return ob_get_clean();
 }
 
 function build_table_rows($list_name)
@@ -272,4 +410,21 @@ function build_table_rows($list_name)
     }
     write_log("rows " .$rows);
     return $rows;
+}
+
+function create_popup(){
+    ?>
+    <div class="popup_page_overlay">
+            <div class="popup">
+                <div class="close-popup pointer">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 22 22" fill="none">
+                        <path d="M13.9776 10.9999L19.7418 5.23577C20.564 4.41352 20.564 3.08042 19.7418 2.25817C18.9195 1.43592 17.5865 1.43592 16.7642 2.25817L11 8.02234L5.23583 2.25817C4.41358 1.43592 3.08048 1.43592 2.25823 2.25817C1.43598 3.08042 1.43598 4.41352 2.25823 5.23577L8.0224 10.9999L2.25823 16.7641C1.43598 17.5864 1.43598 18.9195 2.25823 19.7417C2.66935 20.1528 3.20818 20.3584 3.74701 20.3584C4.28584 20.3584 4.82471 20.1528 5.23579 19.7417L11 13.9776L16.7642 19.7417C17.1753 20.1528 17.7141 20.3584 18.253 20.3584C18.7918 20.3584 19.3306 20.1528 19.7417 19.7417C20.564 18.9195 20.564 17.5864 19.7417 16.7641L13.9776 10.9999Z" fill="black"/>
+                    </svg>
+                </div>
+                <div class="popup-body">
+
+                </div>
+            </div>
+    </div>
+    <?php
 }

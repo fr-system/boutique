@@ -11,9 +11,9 @@ $table_name = $_GET["subject"];
 
 $action = $_GET["action"];
 
-$fields_arr = BOUTIQUE_TABLES[$table_name];
+$page_info = BOUTIQUE_TABLES[$table_name];
 if($action == "new") {
-    $title_page = "הוספת " . $fields_arr["single"] . " חדש" . ($fields_arr["male_female"] == "female" ? "ה" : "");
+    $title_page = "הוספת " . $page_info["single"] . " חדש" . ($page_info["male_female"] == "female" ? "ה" : "");
     $row = (object)array();
     if($table_name == "orders"){
         $row->order_date = date('Y-m-d');
@@ -22,11 +22,11 @@ if($action == "new") {
 }
 else if($action == "edit") {
     $id = $_GET["id"];
-    $title_page = "עדכון ". $fields_arr["single"];
-    $query = get_page_query($table_name,"id" ,$id);
-    $result =run_query ($query);
+    $title_page = "עדכון ". $page_info["single"];
+    $result = get_page_data($table_name,"id" ,$id);
     if(count($result)>0){
         $row = $result[0];
+       // write_log("row ".json_encode($row));
     }
 
     if($table_name == "agents"){
@@ -51,6 +51,7 @@ $class_form = "border-dark-gray padding-20 flex-display direction-column part-60
 <section class="page single">
 <div class="font-30 margin-bottom-20"><?php echo $title_page ?></div>
     <div class="flex-display space-between">
+        <input type="hidden" name="dirty" value="" />
         <?php if($table_name == "products"){
             ?>
         <form novalidate="" id="product-form" class=" <?php echo $class_form?>" method="post" enctype="multipart/form-data"  <!--onsubmit="required()-->">
@@ -58,6 +59,7 @@ $class_form = "border-dark-gray padding-20 flex-display direction-column part-60
             <?php
         }
         else{?>
+
         <form class="site_form <?php echo $class_form?> " novalidate="" data-success='reload_page' data-failed='show_error_messages'>
             <?php } ?>
             <div id="form_error_msgs_container" class="margin-bottom-20"></div>
@@ -65,35 +67,9 @@ $class_form = "border-dark-gray padding-20 flex-display direction-column part-60
             <input type="hidden" name="table_name" value="<?php echo $table_name ?>" />
             <input type="hidden" name="id" value="<?php echo $id ?>" />
             <input type="hidden" name="previous_page" value="<?php echo $previous_page ?>" />
-            <div class="grid-display cols-2 margin-bottom-40">
-                <?php
-                foreach($fields_arr["columns"] as $column){
-                    if(!isset($column["widget"])){continue;}
-                    ?>
-                    <div class="input-label flex-display <?php echo $column["widget"] != "textarea" && $column["widget"] != "products"  ? 'align-center' :'stretch'?> ">
-                        <?php if (isset($column["label"])){?>
-                            <label class="bold" for="<?php echo $column["field_name"] ?>"><?php echo $column["label"].":"?></label>
-                        <?php }
-                        $value = "";
-                        //write_log("q p ".json_encode( $column));
-                        if(isset($column["field_name"])){
-                            $field_name = isset($column["field_name"]) ? $column["field_name"] : null;
-                            $value = isset($row->$field_name) ? $row->$field_name :"";
-                        }
-                        else if($column["widget"] == "products" && isset($row->id)){
 
-                            $query = get_page_query("order_products","order_id",$row->id);
-                            //write_log("q p ".$query);
-                            $value = run_query ($query);
-                            //write_log("prods ".json_encode($value));
-                        }
 
-                        echo create_input($column,$value);
-                        ?>
-                    </div>
-                <?php } ?>
-
-            </div>
+            <?php  get_single_view($table_name,$row); ?>
             <div class="buttons flex-display align-self-center">
                 <button type="post" class="save background-gold bold font-18">שמור</button>
                 <?php if($previous_page) { ?>

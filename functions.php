@@ -12,20 +12,26 @@ require_once dirname(__FILE__) . "/queries.php";
 require_once dirname(__FILE__) . "/popups.php";
 function boutique_enqueue_scripts()
 {
+    $ver = '1.0.0';
     wp_enqueue_style(
         'boutique',
         get_template_directory_uri() . '/style.css',
         [],
-        '1.0.0'
+        $ver
     );
 
-    wp_register_style( 'assets-style', get_template_directory_uri(). '/assets/style.css' );
+
+    wp_register_style( 'assets-style', get_template_directory_uri(). '/assets/style.css' , array(), $ver);
     wp_enqueue_style( 'assets-style' );
 
     wp_enqueue_script('jquery');
 
-    wp_register_script('script', get_template_directory_uri() . '/script.js');
-    wp_enqueue_script('script');
+    //wp_enqueue_script( 'script', get_template_directory_uri() . '/script.js', $ver);
+    wp_enqueue_script( 'script', get_template_directory_uri() . '/script.js', array(), $ver );
+
+
+    //wp_register_script('script', get_template_directory_uri() . '/script.js');
+   wp_enqueue_script('script',);
 
     wp_register_script('autoNumeric', get_template_directory_uri() . '/assets/autoNumeric.js');
     wp_enqueue_script('autoNumeric');

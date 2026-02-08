@@ -2,7 +2,7 @@
 function run_query($query, $type="")
 {
     global $wpdb;
-
+    //test_mode_table_prefix();
     if ($type == "execute") {
         $result = $wpdb->query($query);
     } else {
@@ -12,6 +12,62 @@ function run_query($query, $type="")
     //error_log("result ". json_encode($result));
     return $result;
 }
+
+function build_query_structure($table_name,$row){
+    $update = array();
+    $fields = array();
+    $values = array();
+
+    foreach ($row as $key => $value) {
+        $field = get_field($table_name, $key);
+        if ($field != null) {
+            if (!empty($value) && isset($field["un_apostrophe"])) {
+                $value = floatval(str_replace("₪", "", $value));
+            }
+
+            $apostrophe = is_needed_apostrophe($field["widget"], isset($field["un_apostrophe"]));
+            array_push($fields, $key);
+            array_push($values, (empty($value) ? "NULL" : $apostrophe . $value . $apostrophe));
+            array_push($update, $key . " = " . (empty($value) ? "NULL" : $apostrophe . $value . $apostrophe));
+        }
+    }
+
+    return array("fields"=>$fields, "values"=>$values,"update"=>$update);
+}
+
+function create_query($table_name,$id,$action, $results)
+{
+    global $wpdb;
+
+    switch ($action) {
+        case "remove":
+            $query = "DELETE FROM {$wpdb->prefix}" . $table_name;
+            break;
+        case "update":
+            $query = "UPDATE {$wpdb->prefix}" . $table_name . " SET " . implode(",", $results["update"]);
+            break;
+        case "new":
+            $query = "INSERT INTO {$wpdb->prefix}" . $table_name . " (" . implode(",", $results["fields"]) . " ) 
+                SELECT " . implode(",", $results["values"]);
+            /*
+             * ($table_name == "order_products" ? " VALUES " : " SELECT ")
+             * if($table_name == "tasks"){
+                $fields.= " date_write, assignor_id"." ,";
+                $values .= " NOW(), ". get_current_user_id() ." ,";
+            }*/
+            break;
+    }
+    if (!empty($id)) {
+        $query .= " where id = " . $id;
+    }
+
+    //if ($table_name == "order_products") {
+        write_log(" query " . $query);
+    //}
+    $ok = run_query($query, "execute");
+    //return $query;
+}
+
 add_action('wp_ajax_build_query_boutique', 'build_query_boutique');
 function build_query_boutique($from_ajax = true)
 {
@@ -24,56 +80,39 @@ function build_query_boutique($from_ajax = true)
            die();
        }
        unset($_POST["display_name"]);
-        unset($_POST["user_email"]);
+       unset($_POST["user_email"]);
         $_POST["user_id"] = $result["user_id"];
     }
 
-
     global $wpdb;
-    $update = array();
-    $fields = array();
-    $values = array();
-    if(isset($_POST["remove"])){}
+    if(isset($_POST["remove"])){
+        $action = "remove";
+    }
     else {
-        foreach ($_POST as $key => $value) {
-            $field = get_field($table_name, $key);
-            if ($field != null) {
-                if (!empty($value) && isset($field["un_apostrophe"])) {
-                    //write_log("val " . PHP_FLOAT_MAX);
-                    //write_log("val2 " . str_replace("₪", "", $value));
+        $action = isset($_POST["id"]) && !empty($_POST["id"]) ? "update" : "new";
+        $result = build_query_structure($table_name, $_POST);
+    }
 
-                    $value = floatval(str_replace("₪", "", $value));
-                }
+    $id = isset($_POST["id"])? $_POST["id"]:null;
+    write_log("create_query ".$table_name);
+    create_query($table_name,$id,$action,$result);
+    if(!$_POST["id"]){
+        $id = $wpdb->get_var("SELECT MAX(id) FROM {$wpdb->prefix}".$table_name);
+    }
 
-                $apostrophe = is_needed_apostrophe($field["widget"], isset($field["un_apostrophe"]));
-                array_push($fields, $key);
-                array_push($values, (empty($value) ? "NULL" : $apostrophe . $value . $apostrophe));
-                array_push($update, $key . " = " . (empty($value) ? "NULL" : $apostrophe . $value . $apostrophe));
+    if($table_name == "orders") {
+        foreach ($_POST["products"] as $row) {
+            if ($action == "new") {
+                $row["order_id"] = $id;
             }
+            write_log("create_query " . "order_products");
+            $result = build_query_structure("order_products", $row);
+            create_query("order_products",
+                $row["id"], (isset($row["id"]) && !empty($row["id"])) ? "update" : "new"
+                , $result);
         }
     }
 
-    if($_POST["id"]) {
-        if (isset($_POST["remove"])) {//remove
-            $query = "DELETE FROM {$wpdb->prefix}". $table_name;
-        } else {//"update"
-            $query = "UPDATE {$wpdb->prefix}" . $table_name . " set " . implode(",", $update);
-        }
-        $query .= " where id = " . $_POST["id"];
-    }
-    else{//new
-
-        /*if($table_name == "tasks"){
-            $fields.= " date_write, assignor_id"." ,";
-            $values .= " NOW(), ". get_current_user_id() ." ,";
-        }*/
-
-        $query = "INSERT INTO {$wpdb->prefix}".$table_name." (".implode(",", $fields)." ) select " . implode(",", $values);
-    }
-    write_log(" query " . $query);
-    $ok = run_query($query, "execute");
-
-    write_log("ok run_query " . $ok);
     //return  $ok;
     if($from_ajax) {
         echo json_encode(array(
@@ -82,19 +121,18 @@ function build_query_boutique($from_ajax = true)
         ));
         die();
     }
-
 }
 
 function get_field($table_name, $field_name)
 {
-    $fields = BOUTIQUE_TABLES[$table_name]["columns"];
-    $field = array_filter($fields, function ($field_row) use ($field_name) {
+    $page_info = BOUTIQUE_TABLES[$table_name]["columns"];
+    $field = array_filter($page_info, function ($field_row) use ($field_name) {
         return isset($field_row["field_name"]) && $field_row["field_name"] == $field_name;
     });
     return count($field) > 0 ? array_pop($field) : null;
 }
 
-function get_page_query($table_name,$filter_field=null ,$filter_value=null)
+function get_page_data($table_name,$filter_field=null ,$filter_value=null)
 {
     global $wpdb;
     $columns = BOUTIQUE_TABLES[$table_name]["columns"];
@@ -108,6 +146,11 @@ function get_page_query($table_name,$filter_field=null ,$filter_value=null)
         if (isset($column['join_table'])) {
             if(isset($column['join_value'])) {
                 $query .= $wpdb->prefix . $column['join_table'] . "." . $column['join_value'] . " AS " . substr($column['join_table'], 0, -1) . "_" . $column['join_value'] . ", ";
+            }
+            else if (isset($column['join_values_select'])){
+                foreach ($column['join_values_select'] as $select_field){
+                    $query .= $wpdb->prefix . $column['join_table'] . "." . $select_field.",";
+                }
             }
             else{
                 $query .= $wpdb->prefix . $column['join_table'] . ".*, " ;
@@ -134,7 +177,8 @@ function get_page_query($table_name,$filter_field=null ,$filter_value=null)
 //        $query .= " WHERE ".get_id_column_in_page($page_name)." = ".$filter_value;
 //    }
     //write_log ('select '.$query);
-    return $query ;
+    $result = run_query ($query);
+    return $result ;
 }
 
 function is_needed_apostrophe($widget,$un_apostrophe)
@@ -148,15 +192,22 @@ function is_needed_apostrophe($widget,$un_apostrophe)
 }
 
 
-function build_options($list_name,$value=null,$filter=null)
+function build_options($table_name,$value=null,$filter=null)
 {
-    write_log("list name " .$list_name);
-    $fields_list = BOUTIQUE_LISTS[$list_name];
+    //write_log("list name " .$table_name);
+    if (array_key_exists($table_name, BOUTIQUE_LISTS)) {
+        $fields_list = BOUTIQUE_LISTS[$table_name];
+    }
+    else if (array_key_exists($table_name, BOUTIQUE_TABLES)) {
+        $fields_list = BOUTIQUE_TABLES[$table_name];
+    }
+
+    //$fields_list = BOUTIQUE_LISTS[$table_name];
     if(isset($fields_list["data-field"])) {
         $field = $fields_list["data-field"];
     }
-    $list = get_list($list_name,$filter);
-    write_log("list  " .json_encode($list));
+    $list = get_list($table_name,$filter);
+    //write_log("list  " .json_encode($list));
     $options = '<option value=""></option>';
     foreach ($list as $row) {
         $data_field = "";
@@ -172,32 +223,32 @@ function get_list($list_name,$filter = ''){
     global $wpdb;
 
     if (array_key_exists($list_name, BOUTIQUE_LISTS)) {
-        $fields_list = BOUTIQUE_LISTS[$list_name];
+        $page_info = BOUTIQUE_LISTS[$list_name];
     }
     else if (array_key_exists($list_name, BOUTIQUE_TABLES)) {
-        $fields_list = BOUTIQUE_TABLES[$list_name];
+        $page_info = BOUTIQUE_TABLES[$list_name];
     }
 
-    $field_name = $fields_list["columns"][0]["field_name"];
+    $field_name = $page_info["columns"][0]["field_name"];
 
     $query = "SELECT id as value, ".$field_name." as text";
-    if(isset($fields_list["data-field"])) {
-        $query .= ", ".$fields_list["data-field"];
+    if(isset($page_info["data-field"])) {
+        $query .= ", ".$page_info["data-field"];
     }
     $table_name=$list_name;
     $query .= " FROM ".$wpdb->prefix.$table_name;
-    /*if(isset($fields_list["join_table"]) && $fields_list["join_table"] != "" && isset($fields_list["join_table_value"])){
-        $query.=" JOIN #_".$fields_list["join_table"]." on #_".$fields_list["join_table"].".".$fields_list["join_table_value"]." = #_".$fields_list["table_name"].".".$fields_list["field_value"];
+    /*if(isset($page_info["join_table"]) && $page_info["join_table"] != "" && isset($page_info["join_table_value"])){
+        $query.=" JOIN #_".$page_info["join_table"]." on #_".$page_info["join_table"].".".$page_info["join_table_value"]." = #_".$page_info["table_name"].".".$page_info["field_value"];
     }
-    $query .= " group by #_".$fields_list["table_name"].".".$fields_list["field_value"].", #_".$fields_list["table_name"].".".$fields_list["field_name"];*/
+    $query .= " group by #_".$page_info["table_name"].".".$page_info["field_value"].", #_".$page_info["table_name"].".".$page_info["field_name"];*/
 
-    if(isset($fields_list["filter"])){
-        $query .= " WHERE ".$fields_list["filter"];
+    if(isset($page_info["filter"])){
+        $query .= " WHERE ".$page_info["filter"];
     }
     else if(!empty($filter)){
         $query .= " WHERE ".$filter;
     }
-    write_log("quert ".$query." table_name ".$table_name." field_name ".$field_name);
+    //write_log("quert ".$query." table_name ".$table_name." field_name ".$field_name);
     $list = run_query($query);
 
     if($table_name == "agents") {
@@ -217,11 +268,11 @@ function get_list($list_name,$filter = ''){
     return $list;
 }
 function test_mode_table_prefix() {
-    if(get_user_test_mode()) {
+    //if(get_user_test_mode()) {
         global $wpdb;
         $wpdb->prefix = 'test_';
         //write_log ("prefix ".$wpdb->prefix);
-    }
+    //}
 }
 add_action('init', 'test_mode_table_prefix');
 
@@ -270,8 +321,8 @@ if(isset($_POST['save_product']) && $_SERVER["REQUEST_METHOD"] == "POST") {
 //write_log("save_product");
     test_mode_table_prefix();
 
-    $fields_arr = BOUTIQUE_TABLES[$_POST['table_name']]["columns"];
-    $array_uploads = array_filter($fields_arr, function ($field_row) {
+    $columns = BOUTIQUE_TABLES[$_POST['table_name']]["columns"];
+    $array_uploads = array_filter($columns, function ($field_row) {
         return ($field_row["widget"] == "image" || $field_row["widget"] == "file");
     });
     foreach ($array_uploads as $field) {

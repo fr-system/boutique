@@ -23,6 +23,17 @@ input:-webkit-autofill {
     height: 100%;
 }
 
+.products{
+    overflow-x: auto;
+}
+
+.products .product{
+    width: 150px;
+    margin-left: 10px;
+}
+.products .add-order-product{
+    min-width: 150px;
+ }
 .product .product-img{
     height: 100%;
     overflow: hidden;
@@ -84,6 +95,7 @@ input:-webkit-autofill {
     border-radius:  5px;
     box-sizing: border-box;
     padding: 15px;
+    border: none;
 }
 
 #sidebar-menu{

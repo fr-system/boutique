@@ -35,7 +35,7 @@ const BOUTIQUE_TABLES = array(
             array("field_name" => "price", "type" => "float", "widget" => "text","label"=>"מחיר", "un_apostrophe" => true),
             array("field_name" => "description", "widget" => "textarea","label"=>"תיאור"),
             array("field_name" => "file_id", "widget" => "file","label"=>"העלאת דף מוצר","hidden"=>true),
-            array("field_name" => "image_id", "widget" => "image","label"=>"העלאת תמונת מוצר"),
+            array("field_name" => "image_id", "widget" => "image","label"=>"העלאת תמונת מוצר","hidden"=>true),
             array("field_name" => "blocked", "widget" => "checkbox","label"=>"מוצר חסום","hidden"=>true),
             array("field_name" => "factor_of_friction", "widget" => "select","label"=>"גורם אירוז","hidden"=>true),
             array("field_name" => "individually", "widget" => "checkbox","label"=>"ניתן למכירה בבודדים","hidden"=>true),
@@ -74,7 +74,7 @@ const BOUTIQUE_TABLES = array(
         "columns" => array(
             array("field_name" => "client_id","widget" => "select", "join_table" => "clients", "join_value" => "name", "label" => "שם הלקוח","required"=>true),
             array("field_name" => "order_date", "widget" => "date", "label" => "תאריך הזמנה","required"=>true),
-            array("widget" => "products","label"=>"מוצרים"),
+            array("widget" => "products"),
 
             array("field_name" => "doc_type","widget" => "file", "label" => "מסמך"),
             array("field_name" => "notes","widget" => "textarea", "label" => "הערות"),
@@ -85,7 +85,8 @@ const BOUTIQUE_TABLES = array(
         "title" => "הזמנות מוצרים",
         "columns" => array(
             array("field_name" => "order_id", "widget" => "number"),
-            array("field_name" => "product_id", "widget" => "number", "join_table" => "products"),
+            array("field_name" => "product_id", "widget" => "number", "join_table" => "products","join_values_select"=>array("name","price","image_id")),
+            array("field_name" => "count", "widget" => "number"),
             array("field_name" => "price", "widget" => "text", "un_apostrophe" => true),
             array("field_name" => "bonus", "widget" => "checkbox"),
             array("field_name" => "discount_percent", "widget" => "text", "un_apostrophe" => true),

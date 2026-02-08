@@ -281,7 +281,7 @@ function wporg_usermeta_form_field_lang_update( $user_id ) {
 add_action('wp_ajax_update_user_meta_value', 'update_user_meta_value');
 function update_user_meta_value()
 {
-    write_log("!@#$^%^".$_POST['user_meta ']." dfd ".$_POST['meta_value']);
+    //write_log("!@#$^%^".$_POST['user_meta ']." dfd ".$_POST['meta_value']);
     update_user_meta( get_current_user_id(),$_POST['meta_key'],$_POST['meta_value']);
     echo json_encode( array(        'status'   => 'success'    ) );
     die();

@@ -7,6 +7,18 @@ function getParameterByName(name){
     return value;
 }
 jQuery(document).ready(function($){
+    jQuery('input, select, textarea').change(function (){
+        jQuery('input[name=dirty]').val("1");
+    })
+
+    jQuery('a, button, .logout-button ').click(function(e) {
+        if(jQuery('input[name=dirty]').val() == "1"){
+            const confirmation = confirm('הערכים עדיין לא נשמרו. האם אתה בטוח שברצונך לצאת ללא שמירה?');
+            if (!confirmation) {
+                e.preventDefault(); // מניעת לחיצה אם המשתמש לא מאשר
+            }
+        }
+    });
 
     jQuery('input[data-a-sign=₪]').autoNumeric('init', { vMin: '-9999999999999.99' });
 
@@ -43,7 +55,7 @@ jQuery(document).ready(function($){
 
         }});
 
-    jQuery('.user-logged').click(function(){
+    jQuery('.user-logged:not(.popup-logout)').click(function(){
         jQuery('.popup-logout').toggleClass("hidden");
     });
 
@@ -62,7 +74,7 @@ jQuery(document).ready(function($){
         forgot_password_state();
     });
 
-    jQuery('.popup .button.cancel').click(function(){
+    jQuery('.popup .btn.cancel, .popup .close-popup').click(function(){
         closePopup();
     });
 
@@ -194,7 +206,84 @@ jQuery(document).ready(function($){
         ];
         call_ajax_function(postData,"reload_page");
     });
+
+    jQuery('.add-order-product').click(function () {
+        var postData = [
+            {name: "action", value: "view_catalog_gallery_ajax"},
+        ];
+        call_ajax_function(postData,"openPopupAddOrderProduct");
+    })
+
+    jQuery('#search').on("keyup",function(event){
+        var text = jQuery(this).val();
+
+        if((jQuery('.grid-display').length)){
+            searchProducts(text, ".product",".product-name");
+        }
+        else{
+            searchProducts(text, "tr:not(:first)","td");
+        }
+    });
 })
+
+function searchProducts(text,selector,searchSelector){
+
+    jQuery(selector).show();
+    if(text.length > 0) {
+        jQuery.each(jQuery(selector), function (k) {
+            var product = jQuery(this);
+            if (product.find(searchSelector+':contains(' + text + ')').length) {
+                product.show();
+            } else {
+                product.hide();
+            }
+        })
+    }
+}
+
+    function openPopupAddOrderProduct(result,targetElement){
+    jQuery(".popup-body").empty();
+    jQuery(".popup-body").html(result.html);
+        jQuery('.popup-body #search').on("keyup",function(event){
+            var text = jQuery(this).val();
+            searchProducts(text,".popup-body .product");
+        });
+    jQuery('.popup-body button.order-product').click(function () {
+        var element = jQuery(this).parent().parent();
+        var id = jQuery(this).parent().parent().data("id");
+        element.addClass("current");
+        element.find("a, order-product").addClass("hidden");
+        var key = 0;
+        jQuery.each(jQuery(".page .products .product"), function (k) {
+            var product = jQuery(this);
+            var name = product.find('[name*="][product_id]"]').attr('name');
+            if(name) {
+                var a = parseInt(name.substring(name.indexOf("[") + 1, name.indexOf("]")))
+                if (a > key) {
+                    key = a;
+                }
+            }
+        })
+
+        var order_id = jQuery(".page input[name=id]").val();
+        key++;
+        element.prepend(
+            '<input type="hidden" name="products['+key+'][id]" value="">'+//id של השורה של מוצר_הזמנה
+            '<input type="hidden" name="products['+key+'][order_id]" value="'+order_id+'">' +
+            '<input type="hidden" name="products['+key+'][product_id]" value="'+id+'">' +
+            '<input type="hidden" name="products['+key+'][count]" value="">');
+        //element.find("input[name*=\"][product_id]").prop("name","products["+key+"][product_id]");
+        //element.find("input[name*=\"][count]").prop("name","products["+key+"][count]");
+        jQuery('input[name=dirty]').val("1");
+        jQuery(".add-order-product").after(element);
+
+        //jQuery(".products").prepend(element);
+        closePopup();
+
+    })
+    openPopup();
+
+}
 
 function reload_page(data){
     if(data.redirect) {
@@ -216,18 +305,9 @@ function closePopup(){
 }
 
 function openPopup(name, title){
-    jQuery('.popup .popup-title svg').hide();
-    if(name == "task"){
-        jQuery('.icon-task').show();
-    }
-    else if(name == "client") {
-        jQuery('.icon-client').show();
-    }
-
     jQuery('html').addClass('popup_open');
-    jQuery('.popup_page_overlay').find('form').addClass("hide");
-    jQuery('.popup_page_overlay').find('form.'+name+'-popup').removeClass("hide");
-    jQuery('.popup').find('.popup-title div').text(title);
+    //jQuery('.popup_page_overlay').find('form').addClass("hide");
+    //jQuery('.popup_page_overlay').find('form.'+name+'-popup').removeClass("hide");
 
 }
 function forgot_password_state(data){

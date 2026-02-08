@@ -47,7 +47,7 @@ body{
     overflow: auto;
     margin:0;
     font-size: 1.7rem;
-    overflow-y: hidden;
+    /*overflow-y: hidden; זה בעצם מונע גלילה לבודי*/
 }
 section{
     height: 100%;
@@ -103,7 +103,7 @@ input, textarea, select, button{
     text-decoration: underline
 }
 .hidden, .d-none{
-    display: none;
+    display: none !important;
 }
 .flex-display{
     display:flex;
@@ -289,11 +289,13 @@ table {
 }
 .archive-table thead tr{ position: sticky;}
 .archive-table tr {height: 50px}
-
+.archive-table tr img{
+    max-width: 55px;
+    height: auto;
+}
 /* popups */
 
 .popup_page_overlay{
-    display: none;
     position: fixed;
     top: 0px;
     right: 0px;
@@ -317,31 +319,24 @@ table {
     transform: none;
     -webkit-transform: none;
 }
-.popup-title{
-    border-bottom: 1px solid var(--a-global-color-blue);
-    padding-bottom: 3px;
-    width: max-content;
-    margin: 0 auto 30px auto;
-}
 
 .popup form.hide{
     display: none;
 }
 .popup{
-    width: 800px;
-    /*height: 700px;*/
+    width: 80%;
+    height: 70%;
+    /*width: 800px;
+    height: 700px;*/
     background-color: white;
     border-radius: 30px;
     box-shadow: 2px 4px 23.6px 7px rgba(0, 0, 0, 0.06);
     margin: 1.75rem auto;
     position: relative;
     margin-top: 60px;
-    padding: 30px;
+    padding: 50px;
 }
-.popup-body{
-    padding: 0 50px 30px 50px;
 
-}
 .text-align-end, .close-popup{
     text-align: end;
 }
