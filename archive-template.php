@@ -61,12 +61,13 @@ function get_tr_data($table_name, $data, $id_column){
     $page_info = BOUTIQUE_TABLES[$table_name];
     $row = is_array ($data)? $data[0]:$data;
     //error_log ('row '.json_encode ($row));
-    $html='<tr class="border-dark-gray" data-id="'.$row->id.'">';
-    if($table_name == "products"){
-        $html .='<td>'.($row->image_id ? '<img class="" src="'.wp_get_attachment_url($row->image_id) .'" /></div>':'') .'</td>';
-    }
+    //$html='<tr class="border-dark-gray" data-id="'.$row->id.'">';
     $html='<tr  data-id="'.$row->id.'">';
 //        <td data-id="checkbox" class="td-checkbox"><input type="checkbox" class="checkbox-row" value="'.$row->$id_column.'" id=""/></td>';
+    if($table_name == "products"){
+        $html.='<td>'.($row->image_id ? '<img class="" src="'.wp_get_attachment_url($row->image_id) .'" /></div>':'') .'</td>';
+    }
+
     foreach($page_info["columns"] as $column) {
         if(!isset($column['field_name'])){continue;}
 
