@@ -124,8 +124,8 @@ function get_single_view($table_name,$row)
                             $value = get_page_data("order_products","order_id",$row->id);
                             //write_log("q p ".$query);
 
-                            //write_log("prods ".json_encode($value));
                         }
+                        //write_log($field_name .": value ".json_encode($value));
 
                         echo create_input($column,$value);
                         ?>
@@ -169,7 +169,7 @@ function create_input($field,$value = null)
                 ($field["widget"] == "number" ? option_if_set($field,"step").option_if_set($field,"min"). option_if_set($field,"max")."style=\"width: 70px\"" : "" ).'/>';
         case "checkbox":
             ?>
-            <input type="checkbox" id="<?php echo $field["field_name"]?>" name="<?php echo $field["field_name"]?>" id="<?php echo $field["field_name"]?>" value="1" <?php echo checked($value == "1") ?> />
+            <input type="checkbox" id="<?php echo $field["field_name"]?>" name="<?php echo $field["field_name"]?>" id="<?php echo $field["field_name"]?>" value="1" <?php echo $required ?> <?php echo  checked($value == "1") ?> />
 <!--        כן
             <input type="checkbox" id="<?php /*echo $field["field_name"]*/?>2" name="<?php /*echo $field["field_name"]*/?>" id="<?php /*echo $field["field_name"]*/?>" value="0" <?php /*echo checked($value == "0") */?> />
             לא
@@ -177,11 +177,11 @@ function create_input($field,$value = null)
             <?php
             break;
         case "textarea":
-            return '<textarea rows ="2" class="font-17 grow" id="'.$field["field_name"].'" name="'.$field["field_name"].'">'.esc_attr( $value).'</textarea>';
+            return '<textarea rows ="2" class="font-17 grow" id="'.$field["field_name"].'" name="'.$field["field_name"].'" '. $required .'>'.esc_attr( $value).'</textarea>';
         case "select":?>
             <select class="<?php echo $field['field_name']?>  font-17 grow" id="<?php echo $field["field_name"]?>"
             name="<?php echo $field["field_name"].(isset($field["multiple"]) ? "[]" : "" )?>" <?php echo (isset($field["multiple"]) ? "multiple=\"multiple\" size=\"10\"" : "" )?>
-                    onchange="onchangeSelect(event,this, this.value)" data-fill-select="<?php echo (isset($field["select_to_fill"]) ? $field["select_to_fill"] : "") ?>" >
+                <?php echo $required ?>  onchange="onchangeSelect(event,this, this.value)" data-fill-select="<?php echo (isset($field["select_to_fill"]) ? $field["select_to_fill"] : "") ?>" >
                 <?php
                 //write_log("value ".$value);
                 if(isset($field["options"])){
@@ -209,7 +209,7 @@ function create_input($field,$value = null)
 <!--        <span class="grow pointer <?php /*echo $field["widget"]*/?>-name"></span>
 -->        <?php if($field["widget"] ==  "file"){
                 $accept = ".pdf, .xls, .xlsx, .csv";?>
-                <svg class="open-file-uploader pointer" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+                <svg class="open-file-uploader" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
                     <path d="M6 22C5.46957 22 4.96086 21.7893 4.58579 21.4142C4.21071 21.0391 4 20.5304 4 20V4C4 3.46957 4.21071 2.96086 4.58579 2.58579C4.96086 2.21072 5.46957 2 6 2H14C14.3166 1.99949 14.6301 2.06161 14.9225 2.18277C15.215 2.30394 15.4806 2.48176 15.704 2.706L19.292 6.294C19.5168 6.51751 19.6952 6.78335 19.8167 7.07616C19.9382 7.36898 20.0005 7.68297 20 8V20C20 20.5304 19.7893 21.0391 19.4142 21.4142C19.0391 21.7893 18.5304 22 18 22H6Z" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                     <path d="M14 2V7C14 7.26522 14.1054 7.51957 14.2929 7.70711C14.4804 7.89464 14.7348 8 15 8H20M12 12V18M12 12L15 15M12 12L9 15" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                 </svg>
@@ -217,7 +217,7 @@ function create_input($field,$value = null)
         else{
             $accept = "image/png, image/jpeg";?>
 
-            <svg class="open-image-uploader pointer" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+            <svg class="open-image-uploader" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
                 <path d="M10.3 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H19C19.5304 3 20.0391 3.21071 20.4142 3.58579C20.7893 3.96086 21 4.46957 21 5V15L17.9 11.9C17.5237 11.5312 17.017 11.3258 16.4901 11.3284C15.9632 11.331 15.4586 11.5415 15.086 11.914L6 21" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                 <path d="M14 19.5L17 16.5M17 16.5L20 19.5M17 16.5V22" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                 <path d="M9 11C10.1046 11 11 10.1046 11 9C11 7.89543 10.1046 7 9 7C7.89543 7 7 7.89543 7 9C7 10.1046 7.89543 11 9 11Z" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -226,6 +226,44 @@ function create_input($field,$value = null)
         <input class="upload-<?php echo $field["widget"]?>" type="file" id="<?php echo $field["field_name"]?>" name="<?php echo $field["field_name"]?>" style="display: none;" required  accept="<?php echo $accept ?>"/>
 
     <?php break;
+        case "radio":
+            $direction = "row";
+            $direction_class = $direction == "column" ? "direction-column" : "row";
+            ?>
+
+            <div class="radio-options flex-display <?=$direction_class?>">
+                <?php
+                if(isset($field["values"])){
+                    foreach ($field["values"] as $key=>$option){?>
+                        <div class="">
+                            <input type="radio" class="<?php echo $field["field_name"].$key ?>" id="<?=$direction.($key)?>" name="<?php echo $field["field_name"]?>" value="<?php echo $key ?>" <?php if (isset($value) && $value == $key) echo 'checked'; ?>>
+                            <label for="<?=$direction.$key?>"><span><?php echo $option["label"] ?></span></label>
+                        </div>
+            <?php   }
+                }?>
+            </div>
+        <?php
+            break;
+        case "status":?>
+           <div class="status-options flex-display direction-column">
+                <?php
+                if(isset($field["values"])){
+                    ?><input type="hidden" id="<?php echo $field["field_name"]?>" name="<?php echo $field["field_name"]?>" value="<?php echo ($value ?? '')?>">
+                    <?php
+                    foreach ($field["values"] as $key=>$option){
+                        //$firstElement = reset($option);
+
+                        //write_log("1 ".json_encode($firstElement));
+                        //write_log("2 ".$key);
+                        ?>
+                        <span data-value="<?php echo $key ?>" class="pointer ellipse <?php echo ($value && $value == $key ? '' : 'un-value ').$option["class"]?>">
+                            <?php echo $option["label"]?>
+                        </span>
+                    <?php   }
+                }?>
+            </div>
+            <?php
+            break;
         case "products":
             ?>
         <div class="products flex-display padding-10 start ">
@@ -290,7 +328,7 @@ function create_product_view($product=null,$options=null)
 
 add_action('wp_ajax_get_list_ajax', 'get_list_ajax');
 function get_list_ajax(){
-    write_log ("get_list_ajax " );
+    //write_log ("get_list_ajax " );
     $table_name = $_POST['table_name'];
     $filter="";
     if(isset($_POST['filter'])){
@@ -300,11 +338,11 @@ function get_list_ajax(){
     if(isset($_POST['table_display'])){
         write_log ("table_display " );
         $table = build_table_rows($table_name);
-        write_log ("rows " . $table);
+        //write_log ("rows " . $table);
     }
     else {
         $options = build_options ($table_name, null, $filter);
-        write_log ("options" . $options);
+        //write_log ("options" . $options);
     }
     echo json_encode (array("options" => $options ,"tableData"=>$table));
     die();
@@ -312,26 +350,47 @@ function get_list_ajax(){
 
 function view_archive_actions($table_name,$view_only = false)
 {
-    ob_start();
+   // ob_start();
     ?>
-    <div class="archive-actions flex-display space-between <?php echo $view_only?'margin-bottom-20':'' ?>">
+    <div class="archive-actions flex-display space-between margin-bottom-20">
         <div class="flex-display space-between">
             <?php if($table_name=="products" && !$view_only){ ?>
-                <svg class="margin-after-10 pointer" data-view="gallery" xmlns="http://www.w3.org/2000/svg" width="44" height="44" viewBox="0 0 44 44" fill="none">
+                <svg class="margin-after-10" data-view="gallery" xmlns="http://www.w3.org/2000/svg" width="44" height="44" viewBox="0 0 44 44" fill="none">
                     <circle cx="22" cy="22" r="22" fill="#D9F5F3"/>
                     <rect x="13" y="13" width="7.55827" height="7.23077" rx="1" stroke="#1A7870" stroke-width="2"/>
                     <rect x="24.1511" y="13" width="7.55827" height="7.23077" rx="1" stroke="#1A7870" stroke-width="2"/>
                     <rect x="13" y="23.7692" width="7.55827" height="7.23077" rx="1" stroke="#1A7870" stroke-width="2"/>
                     <rect x="24.1511" y="23.7692" width="7.55827" height="7.23077" rx="1" stroke="#1A7870" stroke-width="2"/>
                 </svg>
-                <svg class="margin-after-10 pointer" data-view=table" xmlns="http://www.w3.org/2000/svg" width="44" height="44" viewBox="0 0 44 44" fill="none">
+                <svg class="margin-after-10" data-view=table" xmlns="http://www.w3.org/2000/svg" width="44" height="44" viewBox="0 0 44 44" fill="none">
                     <circle cx="22" cy="22" r="22" fill="#D9F5F3"/>
                     <path d="M12.5 13.2412C12.5 12.1534 13.382 11.2725 14.4688 11.2725H28.5312C29.618 11.2725 30.5 12.1534 30.5 13.2412V16.0537C30.5 16.5759 30.2926 17.0767 29.9234 17.4459C29.5542 17.8151 29.0534 18.0225 28.5312 18.0225H14.4688C13.9466 18.0225 13.4458 17.8151 13.0766 17.4459C12.7074 17.0767 12.5 16.5759 12.5 16.0537V13.2412ZM14.4688 12.96C14.3942 12.96 14.3226 12.9896 14.2699 13.0424C14.2171 13.0951 14.1875 13.1667 14.1875 13.2412V16.0537C14.1875 16.209 14.3135 16.335 14.4688 16.335H28.5312C28.6058 16.335 28.6774 16.3054 28.7301 16.2526C28.7829 16.1999 28.8125 16.1283 28.8125 16.0537V13.2412C28.8125 13.1667 28.7829 13.0951 28.7301 13.0424C28.6774 12.9896 28.6058 12.96 28.5312 12.96H14.4688ZM12.5 21.1162C12.5 20.0284 13.382 19.1475 14.4688 19.1475H28.5312C29.618 19.1475 30.5 20.0284 30.5 21.1162V23.9287C30.5 24.4509 30.2926 24.9517 29.9234 25.3209C29.5542 25.6901 29.0534 25.8975 28.5312 25.8975H14.4688C13.9466 25.8975 13.4458 25.6901 13.0766 25.3209C12.7074 24.9517 12.5 24.4509 12.5 23.9287V21.1162ZM14.4688 20.835C14.3942 20.835 14.3226 20.8646 14.2699 20.9174C14.2171 20.9701 14.1875 21.0417 14.1875 21.1162V23.9287C14.1875 24.084 14.3135 24.21 14.4688 24.21H28.5312C28.6058 24.21 28.6774 24.1804 28.7301 24.1276C28.7829 24.0749 28.8125 24.0033 28.8125 23.9287V21.1162C28.8125 21.0417 28.7829 20.9701 28.7301 20.9174C28.6774 20.8646 28.6058 20.835 28.5312 20.835H14.4688ZM14.4688 27.0225C13.9466 27.0225 13.4458 27.2299 13.0766 27.5991C12.7074 27.9683 12.5 28.4691 12.5 28.9912V31.8037C12.5 32.8905 13.382 33.7725 14.4688 33.7725H28.5312C29.0534 33.7725 29.5542 33.5651 29.9234 33.1959C30.2926 32.8267 30.5 32.3259 30.5 31.8037V28.9912C30.5 28.4691 30.2926 27.9683 29.9234 27.5991C29.5542 27.2299 29.0534 27.0225 28.5312 27.0225H14.4688ZM14.1875 28.9912C14.1875 28.9167 14.2171 28.8451 14.2699 28.7924C14.3226 28.7396 14.3942 28.71 14.4688 28.71H28.5312C28.6058 28.71 28.6774 28.7396 28.7301 28.7924C28.7829 28.8451 28.8125 28.9167 28.8125 28.9912V31.8037C28.8125 31.8783 28.7829 31.9499 28.7301 32.0026C28.6774 32.0554 28.6058 32.085 28.5312 32.085H14.4688C14.3942 32.085 14.3226 32.0554 14.2699 32.0026C14.2171 31.9499 14.1875 31.8783 14.1875 31.8037V28.9912Z" fill="#1A7870"/>
                 </svg>
             <?php }//get_svg ("clients","new",false,"class-name"); ?>
             <h1 class="page-title font-30 bold"><?php echo BOUTIQUE_TABLES[$table_name]["title"] ?></h1>
         </div>
-        <div class="flex-display space-between">
+        <div class="flex-display align-center  space-between">
+        <?php if(!$view_only){?>
+                <svg class="send-email margin-after-10" xmlns="http://www.w3.org/2000/svg" width="44" height="44" viewBox="0 0 44 44" fill="none">
+                    <circle cx="22" cy="22" r="22" fill="#D9F5F3"/>
+                    <path fill-rule="evenodd" clip-rule="evenodd" d="M30.6875 16.605L22.7963 23.14C22.572 23.3258 22.29 23.4275 21.9987 23.4275C21.7075 23.4275 21.4255 23.3258 21.2013 23.14L13.3138 16.605C13.2714 16.7324 13.2499 16.8658 13.25 17V27C13.25 27.3315 13.3817 27.6495 13.6161 27.8839C13.8505 28.1183 14.1685 28.25 14.5 28.25H29.5C29.8315 28.25 30.1495 28.1183 30.3839 27.8839C30.6183 27.6495 30.75 27.3315 30.75 27V17C30.7505 16.8658 30.7294 16.7325 30.6875 16.605ZM14.5 14.5H29.5C30.163 14.5 30.7989 14.7634 31.2678 15.2322C31.7366 15.7011 32 16.337 32 17V27C32 27.663 31.7366 28.2989 31.2678 28.7678C30.7989 29.2366 30.163 29.5 29.5 29.5H14.5C13.837 29.5 13.2011 29.2366 12.7322 28.7678C12.2634 28.2989 12 27.663 12 27V17C12 16.337 12.2634 15.7011 12.7322 15.2322C13.2011 14.7634 13.837 14.5 14.5 14.5ZM14.2375 15.75L21.2075 21.5038C21.4307 21.6881 21.711 21.7893 22.0006 21.79C22.2901 21.7907 22.5709 21.6908 22.795 21.5075L29.835 15.75H14.2375Z" fill="#1A7870"/>
+                </svg>
+
+                <a class="margin-after-10" data-tooltip="הורדה לאקסל" href="<?= get_bloginfo('stylesheet_directory'); ?>/lib/export_excel.php/lib/export_excel.php?export=archive&subject=<?= $table_name; ?>" target="_blank">
+                    <svg class="download-file" xmlns="http://www.w3.org/2000/svg" width="44" height="44" viewBox="0 0 44 44" fill="none">
+                        <circle cx="22" cy="22" r="22" fill="#D9F5F3"/>
+                        <path d="M30.4661 24.6748C30.6759 24.6748 30.8776 24.7616 31.0266 24.916C31.1757 25.0706 31.26 25.2806 31.26 25.5V29.002C31.2932 29.8006 31.0213 30.5809 30.5032 31.1719C29.9851 31.7628 29.2626 32.1166 28.4944 32.1582H14.5042C14.1211 32.1419 13.7447 32.048 13.3967 31.8809C13.0485 31.7135 12.7349 31.4757 12.4749 31.1826C12.215 30.8896 12.013 30.546 11.8811 30.1719C11.7492 29.7977 11.69 29.4001 11.7063 29.002V25.5C11.7063 25.2806 11.7906 25.0706 11.9397 24.916C12.0887 24.7616 12.2904 24.6748 12.5002 24.6748C12.7101 24.6749 12.9118 24.7615 13.0608 24.916C13.2098 25.0706 13.2942 25.2807 13.2942 25.5V29C13.2653 29.3573 13.3688 29.7127 13.5852 29.9932C13.8025 30.2748 14.1166 30.4593 14.4622 30.5078V30.5088H28.4973L28.5042 30.5078C28.8497 30.4593 29.1639 30.2748 29.3811 29.9932C29.5712 29.7467 29.6743 29.4424 29.677 29.1299L29.6721 28.9961V25.5C29.6721 25.2807 29.7565 25.0706 29.9055 24.916C30.0545 24.7615 30.2562 24.6749 30.4661 24.6748Z" fill="#1A7870" stroke="#D9F5F3" stroke-width="0.1"/>
+                        <path d="M21.5 26.375C21.3892 26.3755 21.2793 26.3531 21.1769 26.309C21.0745 26.2649 20.9817 26.2001 20.9038 26.1183L16.4038 21.4516C16.2547 21.2858 16.1736 21.0664 16.1774 20.8397C16.1813 20.613 16.2698 20.3967 16.4244 20.2364C16.579 20.0761 16.7876 19.9843 17.0062 19.9803C17.2248 19.9763 17.4363 20.0604 17.5963 20.215L21.5 24.2633L25.4038 20.215C25.5637 20.0604 25.7753 19.9763 25.9938 19.9803C26.2124 19.9843 26.421 20.0761 26.5756 20.2364C26.7302 20.3967 26.8187 20.613 26.8226 20.8397C26.8264 21.0664 26.7453 21.2858 26.5963 21.4516L22.0963 26.1183C22.0184 26.2001 21.9255 26.2649 21.8231 26.309C21.7207 26.3531 21.6109 26.3755 21.5 26.375Z" fill="#1A7870"/>
+                        <path d="M21.5 26.375C21.2771 26.3719 21.0642 26.2788 20.9066 26.1153C20.749 25.9519 20.6592 25.7311 20.6563 25.5V12.6666C20.6563 12.4346 20.7452 12.212 20.9034 12.0479C21.0616 11.8838 21.2762 11.7916 21.5 11.7916C21.7238 11.7916 21.9384 11.8838 22.0966 12.0479C22.2549 12.212 22.3438 12.4346 22.3438 12.6666V25.5C22.3408 25.7311 22.251 25.9519 22.0934 26.1153C21.9358 26.2788 21.7229 26.3719 21.5 26.375Z" fill="#1A7870"/>
+                    </svg>
+                </a>
+
+                <svg class="print-page margin-after-10" xmlns="http://www.w3.org/2000/svg" width="44" height="44" viewBox="0 0 44 44" fill="none">
+                    <circle cx="22" cy="22" r="22" fill="#D9F5F3"/>
+                    <path d="M14.4375 22.9375C14.6198 22.9375 14.7947 22.8684 14.9236 22.7453C15.0526 22.6222 15.125 22.4553 15.125 22.2812C15.125 22.1072 15.0526 21.9403 14.9236 21.8172C14.7947 21.6941 14.6198 21.625 14.4375 21.625C14.2552 21.625 14.0803 21.6941 13.9514 21.8172C13.8224 21.9403 13.75 22.1072 13.75 22.2812C13.75 22.4553 13.8224 22.6222 13.9514 22.7453C14.0803 22.8684 14.2552 22.9375 14.4375 22.9375Z" fill="#1A7870"/>
+                    <path d="M17.875 13.75C17.1457 13.75 16.4462 14.0266 15.9305 14.5188C15.4147 15.0111 15.125 15.6788 15.125 16.375V19H13.75C13.0207 19 12.3212 19.2766 11.8055 19.7688C11.2897 20.2611 11 20.9288 11 21.625V25.5625C11 26.2587 11.2897 26.9264 11.8055 27.4187C12.3212 27.9109 13.0207 28.1875 13.75 28.1875H15.125V29.5C15.125 30.1962 15.4147 30.8639 15.9305 31.3562C16.4462 31.8484 17.1457 32.125 17.875 32.125H26.125C26.8543 32.125 27.5538 31.8484 28.0695 31.3562C28.5853 30.8639 28.875 30.1962 28.875 29.5V28.1875H30.25C30.9793 28.1875 31.6788 27.9109 32.1945 27.4187C32.7103 26.9264 33 26.2587 33 25.5625V21.625C33 20.9288 32.7103 20.2611 32.1945 19.7688C31.6788 19.2766 30.9793 19 30.25 19H28.875V16.375C28.875 15.6788 28.5853 15.0111 28.0695 14.5188C27.5538 14.0266 26.8543 13.75 26.125 13.75H17.875ZM16.5 16.375C16.5 16.0269 16.6449 15.6931 16.9027 15.4469C17.1606 15.2008 17.5103 15.0625 17.875 15.0625H26.125C26.4897 15.0625 26.8394 15.2008 27.0973 15.4469C27.3551 15.6931 27.5 16.0269 27.5 16.375V19H16.5V16.375ZM17.875 22.9375C17.1457 22.9375 16.4462 23.2141 15.9305 23.7063C15.4147 24.1986 15.125 24.8663 15.125 25.5625V26.875H13.75C13.3853 26.875 13.0356 26.7367 12.7777 26.4906C12.5199 26.2444 12.375 25.9106 12.375 25.5625V21.625C12.375 21.2769 12.5199 20.9431 12.7777 20.6969C13.0356 20.4508 13.3853 20.3125 13.75 20.3125H30.25C30.6147 20.3125 30.9644 20.4508 31.2223 20.6969C31.4801 20.9431 31.625 21.2769 31.625 21.625V25.5625C31.625 25.9106 31.4801 26.2444 31.2223 26.4906C30.9644 26.7367 30.6147 26.875 30.25 26.875H28.875V25.5625C28.875 24.8663 28.5853 24.1986 28.0695 23.7063C27.5538 23.2141 26.8543 22.9375 26.125 22.9375H17.875ZM27.5 25.5625V29.5C27.5 29.8481 27.3551 30.1819 27.0973 30.4281C26.8394 30.6742 26.4897 30.8125 26.125 30.8125H17.875C17.5103 30.8125 17.1606 30.6742 16.9027 30.4281C16.6449 30.1819 16.5 29.8481 16.5 29.5V25.5625C16.5 25.2144 16.6449 24.8806 16.9027 24.6344C17.1606 24.3883 17.5103 24.25 17.875 24.25H26.125C26.4897 24.25 26.8394 24.3883 27.0973 24.6344C27.3551 24.8806 27.5 25.2144 27.5 25.5625Z" fill="#1A7870"/>
+                </svg>
+        <?php }?>
             <div class="border-dark-gray archive-search flex-display align-center align-self-center margin-after-10">
                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 14 14" fill="none">
                     <g clip-path="url(#clip0_39_370)">
@@ -358,7 +417,7 @@ function view_archive_actions($table_name,$view_only = false)
         </div>
     </div>
         <?php
-    return ob_get_clean();
+    //return ob_get_clean();
 }
 
 add_action('wp_ajax_view_catalog_gallery_ajax', 'view_catalog_gallery_ajax');
@@ -408,7 +467,7 @@ function build_table_rows($list_name)
         }
         $rows .= '</tr>';
     }
-    write_log("rows " .$rows);
+    //write_log("rows " .$rows);
     return $rows;
 }
 
@@ -428,3 +487,50 @@ function create_popup(){
     </div>
     <?php
 }
+
+function get_column_value($column,$row,$field,$list)
+{
+    $column_value = "";
+    switch ($column["widget"]) {
+        case "select":
+            if ($column["join_table"] == "agents") {
+                //write_log ('fiel ' . $field);
+               // write_log ('row ' . json_encode ($row));
+                $user_field = $column["field_name"];
+                $column_value = empty($row->$user_field) ? '' : get_userdata($row->$user_field)->display_name;
+            }else {
+                $column_value = $row->$field;
+            }
+            break;
+        case "radio":
+            $column_value = '<div class="flex-display center align-center" style="color: ' . $column["values"][$row->$field]["color"] . '"><div class="dot" style="background-color: ' . $column["values"][$row->$field]["color"] . '"></div>&nbsp;' . $column["values"][$row->$field]["label"] . '</div>';
+
+            break;
+        case "status":
+            $column_value = '<span class="pointer ellipse '.$column["values"][$row->$field]["class"].'">
+                                   '.$column["values"][$row->$field]["label"].'
+                                </span>';
+            break;
+        case "date":
+            if($row->$field) {
+                $timestamp = strtotime($row->$field); // המרת התאריך לאטימות זמן
+                $column_value = date('d/m/Y', $timestamp);
+            }
+            break;
+        default:
+            write_log("col ".json_encode($column));
+            write_log("row ".json_encode($row));
+            write_log("list ".json_encode($list));
+
+            $column_value = isset($column['list_name']) && isset($list[$row->$field]) ? $list[$row->$field] : $row->$field;
+            if (!empty($column_value) && isset($column["un_apostrophe"])) {
+                $column_value .= " ₪";
+            }
+            break;
+    }
+
+    return $column_value;
+
+}
+
+

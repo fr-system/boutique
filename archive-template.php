@@ -24,8 +24,9 @@ $page_info  = BOUTIQUE_TABLES[$table_name];
      <?php
     }
     else{
-       $archive_actions = view_archive_actions($table_name);
-       echo $archive_actions;
+        view_archive_actions($table_name);
+//       $archive_actions = view_archive_actions($table_name);
+//       echo $archive_actions;
     }
     $result = get_page_data($table_name);
     $user_meta = get_user_meta( get_current_user_id(), "products_view", true);
@@ -60,7 +61,7 @@ function get_tr_data($table_name, $data, $id_column){
     global $actions_icons;
     $page_info = BOUTIQUE_TABLES[$table_name];
     $row = is_array ($data)? $data[0]:$data;
-    //error_log ('row '.json_encode ($row));
+    //write_log('row '.json_encode ($row));
     //$html='<tr class="border-dark-gray" data-id="'.$row->id.'">';
     $html='<tr  data-id="'.$row->id.'">';
 //        <td data-id="checkbox" class="td-checkbox"><input type="checkbox" class="checkbox-row" value="'.$row->$id_column.'" id=""/></td>';
@@ -69,28 +70,22 @@ function get_tr_data($table_name, $data, $id_column){
     }
 
     foreach($page_info["columns"] as $column) {
-        if(!isset($column['field_name'])){continue;}
+        if (!isset($column['field_name'])) {
+            continue;
+        }
 
-        $field = isset($column['join_table']) ? substr($column['join_table'], 0, -1)  . "_" . $column['join_value']: $column["field_name"];
-        $list = isset($column['table_name'])? constant($column['table_name']):null;
+        $field = isset($column['join_table']) ? substr($column['join_table'], 0, -1) . "_" . $column['join_value'] : $column["field_name"];
+        $list = isset($column['table_name']) ? constant($column['table_name']) : null;
 
-        if($field != $id_column && !isset($column["hidden"]) && isset($column["label"])){
-            if(isset($column['type']) && $column['type']=="user_data") {
-                //write_log ('fiel ' . $field);
-                //write_log ('row ' . json_encode ($row));
-                $user_field = $column["field_name"];
-                $column_value = empty($row->user_id) ? '' : get_userdata ($row->user_id)->$user_field;
-            }
+        if ($field != $id_column && !isset($column["hidden"]) && isset($column["label"])) {
+            $column_value = get_column_value($column,$row,$field,$list);
             //else if($column['type']=="action"){
-                //$column_value = '<button  class="action bg-lightblue" name="'.$column['field_name'].'" onclick="action_func(this)"><i class="'.$actions_icons[$column['field_name']].'"></i><span>פעולה</span></button>';
+            //$column_value = '<button  class="action bg-lightblue" name="'.$column['field_name'].'" onclick="action_func(this)"><i class="'.$actions_icons[$column['field_name']].'"></i><span>פעולה</span></button>';
             //}
-        else{
-                $column_value = isset($column['list_name']) && isset($list[$row->$field])?$list[$row->$field]: $row->$field;
-                if(!empty($column_value) && isset($column["un_apostrophe"])){
-                    $column_value.=" ₪";
-                }
-            }
-            $html .='<td >'. $column_value.'</td>';
+            //else {
+
+            //}
+            $html .= '<td >' . $column_value . '</td>';
         }
     }
     $html .='<td >';
@@ -100,7 +95,7 @@ function get_tr_data($table_name, $data, $id_column){
     <path d="M5 20.125H19C20.103 20.125 21 19.2654 21 18.2083V9.9015L19 11.8182V18.2083H8.158C8.132 18.2083 8.105 18.2179 8.079 18.2179C8.046 18.2179 8.013 18.2093 7.979 18.2083H5V4.79167H11.847L13.847 2.875H5C3.897 2.875 3 3.73462 3 4.79167V18.2083C3 19.2654 3.897 20.125 5 20.125Z" fill="#E2B252"/>
 </svg></a>';
     $html .='</td ><td >';
-    $html .='<svg class="remove-row pointer"  xmlns="http://www.w3.org/2000/svg" width="25" height="24" viewBox="0 0 25 24" fill="none">
+    $html .='<svg class="remove-row"  xmlns="http://www.w3.org/2000/svg" width="25" height="24" viewBox="0 0 25 24" fill="none">
 <path d="M4.16663 7H20.8333M10.4166 11V17M14.5833 11V17M5.20829 7L6.24996 19C6.24996 19.5304 6.46945 20.0391 6.86015 20.4142C7.25085 20.7893 7.78076 21 8.33329 21H16.6666C17.2192 21 17.7491 20.7893 18.1398 20.4142C18.5305 20.0391 18.75 19.5304 18.75 19L19.7916 7M9.37496 7V4C9.37496 3.73478 9.48471 3.48043 9.68006 3.29289C9.87541 3.10536 10.1404 3 10.4166 3H14.5833C14.8596 3 15.1245 3.10536 15.3199 3.29289C15.5152 3.48043 15.625 3.73478 15.625 4V7" stroke="#E2B252" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>';
     $html .='</td>';

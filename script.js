@@ -11,7 +11,7 @@ jQuery(document).ready(function($){
         jQuery('input[name=dirty]').val("1");
     })
 
-    jQuery('a, button, .logout-button ').click(function(e) {
+    jQuery('a, button:not(.save), .logout-button ').click(function(e) {
         if(jQuery('input[name=dirty]').val() == "1"){
             const confirmation = confirm('הערכים עדיין לא נשמרו. האם אתה בטוח שברצונך לצאת ללא שמירה?');
             if (!confirmation) {
@@ -224,7 +224,49 @@ jQuery(document).ready(function($){
             searchProducts(text, "tr:not(:first)","td");
         }
     });
+
+    jQuery(".status-options .ellipse").click(function () {
+        var ellipse = jQuery(this);
+        var input = jQuery(".status-options input");
+
+        if(!ellipse.hasClass("un-value")){//היה בחור ורצים לבטל הבחירה
+            ellipse.addClass("un-value ");
+            input.val("");
+
+        }
+        else{//רוצים לבחור את מי שלחצתי עכשיו
+            jQuery(".status-options .ellipse").addClass("un-value ");
+            ellipse.removeClass("un-value");
+            input.val(ellipse.data("value"));
+        }
+
+    })
+
+    jQuery( "#newChat" ).on("change",function(event){
+        if(jQuery( "#newChat" ).val() && jQuery( "#newChat" ).val().length > 2){
+
+            var postData = [
+                {name: "action", value: "new_chat_ajax"},
+                {name: "text", value: jQuery( "#newChat" ).val() },
+                {name: "task_id", value: getParameterByName("id")},
+            ];
+            call_ajax_function(postData,"onAddChat");
+        }
+    })
 })
+
+function onAddChat(result,targetElement){
+    var chatList = jQuery(".chat-list");
+    chatList.append(jQuery(' <div class="input-label flex-display space-between">'+
+        '<div class="part-20"><img class="user-logo" src="'+result.client_logo+'"></div>'+
+        '<div class="text part-50 text-center">'+jQuery( "#newChat" ).val()+'</div>'+
+        '<div class="date text-left part-20">'+result.time +'</div></div>'));
+
+    if (chatList.length) {
+        chatList.scrollTop(chatList[0].scrollHeight);
+    }
+    jQuery( "#newChat" ).val("");
+}
 
 function searchProducts(text,selector,searchSelector){
 

@@ -384,7 +384,9 @@ input, textarea, select, .input-acting{
     border: none;
     outline: none;
     padding: 3px 7px;
-
+}
+.radio-options, .status-options{
+    padding: 3px 7px;
 }
 
 input, input[type="datetime-local"], input[type="date"], input[type="time"],.input-acting {
@@ -480,5 +482,9 @@ form#registration button{
 
 label.error, #form_error_msgs_container{
     color: red;
+}
+
+svg{
+    cursor: pointer;
 }
 

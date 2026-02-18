@@ -231,7 +231,7 @@ function get_list($list_name,$filter = ''){
 
     $field_name = $page_info["columns"][0]["field_name"];
 
-    $query = "SELECT id as value, ".$field_name." as text";
+    $query = "SELECT id as value" . ($list_name == "agents" ? "" : ", ".$field_name." as text");
     if(isset($page_info["data-field"])) {
         $query .= ", ".$page_info["data-field"];
     }
@@ -250,7 +250,6 @@ function get_list($list_name,$filter = ''){
     }
     //write_log("quert ".$query." table_name ".$table_name." field_name ".$field_name);
     $list = run_query($query);
-
     if($table_name == "agents") {
         $users = array();
         foreach ($list as $row) {
@@ -368,8 +367,26 @@ if(isset($_POST['save_product']) && $_SERVER["REQUEST_METHOD"] == "POST") {
     build_query_boutique(false);
     wp_redirect($_SERVER['REQUEST_URI']);
     exit();
+}
 
+add_action('wp_ajax_new_chat_ajax', 'new_chat_ajax');
+//add_action('wp_ajax_nopriv_new_chat_ajax', 'new_chat_ajax');
+function new_chat_ajax()
+{
+    $user_id =get_current_user_id();
+    write_log ('new chat user id '.$user_id);
+    $query = "INSERT into chat(text,task_id,user_id,date) select '" . $_POST['text'] . "'," . $_POST['task_id'] . "," . get_current_user_id () . ",NOW()";
+    run_query ($query);
+    //run_query ("UPDATE tasks set treatment_date = NOW()");
 
-
+    $media_id =9 ;
+    //write_log ("media id new chat " .json_encode ( $media_id));
+    $query = "SELECT date FROM chat where task_id = " . $_POST['task_id'] ." ORDER BY id DESC LIMIT 1";
+    $chat_time = run_query ($query);
+    $media_url =  wp_get_attachment_url($media_id );
+    echo json_encode (array(
+        "time" => date("H:i:s",strtotime( $chat_time[0]->date))/*date("d/m/y H:i")*/,
+        "client_logo" => $media_url));
+    die();
 }
 ?>

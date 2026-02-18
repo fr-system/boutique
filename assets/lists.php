@@ -19,7 +19,7 @@ const BOUTIQUE_TABLES = array(
                     array("value"=>"3","text"=>"שוטף+90"),
                 )
             ),
-            array("field_name" => "agent_id", "widget" => "select", "type" => "user_data", "label" => "סוכן", "join_table" => "agents", "join_value" => "user_id", "user_field" => "display_name","required"=>true),
+            array("field_name" => "agent_id", "widget" => "select", "label" => "סוכן", "join_table" => "agents", "join_value" => "user_id", "user_field" => "display_name","required"=>true),
             array("field_name" => "email", "widget" => "text", "label" => "דוא\"ל","required"=>true),
             array("field_name" => "obligo", "un_apostrophe" => true, "widget" => "text", "label" => "אובליגו"),
             array("field_name" => "exceeding_conditions", "widget" => "bool", "label" => "חריגה מתנאי תשלום","hidden"=>true),
@@ -48,10 +48,21 @@ const BOUTIQUE_TABLES = array(
             array("field_name" => "client_id", "join_table" => "clients", "join_value" => "name", "label" => "שם לקוח","hidden"=>true),
             array("field_name" => "subject", "widget" => "text", "label" => "משימה","required"=>true),
             array("field_name" => "open_date", "widget" => "date", "label" => "תאריך פתיחה","locked"=>true),
-            array("field_name" => "agent_id", "widget" => "select", "label" => "סוכן","required"=>true),//להביא מטבלת יוזר
+            array("field_name" => "agent_id", "widget" => "select", "label" => "סוכן", "join_table" => "agents", "join_value" => "user_id", "user_field" => "display_name","required"=>true),//להביא מטבלת יוזר
             array("field_name" => "details", "widget" => "textarea", "label" => "פירוט"),
-            array("field_name" => "importance_id", "widget" => "select", "label" => "חשיבות"),
-            array("field_name" => "status_id", "widget" => "select", "label" => "מצב משימה"),
+            array("field_name" => "importance_id", "widget" => "radio", "label" => "חשיבות",
+                "values"=>array(
+                    1=>array("class"=>"high","label"=> "גבוהה","color"=>"#1A7870"),
+                    2=>array("class"=>"medium","label"=> "בינונית","color"=>"#4CD2C6"),
+                    3=>array("class"=>"low","label"=> "נמוכה","color"=>"#C0DBD9")
+                )
+            ),
+            array("field_name" => "status_id", "widget" => "status", "label" => "מצב משימה",
+                "values"=>array(
+                    1=>array("class"=>"done","label"=> "בוצע"),
+                    2=>array("class"=>"in-treatment","label"=> "בטיפול"),
+                    3=>array("class"=>"not-yet-treated","label"=> "טרם טופל")
+                )),
             array("field_name" => "target_date", "widget" => "date", "label" => "תאריך יעד"),
         )),
     "suppliers" => array(
@@ -128,7 +139,7 @@ const BOUTIQUE_TABLES = array(
             array("field_name" => "supplier_id","widget" => "select", "join_table" => "suppliers", "join_value" => "name", "label" => "שם הספק"),
             array("field_name" => "client_id","widget" => "select", "join_table" => "clients", "join_value" => "name", "label" => "שם הלקוח"),
             array("field_name" => "obligation", "widget" => "text","un_apostrophe" => true, "label" => "חיוב"),
-            array("field_name" => "doc_number", "type" => "text","un_apostrophe" => true, "label" => "מס' חשבונית"),
+            array("field_name" => "doc_number", "widget" => "text","un_apostrophe" => true, "label" => "מס' חשבונית"),
             array("field_name" => "date", "widget" => "date", "label" => "תאריך"),
             array("field_name" => "doc_type", "widget" => "select", "label" => "סוג חשבונית"),
             array("field_name" => "payment_date", "widget" => "date", "label" => "תאריך תשלום"),

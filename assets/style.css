@@ -2,6 +2,7 @@
     background-color: var(--b-global-color-light-gray);
     border: none;
     padding: 0 10px;
+    border-radius: 12px;
 }
 input:-webkit-autofill {
     -webkit-box-shadow: 0 0 0 1000px var(--b-global-color-light-gray) inset; /* צבע הרקע */
@@ -155,4 +156,89 @@ ul.menu li a{
 }
 .archive-search input{
     width: 100%;
+}
+
+input[type="radio"] {
+    display: none; /* הסתרת הכפתור הרדיאו המקורי */
+}
+
+input[type="radio"] + label {
+    position: relative;
+    padding-left: 15px; /* רווח לפני התווית */
+    cursor: pointer;
+}
+
+input[type="radio"] + label:before {
+    content: '';
+    position: absolute;
+    /*left: 0;*/
+    top: 50%;
+    transform: translateY(-50%);
+    width: 15px; /* רוחב הכפתור */
+    height: 15px; /* גובה הכפתור */
+    border: 1px solid #000; /* גבול */
+    border-radius: 50%; /* עיגול */
+    background-color: var(--b-global-color-light-gray); /* צבע הרקע */
+}
+.dot {
+    height: 12px;
+    width: 12px;
+    border-radius: 50%;
+}
+.dot.importance_id1, input[type="radio"].importance_id1:checked + label:before {
+    background-color: #1A7870; /* צבע כאשר נבחר */
+}
+.dot.importance_id2, input[type="radio"].importance_id2:checked + label:before {
+    background-color: #4CD2C6; /* צבע כאשר נבחר */
+}
+.dot.importance_id3, input[type="radio"].importance_id3:checked + label:before {
+    background-color: #C0DBD9; /* צבע כאשר נבחר */
+}
+
+.ellipse{
+    display: inline-block;
+    border-radius: 100px;
+    padding: 5px;
+    width: 100px;
+    text-align: center;
+}
+.status-options .ellipse {
+    margin-bottom: 5px;
+}
+.ellipse.un-value{
+    border: 1px solid #000 !important;
+    background-color: var(--b-global-color-light-gray)!important;
+    color: black!important;
+}
+.ellipse.done {
+    background-color: #D9F5F3;
+    color: #000000;
+}
+.ellipse.in-treatment {
+    background-color: #1A7870;
+    color: #FFFFFF;
+}
+.ellipse.not-yet-treated {
+    background-color: #FFEDC8;
+    color: #000000;
+}
+
+.chat-list {
+    max-height: 45vh;
+    height: 70%;
+    overflow-y: scroll;
+    scrollbar-width: none;
+}
+
+.chat-area .input-label{
+    height: 20px;
+    margin-bottom: 10px;
+    padding: 17px 17px 17px 30px;
+    align-items: center;
+}
+
+.input-label .user-logo {
+    height: 20px;
+    width: 20px;
+    border-radius: 100px;
 }
