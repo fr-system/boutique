@@ -69,7 +69,7 @@ function create_query($table_name,$id,$action, $results)
 }
 
 add_action('wp_ajax_build_query_boutique', 'build_query_boutique');
-function build_query_boutique($from_ajax = true)
+function build_query_boutique()
 {
     $table_name = $_POST["table_name"];
 
@@ -105,7 +105,7 @@ function build_query_boutique($from_ajax = true)
             if ($action == "new") {
                 $row["order_id"] = $id;
             }
-            write_log("create_query " . "order_products");
+            //write_log("create_query " . "order_products");
             $result = build_query_structure("order_products", $row);
             create_query("order_products",
                 $row["id"], (isset($row["id"]) && !empty($row["id"])) ? "update" : "new"
@@ -114,7 +114,7 @@ function build_query_boutique($from_ajax = true)
     }
 
     //return  $ok;
-    if($from_ajax) {
+    if(!isset($_POST['save_product'])) {
         echo json_encode(array(
             'status' => 'success',
             'redirect' => $_POST["previous_page"],
@@ -139,17 +139,20 @@ function get_page_data($table_name,$filter_field=null ,$filter_value=null)
     $join = "";
 
     $query = "SELECT ".$wpdb->prefix.$table_name.".id, ";
+    $i = 0;
     foreach ($columns as $column) {
+
         if(!isset($column["field_name"]) || isset($column["type"]) && $column["type"] == "user_data"  )continue;
        // if (/*$column["type"] == "action" ||*/isset($column["type"]) && $column["type"] == "user_data" && !isset($column['join_table'])) continue;
+        $i++;
         $query .=$wpdb->prefix.$table_name.".". $column["field_name"] . ", ";
         if (isset($column['join_table'])) {
             if(isset($column['join_value'])) {
                 $query .= $wpdb->prefix . $column['join_table'] . "." . $column['join_value'] . " AS " . substr($column['join_table'], 0, -1) . "_" . $column['join_value'] . ", ";
             }
-            else if (isset($column['join_values_select'])){
-                foreach ($column['join_values_select'] as $select_field){
-                    $query .= $wpdb->prefix . $column['join_table'] . "." . $select_field.",";
+            else if(isset($column['join_values_select'])){
+                foreach ($column['join_values_select'] as $join_values_select){
+                    $query .= $wpdb->prefix . $column['join_table'] . "." . $join_values_select. ", ";
                 }
             }
             else{
@@ -157,6 +160,7 @@ function get_page_data($table_name,$filter_field=null ,$filter_value=null)
             }
             $join .= " LEFT JOIN " . $wpdb->prefix.$column['join_table'] . " ON " .$wpdb->prefix. $table_name . "." . $column["field_name"] . " = " . $wpdb->prefix.$column['join_table'] . ".id";
         }
+
     }
 
     $query = substr($query,0,-2);
@@ -173,11 +177,13 @@ function get_page_data($table_name,$filter_field=null ,$filter_value=null)
         }
         $query .= " WHERE " . $filter_field . " = " . $apostrophe . $filter_value . $apostrophe;
     }
+
+    //echo $query;
 //    if($filter_value!= 0){
 //        $query .= " WHERE ".get_id_column_in_page($page_name)." = ".$filter_value;
 //    }
-    //write_log ('select '.$query);
     $result = run_query ($query);
+    //write_log("res ".json_encode($result));
     return $result ;
 }
 
@@ -362,10 +368,11 @@ if(isset($_POST['save_product']) && $_SERVER["REQUEST_METHOD"] == "POST") {
         }
     }
 
-    write_log("post ".json_encode($_POST));
+    //write_log("post ".json_encode($_POST));
 
-    build_query_boutique(false);
-    wp_redirect($_SERVER['REQUEST_URI']);
+    build_query_boutique($_POST,false);
+
+    wp_redirect($_POST["previous_page"]);
     exit();
 }
 
@@ -373,15 +380,16 @@ add_action('wp_ajax_new_chat_ajax', 'new_chat_ajax');
 //add_action('wp_ajax_nopriv_new_chat_ajax', 'new_chat_ajax');
 function new_chat_ajax()
 {
-    $user_id =get_current_user_id();
+    global $wpdb;
+    $user_id = get_current_user_id();
     write_log ('new chat user id '.$user_id);
-    $query = "INSERT into chat(text,task_id,user_id,date) select '" . $_POST['text'] . "'," . $_POST['task_id'] . "," . get_current_user_id () . ",NOW()";
+    $query = "INSERT into ".$wpdb->prefix."chat(text,task_id,user_id,date) select '" . $_POST['text'] . "'," . $_POST['task_id'] . "," . get_current_user_id () . ",NOW()";
     run_query ($query);
     //run_query ("UPDATE tasks set treatment_date = NOW()");
 
     $media_id =9 ;
     //write_log ("media id new chat " .json_encode ( $media_id));
-    $query = "SELECT date FROM chat where task_id = " . $_POST['task_id'] ." ORDER BY id DESC LIMIT 1";
+    $query = "SELECT date FROM ".$wpdb->prefix."chat where task_id = " . $_POST['task_id'] ." ORDER BY id DESC LIMIT 1";
     $chat_time = run_query ($query);
     $media_url =  wp_get_attachment_url($media_id );
     echo json_encode (array(

@@ -77,4 +77,22 @@ function write_log($text)
     file_put_contents( ABSPATH . '/wp-content/themes/boutique/assets/debug.log', $log, FILE_APPEND);
 }
 
+function add_notice(  $type , $notice ){
+    session_start();
+    $_SESSION['notices'][$type] = $notice;
+}
+
+function has_user_notice( $type ){
+    session_start();
+    return isset( $_SESSION['notices'][$type] ) && $_SESSION['notices'][$type];
+}
+
+function show_notice( $type ){
+    session_start();
+    if( has_user_notice( $type ) ){
+        echo "<div class='notice'>" . $_SESSION['notices'][$type] . "</div>";
+        unset( $_SESSION['notices'][$type] );
+    }
+}
+
 ?>

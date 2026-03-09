@@ -24,11 +24,20 @@ input:-webkit-autofill {
     height: 100%;
 }
 
+.catalog-gallery{
+    grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+    grid-auto-rows: 250px;
+    overflow-x: auto;
+    /* overflow-y: hidden; */
+    max-height: 550px;
+    /* grid-template-columns: repeat(5, 1fr); */
+}
+
 .products{
     overflow-x: auto;
 }
 
-.products .product{
+.product{
     width: 150px;
     margin-left: 10px;
 }
@@ -46,11 +55,57 @@ input:-webkit-autofill {
     width: 100%;
     border-radius: 10px;
 }
-.product .button{
+.product-img{
+    position: relative;
+}
+.view-product {
+    position: absolute;
+    top: 10px;
+}
+.product .button, .product button{
     height: 30px;
     margin: 0;
 }
+.plus-minus-count{
+    height: 35px;
+}
+.plus-minus-count div, .plus-minus-count input{
+    border:solid 1px var(--b-global-color-dark-gray);
+}
+.product input[type=number]{
+    width: 100%;
+    height: 33px;
+    text-align: center;
+    moz-appearance: textfield;
+    padding: 0;
+}
 
+.product input[type=number]::-webkit-inner-spin-button,
+.product input[type=number]::-webkit-outer-spin-button {
+    -webkit-appearance: none; /* Chrome, Safari, Edge */
+    margin: 0; /* להסרת מרווח */
+}
+.product .input-label{
+    padding: 0;
+}
+.product .input-label input{
+    width: 100%;
+    margin-left: 5px;
+}
+.plus-minus-count .plus, .plus-minus-count .minus{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.plus-minus-count .minus {
+    border-top-right-radius: 5px;
+    border-bottom-right-radius: 5px;
+}
+
+.plus-minus-count .plus {
+    border-top-left-radius: 5px;
+    border-bottom-left-radius: 5px;
+}
 
 .boutique-header{
     height: 65px;
@@ -117,14 +172,14 @@ ul.menu li {
     border-radius: 6px;
 }
 ul.menu li.selected {
-    background-color: #F9F9F9;
+    background-color: var(--b-global-color-light-gray);
 }
 
 ul.menu li.selected a{
     font-weight: bold;
 }
 ul.menu li:hover {
-    background-color: #F9F9F9;
+    background-color: var(--b-global-color-light-gray);
 }
 a.not-link{
     text-decoration: none;
@@ -203,7 +258,8 @@ input[type="radio"] + label:before {
     text-align: center;
 }
 .status-options .ellipse {
-    margin-bottom: 5px;
+    width: 30%;
+    box-sizing: border-box;
 }
 .ellipse.un-value{
     border: 1px solid #000 !important;
@@ -241,4 +297,11 @@ input[type="radio"] + label:before {
     height: 20px;
     width: 20px;
     border-radius: 100px;
+}
+tr.order-confirm{
+    background-color: var(--b-global-color-light-gray);
+    border-color: var(--b-global-color-light-gray);
+}
+td.actions a{
+
 }

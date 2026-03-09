@@ -53,9 +53,9 @@ function get_svg($svg_name,$action='',$side_menu = true)
 </svg>';
         case "orders":
             if($action == "new")  return '<svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 30 30" fill="none">
-<rect width="30" height="30" rx="5" fill="#D9F5F3"/>
-<path d="M15.359 14.3333H17.359V15.6667H15.359V17.6667H14.0256V15.6667H12.0256V14.3333H14.0256V12.3333H15.359V14.3333ZM21.359 10.6667V17.6667L17.359 21.6667H10.359C9.0923 21.6667 8.02563 20.6 8.02563 19.3333V10.6667C8.02563 9.39999 9.0923 8.33333 10.359 8.33333H19.0256C20.2923 8.33333 21.359 9.39999 21.359 10.6667ZM20.0256 10.8667C20.0256 10.2 19.4923 9.66666 18.8256 9.66666H10.559C9.8923 9.66666 9.35897 10.2 9.35897 10.8667V19.2C9.35897 19.8667 9.8923 20.4 10.559 20.4H16.6923V19.4C16.6923 18.1333 17.759 17.0667 19.0256 17.0667H20.0256V10.8667Z" fill="black"/>
-</svg>';
+                                            <rect width="30" height="30" rx="5" fill="#D9F5F3"/>
+                                            <path d="M15.359 14.3333H17.359V15.6667H15.359V17.6667H14.0256V15.6667H12.0256V14.3333H14.0256V12.3333H15.359V14.3333ZM21.359 10.6667V17.6667L17.359 21.6667H10.359C9.0923 21.6667 8.02563 20.6 8.02563 19.3333V10.6667C8.02563 9.39999 9.0923 8.33333 10.359 8.33333H19.0256C20.2923 8.33333 21.359 9.39999 21.359 10.6667ZM20.0256 10.8667C20.0256 10.2 19.4923 9.66666 18.8256 9.66666H10.559C9.8923 9.66666 9.35897 10.2 9.35897 10.8667V19.2C9.35897 19.8667 9.8923 20.4 10.559 20.4H16.6923V19.4C16.6923 18.1333 17.759 17.0667 19.0256 17.0667H20.0256V10.8667Z" fill="black"/>
+                                            </svg>';
             return '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12" fill="none">
                 <path d="M6.5 5.5H8V6.5H6.5V8H5.5V6.5H4V5.5H5.5V4H6.5V5.5ZM11 2.75V8L8 11H2.75C1.8 11 1 10.2 1 9.25V2.75C1 1.8 1.8 1 2.75 1H9.25C10.2 1 11 1.8 11 2.75ZM10 2.9C10 2.4 9.6 2 9.1 2H2.9C2.4 2 2 2.4 2 2.9V9.15C2 9.65 2.4 10.05 2.9 10.05H7.5V9.3C7.5 8.35 8.3 7.55 9.25 7.55H10V2.9Z" fill="black"/>
             </svg>';
@@ -101,13 +101,13 @@ function get_side_menu()
     <?php
 }
 
-function get_single_view($table_name,$row)
+function get_single_view($table_name,$row,$readonly)
 {?>
     <div class="grid-display cols-2 margin-bottom-40">
                 <?php
                 $columns = BOUTIQUE_TABLES[$table_name]["columns"];
                 foreach($columns as $column){
-                    if(!isset($column["widget"])){continue;}
+                    if(!isset($column["widget"]) || isset($column["locked"])){continue;}
                     ?>
                     <div class="input-label flex-display <?php echo $column["widget"] != "textarea" && $column["widget"] != "products"  ? 'align-center' :'stretch'?> ">
                         <?php if (isset($column["label"])){?>
@@ -123,11 +123,11 @@ function get_single_view($table_name,$row)
 
                             $value = get_page_data("order_products","order_id",$row->id);
                             //write_log("q p ".$query);
-
+                            //write_log("products: ".json_encode($value));
                         }
                         //write_log($field_name .": value ".json_encode($value));
 
-                        echo create_input($column,$value);
+                        echo create_input($column,$value,$readonly);
                         ?>
                     </div>
                 <?php } ?>
@@ -139,7 +139,7 @@ function option_if_set($set,$option){
     return  (isset($set[$option]) ? "$option=\"".$set[$option]."\"" : "" );
 }
 
-function create_input($field,$value = null)
+function create_input($field,$value = null,$readonly = "")
 {
     if(isset($field['required'])){
         $required = 'required';
@@ -165,11 +165,11 @@ function create_input($field,$value = null)
             return '<input type="'.$field["widget"].'"  class="grow font-17" id="'.$field["field_name"].'" name="'.$field["field_name"].'" '
              .($field["widget"]=="text" && isset($field["un_apostrophe"]) ? 'data-a-sign="₪"':'').  'value="'.esc_attr($value).'" '.
                 option_if_set($field,"class").
-                $required.$autocomplete.
+                $required.$autocomplete.$readonly.
                 ($field["widget"] == "number" ? option_if_set($field,"step").option_if_set($field,"min"). option_if_set($field,"max")."style=\"width: 70px\"" : "" ).'/>';
         case "checkbox":
             ?>
-            <input type="checkbox" id="<?php echo $field["field_name"]?>" name="<?php echo $field["field_name"]?>" id="<?php echo $field["field_name"]?>" value="1" <?php echo $required ?> <?php echo  checked($value == "1") ?> />
+            <input type="checkbox" id="<?php echo $field["field_name"]?>" name="<?php echo $field["field_name"]?>" id="<?php echo $field["field_name"]?>" value="1" <?php echo $required ?> <?php echo  checked($value == "1") ?> <?php echo $readonly ?>/>
 <!--        כן
             <input type="checkbox" id="<?php /*echo $field["field_name"]*/?>2" name="<?php /*echo $field["field_name"]*/?>" id="<?php /*echo $field["field_name"]*/?>" value="0" <?php /*echo checked($value == "0") */?> />
             לא
@@ -177,11 +177,11 @@ function create_input($field,$value = null)
             <?php
             break;
         case "textarea":
-            return '<textarea rows ="2" class="font-17 grow" id="'.$field["field_name"].'" name="'.$field["field_name"].'" '. $required .'>'.esc_attr( $value).'</textarea>';
+            return '<textarea rows ="2" class="font-17 grow" id="'.$field["field_name"].'" name="'.$field["field_name"].'" '. $required.' '.$readonly .'>'.esc_attr( $value).'</textarea>';
         case "select":?>
             <select class="<?php echo $field['field_name']?>  font-17 grow" id="<?php echo $field["field_name"]?>"
             name="<?php echo $field["field_name"].(isset($field["multiple"]) ? "[]" : "" )?>" <?php echo (isset($field["multiple"]) ? "multiple=\"multiple\" size=\"10\"" : "" )?>
-                <?php echo $required ?>  onchange="onchangeSelect(event,this, this.value)" data-fill-select="<?php echo (isset($field["select_to_fill"]) ? $field["select_to_fill"] : "") ?>" >
+                <?php echo $required ?>  <?php echo ($readonly == "readonly" ? "disabled" : "") ?>   <?php echo $required ?> onchange="onchangeSelect(event,this, this.value)" data-fill-select="<?php echo (isset($field["select_to_fill"]) ? $field["select_to_fill"] : "") ?>" >
                 <?php
                 //write_log("value ".$value);
                 if(isset($field["options"])){
@@ -205,6 +205,7 @@ function create_input($field,$value = null)
             <?php break;
         case "file":
         case "image":
+            if(empty($readonly)){
             ?>
 <!--        <span class="grow pointer <?php /*echo $field["widget"]*/?>-name"></span>
 -->        <?php if($field["widget"] ==  "file"){
@@ -214,6 +215,7 @@ function create_input($field,$value = null)
                     <path d="M14 2V7C14 7.26522 14.1054 7.51957 14.2929 7.70711C14.4804 7.89464 14.7348 8 15 8H20M12 12V18M12 12L15 15M12 12L9 15" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                 </svg>
         <?php }
+
         else{
             $accept = "image/png, image/jpeg";?>
 
@@ -225,18 +227,19 @@ function create_input($field,$value = null)
         <?php } ?>
         <input class="upload-<?php echo $field["widget"]?>" type="file" id="<?php echo $field["field_name"]?>" name="<?php echo $field["field_name"]?>" style="display: none;" required  accept="<?php echo $accept ?>"/>
 
-    <?php break;
+    <?php }
+         break;
         case "radio":
             $direction = "row";
             $direction_class = $direction == "column" ? "direction-column" : "row";
             ?>
 
-            <div class="radio-options flex-display <?=$direction_class?>">
+            <div class="radio-options font-17  flex-display <?=$direction_class?>">
                 <?php
                 if(isset($field["values"])){
                     foreach ($field["values"] as $key=>$option){?>
                         <div class="">
-                            <input type="radio" class="<?php echo $field["field_name"].$key ?>" id="<?=$direction.($key)?>" name="<?php echo $field["field_name"]?>" value="<?php echo $key ?>" <?php if (isset($value) && $value == $key) echo 'checked'; ?>>
+                            <input type="radio" class="<?php echo $field["field_name"].$key ?>" id="<?=$direction.($key)?>" name="<?php echo $field["field_name"]?>" <?php echo $readonly == "readonly" ?"disabled":"" ?> value="<?php echo $key ?>" <?php if (isset($value) && $value == $key) echo 'checked'; ?>>
                             <label for="<?=$direction.$key?>"><span><?php echo $option["label"] ?></span></label>
                         </div>
             <?php   }
@@ -245,18 +248,13 @@ function create_input($field,$value = null)
         <?php
             break;
         case "status":?>
-           <div class="status-options flex-display direction-column">
+           <div class="status-options flex-display font-17  grow space-around">
                 <?php
                 if(isset($field["values"])){
                     ?><input type="hidden" id="<?php echo $field["field_name"]?>" name="<?php echo $field["field_name"]?>" value="<?php echo ($value ?? '')?>">
                     <?php
-                    foreach ($field["values"] as $key=>$option){
-                        //$firstElement = reset($option);
-
-                        //write_log("1 ".json_encode($firstElement));
-                        //write_log("2 ".$key);
-                        ?>
-                        <span data-value="<?php echo $key ?>" class="pointer ellipse <?php echo ($value && $value == $key ? '' : 'un-value ').$option["class"]?>">
+                    foreach ($field["values"] as $key=>$option){?>
+                        <span data-value="<?php echo $key ?>" class="<?php echo $readonly ?> pointer ellipse <?php echo ($value && $value == $key ? '' : 'un-value ').$option["class"]?>">
                             <?php echo $option["label"]?>
                         </span>
                     <?php   }
@@ -266,13 +264,16 @@ function create_input($field,$value = null)
             break;
         case "products":
             ?>
-        <div class="products flex-display padding-10 start ">
-            <div class="add-order-product border-dark-gray flex-display direction-column space-between product padding-15 margin-after-10">
+        <div class="products flex-display padding-10 start">
+            <?php if(empty($readonly)){  ?>
+            <div class="pointer add-order-product border-dark-gray flex-display direction-column space-between product padding-15 margin-after-10">
                 הוספת מוצר להזמנה
             </div>
         <?php
+            }
             if($value && is_array($value)){
                 foreach ($value as $key=>$product) {
+                    //write_log("product ".json_encode($product));
                     create_product_view($product,array("table_name"=>"orders","key"=>$key));
                  }
             } ?>
@@ -295,30 +296,62 @@ function create_product_view($product=null,$options=null)
         $options["key"] = 0;
     }
     ?>
-    <div class="border-dark-gray flex-display direction-column space-between product padding-15" data-id="<?php echo $product->id?>">
+    <div class="border-dark-gray flex-display direction-column space-between product font-15 padding-15" data-id="<?php echo $product->id?>">
         <?php if($options["table_name"]=="orders"){ ?>
         <input type="hidden" name="products[<?php echo $options["key"]?>][id]" value="<?php echo $product->id?>"><!--id של השורה של מוצר_הזמנה-->
         <input type="hidden" name="products[<?php echo $options["key"]?>][order_id]" value="<?php echo $product->order_id?>">
         <input type="hidden" name="products[<?php echo $options["key"]?>][product_id]" value="<?php echo $product->product_id?>">
-        <input type="hidden" name="products[<?php echo $options["key"]?>][count]" value="">
     <?php } ?>
-        <div class="product-img part-60"><?php if($product->image_id){  ?><img class="" src="<?php echo wp_get_attachment_url($product->image_id) ?>" /><?php } ?></div>
-        <div class="part-10 bold product-name"><?php echo $product->name ?></div>
-        <div class="part-10"><?php echo $product->price ?></div>
-        <div class="flex-display end part-15">
+        <div class="product-img part-40">
+            <svg class="pointer view-product" xmlns="http://www.w3.org/2000/svg" width="12" height="9" viewBox="0 0 12 9" fill="none">
+                <path d="M5.85467 0.515015C2.4715 0.515015 0.830067 3.44152 0.538793 4.02085C0.523225 4.05167 0.515137 4.08547 0.515137 4.11972C0.515137 4.15398 0.523225 4.18778 0.538793 4.2186C0.82953 4.79793 2.47096 7.72444 5.85467 7.72444C9.23838 7.72444 10.8793 4.79793 11.1705 4.2186C11.1861 4.18778 11.1942 4.15398 11.1942 4.11972C11.1942 4.08547 11.1861 4.05167 11.1705 4.02085C10.8798 3.44152 9.23838 0.515015 5.85467 0.515015Z" stroke="black" stroke-width="1.02992" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M5.85485 5.66458C6.74361 5.66458 7.4641 4.97292 7.4641 4.1197C7.4641 3.26649 6.74361 2.57483 5.85485 2.57483C4.96609 2.57483 4.24561 3.26649 4.24561 4.1197C4.24561 4.97292 4.96609 5.66458 5.85485 5.66458Z" stroke="black" stroke-width="1.02992" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <?php if($product->image_id){  ?>
+                <img class="" src="<?php echo wp_get_attachment_url($product->image_id) ?>" />
+            <?php } ?>
+        </div>
+        <div class="flex-display space-between part-20  bold">
+            <div class="product-name part-60"><?php echo $product->name ?></div>
+            <?php
+                $price = null;
+                if(!empty($product->order_price)){
+                    $price = $product->order_price;
+                }
+                else if(!empty($product->price)){
+                    $price = $product->price;
+                }
+            ?>
+            <div class="part-30"><?php echo (!empty($price) ? $price . " ₪" : "") ?></div>
+        </div>
+        <div class="plus-minus-count flex-display <?php echo $options["table_name"]=="orders" ? '':"hidden" ?> ">
+            <div class="minus bold font-60 part-20 pointer">-</div>
+            <input type="number" class="part-60"  min="0" name="products[<?php echo $options["key"]?>][count]" value="<?php echo $product->count?>" />
+            <div class="plus bold font-60 part-20 pointer">+</div>
+        </div>
+        <div class="discount_percent-bonus flex-display space-between part-20 font-12 <?php echo $options["table_name"]=="orders" ? '':"hidden" ?> ">
+                <div class="input-label flex-display align-center part-45">
+                    <input class="background-white " type="text" pattern="\d*" name="products[<?php echo $options["key"]?>][discount_percent]" value="<?php echo $product->discount_percent?>" >
+                    <label class="">אחוזי הנחה</label>
+                </div>
+                <div class="input-label flex-display align-center part-45">
+                    <input class="background-white " type="number" name="products[<?php echo $options["key"]?>][bonus]" value="<?php echo $product->bonus?>" >
+                    <label class="">בונוס</label>
+                </div>
+
+        </div>
+        <div class="flex-display space-around part-15 buttons">
         <?php //if($options["table_name"]=="products"){?>
             <a href="single?subject=products&action=edit&id=<?php echo $product->id?>" class="part-15 button background-white gold bold font-15 <?php echo $options["table_name"]=="products" ? '':"hidden" ?>">מעבר למוצר</a>
       <?php //} ?>
         <?php //if($options["table_name"]=="orders"){
             //$link = "single?subject=products&action=edit&id=".$product->id;
             ?>
-
-                <button type="button" class="background-white gold bold font-15 <?php echo $options["table_name"]=="orders" ? '':"hidden" ?>">פרטים</button>
-
+                <button type="button" class="background-white gold bold font-15 <?php echo $options["table_name"]=="orders_" ? '':"hidden" ?>">פרטים</button>
         <?php
         //}
         //else if ($options["table_name"]=="order_products"){?>
-            <button type="button" class="background-white gold bold font-15 order-product <?php echo $options["table_name"]=="order_products" ? '':"hidden" ?>">הזמן מוצר</button>
+            <button type="button" class="background-gold bold font-15 order-product <?php echo $options["table_name"]=="order_products" ? '':"hidden" ?>">הזמן מוצר</button>
         </div>
         <?php //}
         ?>
@@ -348,9 +381,9 @@ function get_list_ajax(){
     die();
 }
 
-function view_archive_actions($table_name,$view_only = false)
+function view_archive_actions($table_name,$view_only = false,$add_text="", $client_id = null)
 {
-   // ob_start();
+   ob_start();
     ?>
     <div class="archive-actions flex-display space-between margin-bottom-20">
         <div class="flex-display space-between">
@@ -367,16 +400,16 @@ function view_archive_actions($table_name,$view_only = false)
                     <path d="M12.5 13.2412C12.5 12.1534 13.382 11.2725 14.4688 11.2725H28.5312C29.618 11.2725 30.5 12.1534 30.5 13.2412V16.0537C30.5 16.5759 30.2926 17.0767 29.9234 17.4459C29.5542 17.8151 29.0534 18.0225 28.5312 18.0225H14.4688C13.9466 18.0225 13.4458 17.8151 13.0766 17.4459C12.7074 17.0767 12.5 16.5759 12.5 16.0537V13.2412ZM14.4688 12.96C14.3942 12.96 14.3226 12.9896 14.2699 13.0424C14.2171 13.0951 14.1875 13.1667 14.1875 13.2412V16.0537C14.1875 16.209 14.3135 16.335 14.4688 16.335H28.5312C28.6058 16.335 28.6774 16.3054 28.7301 16.2526C28.7829 16.1999 28.8125 16.1283 28.8125 16.0537V13.2412C28.8125 13.1667 28.7829 13.0951 28.7301 13.0424C28.6774 12.9896 28.6058 12.96 28.5312 12.96H14.4688ZM12.5 21.1162C12.5 20.0284 13.382 19.1475 14.4688 19.1475H28.5312C29.618 19.1475 30.5 20.0284 30.5 21.1162V23.9287C30.5 24.4509 30.2926 24.9517 29.9234 25.3209C29.5542 25.6901 29.0534 25.8975 28.5312 25.8975H14.4688C13.9466 25.8975 13.4458 25.6901 13.0766 25.3209C12.7074 24.9517 12.5 24.4509 12.5 23.9287V21.1162ZM14.4688 20.835C14.3942 20.835 14.3226 20.8646 14.2699 20.9174C14.2171 20.9701 14.1875 21.0417 14.1875 21.1162V23.9287C14.1875 24.084 14.3135 24.21 14.4688 24.21H28.5312C28.6058 24.21 28.6774 24.1804 28.7301 24.1276C28.7829 24.0749 28.8125 24.0033 28.8125 23.9287V21.1162C28.8125 21.0417 28.7829 20.9701 28.7301 20.9174C28.6774 20.8646 28.6058 20.835 28.5312 20.835H14.4688ZM14.4688 27.0225C13.9466 27.0225 13.4458 27.2299 13.0766 27.5991C12.7074 27.9683 12.5 28.4691 12.5 28.9912V31.8037C12.5 32.8905 13.382 33.7725 14.4688 33.7725H28.5312C29.0534 33.7725 29.5542 33.5651 29.9234 33.1959C30.2926 32.8267 30.5 32.3259 30.5 31.8037V28.9912C30.5 28.4691 30.2926 27.9683 29.9234 27.5991C29.5542 27.2299 29.0534 27.0225 28.5312 27.0225H14.4688ZM14.1875 28.9912C14.1875 28.9167 14.2171 28.8451 14.2699 28.7924C14.3226 28.7396 14.3942 28.71 14.4688 28.71H28.5312C28.6058 28.71 28.6774 28.7396 28.7301 28.7924C28.7829 28.8451 28.8125 28.9167 28.8125 28.9912V31.8037C28.8125 31.8783 28.7829 31.9499 28.7301 32.0026C28.6774 32.0554 28.6058 32.085 28.5312 32.085H14.4688C14.3942 32.085 14.3226 32.0554 14.2699 32.0026C14.2171 31.9499 14.1875 31.8783 14.1875 31.8037V28.9912Z" fill="#1A7870"/>
                 </svg>
             <?php }//get_svg ("clients","new",false,"class-name"); ?>
-            <h1 class="page-title font-30 bold"><?php echo BOUTIQUE_TABLES[$table_name]["title"] ?></h1>
+            <h1 class="page-title font-30 bold"><?php echo BOUTIQUE_TABLES[$table_name]["title"].$add_text ?></h1>
         </div>
         <div class="flex-display align-center  space-between">
         <?php if(!$view_only){?>
-                <svg class="send-email margin-after-10" xmlns="http://www.w3.org/2000/svg" width="44" height="44" viewBox="0 0 44 44" fill="none">
+<!--                <svg class="send-email margin-after-10" xmlns="http://www.w3.org/2000/svg" width="44" height="44" viewBox="0 0 44 44" fill="none">
                     <circle cx="22" cy="22" r="22" fill="#D9F5F3"/>
                     <path fill-rule="evenodd" clip-rule="evenodd" d="M30.6875 16.605L22.7963 23.14C22.572 23.3258 22.29 23.4275 21.9987 23.4275C21.7075 23.4275 21.4255 23.3258 21.2013 23.14L13.3138 16.605C13.2714 16.7324 13.2499 16.8658 13.25 17V27C13.25 27.3315 13.3817 27.6495 13.6161 27.8839C13.8505 28.1183 14.1685 28.25 14.5 28.25H29.5C29.8315 28.25 30.1495 28.1183 30.3839 27.8839C30.6183 27.6495 30.75 27.3315 30.75 27V17C30.7505 16.8658 30.7294 16.7325 30.6875 16.605ZM14.5 14.5H29.5C30.163 14.5 30.7989 14.7634 31.2678 15.2322C31.7366 15.7011 32 16.337 32 17V27C32 27.663 31.7366 28.2989 31.2678 28.7678C30.7989 29.2366 30.163 29.5 29.5 29.5H14.5C13.837 29.5 13.2011 29.2366 12.7322 28.7678C12.2634 28.2989 12 27.663 12 27V17C12 16.337 12.2634 15.7011 12.7322 15.2322C13.2011 14.7634 13.837 14.5 14.5 14.5ZM14.2375 15.75L21.2075 21.5038C21.4307 21.6881 21.711 21.7893 22.0006 21.79C22.2901 21.7907 22.5709 21.6908 22.795 21.5075L29.835 15.75H14.2375Z" fill="#1A7870"/>
                 </svg>
 
-                <a class="margin-after-10" data-tooltip="הורדה לאקסל" href="<?= get_bloginfo('stylesheet_directory'); ?>/lib/export_excel.php/lib/export_excel.php?export=archive&subject=<?= $table_name; ?>" target="_blank">
+-->                <a class="margin-after-10" data-tooltip="הורדה לאקסל" href="<?= get_bloginfo('stylesheet_directory'); ?>/lib/export_excel.php/lib/export_excel.php?export=archive&subject=<?= $table_name; ?>" target="_blank">
                     <svg class="download-file" xmlns="http://www.w3.org/2000/svg" width="44" height="44" viewBox="0 0 44 44" fill="none">
                         <circle cx="22" cy="22" r="22" fill="#D9F5F3"/>
                         <path d="M30.4661 24.6748C30.6759 24.6748 30.8776 24.7616 31.0266 24.916C31.1757 25.0706 31.26 25.2806 31.26 25.5V29.002C31.2932 29.8006 31.0213 30.5809 30.5032 31.1719C29.9851 31.7628 29.2626 32.1166 28.4944 32.1582H14.5042C14.1211 32.1419 13.7447 32.048 13.3967 31.8809C13.0485 31.7135 12.7349 31.4757 12.4749 31.1826C12.215 30.8896 12.013 30.546 11.8811 30.1719C11.7492 29.7977 11.69 29.4001 11.7063 29.002V25.5C11.7063 25.2806 11.7906 25.0706 11.9397 24.916C12.0887 24.7616 12.2904 24.6748 12.5002 24.6748C12.7101 24.6749 12.9118 24.7615 13.0608 24.916C13.2098 25.0706 13.2942 25.2807 13.2942 25.5V29C13.2653 29.3573 13.3688 29.7127 13.5852 29.9932C13.8025 30.2748 14.1166 30.4593 14.4622 30.5078V30.5088H28.4973L28.5042 30.5078C28.8497 30.4593 29.1639 30.2748 29.3811 29.9932C29.5712 29.7467 29.6743 29.4424 29.677 29.1299L29.6721 28.9961V25.5C29.6721 25.2807 29.7565 25.0706 29.9055 24.916C30.0545 24.7615 30.2562 24.6749 30.4661 24.6748Z" fill="#1A7870" stroke="#D9F5F3" stroke-width="0.1"/>
@@ -405,8 +438,14 @@ function view_archive_actions($table_name,$view_only = false)
                 </svg>
                 <input type="search" id="search" class="" placeholder="חיפוש" />
             </div>
-            <?php if(!$view_only){?>
-                <a href="<?php echo 'single?subject='.$table_name.'&action=new' ?>">
+            <?php if($table_name != "collection" &&  !$view_only){
+                $href = 'single?subject='.$table_name.'&action=new';
+                if(!empty($client_id)){
+                    $href.="&client_id=".$client_id;
+                }
+                ?>
+
+                <a href="<?php echo $href ?>">
                     <svg xmlns="http://www.w3.org/2000/svg" width="60" height="60" viewBox="0 0 60 60" fill="none">
                         <circle cx="30" cy="30" r="29.5" fill="#1A7870" stroke="white"/>
                         <line x1="30" y1="20" x2="30" y2="42" stroke="white" stroke-width="2"/>
@@ -417,12 +456,12 @@ function view_archive_actions($table_name,$view_only = false)
         </div>
     </div>
         <?php
-    //return ob_get_clean();
+    return ob_get_clean();
 }
 
 add_action('wp_ajax_view_catalog_gallery_ajax', 'view_catalog_gallery_ajax');
 function view_catalog_gallery_ajax(){
-
+write_log("1");
     //$cache_key = 'catalog_result';
 
     //$result = $cached_output = get_transient($cache_key);
@@ -431,10 +470,24 @@ function view_catalog_gallery_ajax(){
         $result = get_page_data("products");
         set_transient ($cache_key, $result, 12 * 3600 );
     }*/
+    $html = "";
+    if(isset($_POST['client_id'])){
+        $products = get_favorite_products($_POST['client_id']);
+        if(count($products)>0) {
+            //write_log("2 client: " . $_POST['client_id']);
+            $html = '<div class="archive-actions flex-display space-between margin-bottom-20">
+                    <h2 class="page-title font-30 bold">מוצרים מועדפים</h2>
+                </div>';
+            $html .= view_catalog_gallery($products,array("table_name"=>"order_products"));
+            $html .= '<div class="margin-bottom-20"></div>';
+        }
+    }
     $result = get_page_data("products");
-    $archive_actions = view_archive_actions("products",true);
-    $html = view_catalog_gallery($result,array("table_name"=>"order_products"));
-    echo json_encode (array("html" => $archive_actions.$html));
+    //$archive_actions = view_archive_actions("products",true);
+    $html .= view_archive_actions("products",true);
+    $html .= view_catalog_gallery($result,array("table_name"=>"order_products"));
+
+    echo json_encode (array("html" => $html));
     die();
 
 }
@@ -442,10 +495,11 @@ function view_catalog_gallery($products,$options = null)
 {
     ob_start();
     ?>
-    <div class="grid-display cols-5">
+    <div class="grid-display catalog-gallery">
         <?php
     foreach ($products as $product){
         create_product_view($product,$options);
+        //create_product_view($product,$options);
     }?>
     </div>
         <?php
@@ -495,10 +549,10 @@ function get_column_value($column,$row,$field,$list)
         case "select":
             if ($column["join_table"] == "agents") {
                 //write_log ('fiel ' . $field);
-               // write_log ('row ' . json_encode ($row));
+                //write_log ('row ' . json_encode ($row));
                 $user_field = $column["field_name"];
                 $column_value = empty($row->$user_field) ? '' : get_userdata($row->$user_field)->display_name;
-            }else {
+            } else {
                 $column_value = $row->$field;
             }
             break;
@@ -507,24 +561,26 @@ function get_column_value($column,$row,$field,$list)
 
             break;
         case "status":
-            $column_value = '<span class="pointer ellipse '.$column["values"][$row->$field]["class"].'">
-                                   '.$column["values"][$row->$field]["label"].'
+            $column_value = '<span class="pointer ellipse ' . $column["values"][$row->$field]["class"] . '">
+                                   ' . $column["values"][$row->$field]["label"] . '
                                 </span>';
             break;
         case "date":
-            if($row->$field) {
+            if ($row->$field) {
                 $timestamp = strtotime($row->$field); // המרת התאריך לאטימות זמן
                 $column_value = date('d/m/Y', $timestamp);
             }
             break;
         default:
-            write_log("col ".json_encode($column));
-            write_log("row ".json_encode($row));
-            write_log("list ".json_encode($list));
-
-            $column_value = isset($column['list_name']) && isset($list[$row->$field]) ? $list[$row->$field] : $row->$field;
-            if (!empty($column_value) && isset($column["un_apostrophe"])) {
-                $column_value .= " ₪";
+            if ($column["field_name"] == "display_name" || $column["field_name"] == "user_email") {
+                $user_field = $column["field_name"];
+                $column_value =  get_userdata($row->user_id)->$user_field;
+            }
+            else {
+                $column_value = isset($column['list_name']) && isset($list[$row->$field]) ? $list[$row->$field] : $row->$field;
+                if (!empty($column_value) && isset($column["un_apostrophe"])) {
+                    $column_value .= " ₪";
+                }
             }
             break;
     }
@@ -533,4 +589,80 @@ function get_column_value($column,$row,$field,$list)
 
 }
 
+add_action('wp_ajax_on_order_confirmation', 'on_order_confirmation');
+function on_order_confirmation(){
+    global  $wpdb;
+    write_log("on_order_confirmation");
+    if(isset($_POST['order_id'])){
+        $order_id = $_POST['order_id'];
+        $query = "UPDATE ".$wpdb->prefix."orders SET done = 1, user_confirms = ".get_current_user_id()."
+                  WHERE id = ".$order_id;
+        run_query ($query);
+        write_log("order_confirmation");
+        //add_notice( 'order_confirmation' ,"ההזמנה אושרה נשלח מייל ללקוח ולספקים" );
 
+        echo json_encode(array(
+            'status' => 'success',
+            'redirect' => $_POST["previous_page"],
+        ));
+        die();
+
+
+        $order_confirmation = get_page_data("orders","id" ,$order_id);
+
+        //שליחת מייל ללקוח על ההזמנה שאושרה
+        $client = get_page_data("clients","id" ,$order_confirmation->client_id);
+        $body = "הזמנה מתאריך ".$order_confirmation->order_date."<br><br>";
+        $products = get_page_data("order_products","order_id",$order_id);
+        $order_supplier = array();
+
+        foreach ($products as $product){
+            if(!is_array($order_supplier[$product->supplier_id])){
+                $order_supplier[$product->supplier_id] = array();
+            }
+            $order_supplier[$product->supplier_id][]=$product;
+            $body .= $product->name." כמות: ".$product->count." מחיר ".$product->price;
+            if(!empty($product->bonus)){
+                $body .= " כמות בקבוקים/ארגזים בונוס ".$product->bonus;
+            }
+            if(!empty($product->discount_percent)){
+                $body .= " קיבלת הנחה של ".$product->discount_percent."%";
+            }
+            $body .= "<br>";
+        }
+        $body.= "<br>".$order_confirmation->notes;
+
+        send_mail($client->email,"סיכום הזמנה מס. ".$order_id,$body);
+
+
+        //שליחת מייל לכל ספק על ההזמנה בשבילו
+        foreach ($order_supplier as $key=>$order){
+            $supplier = get_page_data("suppliers","id",$key);
+
+            $body = "נא לספק ללקוח  ".$client->name." את המוצרים הבאים:<br>";
+            foreach ($order as $product){
+
+                $body .= $product->name." כמות: ".$product->count+$product->bonus." מחיר ";
+                $body .= "<br>";
+            }
+            send_mail($supplier->email,"סיכום הזמנה מס. ".$order_id,$body);
+        }
+
+    }
+}
+
+function get_favorite_products($client_id)
+{
+    global  $wpdb;
+    $query = "SELECT p.* FROM ".$wpdb->prefix."order_products op
+                JOIN ".$wpdb->prefix."products p ON p.id = op.product_id
+                WHERE order_id 
+              IN (SELECT id FROM ".$wpdb->prefix."orders WHERE client_id = ".$client_id." 
+               ORDER BY order_date DESC
+                )
+            GROUP BY p.id";//LIMIT 3
+    //write_log("query ".$query);
+    $products = run_query ($query);
+    return $products;
+    //write_log("favorite: ".json_encode($products));
+}

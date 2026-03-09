@@ -7,7 +7,22 @@ function getParameterByName(name){
     return value;
 }
 jQuery(document).ready(function($){
+    if(getParameterByName("subject") == "orders" && getParameterByName("action") && getParameterByName("action") != "readonly")
+    setInterval(function() {
+        if(jQuery('input[name=dirty]').val() =="1" && jQuery('input[name=order_date]').val()
+            && jQuery('select[name=client_id]').val() && jQuery('.border-dark-gray.product').length > 0){
+            jQuery('input[name=dirty]').val("0");
+            if(getParameterByName("action") == "new"){
+
+            }
+            automaticOrderSaving();
+            //לשאול את פרידי לבדוק אם נגעו ב-2 דקות האלו לשמור ואם לא אז לא לשמור אולי לעשות שרק אם עזבו את המסך ולא נגעו בו כבר יותר מ2 דקות אז ללכת לשמירה
+        }
+    }, 120000); // 120000 מילישניות = 2 דקות
+
     jQuery('input, select, textarea').change(function (){
+        //לבדוק אם רק הוסיפו מוצר חדש וכמות וכו'
+        // לבדוק שבכל האפשרויות הוא רואה שהרשומה עודכנה
         jQuery('input[name=dirty]').val("1");
     })
 
@@ -89,6 +104,7 @@ jQuery(document).ready(function($){
         //grecaptcha.execute(globalVars.recaptcha_key, {action: 'submit'})
         //.then(function (token) {
         $form.find('#form_error_msgs_container').html('');
+
         var formData = $form.serializeArray();
 
         formData.push({
@@ -113,7 +129,11 @@ jQuery(document).ready(function($){
             var func;
             if (data.status == 'success') {
                 func = $form.data('success');
-                window[func]($form, data);
+                if(func == "reload_page"){
+                    window[func](data);
+                }else{
+                    window[func]($form, data);
+                }
             }
             else {
                 if (data.status == 'exception') {
@@ -144,16 +164,30 @@ jQuery(document).ready(function($){
         });
     })
 
-    jQuery(".archive-table .remove-row").click(function(){
-        var id = jQuery(this).parent().parent().data("id");
-        var postData = [
-            {name: "id", value: id},
-            {name: "remove", value: true},
-            {name: "action", value: "build_query_boutique"},
-            {name: "table_name", value: getParameterByName("subject")},
-        ];
-        call_ajax_function(postData,"remove_row",id);
+    jQuery(".remove-row").click(function(e){
+        var id = null;
 
+        var elementType = $(this).prop("tagName").toLowerCase();
+        if (elementType === 'button') {
+            id = jQuery('input[name=id]').val();
+        } else if (elementType === 'svg') {
+            id = jQuery(this).parent().parent().data("id");
+        }
+
+        var single = jQuery("section.page").data("single");
+        const confirmation = confirm('האם אתה מאשר למחוק את ה'+single);
+        if (!confirmation) {
+            e.preventDefault(); // מניעת לחיצה אם המשתמש לא מאשר
+        }
+        else {
+            var postData = [
+                {name: "id", value: id},
+                {name: "remove", value: true},
+                {name: "action", value: "build_query_boutique"},
+                {name: "table_name", value: getParameterByName("subject")},
+            ];
+            call_ajax_function(postData, "remove_row", id);
+        }
     })
 
     jQuery('.open-file-uploader, .file-name').click(function () {
@@ -210,22 +244,23 @@ jQuery(document).ready(function($){
     jQuery('.add-order-product').click(function () {
         var postData = [
             {name: "action", value: "view_catalog_gallery_ajax"},
+            {name: "client_id", value: jQuery('select[name=client_id').val()},
         ];
         call_ajax_function(postData,"openPopupAddOrderProduct");
     })
 
-    jQuery('#search').on("keyup",function(event){
-        var text = jQuery(this).val();
+    jQuery('#search').on('input', function() {
+        var text = jQuery(element).val();
 
         if((jQuery('.grid-display').length)){
-            searchProducts(text, ".product",".product-name");
+            searchElements(text, ".product",".product-name");
         }
         else{
-            searchProducts(text, "tr:not(:first)","td");
+            searchElements(text, "tr:not(:first)","td");
         }
     });
 
-    jQuery(".status-options .ellipse").click(function () {
+    jQuery(".status-options .ellipse:not(.readonly)").click(function () {
         var ellipse = jQuery(this);
         var input = jQuery(".status-options input");
 
@@ -253,6 +288,20 @@ jQuery(document).ready(function($){
             call_ajax_function(postData,"onAddChat");
         }
     })
+
+    jQuery( ".order-confirmation" ).on("click",function(event){
+        var postData = [
+            {name: "action", value: "on_order_confirmation"},
+            {name: "order_id", value: getParameterByName("id")},
+        ];
+        call_ajax_function(postData,"reload_page");
+
+    })
+
+    jQuery(".page .products .product .plus-minus-count div").click(function (e) {
+        plusMinusCountProduct(e)
+    })
+
 })
 
 function onAddChat(result,targetElement){
@@ -268,7 +317,7 @@ function onAddChat(result,targetElement){
     jQuery( "#newChat" ).val("");
 }
 
-function searchProducts(text,selector,searchSelector){
+function searchElements(text,selector,searchSelector){
 
     jQuery(selector).show();
     if(text.length > 0) {
@@ -284,47 +333,74 @@ function searchProducts(text,selector,searchSelector){
 }
 
     function openPopupAddOrderProduct(result,targetElement){
-    jQuery(".popup-body").empty();
-    jQuery(".popup-body").html(result.html);
+        jQuery(".popup-body").empty();
+        jQuery(".popup-body").html(result.html);
+
         jQuery('.popup-body #search').on("keyup",function(event){
             var text = jQuery(this).val();
-            searchProducts(text,".popup-body .product");
+            //searchProducts(text,".popup-body .product");
+            searchElements(text, ".popup-body .product",".product-name");
         });
-    jQuery('.popup-body button.order-product').click(function () {
-        var element = jQuery(this).parent().parent();
-        var id = jQuery(this).parent().parent().data("id");
-        element.addClass("current");
-        element.find("a, order-product").addClass("hidden");
-        var key = 0;
-        jQuery.each(jQuery(".page .products .product"), function (k) {
-            var product = jQuery(this);
-            var name = product.find('[name*="][product_id]"]').attr('name');
-            if(name) {
-                var a = parseInt(name.substring(name.indexOf("[") + 1, name.indexOf("]")))
-                if (a > key) {
-                    key = a;
+
+        jQuery('.popup-body button.order-product').click(function () {
+            var element = jQuery(this).parent().parent().clone();
+            var id = jQuery(this).parent().parent().data("id");
+
+            element.addClass("current");
+            element.find("a, .order-product").addClass("hidden");
+            var key = 0;
+            jQuery.each(jQuery(".page .products .product"), function (k) {
+                var product = jQuery(this);
+                var name = product.find('[name*="][product_id]"]').attr('name');
+                if(name) {
+                    var a = parseInt(name.substring(name.indexOf("[") + 1, name.indexOf("]")))
+                    if (a > key) {
+                        key = a;
+                    }
                 }
-            }
+            })
+
+            var order_id = jQuery(".page input[name=id]").val();
+            key++;
+            element.prepend(
+                '<input type="hidden" name="products['+key+'][id]" value="">'+//id של השורה של מוצר_הזמנה
+                '<input type="hidden" name="products['+key+'][order_id]" value="'+order_id+'">' +
+                '<input type="hidden" name="products['+key+'][product_id]" value="'+id+'">');
+            //element.find("input[name*=\"][product_id]").prop("name","products["+key+"][product_id]");
+            //element.find("input[name*=\"][count]").prop("name","products["+key+"][count]");
+            element.find('.plus-minus-count').removeClass("hidden");
+            element.find('.plus-minus-count input').prop("name","products["+key+"][count]");
+            element.find('.discount_percent-bonus').removeClass("hidden");
+            element.find('.discount_percent-bonus input[type="text"]').prop("name","products["+key+"][discount_percent]");
+            element.find('.discount_percent-bonus input[type="text"]').prop("name","products["+key+"][bonus]");
+
+
+            jQuery('input[name=dirty]').val("1");
+            jQuery(".add-order-product").after(element);
+
+            jQuery(".page .products .product.current .plus-minus-count div").click(function (e) {
+                plusMinusCountProduct(e);
+            })
+            //jQuery(".products").prepend(element);
+            closePopup();
+
         })
-
-        var order_id = jQuery(".page input[name=id]").val();
-        key++;
-        element.prepend(
-            '<input type="hidden" name="products['+key+'][id]" value="">'+//id של השורה של מוצר_הזמנה
-            '<input type="hidden" name="products['+key+'][order_id]" value="'+order_id+'">' +
-            '<input type="hidden" name="products['+key+'][product_id]" value="'+id+'">' +
-            '<input type="hidden" name="products['+key+'][count]" value="">');
-        //element.find("input[name*=\"][product_id]").prop("name","products["+key+"][product_id]");
-        //element.find("input[name*=\"][count]").prop("name","products["+key+"][count]");
-        jQuery('input[name=dirty]').val("1");
-        jQuery(".add-order-product").after(element);
-
-        //jQuery(".products").prepend(element);
-        closePopup();
-
-    })
     openPopup();
 
+}
+
+function plusMinusCountProduct(e){
+    var numberInput = jQuery(e.currentTarget).parent().find("input");
+    var currentValue = parseInt(numberInput.val()) || 0;
+
+    if(e.currentTarget.classList[0] == "plus"){
+        numberInput.val(currentValue + 1);
+    }
+    else{
+        if(currentValue > 0) {
+            numberInput.val(currentValue - 1);
+        }
+    }
 }
 
 function reload_page(data){
@@ -399,7 +475,9 @@ function call_ajax_function(postData,func,targetElement) {
         method: 'POST'
     }).done(function (result) {
         //window[func]($form, data);
-        window[func](result,targetElement);
+        if(func) {
+            window[func](result, targetElement);
+        }
     })
 }
 
@@ -428,11 +506,34 @@ function fillAgentsSelect(result,targetElement){
 
 
 function remove_row(result,id){
-    var tr = jQuery(".archive-table tr[data-id="+id+"]");
-    tr.remove();
+    var currentUrl = window.location.pathname;
+    if (currentUrl.includes('archive')) {
+        var tr = jQuery(".archive-table tr[data-id=" + id + "]");
+        tr.remove();
+    }
+    else{
+        window.location.href =jQuery("input[name=previous_page]").val();
+    }
 }
 function fillListTable(result,targetElement){
     if(result.tableData) {
         jQuery("." + targetElement).html(result.tableData);
     }
+}
+
+function automaticOrderSaving(){
+    var $form = jQuery('form');
+    if (!$form.valid()) {
+        return;
+    }
+
+    var formData = $form.serializeArray();
+
+    formData.push({
+        name: "action",
+        value: "send_site_forms"
+    });
+
+    call_ajax_function(formData);
+
 }

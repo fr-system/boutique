@@ -10,11 +10,14 @@ if(!isset($_GET["subject"])) wp_redirect(get_site_url());
 $table_name = $_GET["subject"];
 
 $action = $_GET["action"];
-
+$readonly ="";
 $page_info = BOUTIQUE_TABLES[$table_name];
 if($action == "new") {
     $title_page = "הוספת " . $page_info["single"] . " חדש" . ($page_info["male_female"] == "female" ? "ה" : "");
     $row = (object)array();
+    if(isset($_GET["client_id"])){
+        $row->client_id = $_GET["client_id"];
+    }
 
     if($table_name == "orders"){
         $row->order_date = date('Y-m-d');
@@ -25,13 +28,13 @@ if($action == "new") {
         //אולי צריך לשמור מי פתח את המשימה???
     }
 }
-else if($action == "edit") {
+else{//edit || readonly
     $id = $_GET["id"];
     $title_page = "עדכון ". $page_info["single"];
     $result = get_page_data($table_name,"id" ,$id);
     if(count($result)>0){
         $row = $result[0];
-       // write_log("row ".json_encode($row));
+        // write_log("row ".json_encode($row));
     }
 
     if($table_name == "agents"){
@@ -41,17 +44,29 @@ else if($action == "edit") {
             $row->user_email = $user_info->user_email;
         }
     }
-    //write_log(" row ".json_encode($row));
+
+    if($action == "edit") {    }
+    if($action == "readonly") {
+        $readonly = "readonly";
+    }
 }
+
+
 $previous_page = null;
 if (isset($_SERVER['HTTP_REFERER'])) {
     $previous_page = $_SERVER['HTTP_REFERER'];
 }
-$class_form = "border-dark-gray padding-20 flex-display direction-column part-60"
+$class_form = "border-dark-gray padding-20 flex-display direction-column ";
+if($table_name != "orders"){
+    $class_form.="part-60 ";
+}
+else{
+    $class_form.="part-80 ";
+}
 
 ?>
 
-<section class="page single">
+<section class="page single" data-single="<?php echo $page_info['single']?>">
 <div class="font-30 margin-bottom-20"><?php echo $title_page ?></div>
     <div class="flex-display space-between">
         <input type="hidden" name="dirty" value="" />
@@ -72,12 +87,20 @@ $class_form = "border-dark-gray padding-20 flex-display direction-column part-60
 
             <?php
             //write_log("row ".json_encode($row));
-            get_single_view($table_name,$row); ?>
+            get_single_view($table_name,$row,$readonly); ?>
             <div class="buttons flex-display align-self-center">
                 <button type="post" class="save background-gold bold font-18">שמור</button>
                 <?php if($previous_page) { ?>
                     <a href="<?php echo $previous_page?>" class="cancel button background-white gold bold font-18">בטל</a>
-                <?php } ?>
+                <?php }
+                if($action != "new") {?>
+                    <button type="button" class="remove-row background-dark-green bold font-18">מחיקת <?php echo $page_info["single"]; ?></button>
+                <?php }
+                if($table_name == "orders" && (!isset($row->done) || !$row->done)){
+                    ?><button type="button" class="order-confirmation background-white dark-green bold font-18">אישור <?php echo $page_info["single"]; ?></button>
+                    <?php
+                }
+                ?>
             </div>
 
         </form>

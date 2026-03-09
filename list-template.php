@@ -6,8 +6,8 @@ if(!is_user_logged_in()){
 <?php get_header();?>
 <section class="page">
     <h1 class="page-title  font-30 bold">רשימות</h1>
-        <select class="list-combo font-17 grow"><?php
-            foreach (BOUTIQUE_LISTS as $list_name=> $B_LIST){
+        <select id="list" class="list-combo font-17 grow"><?php
+            foreach (BOUTIQUE_LISTS as $list_name => $B_LIST){
 
                 //print_r ($B_LIST);
                echo "<option value='{$list_name}'>".$B_LIST["title"]."</option>";
@@ -38,5 +38,4 @@ if(!is_user_logged_in()){
 //        }?>
     </table>
 </section>
-<?php
-?>
+
