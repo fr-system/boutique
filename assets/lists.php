@@ -126,19 +126,7 @@ const BOUTIQUE_TABLES = array(
         ),
         //"filter"=>"area_id == []"
     ),
-//    "cities" =>
-//        array(
-//        "title" => "ערים",
-//        "single" => "עיר",
-//            "male_female" => "female",
-//        "columns" => array(
-//            array("field_name" => "name", "widget" => "text"),
-//            array("field_name" => "area_id","widget" => "select"),
-//            array("field_name" => "is_area", "widget" => "checkbox"),
-//        ),
-//        "filter"=>"is_area != true",
-//        "data-field"=>"area_id"
-//        ),
+
     "collection" =>//invoices
         array(
         "title" => "חשבוניות",
@@ -154,8 +142,12 @@ const BOUTIQUE_TABLES = array(
             //array("field_name" => "credit_number", "widget" => "text", "label" => "מספר כרטיס אשראי"),
             array("field_name" => "payment_type", "widget" => "select", "label" => "אופן תשלום"),
             array("field_name" => "check_number", "widget" => "text", "label" => "מספר צ'ק"),
-        ))
-
+        )),
+        "lists" =>//tables
+        array(
+            "title" => "רשימות",
+            "single" => "רשימה",
+           )
 );
 const BOUTIQUE_LISTS = array(
     "cities" =>
@@ -167,8 +159,6 @@ const BOUTIQUE_LISTS = array(
                 array("field_name" => "name","widget" => "text"),
                 array("field_name" => "area_id","widget" => "select", "join_table" => "areas", "join_value" => "area", "label" => "איזור"),
             ),
-            "filter"=>"is_area != true",
-            "data-field"=>"area_id"
         ),
     "areas" =>
         array(

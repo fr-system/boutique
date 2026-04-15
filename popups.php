@@ -87,7 +87,7 @@ function get_side_menu()
         foreach ($menu_items as $item) {
             $name = $item->description;
             $url = $item->url;
-            if($url != "home"){
+            if($url != "home" && !empty ($name)){
                 $url.="?subject=".$name;
             }
             ?>
@@ -370,8 +370,8 @@ function get_list_ajax(){
    $options=$table=null;
     if(isset($_POST['table_display'])){
         write_log ("table_display " );
-        $table = build_table_rows($table_name);
-        //write_log ("rows " . $table);
+        $table = build_table_rows($table_name,'');
+        write_log ("rows " . $table);
     }
     else {
         $options = build_options ($table_name, null, $filter);
@@ -400,7 +400,7 @@ function view_archive_actions($table_name,$view_only = false,$add_text="", $clie
                     <path d="M12.5 13.2412C12.5 12.1534 13.382 11.2725 14.4688 11.2725H28.5312C29.618 11.2725 30.5 12.1534 30.5 13.2412V16.0537C30.5 16.5759 30.2926 17.0767 29.9234 17.4459C29.5542 17.8151 29.0534 18.0225 28.5312 18.0225H14.4688C13.9466 18.0225 13.4458 17.8151 13.0766 17.4459C12.7074 17.0767 12.5 16.5759 12.5 16.0537V13.2412ZM14.4688 12.96C14.3942 12.96 14.3226 12.9896 14.2699 13.0424C14.2171 13.0951 14.1875 13.1667 14.1875 13.2412V16.0537C14.1875 16.209 14.3135 16.335 14.4688 16.335H28.5312C28.6058 16.335 28.6774 16.3054 28.7301 16.2526C28.7829 16.1999 28.8125 16.1283 28.8125 16.0537V13.2412C28.8125 13.1667 28.7829 13.0951 28.7301 13.0424C28.6774 12.9896 28.6058 12.96 28.5312 12.96H14.4688ZM12.5 21.1162C12.5 20.0284 13.382 19.1475 14.4688 19.1475H28.5312C29.618 19.1475 30.5 20.0284 30.5 21.1162V23.9287C30.5 24.4509 30.2926 24.9517 29.9234 25.3209C29.5542 25.6901 29.0534 25.8975 28.5312 25.8975H14.4688C13.9466 25.8975 13.4458 25.6901 13.0766 25.3209C12.7074 24.9517 12.5 24.4509 12.5 23.9287V21.1162ZM14.4688 20.835C14.3942 20.835 14.3226 20.8646 14.2699 20.9174C14.2171 20.9701 14.1875 21.0417 14.1875 21.1162V23.9287C14.1875 24.084 14.3135 24.21 14.4688 24.21H28.5312C28.6058 24.21 28.6774 24.1804 28.7301 24.1276C28.7829 24.0749 28.8125 24.0033 28.8125 23.9287V21.1162C28.8125 21.0417 28.7829 20.9701 28.7301 20.9174C28.6774 20.8646 28.6058 20.835 28.5312 20.835H14.4688ZM14.4688 27.0225C13.9466 27.0225 13.4458 27.2299 13.0766 27.5991C12.7074 27.9683 12.5 28.4691 12.5 28.9912V31.8037C12.5 32.8905 13.382 33.7725 14.4688 33.7725H28.5312C29.0534 33.7725 29.5542 33.5651 29.9234 33.1959C30.2926 32.8267 30.5 32.3259 30.5 31.8037V28.9912C30.5 28.4691 30.2926 27.9683 29.9234 27.5991C29.5542 27.2299 29.0534 27.0225 28.5312 27.0225H14.4688ZM14.1875 28.9912C14.1875 28.9167 14.2171 28.8451 14.2699 28.7924C14.3226 28.7396 14.3942 28.71 14.4688 28.71H28.5312C28.6058 28.71 28.6774 28.7396 28.7301 28.7924C28.7829 28.8451 28.8125 28.9167 28.8125 28.9912V31.8037C28.8125 31.8783 28.7829 31.9499 28.7301 32.0026C28.6774 32.0554 28.6058 32.085 28.5312 32.085H14.4688C14.3942 32.085 14.3226 32.0554 14.2699 32.0026C14.2171 31.9499 14.1875 31.8783 14.1875 31.8037V28.9912Z" fill="#1A7870"/>
                 </svg>
             <?php }//get_svg ("clients","new",false,"class-name"); ?>
-            <h1 class="page-title font-30 bold"><?php echo BOUTIQUE_TABLES[$table_name]["title"].$add_text ?></h1>
+            <h1 class="page-title font-30 bold"><?php echo BOUTIQUE_TABLES[$table_name]["title"].$add_text  ?></h1>
         </div>
         <div class="flex-display align-center  space-between">
         <?php if(!$view_only){?>
@@ -443,9 +443,15 @@ function view_archive_actions($table_name,$view_only = false,$add_text="", $clie
                 if(!empty($client_id)){
                     $href.="&client_id=".$client_id;
                 }
+                if($table_name=="lists") { ?>
+                    <a data-bs-toggle="modal" href="#edit-list" role="button" data-action="new">
+                <?php }
+                else{
                 ?>
 
                 <a href="<?php echo $href ?>">
+
+                <?php }?>
                     <svg xmlns="http://www.w3.org/2000/svg" width="60" height="60" viewBox="0 0 60 60" fill="none">
                         <circle cx="30" cy="30" r="29.5" fill="#1A7870" stroke="white"/>
                         <line x1="30" y1="20" x2="30" y2="42" stroke="white" stroke-width="2"/>
@@ -509,16 +515,37 @@ function view_catalog_gallery($products,$options = null)
 function build_table_rows($list_name)
 {
     $fields_list = BOUTIQUE_LISTS[$list_name];
-    write_log("build_table_rows list name " .$list_name);
-    $list = get_list($list_name);
-    write_log("list " .json_encode($list));
-    $rows = '';
+    //write_log("build_table_rows list name " .$list_name);
+    $list = get_list($list_name,'',true);
+   // write_log("list " .json_encode($list));
+
+    $rows = '<tr class="tr-head gold"><th>'.BOUTIQUE_LISTS[$list_name]["single"].'</th>';
+    foreach (array_slice(BOUTIQUE_LISTS[$list_name]["columns"],1) as $column) {
+        $rows .= '<th data-column-name ='.$column["field_name"].'>'.$column['label'].'</th>';
+    }
+    $rows .= '</tr>';
     foreach ($list as $row) {
         $rows .= '<tr>';
         foreach (BOUTIQUE_LISTS[$list_name]["columns"] as $column) {
-            $field =$column["field_name"];
-            $rows .= '<td >' . $row->$field . ' </td>';
+            if (isset($column['join_value'])) {
+                $field = $column['join_value'];
+            } else {
+                $field = $column["field_name"];
+            }
+            $rows .= '<td>' . $row->$field . ' </td>';
         }
+        //?subject=' . $list_name . '&action=edit&id=' . $row->id . '
+        $rows .= '<td class="td-action"><a data-bs-toggle="modal" href="#edit-list" role="button" data-action="edit"> 
+                        <svg class="edit-row" xmlns="http://www.w3.org/2000/svg" width="24" height="23" viewBox="0 0 24 23" fill="none">
+                            <path d="M7 16.3041L11.413 16.2898L21.045 7.14726C21.423 6.78501 21.631 6.30393 21.631 5.79218C21.631 5.28043 21.423 4.79934 21.045 4.43709L19.459 2.91717C18.703 2.19267 17.384 2.19651 16.634 2.9143L7 12.0587V16.3041ZM18.045 4.27226L19.634 5.7893L18.037 7.30538L16.451 5.78643L18.045 4.27226ZM9 12.858L15.03 7.13384L16.616 8.65376L10.587 14.376L9 14.3808V12.858Z" fill="#E2B252"/>
+                            <path d="M5 20.125H19C20.103 20.125 21 19.2654 21 18.2083V9.9015L19 11.8182V18.2083H8.158C8.132 18.2083 8.105 18.2179 8.079 18.2179C8.046 18.2179 8.013 18.2093 7.979 18.2083H5V4.79167H11.847L13.847 2.875H5C3.897 2.875 3 3.73462 3 4.79167V18.2083C3 19.2654 3.897 20.125 5 20.125Z" fill="#E2B252"/>
+                        </svg></a>
+                  </td>';
+        $rows .='<td class="td-action"><a data-bs-toggle="modal" href="#bout-msg" role="button" data-action="remove">
+                    <svg class="remove-row"  xmlns="http://www.w3.org/2000/svg" width="25" height="24" viewBox="0 0 25 24" fill="none">
+                    <path d="M4.16663 7H20.8333M10.4166 11V17M14.5833 11V17M5.20829 7L6.24996 19C6.24996 19.5304 6.46945 20.0391 6.86015 20.4142C7.25085 20.7893 7.78076 21 8.33329 21H16.6666C17.2192 21 17.7491 20.7893 18.1398 20.4142C18.5305 20.0391 18.75 19.5304 18.75 19L19.7916 7M9.37496 7V4C9.37496 3.73478 9.48471 3.48043 9.68006 3.29289C9.87541 3.10536 10.1404 3 10.4166 3H14.5833C14.8596 3 15.1245 3.10536 15.3199 3.29289C15.5152 3.48043 15.625 3.73478 15.625 4V7" stroke="#E2B252" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg></a>
+                </td>';
         $rows .= '</tr>';
     }
     //write_log("rows " .$rows);

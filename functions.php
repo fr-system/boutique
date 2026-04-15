@@ -14,6 +14,10 @@ require_once dirname(__FILE__) . "/popups.php";
 function boutique_enqueue_scripts()
 {
     $ver = '1.0.0';
+    wp_register_style( 'bootstrap-style', get_template_directory_uri(). '/assets/bootstrap.min.css' , array(), $ver);
+    wp_enqueue_style( 'bootstrap-style' );
+
+
     wp_enqueue_style(
         'boutique',
         get_template_directory_uri() . '/style.css',
@@ -21,9 +25,10 @@ function boutique_enqueue_scripts()
         $ver
     );
 
-
     wp_register_style( 'assets-style', get_template_directory_uri(). '/assets/style.css' , array(), $ver);
     wp_enqueue_style( 'assets-style' );
+
+
 
     wp_enqueue_script('jquery');
 
@@ -36,7 +41,7 @@ function boutique_enqueue_scripts()
 
     wp_register_script('autoNumeric', get_template_directory_uri() . '/assets/autoNumeric.js');
     wp_enqueue_script('autoNumeric');
-
+    wp_enqueue_script( 'boostrap', get_template_directory_uri(). '/assets/bootstrap.bundle.min.js', array('jquery'), $ver );
     wp_register_script('jquery-validate', get_template_directory_uri() . '/assets/jquery.validate.js');
     wp_enqueue_script('jquery-validate');
     wp_register_script('messages_he', get_template_directory_uri() . '/assets/messages_he.js');
