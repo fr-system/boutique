@@ -241,7 +241,9 @@ input, textarea, select, button{
 .margin-r-30{
     margin-right: 30px;
 }
-
+.margin-20{
+    margin: 20px;
+}
 .w-h-25{
     width: 25px;
     height: 25px;
@@ -511,4 +513,35 @@ label.error, #form_error_msgs_container{
 svg{
     cursor: pointer;
 }
+ul.tables-list li.selected {
+    font-weight: bold;
+}
+ul.tables-list li:hover{
+    background-color: var(--b-global-color-light-gray);
+}
+ul.tables-list li{
+     display: inline;
+     padding: 10px;
+     border:  var(--b-global-color-dark-gray) 1px solid;
+ }
+ul.tables-list li:first-child{
+    border-top-right-radius: 12px;
+    border-bottom-right-radius: 12px;
+    border-right: var(--b-global-color-dark-gray) 1px solid;
+}
+ul.tables-list li:last-child{
+    border-top-left-radius: 12px;
+    border-bottom-left-radius: 12px;
+    border-right: var(--b-global-color-dark-gray) 1px solid;
+}
 
+.list-table{
+    width: 60%;
+}
+.list-table .td-action{
+    width: 10%;
+    padding-top: 5px;
+}
+.modal button.btn-close{
+    min-width: auto;
+}

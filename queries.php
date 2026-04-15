@@ -225,24 +225,41 @@ function build_options($table_name,$value=null,$filter=null)
     return $options;
 }
 
-function get_list($list_name,$filter = ''){
+function get_list($list_name,$filter = '',$table_display =false)
+{
     global $wpdb;
-
-    if (array_key_exists($list_name, BOUTIQUE_LISTS)) {
+    if (array_key_exists ($list_name, BOUTIQUE_LISTS)) {
         $page_info = BOUTIQUE_LISTS[$list_name];
-    }
-    else if (array_key_exists($list_name, BOUTIQUE_TABLES)) {
+    } else if (array_key_exists ($list_name, BOUTIQUE_TABLES)) {
         $page_info = BOUTIQUE_TABLES[$list_name];
     }
-
+    $table_name=$list_name;
+    $join="";
     $field_name = $page_info["columns"][0]["field_name"];
-
-    $query = "SELECT id as value" . ($list_name == "agents" ? "" : ", ".$field_name." as text");
+    if ($table_display) {
+        $query = "SELECT {$wpdb->prefix}{$table_name}.id ,";
+        foreach (BOUTIQUE_LISTS[$list_name]["columns"] as $column) {
+            if (isset($column['join_table'])) {
+                if(isset($column['join_value'])) {
+                    $query .= $wpdb->prefix . $column['join_table'] . "." . $column['join_value'] . " AS " . $column['join_value'] . ", ";
+                }
+                else{
+                    $query .= $wpdb->prefix . $column['join_table'] . ".*, " ;
+                }
+                $join .= " LEFT JOIN " . $wpdb->prefix.$column['join_table'] . " ON " .$wpdb->prefix. $table_name . "." . $column["field_name"] . " = " . $wpdb->prefix.$column['join_table'] . ".id";
+            }
+            $query .= $column["field_name"].", ";
+        }
+        $query = substr ($query,0,-2);
+    }
+    else {
+        $query = "SELECT id as value" . ($list_name == "agents" ? "" : ", " . $field_name . " as text");
+    }
     if(isset($page_info["data-field"])) {
         $query .= ", ".$page_info["data-field"];
     }
     $table_name=$list_name;
-    $query .= " FROM ".$wpdb->prefix.$table_name;
+    $query .= " FROM ".$wpdb->prefix.$table_name.$join;
     /*if(isset($page_info["join_table"]) && $page_info["join_table"] != "" && isset($page_info["join_table_value"])){
         $query.=" JOIN #_".$page_info["join_table"]." on #_".$page_info["join_table"].".".$page_info["join_table_value"]." = #_".$page_info["table_name"].".".$page_info["field_value"];
     }
@@ -254,7 +271,7 @@ function get_list($list_name,$filter = ''){
     else if(!empty($filter)){
         $query .= " WHERE ".$filter;
     }
-    //write_log("quert ".$query." table_name ".$table_name." field_name ".$field_name);
+    write_log("quert ".$query." table_name ".$table_name." field_name ".$field_name);
     $list = run_query($query);
     if($table_name == "agents") {
         $users = array();
