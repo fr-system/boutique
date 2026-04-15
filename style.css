@@ -31,12 +31,12 @@ Text Domain: boutique
 .background-white.dark-green{
     border: var(--b-global-color-dark-green) 1px solid;
 }
-.background-gold {
+.background-gold ,.background-gold:hover{
     background-color:var(--b-global-color-gold);
     color: white;
     border: var(--b-global-color-gold) 1px solid;
 }
-.background-dark-green {
+.background-dark-green, .background-dark-green:hover {
     background-color: var(--b-global-color-dark-green);
     color: white;
     border: var(--b-global-color-dark-green) 1px solid;
@@ -253,6 +253,9 @@ button, .pointer{
     cursor: pointer;
 }
 
+button:hover, .button:hover{
+    box-shadow: 1px 2px 19px 5px rgba(0, 0, 0, 0.06);
+}
 
 button, .button{
     min-width: 130px;
