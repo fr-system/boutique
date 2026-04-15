@@ -67,7 +67,7 @@ else{
 ?>
 
 <section class="page single" data-single="<?php echo $page_info['single']?>">
-<div class="font-30 margin-bottom-20"><?php echo $title_page ?></div>
+<div class="font-30 margin-bottom-20 bold"><?php echo $title_page ?></div>
     <div class="flex-display space-between">
         <input type="hidden" name="dirty" value="" />
         <?php if($table_name == "products"){

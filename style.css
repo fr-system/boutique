@@ -16,13 +16,13 @@ Text Domain: boutique
 
     font-size: 62.5%;
 }
-.gold {
+.gold, .gold:hover {
    color:var(--b-global-color-gold);
 }
-.dark-green {
+.dark-green, .dark-green:hover{
     color:var(--b-global-color-dark-green);
 }
-.background-white{
+.background-white {
     background-color:white;
 }
 .background-white.gold{
