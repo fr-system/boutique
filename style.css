@@ -13,6 +13,7 @@ Text Domain: boutique
     --b-global-color-light-gray: #F9F9F9;
     --b-global-color-gold: #E2B252;
     --b-global-color-dark-green: #1A7870;
+    --b-global-color-light-green:#D9F5F3;
 
     font-size: 62.5%;
 }
@@ -513,15 +514,18 @@ label.error, #form_error_msgs_container{
 svg{
     cursor: pointer;
 }
+ul.tables-list li:hover{
+     background-color: var(--b-global-color-light-green);
+ }
 ul.tables-list li.selected {
     font-weight: bold;
+    background-color: var(--b-global-color-dark-green);
+    color: white;
 }
-ul.tables-list li:hover{
-    background-color: var(--b-global-color-light-gray);
-}
+
 ul.tables-list li{
      display: inline;
-     padding: 10px;
+     padding: 10px 18px;
      border:  var(--b-global-color-dark-gray) 1px solid;
  }
 ul.tables-list li:first-child{
@@ -536,7 +540,7 @@ ul.tables-list li:last-child{
 }
 
 .list-table{
-    width: 60%;
+    width: 620px;
 }
 .list-table .td-action{
     width: 10%;

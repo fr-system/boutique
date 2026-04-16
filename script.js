@@ -12,12 +12,7 @@ jQuery(document).ready(function($){
     {
         var selected = jQuery("ul.tables-list li:first-child")
         selected.addClass("selected");
-        var postData = [
-            {name: "table_display", value: "1"},
-            {name: "action", value: "get_list_ajax"},
-            {name: "table_name", value: selected.data("list-name")},
-        ];
-        call_ajax_function(postData,"fillListTable","list-table");
+        getTableAjaxData(selected.data("list-name"));
     }
 
     if(getParameterByName("subject") == "orders" && getParameterByName("action") && getParameterByName("action") != "readonly")
@@ -212,16 +207,9 @@ jQuery(document).ready(function($){
 
     });
     jQuery('ul.tables-list li').click(function () {
-        //var listName=this.value;
         jQuery(this).parent().children().removeClass("selected");
         jQuery(this).addClass("selected");
-        //jQuery("section").data("single",jQuery(this).data("list-name"));
-        var postData = [
-            {name: "table_display", value: "1"},
-            {name: "action", value: "get_list_ajax"},
-            {name: "table_name", value: jQuery(this).data("list-name")},
-        ];
-        call_ajax_function(postData,"fillListTable","list-table");
+        getTableAjaxData( jQuery(this).data("list-name"));
     });
 
     jQuery('[data-view]').click(function () {
@@ -298,26 +286,47 @@ jQuery(document).ready(function($){
         jQuery('.site_form').find('input, select').not(dont_reset_val).val('');
     });
     jQuery('#edit-list').on('show.bs.modal', function (e) {
-        var btn = jQuery(e.relatedTarget),        id, name, tr;
+        var btn = jQuery(e.relatedTarget), comboListName,html='', tr,rowData=[];
         var listName= jQuery("ul.tables-list li.selected").data("list-name");
-        jQuery("input[name=table_name]").val(listName);
-        var th = jQuery('th')
-        if(listName=="cities"){
-            var postData = [
-                {name: "action", value: "get_list_ajax"},
-                {name: "table_name", value: "areas"},
-            ];
-            call_ajax_function(postData,"fill_modal_list")
+        jQuery("#edit-list input[name=table_name]").val(listName);
+        jQuery("#edit-list .modal-title").text(jQuery("ul.tables-list li.selected").text());
+        if(btn.data("action")=="edit"){
+            tr=btn.parent().parent();
+            rowData= jQuery.map(jQuery(tr).find('td:not(.td-action)'),function(td){
+                return jQuery(td).html();
+            });
+            jQuery('#edit-list input[name=id]').val(btn.data("id"));
         }
-        if(btn.data("action")=="new"){
+        jQuery('table.list-table tr:first-child th').each(function(k,th) {
+            th = jQuery(th)
+            var columnName = th.data("column-name");
+            var columnType = th.data("column-type") ?? "text";
+            html += '<span class="input-label flex-display align-center">' +
+                ' <label class="bold" for="' + columnName + '">' + th.text() + ':</label>';
+            if (th.data("column-type") == "select") {
+                html += '<select id="' + columnName + '" name="' + columnName + '"  class="font-17 grow"' +
+                    (rowData.length > 0 ? ' value="' + rowData[k] + '"' : '') + '>';
+                comboListName = th.data("table");
+                var postData = [
+                    {name: "action", value: "get_list_ajax"},
+                    {name: "table_name", value: comboListName},
+                    {name: "selected_value",value:  rowData[k]}
+                ];
+                call_ajax_function(postData,"fill_modal_list")
+            } else {
+                html += '<input type="text" id="' + columnName + '" name="' + columnName + '"  class="font-17 grow"' +
+                    (rowData.length > 0 ? ' value="' + rowData[k] + '"' : '') + '>';
+            }
+            html += '</span>';
+        });
+        jQuery('#edit-list .modal-body').empty();
+        jQuery('#edit-list .modal-body').append(html);
 
-        }
-        else{
-            tr = btn.parent().parent();
-
-        }
 
     });
+    jQuery('#edit-list').on('shown.bs.modal', function () {
+        jQuery('#edit-list .modal-body input:first-child').focus();
+    })
 })
 
 function onAddChat(result,targetElement){
@@ -585,4 +594,20 @@ function automaticOrderSaving(){
 }
 function fill_modal_list(result){
     jQuery(".modal-body select").html(result.options);
+}
+function getTableAjaxData(tableName){
+    if(jQuery(tableName).is("form")){
+        closeModal();
+        var selected = jQuery("ul.tables-list li.selected")
+        tableName = selected.data("list-name");
+    }
+    var postData = [
+        {name: "table_display", value: "1"},
+        {name: "action", value: "get_list_ajax"},
+        {name: "table_name", value: tableName},
+    ];
+    call_ajax_function(postData,"fillListTable","list-table");
+}
+function closeModal(){
+    jQuery('.modal.show').modal('hide');
 }
