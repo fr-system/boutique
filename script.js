@@ -289,7 +289,7 @@ jQuery(document).ready(function($){
 
     })
 
-    jQuery(".page .products .product .plus-minus-count div").click(function (e) {
+    jQuery(".page .products-gallery .product .plus-minus-count div").click(function (e) {
         plusMinusCountProduct(e)
     })
 
@@ -369,14 +369,14 @@ jQuery(document).ready(function($){
     jQuery('#bout-massage').on('show.bs.modal', function (e) {
         //action = remove
         var btn = jQuery(e.relatedTarget);
-            var single= btn.parent().parent().parent().parent().parent().parent().parent().parent().find("section").data("single");
+        var single= btn.parent().parent().parent().parent().parent().parent().parent().parent().find("section").data("single");
         var title= btn.parent().parent().parent().parent().parent().parent().parent().parent().find(".page-title").html()
         jQuery(".modal-title").html(title);
         jQuery(".modal-body").html("האם אתה מאשר למחוק את ה"+single+"?");
 
-        if (btn === 'button') {
+        if (btn.is('button')) {
             id = getParameterByName("id");
-        } else {//if (btn === 'a') {
+        } else if (btn.is('a')) {
             id = btn.parent().parent().data("id");
         }
 
@@ -418,6 +418,7 @@ function removeRowSuccess(result){
     else{
         window.location.href =jQuery("input[name=previous_page]").val();
     }
+    closeModal();
 }
 
 function onAddChat(result,targetElement){
@@ -465,7 +466,7 @@ function searchElements(text,selector,searchSelector){
             element.addClass("current");
             element.find("a, .order-product").addClass("hidden");
             var key = 0;
-            jQuery.each(jQuery(".page .products .product"), function (k) {
+            jQuery.each(jQuery(".page .products-gallery .product"), function (k) {
                 var product = jQuery(this);
                 var name = product.find('[name*="][product_id]"]').attr('name');
                 if(name) {
@@ -494,7 +495,7 @@ function searchElements(text,selector,searchSelector){
             jQuery('input[name=dirty]').val("1");
             jQuery(".add-order-product").after(element);
 
-            jQuery(".page .products .product.current .plus-minus-count div").click(function (e) {
+            jQuery(".page .products-gallery .product.current .plus-minus-count div").click(function (e) {
                 plusMinusCountProduct(e);
             })
             //jQuery(".products").prepend(element);
@@ -634,7 +635,7 @@ function fillListTable(result,targetElement){
         jQuery("." + targetElement).html("");
     }
 }
-function onRemoveRowClick(e,me){
+/*function onRemoveRowClick(e,me){
     var id = null;
 
     var elementType = jQuery(me).prop("tagName").toLowerCase();
@@ -658,7 +659,7 @@ function onRemoveRowClick(e,me){
         ];
         call_ajax_function(postData, "remove_row", id);
     }
-}
+}*/
 function automaticOrderSaving(){
     var $form = jQuery('form');
     if (!$form.valid()) {

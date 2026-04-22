@@ -265,7 +265,7 @@ function create_input($field,$value = null,$readonly = "")
             break;
         case "products":
             ?>
-        <div class="products flex-display padding-10 start">
+        <div class="products-gallery grid-display padding-10 start one-row">
             <?php if(empty($readonly)){  ?>
             <div class="pointer add-order-product border-dark-gray flex-display direction-column space-between product padding-15 margin-after-10">
                 הוספת מוצר להזמנה
@@ -312,8 +312,8 @@ function create_product_view($product=null,$options=null)
                 <img class="" src="<?php echo wp_get_attachment_url($product->image_id) ?>" />
             <?php } ?>
         </div>
-        <div class="flex-display space-between part-20  bold">
-            <div class="product-name part-60"><?php echo $product->name ?></div>
+        <div class="product-name bold"><?php echo $product->name ?></div>
+        <div class="flex-display space-between   ">
             <?php
                 $price = null;
                 if(!empty($product->order_price)){
@@ -468,7 +468,7 @@ function view_archive_actions($table_name,$view_only = false,$add_text="", $clie
 }
 
 add_action('wp_ajax_view_catalog_gallery_ajax', 'view_catalog_gallery_ajax');
-function view_catalog_gallery_ajax(){
+function view_catalog_gallery_ajax(){//לתוח פופאפ לבחור איזה מוצר להוסיף להזמנה
 write_log("1");
     //$cache_key = 'catalog_result';
 
@@ -486,14 +486,14 @@ write_log("1");
             $html = '<div class="archive-actions flex-display space-between margin-bottom-20">
                     <h2 class="page-title font-30 bold">מוצרים מועדפים</h2>
                 </div>';
-            $html .= view_catalog_gallery($products,array("table_name"=>"order_products","class_grid"=>"favorite-products"));
+            $html .= view_catalog_gallery($products,array("table_name"=>"order_products","class_grid"=>"favorite one-row"));
             $html .= '<div class="margin-bottom-20"></div>';
         }
     }
     $result = get_page_data("products");
     //$archive_actions = view_archive_actions("products",true);
     $html .= view_archive_actions("products",true);
-    $html .= view_catalog_gallery($result,array("table_name"=>"order_products"));
+    $html .= view_catalog_gallery($result,array("table_name"=>"order_products","class_grid"=>"catalog one-row"));
 
     echo json_encode (array("html" => $html));
     die();
@@ -501,10 +501,10 @@ write_log("1");
 }
 function view_catalog_gallery($products,$options = null)
 {
-    $class_grid = isset($options['class_grid']) ?  $options['class_grid'] : 'catalog-gallery';
+    $class_grid = isset($options['class_grid']) ?  $options['class_grid'] : 'catalog';
     ob_start();
     ?>
-    <div class="grid-display <?= $class_grid ?>">
+    <div class="grid-display products-gallery <?= $class_grid?>">
         <?php
     foreach ($products as $product){
         create_product_view($product,$options);

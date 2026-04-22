@@ -127,7 +127,7 @@ else{
                                     <img class="user-logo" src="<?= wp_get_attachment_url(9); ?>"/>
                                 </div>
                                 <div class="text part-50 text-center"><?= $message->text?></div>
-                                <div class="date text-left part-20">
+                                <div class="date text-left part-20 font-12">
                                     <div><?=  date('d/m/y', strtotime($message->date))?></div>
                                     <div><?=  date('H:i', strtotime($message->date))?></div>
                                 </div>

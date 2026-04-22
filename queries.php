@@ -121,12 +121,12 @@ function build_query_boutique()
     //return  $ok;
     if(!isset($_POST['save_product'])) {
         write_log("to_js");
-        /*echo json_encode(array(
+        echo json_encode(array(
             'status' => 'success',
            // 'id' => $id,
             'redirect' => (isset($_POST["previous_page"])? $_POST["previous_page"]:''),
         ));
-        wp_die();*/
+        wp_die();
     }
 
 }
