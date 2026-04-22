@@ -100,7 +100,7 @@ function build_query_boutique()
     }
 
     $id = isset($_POST["id"])? $_POST["id"]:null;
-    //write_log("create_query ".$table_name);
+    write_log("create_query ".$table_name);
     create_query($table_name,$id,$action,$result);
     if(!$_POST["id"]){
         $id = $wpdb->get_var("SELECT MAX(id) FROM {$wpdb->prefix}".$table_name);
@@ -133,7 +133,13 @@ function build_query_boutique()
 
 function get_field($table_name, $field_name)
 {
-    $page_info = BOUTIQUE_TABLES[$table_name]["columns"];
+    if (array_key_exists($table_name, BOUTIQUE_LISTS)) {
+        $page_info = BOUTIQUE_LISTS[$table_name]["columns"];
+    }
+    else if (array_key_exists($table_name, BOUTIQUE_TABLES)) {
+        $page_info = BOUTIQUE_TABLES[$table_name]["columns"];
+    }
+
     $field = array_filter($page_info, function ($field_row) use ($field_name) {
         return isset($field_row["field_name"]) && $field_row["field_name"] == $field_name;
     });
@@ -190,7 +196,6 @@ function get_page_data($table_name,$filter_field=null ,$filter_value=null)
 //    if($filter_value!= 0){
 //        $query .= " WHERE ".get_id_column_in_page($page_name)." = ".$filter_value;
 //    }
-    //write_log("$query ".$query);
     $result = run_query ($query);
     //write_log("res ".json_encode($result));
     return $result ;
@@ -229,7 +234,7 @@ function build_options($table_name,$value=null,$filter=null)
         if(isset($fields_list["data-field"])){
             $data_field =' data-field="'.$row->$field.'"';
         }
-        $options .= '<option '.$data_field.' value="' . $row->value . '"' . (!empty($value)&& (is_array($value) && in_array($row->value, $value) || !is_array($value) && $row->value == $value) ? 'selected' : '') . '>' . $row->text . '</option>';
+        $options .= '<option '.$data_field.' value="' . $row->value . '"' . (!empty($value)&& (is_array($value) && in_array($row->value, $value) || (!is_array($value) && $row->value == $value || $row->text == $value)) ? 'selected' : '') . '>' . $row->text . '</option>';
     }
     return $options;
 }
