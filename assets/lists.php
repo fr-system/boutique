@@ -8,8 +8,8 @@ const BOUTIQUE_TABLES = array(
         "columns" => array(
             array("field_name" => "name", "widget" => "text", "label" => "שם הלקוח","required"=>true),
             array("field_name" => "mobile", "widget" => "text", "label" => "נייד","required"=>true),
-            array("field_name" => "BnNumber", "widget" => "text", "label" => "ח\"פ","required"=>true),
-            array("field_name" => "address", "widget" => "text", "label" => "כתובת"),
+            array("field_name" => "BnNumber", "widget" => "text", "label" => "ח\"פ","required"=>true,"hidden"=>true),
+            array("field_name" => "address", "widget" => "text", "label" => "כתובת","hidden"=>true),
             array("field_name" => "city_id", "widget" => "select", "join_table" => "cities", "join_value" => "name", "label" => "עיר"),
             array("field_name" => "note", "widget" => "text", "label" => "הערה","hidden"=>true),
             array("field_name" => "payment_term_id", "widget" => "select", "label" => "תנאי תשלום","required"=>true,"hidden"=>true,"filter"=>true,
@@ -21,8 +21,8 @@ const BOUTIQUE_TABLES = array(
             ),
             array("field_name" => "agent_id", "widget" => "select", "label" => "סוכן", "join_table" => "agents", "join_value" => "user_id", "user_field" => "display_name","required"=>true),
             array("field_name" => "email", "widget" => "text", "label" => "דוא\"ל","required"=>true),
-            array("field_name" => "email2", "widget" => "text", "label" => "דוא\"ל נוסף"),
-            array("field_name" => "accounting_phone_number", "widget" => "text", "label" => "טלפון הנה\"ח","required"=>true),
+            array("field_name" => "email2", "widget" => "text", "label" => "דוא\"ל נוסף","hidden"=>true),
+            array("field_name" => "accounting_phone_number", "widget" => "text", "label" => "טלפון הנה\"ח","hidden"=>true),
 
 
             array("field_name" => "obligo", "un_apostrophe" => true, "widget" => "text", "label" => "תקרת חוב"),
@@ -65,9 +65,9 @@ const BOUTIQUE_TABLES = array(
             ),
             array("field_name" => "status_id", "widget" => "status", "label" => "מצב משימה","filter"=>true,
                 "values"=>array(
-                    1=>array("class"=>"done","label"=> "בוצע"),
-                    2=>array("class"=>"in-treatment","label"=> "בטיפול"),
-                    3=>array("class"=>"not-yet-treated","label"=> "טרם טופל")
+                    1=>array("class"=>"done background-light-light-blue","label"=> "בוצע"),
+                    2=>array("class"=>"in-treatment background-dark-green","label"=> "בטיפול"),
+                    3=>array("class"=>"not-yet-treated background-light-orange","label"=> "טרם טופל")
                 )),
             array("field_name" => "target_date", "widget" => "date", "label" => "תאריך יעד"),
         )),

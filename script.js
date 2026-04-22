@@ -177,9 +177,9 @@ jQuery(document).ready(function($){
         });
     })
 
-    jQuery(".remove-row").click(function(e){
+    /*jQuery(".remove-row").click(function(e){
         onRemoveRowClick(e,this);
-    })
+    })*/
 
     jQuery('.open-file-uploader, .file-name').click(function () {
         jQuery('input.upload-file').click();
@@ -236,7 +236,7 @@ jQuery(document).ready(function($){
     jQuery('.add-order-product').click(function () {
         var postData = [
             {name: "action", value: "view_catalog_gallery_ajax"},
-            {name: "client_id", value: jQuery('select[name=client_id').val()},
+            {name: "client_id", value: jQuery('select[name=client_id]').val()},
         ];
         call_ajax_function(postData,"openPopupAddOrderProduct");
     })
@@ -266,7 +266,19 @@ jQuery(document).ready(function($){
             ellipse.removeClass("un-value");
             input.val(ellipse.data("value"));
         }
+        jQuery(".status-options .ellipse.un-value").on("mouseover",function (){
+            jQuery(this).addClass("un-value-over");
+        }).on("mouseout",function (){
+            jQuery(this).removeClass("un-value-over");
+        })
     })
+
+    jQuery(".status-options .ellipse.un-value").on("mouseover",function (){
+        jQuery(this).addClass("un-value-over");
+    }).on("mouseout",function (){
+        jQuery(this).removeClass("un-value-over");
+    })
+
 
     jQuery( "#newChat" ).on("change",function(event){
         if(jQuery( "#newChat" ).val() && jQuery( "#newChat" ).val().length > 2){
@@ -318,7 +330,86 @@ jQuery(document).ready(function($){
         }
 
     });
+
+
+    jQuery('#bout-massage').on('hide.bs.modal', function (e,a) {
+        /*var action = jQuery('#bout-massage').find("input[name=action]");
+        switch (action){
+            case "remove"
+                var elementType = jQuery('#bout-massage').prop("tagName").toLowerCase();
+                if (elementType === 'button') {
+                    id = jQuery('input[name=id]').val();
+                } else if (elementType === 'svg') {
+                    id = jQuery(this).parent().parent().data("id");
+                }
+
+                var postData = [
+                    {name: "id", value: id},
+                    {name: "remove", value: true},
+                    {name: "action", value: "build_query_boutique"},
+                    {name: "table_name", value: getParameterByName("subject")},
+                ];
+                call_ajax_function(postData, "removeRowSuccess", id);
+                break
+        }*/
+        //var btn = jQuery(e.relatedTarget);
+
+
+    });
+
+    jQuery('#bout-massage').on('show.bs.modal', function (e) {
+        //action = remove
+        var btn = jQuery(e.relatedTarget);
+            var single= btn.parent().parent().parent().parent().parent().parent().parent().parent().find("section").data("single");
+        var title= btn.parent().parent().parent().parent().parent().parent().parent().parent().find(".page-title").html()
+        jQuery(".modal-title").html(title);
+        jQuery(".modal-body").html("האם אתה מאשר למחוק את ה"+single+"?");
+
+        if (btn === 'button') {
+            id = getParameterByName("id");
+        } else {//if (btn === 'a') {
+            id = btn.parent().parent().data("id");
+        }
+
+        jQuery(this).find('[name="id"]').val(id);
+        jQuery(this).find('[name="remove"]').val(true);
+        jQuery(this).find('[name="form_func"]').val("build_query_boutique");
+        jQuery(this).find('[name="table_name"]').val(getParameterByName("subject"));
+
+    });
+
 })
+
+/*function onRemoveRowClick(e,me){
+    var id = null;
+
+    var elementType = jQuery(me).prop("tagName").toLowerCase();
+    if (elementType === 'button') {
+        id = jQuery('input[name=id]').val();
+    } else if (elementType === 'svg') {
+        id = jQuery(this).parent().parent().data("id");
+    }
+
+    var single = jQuery("section.page").data("single");
+    const confirmation = confirm('האם אתה מאשר למחוק את ה'+single);
+    if (!confirmation) {
+        e.preventDefault(); // מניעת לחיצה אם המשתמש לא מאשר
+    }
+    else {
+        removeRow(id,getParameterByName("subject"));
+    }
+}*/
+
+function removeRowSuccess(result){
+    var currentUrl = window.location.pathname;
+    if (currentUrl.includes('archive')) {
+        var tr = jQuery(".archive-table tr[data-id=" + result.id + "]");
+        tr.remove();
+    }
+    else{
+        window.location.href =jQuery("input[name=previous_page]").val();
+    }
+}
 
 function onAddChat(result,targetElement){
     var chatList = jQuery(".chat-list");
@@ -355,7 +446,7 @@ function searchElements(text,selector,searchSelector){
         jQuery('.popup-body #search').on("keyup",function(event){
             var text = jQuery(this).val();
             //searchProducts(text,".popup-body .product");
-            searchElements(text, ".popup-body .product",".product-name");
+            searchElements(text, ".popup-body .catalog-gallery .product",".product-name");
         });
 
         jQuery('.popup-body button.order-product').click(function () {
@@ -521,51 +612,17 @@ function fillAgentsSelect(result,targetElement){
 
 
 
-function remove_row(result,id){
-    var currentUrl = window.location.pathname;
-    if (currentUrl.includes('archive')) {
-        var tr = jQuery(".archive-table tr[data-id=" + id + "]");
-        tr.remove();
-    }
-    else{
-        window.location.href =jQuery("input[name=previous_page]").val();
-    }
-}
+
 function fillListTable(result,targetElement){
     if(result.tableData) {
         jQuery("." + targetElement).html(result.tableData);
-        jQuery(".remove-row").click(function(e){
+        /*jQuery(".remove-row").click(function(e){
             onRemoveRowClick(e,this);
-        })
+        })*/
 
     }
     else{
         jQuery("." + targetElement).html("");
-    }
-}
-function onRemoveRowClick(e,me){
-    var id = null;
-
-    var elementType = jQuery(me).prop("tagName").toLowerCase();
-    if (elementType === 'button') {
-        id = jQuery('input[name=id]').val();
-    } else if (elementType === 'svg') {
-        id = jQuery(this).parent().parent().data("id");
-    }
-
-    var single = jQuery("section.page").data("single");
-    const confirmation = confirm('האם אתה מאשר למחוק את ה'+single);
-    if (!confirmation) {
-        e.preventDefault(); // מניעת לחיצה אם המשתמש לא מאשר
-    }
-    else {
-        var postData = [
-            {name: "id", value: id},
-            {name: "remove", value: true},
-            {name: "action", value: "build_query_boutique"},
-            {name: "table_name", value: getParameterByName("subject")},
-        ];
-        call_ajax_function(postData, "remove_row", id);
     }
 }
 function automaticOrderSaving(){

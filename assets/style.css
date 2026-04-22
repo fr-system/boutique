@@ -261,23 +261,23 @@ input[type="radio"] + label:before {
     width: 30%;
     box-sizing: border-box;
 }
-.ellipse.un-value{
+.ellipse.un-value:not(.un-value-over){
     border: 1px solid #000 !important;
     background-color: var(--b-global-color-light-gray)!important;
     color: black!important;
 }
-.ellipse.done {
+/*.ellipse.done {
     background-color: #D9F5F3;
     color: #000000;
-}
-.ellipse.in-treatment {
+}*/
+/*.ellipse.in-treatment {
     background-color: #1A7870;
     color: #FFFFFF;
-}
-.ellipse.not-yet-treated {
+}*/
+/*.ellipse.not-yet-treated {
     background-color: #FFEDC8;
     color: #000000;
-}
+}*/
 
 .chat-list {
     max-height: 45vh;
@@ -300,8 +300,19 @@ input[type="radio"] + label:before {
 }
 tr.order-confirm{
     background-color: var(--b-global-color-light-gray);
-    border-color: var(--b-global-color-light-gray);
+   /* border-color: var(--b-global-color-light-gray);*/
+}
+tr.order-confirm td{
+    border-color: var(--b-global-color-light-gray)
 }
 td.actions a{
 
+}
+td a.button{
+    margin: 0;
+    height: 30px;
+}
+
+.modal-body{
+    min-height: 100px;
 }

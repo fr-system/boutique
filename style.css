@@ -11,9 +11,15 @@ Text Domain: boutique
 :root {
     --b-global-color-dark-gray: #AFAFAF;
     --b-global-color-light-gray: #F9F9F9;
-    --b-global-color-gold: #E2B252;
+    --b-global-color-gold: #ce9c3d;
+    --b-global-color-dark-gold: #b68b36;
     --b-global-color-dark-green: #1A7870;
+    --b-global-color-dark-green-hover: #0f544e;
+    --b-global-color-light-light-blue: #D9F5F3;
+    --b-global-color-light-orange: #f8d9a3;
 
+    color: #000000;
+;
     font-size: 62.5%;
 }
 .gold, .gold:hover {
@@ -31,16 +37,67 @@ Text Domain: boutique
 .background-white.dark-green{
     border: var(--b-global-color-dark-green) 1px solid;
 }
-.background-gold ,.background-gold:hover{
+.background-gold {
     background-color:var(--b-global-color-gold);
     color: white;
     border: var(--b-global-color-gold) 1px solid;
 }
-.background-dark-green, .background-dark-green:hover {
+.background-gold:hover{
+    background-color: var(--b-global-color-dark-gold);
+    color: white;
+    border-color: var(--b-global-color-dark-gold);
+}
+.background-dark-green {
     background-color: var(--b-global-color-dark-green);
     color: white;
     border: var(--b-global-color-dark-green) 1px solid;
 }
+.background-dark-green:hover{
+    background-color: var(--b-global-color-dark-green-hover);
+    border-color: var(--b-global-color-dark-green-hover);
+    color: white;
+}
+.background-light-light-blue {
+    background-color: var(--b-global-color-light-light-blue);
+    color: #000000;
+    border: var(--b-global-color-light-light-blue) 1px solid;
+}
+svg circle.background-light-light-blue, svg rect.background-light-light-blue{
+    fill: var(--b-global-color-light-light-blue);
+}
+svg:hover circle.background-light-light-blue, a:hover svg rect.background-light-light-blue{
+    fill: var(--b-global-color-light-orange);
+}
+
+svg circle.background-dark-green, svg rect.background-dark-green{
+    fill: var(--b-global-color-dark-green);
+}
+svg:hover circle.background-dark-green, a:hover svg rect.background-dark-green{
+    fill: var(--b-global-color-dark-green-hover);
+}
+
+svg path.background-gold {
+    fill: var(--b-global-color-gold);
+}
+svg:hover path.background-gold, a:hover svg path.background-gold{
+    fill: var(--b-global-color-dark-green-hover);
+}
+
+
+.background-light-light-blue:hover{
+    background-color: #c6e2e0;
+    border-color: #c6e2e0;
+}
+.background-light-orange {
+    background-color: var(--b-global-color-light-orange);
+    color: #000000;
+    border: var(--b-global-color-light-orange) 1px solid;
+}
+.background-light-orange:hover{
+    background-color: #ebc687;
+    border-color: #ebc687;
+}
+
 
 .black{
     color: black;
@@ -253,8 +310,8 @@ button, .pointer{
     cursor: pointer;
 }
 
-button:hover, .button:hover{
-    box-shadow: 1px 2px 19px 5px rgba(0, 0, 0, 0.06);
+button:hover, .button:hover, span.ellipse{
+    /*box-shadow: 1px 2px 19px 5px rgba(0, 0, 0, 0.06);*/
 }
 
 button, .button{
@@ -273,6 +330,9 @@ a.button{
     text-decoration: none;
     justify-content: center;
 }
+button.background-white:hover, .button.background-white:hover{
+    background-color: var(--b-global-color-light-gray);
+}
 .site-main{
     height: 100vh;
 }
@@ -286,7 +346,7 @@ h1,h2,h3{
 section.page{
     /*background-color: var(--a-global-color-light_gray);*/
     flex-grow: 1;
-    padding: 3% 5%;
+    padding: 3%/* 5%*/;
     /*padding: 40px 100px;*/
     line-height: 1.3;
     height: 100%;

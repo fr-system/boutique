@@ -42,9 +42,13 @@ function create_query($table_name,$id,$action, $results)
     switch ($action) {
         case "remove":
             $query = "DELETE FROM {$wpdb->prefix}" . $table_name;
+            if($table_name == "orders"){
+                run_query("DELETE FROM {$wpdb->prefix}order_products WHERE order_id = ".$id, "execute");
+            }
+            $id = 999999;
             break;
         case "update":
-            $query = "UPDATE {$wpdb->prefix}" . $table_name . " SET " . implode(",", $results["update"]);
+            $query = "UPDATE {$wpdb->prefix}".$table_name." SET ". implode(",", $results["update"]);
             break;
         case "new":
             $query = "INSERT INTO {$wpdb->prefix}" . $table_name . " (" . implode(",", $results["fields"]) . " ) 
@@ -65,6 +69,7 @@ function create_query($table_name,$id,$action, $results)
         write_log(" query " . $query);
     //}
     $ok = run_query($query, "execute");
+    write_log(" ok " . $ok);
     //return $query;
 }
 
@@ -87,6 +92,7 @@ function build_query_boutique()
     global $wpdb;
     if(isset($_POST["remove"])){
         $action = "remove";
+        $result = array();
     }
     else {
         $action = isset($_POST["id"]) && !empty($_POST["id"]) ? "update" : "new";
@@ -94,13 +100,13 @@ function build_query_boutique()
     }
 
     $id = isset($_POST["id"])? $_POST["id"]:null;
-    write_log("create_query ".$table_name);
+    //write_log("create_query ".$table_name);
     create_query($table_name,$id,$action,$result);
     if(!$_POST["id"]){
         $id = $wpdb->get_var("SELECT MAX(id) FROM {$wpdb->prefix}".$table_name);
     }
 
-    if($table_name == "orders") {
+    if($table_name == "orders" && isset($_POST["products"])) {
         foreach ($_POST["products"] as $row) {
             if ($action == "new") {
                 $row["order_id"] = $id;
@@ -112,15 +118,17 @@ function build_query_boutique()
                 , $result);
         }
     }
-
     //return  $ok;
     if(!isset($_POST['save_product'])) {
-        echo json_encode(array(
+        write_log("to_js");
+        /*echo json_encode(array(
             'status' => 'success',
-            'redirect' => $_POST["previous_page"],
+           // 'id' => $id,
+            'redirect' => (isset($_POST["previous_page"])? $_POST["previous_page"]:''),
         ));
-        die();
+        wp_die();*/
     }
+
 }
 
 function get_field($table_name, $field_name)
@@ -182,6 +190,7 @@ function get_page_data($table_name,$filter_field=null ,$filter_value=null)
 //    if($filter_value!= 0){
 //        $query .= " WHERE ".get_id_column_in_page($page_name)." = ".$filter_value;
 //    }
+    //write_log("$query ".$query);
     $result = run_query ($query);
     //write_log("res ".json_encode($result));
     return $result ;

@@ -71,6 +71,29 @@ if ( ! defined( 'ABSPATH' ) ) {
 
     <div class="part-5"></div>
 </header>
+    <form class="modal fade site_form" id="bout-massage" data-success="removeRowSuccess"  tabindex='-1' role="dialog">
+        <input type="hidden" name="form_func" value="">
+        <input type="hidden" name="remove" value="">
+        <input type="hidden" name="id" value="">
+        <input type="hidden" name="table_name" value="">
+        <div class="modal-dialog" role="document">
+
+            <div class="modal-content">
+                <div class="modal-header flex-display">
+                    <h3 class="modal-title grow" >הודעה למשתמש</h3>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" data-dismiss="modal" aria-label="סגור">
+                    </button>
+                </div>
+                <div class="modal-body">
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="save background-gold bold font-18">כן</button>
+                    <button type="button" class="background-white gold" data-bs-dismiss="modal" class=" font-18">לא</button>
+
+                </div>
+            </div>
+        </div>
+    </form>
 <?php } ?>
 <main id="main" class="site-main flex-display" role="main">
       <?php if(is_user_logged_in()) { get_side_menu(); }?>
