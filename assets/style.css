@@ -4,7 +4,7 @@
     padding: 0 10px;
     border-radius: 12px;
 }
-input:-webkit-autofill {
+input:not([type=search]):-webkit-autofill {
     -webkit-box-shadow: 0 0 0 1000px var(--b-global-color-light-gray) inset; /* צבע הרקע */
 }
 
@@ -40,6 +40,9 @@ input:-webkit-autofill {
     width: 200px;
    /* width: 150px;
     margin-left: 10px;*/
+}
+.product:hover{
+    border-color: var(--b-global-color-dark-gold);
 }
 .products-gallery .add-order-product{
     min-width: 150px;

@@ -20,9 +20,12 @@ function build_query_structure($table_name,$row){
 
     foreach ($row as $key => $value) {
         $field = get_field($table_name, $key);
+        //write_log("field: ".$field["field_name"]." value ".$value);
         if ($field != null) {
             if (!empty($value) && isset($field["un_apostrophe"])) {
-                $value = floatval(str_replace("₪", "", $value));
+                $value = str_replace("₪", "", $value);
+                $value = str_replace(",", "", $value);
+                $value = (int)$value;
             }
 
             $apostrophe = is_needed_apostrophe($field["widget"], isset($field["un_apostrophe"]));
@@ -66,10 +69,10 @@ function create_query($table_name,$id,$action, $results)
     }
 
     //if ($table_name == "order_products") {
-        write_log(" query " . $query);
+        //write_log(" query " . $query);
     //}
     $ok = run_query($query, "execute");
-    write_log(" ok " . $ok);
+
     //return $query;
 }
 
@@ -100,7 +103,6 @@ function build_query_boutique()
     }
 
     $id = isset($_POST["id"])? $_POST["id"]:null;
-    write_log("create_query ".$table_name);
     create_query($table_name,$id,$action,$result);
     if(!$_POST["id"]){
         $id = $wpdb->get_var("SELECT MAX(id) FROM {$wpdb->prefix}".$table_name);
@@ -120,7 +122,6 @@ function build_query_boutique()
     }
     //return  $ok;
     if(!isset($_POST['save_product'])) {
-        write_log("to_js");
         echo json_encode(array(
             'status' => 'success',
            // 'id' => $id,
@@ -285,7 +286,7 @@ function get_list($list_name,$filter = '',$table_display =false)
     else if(!empty($filter)){
         $query .= " WHERE ".$filter;
     }
-    write_log("quert ".$query." table_name ".$table_name." field_name ".$field_name);
+    //write_log("quert ".$query." table_name ".$table_name." field_name ".$field_name);
     $list = run_query($query);
     if($table_name == "agents") {
         $users = array();

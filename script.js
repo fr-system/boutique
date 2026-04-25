@@ -43,7 +43,7 @@ jQuery(document).ready(function($){
         }
     });
 
-    jQuery('input[data-a-sign=₪]').autoNumeric('init', { vMin: '-9999999999999.99' });
+    jQuery('input[data-a-sign=₪]').autoNumeric('init', { vMin: '-9999999999999' });
 
     jQuery("form").validate({
         rules: {
@@ -230,7 +230,7 @@ jQuery(document).ready(function($){
     })
 
     jQuery('#search').on('input', function() {
-        var text = jQuery(element).val();
+        var text = jQuery(this).val();
 
         if((jQuery('.grid-display').length)){
             searchElements(text, ".product",".product-name");
@@ -342,37 +342,23 @@ jQuery(document).ready(function($){
 
 
     jQuery('#bout-massage').on('hide.bs.modal', function (e,a) {
-        /*var action = jQuery('#bout-massage').find("input[name=action]");
-        switch (action){
-            case "remove"
-                var elementType = jQuery('#bout-massage').prop("tagName").toLowerCase();
-                if (elementType === 'button') {
-                    id = jQuery('input[name=id]').val();
-                } else if (elementType === 'svg') {
-                    id = jQuery(this).parent().parent().data("id");
-                }
-
-                var postData = [
-                    {name: "id", value: id},
-                    {name: "remove", value: true},
-                    {name: "action", value: "build_query_boutique"},
-                    {name: "table_name", value: getParameterByName("subject")},
-                ];
-                call_ajax_function(postData, "removeRowSuccess", id);
-                break
-        }*/
-        //var btn = jQuery(e.relatedTarget);
-
-
     });
 
     jQuery('#bout-massage').on('show.bs.modal', function (e) {
         //action = remove
         var btn = jQuery(e.relatedTarget);
-        var single= btn.parent().parent().parent().parent().parent().parent().parent().parent().find("section").data("single");
-        var title= btn.parent().parent().parent().parent().parent().parent().parent().parent().find(".page-title").html()
-        jQuery(".modal-title").html(title);
-        jQuery(".modal-body").html("האם אתה מאשר למחוק את ה"+single+"?");
+        var subject = getParameterByName("subject");
+
+        var single = jQuery("body").find("section").data("single");
+        var title = jQuery("body").find(".page-title").html()
+
+        if(subject == "lists"){
+            title = jQuery("ul.tables-list li.selected").html();
+            single= jQuery(".list-table .tr-head th:first-child").html();//td:eq(0)
+        }
+
+        jQuery("#bout-massage .modal-title").html(title);
+        jQuery("#bout-massage .modal-body").html("האם אתה מאשר למחוק את ה"+single+"?");
 
         if (btn.is('button')) {
             id = getParameterByName("id");
@@ -383,7 +369,7 @@ jQuery(document).ready(function($){
         jQuery(this).find('[name="id"]').val(id);
         jQuery(this).find('[name="remove"]').val(true);
         jQuery(this).find('[name="form_func"]').val("build_query_boutique");
-        jQuery(this).find('[name="table_name"]').val(getParameterByName("subject"));
+        jQuery(this).find('[name="table_name"]').val(subject);
 
     });
 
@@ -456,7 +442,7 @@ function searchElements(text,selector,searchSelector){
         jQuery('.popup-body #search').on("keyup",function(event){
             var text = jQuery(this).val();
             //searchProducts(text,".popup-body .product");
-            searchElements(text, ".popup-body .catalog-gallery .product",".product-name");
+            searchElements(text, ".popup-body .products-gallery.catalog .product",".product-name");
         });
 
         jQuery('.popup-body button.order-product').click(function () {
