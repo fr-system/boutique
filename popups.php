@@ -157,17 +157,21 @@ function create_input($field,$value = null,$readonly = "")
             if($field["widget"] == "date" && !empty($value)) {
                 $value = date('Y-m-d', strtotime($value));
             }
-
             if($field["widget"] == "email"){
                 $autocomplete = ' autocomplete="email"';
             } else {
                 $autocomplete = ' autocomplete="off"';
             }
+            $button="";
+            if(isset($field["popup_button"])){
+                $button = "<a class='button' data-bs-toggle='modal' href='#{$field["popup_button"]["target_modal"]}' role='button' >{$field["popup_button"]["label"]}</a>";
+                //$button = "<button class='client-price' onclick=''>{$field["popup_button"]["label"]}</button>";
+            }
             return '<input type="'.$field["widget"].'"  class="grow font-17" id="'.$field["field_name"].'" name="'.$field["field_name"].'" '
              .($field["widget"]=="text" && isset($field["un_apostrophe"]) ? 'data-a-sign="₪"':'').  'value="'.esc_attr($value).'" '.
                 option_if_set($field,"class").
                 $required.$autocomplete.$readonly.
-                ($field["widget"] == "number" ? option_if_set($field,"step").option_if_set($field,"min"). option_if_set($field,"max")."style=\"width: 70px\"" : "" ).'/>';
+                ($field["widget"] == "number" ? option_if_set($field,"step").option_if_set($field,"min"). option_if_set($field,"max")."style=\"width: 70px\"" : "" ).'/>'.$button;
         case "checkbox":
             ?>
             <input type="checkbox" id="<?php echo $field["field_name"]?>" name="<?php echo $field["field_name"]?>" id="<?php echo $field["field_name"]?>" value="1" <?php echo $required ?> <?php echo  checked($value == "1") ?> <?php echo $readonly ?>/>
@@ -313,15 +317,15 @@ function create_product_view($product=null,$options=null)
             <?php } ?>
         </div>
         <div class="product-name bold"><?php echo $product->name ?></div>
-        <div class="flex-display space-between   ">
+        <div class="flex-display space-between  <?php echo $options["table_name"]=="orders" ? '':"hidden" ?>  ">
             <?php
                 $price = null;
                 if(!empty($product->order_price)){
                     $price = $product->order_price;
                 }
-                else if(!empty($product->price)){
-                    $price = $product->price;
-                }
+//                else if(!empty($product->price)){
+//                    $price = $product->price;
+//                }
             ?>
             <div class="part-30"><?php echo (!empty($price) ? $price . " ₪" : "") ?></div>
         </div>
@@ -370,16 +374,22 @@ function get_list_ajax(){
         $filter = $_POST['filter'];
     }
    $options=$table=null;
-    if(isset($_POST['table_display'])){
-        write_log ("table_display " );
-        $table = build_table_rows($table_name,'');
-        write_log ("rows " . $table);
+    $format =  isset($_POST["format"])? $_POST["format"] :"options";
+    switch ($format) {
+        case  'table':
+            write_log ("table_display ");
+            $table = build_table_rows ($table_name, '');
+            //write_log ("rows " . $table);
+            break;
+        case 'array':
+            $result = get_list ($table_name,$filter,true);
+            break;
+        case 'options':
+            $options = build_options ($table_name, $selected_value, $filter);
+            //write_log ("options" . $options);
+            break;
     }
-    else {
-        $options = build_options ($table_name, $selected_value, $filter);
-        //write_log ("options" . $options);
-    }
-    echo json_encode (array("options" => $options ,"tableData"=>$table));
+    echo json_encode (array("options" => $options ,"tableData"=>$table,"array"=>$result));
     die();
 }
 
@@ -696,4 +706,40 @@ function get_favorite_products($client_id)
     $products = run_query ($query);
     return $products;
     //write_log("favorite: ".json_encode($products));
+}
+function update_client_price_modal() {
+    ?>
+<form class="modal fade site_form" id="update_client_price"  tabindex='-1' role="dialog" data-success='getTableAjaxData' data-failed='show_error_messages'>
+    <input type="hidden" name="form_func" value="build_query_boutique" />
+    <input type="hidden" name="table_name" value="products_clients" />
+    <input type="hidden" name="product_id" value="" />
+    <input type="hidden" name="id" value="" />
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title grow" >מחיר מיחוד ללקוח מסוים</h3>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" data-dismiss="modal" aria-label="סגור">
+                    </button>
+                </div>
+                <div class="modal-body border-dark-gray padding-20 flex-display direction-column margin-20">
+                    <span class="input-label flex-display align-center">
+                        <label class="bold" for="client_id">לקוח:</label>
+                        <select id="client_id" name="client_id"  class=" font-17 grow">
+                            <?php echo build_options ("clients");?>
+                        </select>
+                    </span>
+                    <span class="input-label flex-display align-center">
+                        <label class="bold" for="client_price">מחיר:</label>
+                        <input type="text" id="client_price" name="client_price"  data-a-sign="₪"/>
+                    </span>
+                </div>
+                <div class="modal-footer">
+                    <button type="post" class="save background-gold bold font-18">שמור</button>
+                    <button type="button" data-bs-dismiss="modal" class="cancel button background-white gold bold font-18">בטל</button>
+
+                </div>
+            </div>
+        </div>
+</form>
+<?php
 }

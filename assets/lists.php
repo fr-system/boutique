@@ -38,7 +38,7 @@ const BOUTIQUE_TABLES = array(
             array("field_name" => "name", "widget" => "text","label"=>"שם","required"=>true),
             array("field_name" => "barcode", "widget" => "text","label"=>"ברקוד","required"=>true),
             array("field_name" => "supplier_id", "widget" => "select","label"=>"ספק", "join_table" => "suppliers", "join_value" => "name","filter"=>true),
-            array("field_name" => "price", "type" => "float", "widget" => "text","label"=>"מחיר", "un_apostrophe" => true),
+            array("field_name" => "price", "type" => "float", "widget" => "text","label"=>"מחיר", "un_apostrophe" => true,"popup_button"=>array("label"=>"מחיר מיוחד ללקוח","target_modal"=>"update_client_price")),
             array("field_name" => "description", "widget" => "textarea","label"=>"תיאור"),
             array("field_name" => "file_id", "widget" => "file","label"=>"העלאת דף מוצר","hidden"=>true),
             array("field_name" => "image_id", "widget" => "image","label"=>"העלאת תמונת מוצר","hidden"=>true),
@@ -143,11 +143,14 @@ const BOUTIQUE_TABLES = array(
             array("field_name" => "payment_type", "widget" => "select", "label" => "אופן תשלום"),
             array("field_name" => "check_number", "widget" => "text", "label" => "מספר צ'ק"),
         )),
-        "lists" =>//tables
-        array(
-            "title" => "רשימות",
-            "single" => "רשימה",
-           )
+    "products_clients"=>array(
+        "title" => "מחיר מיוחד ללקוח",
+        "columns" => array(
+            array("field_name" => "client_id", "widget" => "number"),
+            array("field_name" => "product_id", "widget" => "number", ),
+            array("field_name" => "client_price", "widget" => "text", "un_apostrophe" => true),
+
+        ))
 );
 const BOUTIQUE_LISTS = array(
     "cities" =>
