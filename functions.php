@@ -34,8 +34,8 @@ function boutique_enqueue_scripts()
 
     //wp_enqueue_script( 'script', get_template_directory_uri() . '/script.js', $ver);
     wp_enqueue_script( 'script', get_template_directory_uri() . '/script.js', array(), $ver );
-
-
+    wp_enqueue_script( 'fridi-script', get_template_directory_uri() . '/fridi.js', array(), $ver );
+    wp_enqueue_script( 'rivka-script', get_template_directory_uri() . '/rivka.js', array(), $ver );
     //wp_register_script('script', get_template_directory_uri() . '/script.js');
    //wp_enqueue_script('script',);
 

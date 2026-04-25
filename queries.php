@@ -252,7 +252,7 @@ function get_list($list_name,$filter = '',$table_display =false)
     $field_name = $page_info["columns"][0]["field_name"];
     if ($table_display) {
         $query = "SELECT {$wpdb->prefix}{$table_name}.id ,";
-        foreach (BOUTIQUE_LISTS[$list_name]["columns"] as $column) {
+        foreach ($page_info["columns"] as $column) {
             if (isset($column['join_table'])) {
                 if(isset($column['join_value'])) {
                     $query .= $wpdb->prefix . $column['join_table'] . "." . $column['join_value'] . " AS " . $column['join_value'] . ", ";

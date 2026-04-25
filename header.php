@@ -70,7 +70,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 
     <div class="part-5"></div>
-</header>
+
     <form class="modal fade site_form" id="bout-massage" data-success="removeRowSuccess"  tabindex='-1' role="dialog">
         <input type="hidden" name="form_func" value="">
         <input type="hidden" name="remove" value="">
@@ -94,6 +94,8 @@ if ( ! defined( 'ABSPATH' ) ) {
             </div>
         </div>
     </form>
-<?php } ?>
+<?php update_client_price_modal();
+} ?>
+</header>
 <main id="main" class="site-main flex-display" role="main">
       <?php if(is_user_logged_in()) { get_side_menu(); }?>

@@ -477,7 +477,7 @@ function searchElements(text,selector,searchSelector){
                 }
             })
 
-            var order_id = jQuery(".page input[name=id]").val();
+            var order_id = jQuery(".page.single input[name=id]").val();
             key++;
             element.prepend(
                 '<input type="hidden" name="products['+key+'][id]" value="">'+//id של השורה של מוצר_הזמנה
@@ -685,7 +685,7 @@ function getTableAjaxData(tableName){
         tableName = selected.data("list-name");
     }
     var postData = [
-        {name: "table_display", value: "1"},
+        {name: "format", value: "table"},
         {name: "action", value: "get_list_ajax"},
         {name: "table_name", value: tableName},
     ];
