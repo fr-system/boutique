@@ -18,7 +18,7 @@ jQuery(document).ready(function($){
     if(getParameterByName("subject") == "orders" && getParameterByName("action") && getParameterByName("action") != "readonly")
     setInterval(function() {
         if(jQuery('input[name=dirty]').val() =="1" && jQuery('input[name=order_date]').val()
-            && jQuery('select[name=client_id]').val() && jQuery('.border-dark-gray.product').length > 0){
+            && jQuery('.grid-display select[name=client_id]').val() && jQuery('.grid-display .border-dark-gray.product').length > 0){
             jQuery('input[name=dirty]').val("0");
             if(getParameterByName("action") == "new"){
 
@@ -172,9 +172,6 @@ jQuery(document).ready(function($){
         });
     })
 
-    /*jQuery(".remove-row").click(function(e){
-        onRemoveRowClick(e,this);
-    })*/
 
     jQuery('.open-file-uploader, .file-name').click(function () {
         jQuery('input.upload-file').click();
@@ -224,7 +221,7 @@ jQuery(document).ready(function($){
     jQuery('.add-order-product').click(function () {
         var postData = [
             {name: "action", value: "view_catalog_gallery_ajax"},
-            {name: "client_id", value: jQuery('select[name=client_id]').val()},
+            {name: "client_id", value: jQuery('.grid-display select[name=client_id]').val()},
         ];
         call_ajax_function(postData,"openPopupAddOrderProduct");
     })
@@ -285,7 +282,7 @@ jQuery(document).ready(function($){
             {name: "action", value: "on_order_confirmation"},
             {name: "order_id", value: getParameterByName("id")},
         ];
-        call_ajax_function(postData,"reload_page");
+        call_ajax_function(postData,"onOrderConfirmation");
 
     })
 
@@ -307,7 +304,7 @@ jQuery(document).ready(function($){
             rowData= jQuery.map(jQuery(tr).find('td:not(.td-action)'),function(td){
                 return jQuery(td).html();
             });
-            jQuery('#edit-list input[name=id]').val(btn.data("id"));
+            jQuery('#edit-list input[name=id]').val(tr.data("id"));
         }
         jQuery('table.list-table tr:first-child th').each(function(k,th) {
             th = jQuery(th)
@@ -342,6 +339,7 @@ jQuery(document).ready(function($){
 
 
     jQuery('#bout-massage').on('hide.bs.modal', function (e,a) {
+        var aa = 1;
     });
 
     jQuery('#bout-massage').on('show.bs.modal', function (e) {
@@ -353,52 +351,43 @@ jQuery(document).ready(function($){
         var title = jQuery("body").find(".page-title").html()
 
         if(subject == "lists"){
+            subject = jQuery("ul.tables-list li.selected").data("list-name");
             title = jQuery("ul.tables-list li.selected").html();
-            single= jQuery(".list-table .tr-head th:first-child").html();//td:eq(0)
+            single = jQuery(".list-table .tr-head th:first-child").html();
         }
 
-        jQuery("#bout-massage .modal-title").html(title);
-        jQuery("#bout-massage .modal-body").html("האם אתה מאשר למחוק את ה"+single+"?");
-
-        if (btn.is('button')) {
+        if (getParameterByName("action")=="edit") {
             id = getParameterByName("id");
         } else if (btn.is('a')) {
             id = btn.parent().parent().data("id");
         }
 
-        jQuery(this).find('[name="id"]').val(id);
-        jQuery(this).find('[name="remove"]').val(true);
-        jQuery(this).find('[name="form_func"]').val("build_query_boutique");
-        jQuery(this).find('[name="table_name"]').val(subject);
+        if(subject == "orders" && getParameterByName("action")=="edit" && btn.parent().parent().hasClass("product")){
+            single = "מוצר מההזמנה";
+            jQuery(this).find('.ok').removeClass("hidden");
+            jQuery(this).find('button[type=submit]').hide();
+        }
+        else{
+            jQuery(this).find('[name="remove"]').val(true);
+            jQuery(this).find('[name="form_func"]').val("build_query_boutique");
+            jQuery(this).find('[name="table_name"]').val(subject);
+            jQuery(this).find('[name="id"]').val(id);
+        }
 
+        jQuery("#bout-massage .modal-title").html(title);
+        jQuery("#bout-massage .modal-body").html("האם אתה מאשר למחוק את ה"+single+"?");
     });
 
 })
 
-/*function onRemoveRowClick(e,me){
-    var id = null;
-
-    var elementType = jQuery(me).prop("tagName").toLowerCase();
-    if (elementType === 'button') {
-        id = jQuery('input[name=id]').val();
-    } else if (elementType === 'svg') {
-        id = jQuery(this).parent().parent().data("id");
-    }
-
-    var single = jQuery("section.page").data("single");
-    const confirmation = confirm('האם אתה מאשר למחוק את ה'+single);
-    if (!confirmation) {
-        e.preventDefault(); // מניעת לחיצה אם המשתמש לא מאשר
-    }
-    else {
-        removeRow(id,getParameterByName("subject"));
-    }
-}*/
-
-function removeRowSuccess(result){
+function removeRowSuccess(form,result){
     var currentUrl = window.location.pathname;
     if (currentUrl.includes('archive')) {
         var tr = jQuery(".archive-table tr[data-id=" + result.id + "]");
+        tr.remove();
+    }
+    else if(currentUrl.includes("manage-lists")){
+        var tr = jQuery(".list-table tr[data-id=" + result.id + "]");
         tr.remove();
     }
     else{
@@ -606,46 +595,16 @@ function fillAgentsSelect(result,targetElement){
     select.append(result.options);
 }
 
-
-
-
 function fillListTable(result,targetElement){
     if(result.tableData) {
         jQuery("." + targetElement).html(result.tableData);
-        /*jQuery(".remove-row").click(function(e){
-            onRemoveRowClick(e,this);
-        })*/
-
+        jQuery(".page-title").html(result.options["title"]);
     }
     else{
         jQuery("." + targetElement).html("");
     }
 }
-/*function onRemoveRowClick(e,me){
-    var id = null;
 
-    var elementType = jQuery(me).prop("tagName").toLowerCase();
-    if (elementType === 'button') {
-        id = jQuery('input[name=id]').val();
-    } else if (elementType === 'svg') {
-        id = jQuery(this).parent().parent().data("id");
-    }
-
-    var single = jQuery("section.page").data("single");
-    const confirmation = confirm('האם אתה מאשר למחוק את ה'+single);
-    if (!confirmation) {
-        e.preventDefault(); // מניעת לחיצה אם המשתמש לא מאשר
-    }
-    else {
-        var postData = [
-            {name: "id", value: id},
-            {name: "remove", value: true},
-            {name: "action", value: "build_query_boutique"},
-            {name: "table_name", value: getParameterByName("subject")},
-        ];
-        call_ajax_function(postData, "remove_row", id);
-    }
-}*/
 function automaticOrderSaving(){
     var $form = jQuery('form');
     if (!$form.valid()) {
@@ -677,6 +636,14 @@ function getTableAjaxData(tableName){
     ];
     call_ajax_function(postData,"fillListTable","list-table");
 }
+function openModal(modalId,message){
+    //jQuery(modalId+'.modal').modal('show');
+}
 function closeModal(){
     jQuery('.modal.show').modal('hide');
+}
+
+function onOrderConfirmation(result){
+    openModal("#bout-massage",result.notice);
+
 }

@@ -44,11 +44,13 @@ function create_query($table_name,$id,$action, $results)
 
     switch ($action) {
         case "remove":
+
             $query = "DELETE FROM {$wpdb->prefix}" . $table_name;
+
             if($table_name == "orders"){
                 run_query("DELETE FROM {$wpdb->prefix}order_products WHERE order_id = ".$id, "execute");
             }
-            $id = 999999;
+            //$id = 999999;
             break;
         case "update":
             $query = "UPDATE {$wpdb->prefix}".$table_name." SET ". implode(",", $results["update"]);
@@ -67,7 +69,6 @@ function create_query($table_name,$id,$action, $results)
     if (!empty($id)) {
         $query .= " where id = " . $id;
     }
-
     //if ($table_name == "order_products") {
         //write_log(" query " . $query);
     //}
@@ -110,21 +111,24 @@ function build_query_boutique()
 
     if($table_name == "orders" && isset($_POST["products"])) {
         foreach ($_POST["products"] as $row) {
-            if ($action == "new") {
-                $row["order_id"] = $id;
+            if(isset($row["product_id"]) && !empty($row["product_id"]) && !empty($id)) {
+                if ($action == "new") {
+                    $row["order_id"] = $id;
+                }
+                //write_log("row order product" . json_encode($row));
+                //write_log("create_query " . "order_products");
+                $result = build_query_structure("order_products", $row);
+                create_query("order_products",
+                    $row["id"], (isset($row["id"]) && !empty($row["id"])) ? "update" : "new"
+                    , $result);
             }
-            //write_log("create_query " . "order_products");
-            $result = build_query_structure("order_products", $row);
-            create_query("order_products",
-                $row["id"], (isset($row["id"]) && !empty($row["id"])) ? "update" : "new"
-                , $result);
         }
     }
     //return  $ok;
     if(!isset($_POST['save_product'])) {
         echo json_encode(array(
             'status' => 'success',
-           // 'id' => $id,
+            'id' => $id,
             'redirect' => (isset($_POST["previous_page"])? $_POST["previous_page"]:''),
         ));
         wp_die();

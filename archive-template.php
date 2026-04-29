@@ -91,12 +91,6 @@ function get_tr_data($table_name, $data, $id_column,$add_text){
 
         if ($field != $id_column && !isset($column["hidden"]) && isset($column["label"])) {
             $column_value = get_column_value($column,$row,$field,$list);
-            //else if($column['type']=="action"){
-            //$column_value = '<button  class="action bg-lightblue" name="'.$column['field_name'].'" onclick="action_func(this)"><i class="'.$actions_icons[$column['field_name']].'"></i><span>פעולה</span></button>';
-            //}
-            //else {
-
-            //}
             $html .= '<td >' . $column_value . '</td>';
         }
     }
@@ -117,8 +111,8 @@ function get_tr_data($table_name, $data, $id_column,$add_text){
     if($table_name == "orders" && $row->done == 1) {
         $html .= '<td><a href="single?subject=' . $table_name . '&action=readonly&id=' . $row->id . '">
                         <svg xmlns="http://www.w3.org/2000/svg" width="25" height="24" viewBox="0 0 25 24" fill="none">
-                        <path d="M12.5 5C5.93017 5 2.74267 10.683 2.17704 11.808C2.14681 11.8678 2.1311 11.9335 2.1311 12C2.1311 12.0665 2.14681 12.1322 2.17704 12.192C2.74163 13.317 5.92913 19 12.5 19C19.0708 19 22.2573 13.317 22.8229 12.192C22.8531 12.1322 22.8688 12.0665 22.8688 12C22.8688 11.9335 22.8531 11.8678 22.8229 11.808C22.2583 10.683 19.0708 5 12.5 5Z" stroke="#E2B252" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                        <path d="M12.5 15C14.2259 15 15.625 13.6569 15.625 12C15.625 10.3431 14.2259 9 12.5 9C10.7741 9 9.375 10.3431 9.375 12C9.375 13.6569 10.7741 15 12.5 15Z" stroke="#E2B252" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M12.5 5C5.93017 5 2.74267 10.683 2.17704 11.808C2.14681 11.8678 2.1311 11.9335 2.1311 12C2.1311 12.0665 2.14681 12.1322 2.17704 12.192C2.74163 13.317 5.92913 19 12.5 19C19.0708 19 22.2573 13.317 22.8229 12.192C22.8531 12.1322 22.8688 12.0665 22.8688 12C22.8688 11.9335 22.8531 11.8678 22.8229 11.808C22.2583 10.683 19.0708 5 12.5 5Z" class="stroke-background-gold" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M12.5 15C14.2259 15 15.625 13.6569 15.625 12C15.625 10.3431 14.2259 9 12.5 9C10.7741 9 9.375 10.3431 9.375 12C9.375 13.6569 10.7741 15 12.5 15Z" class="background-gold" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                         </svg>
                         </a>
                   </td>';
@@ -126,7 +120,7 @@ function get_tr_data($table_name, $data, $id_column,$add_text){
 
     $html .='<td><a data-bs-toggle="modal" href="#bout-massage" role="button" data-action="remove">
                 <svg class=""  xmlns="http://www.w3.org/2000/svg" width="25" height="24" viewBox="0 0 25 24" fill="none">
-                    <path d="M4.16663 7H20.8333M10.4166 11V17M14.5833 11V17M5.20829 7L6.24996 19C6.24996 19.5304 6.46945 20.0391 6.86015 20.4142C7.25085 20.7893 7.78076 21 8.33329 21H16.6666C17.2192 21 17.7491 20.7893 18.1398 20.4142C18.5305 20.0391 18.75 19.5304 18.75 19L19.7916 7M9.37496 7V4C9.37496 3.73478 9.48471 3.48043 9.68006 3.29289C9.87541 3.10536 10.1404 3 10.4166 3H14.5833C14.8596 3 15.1245 3.10536 15.3199 3.29289C15.5152 3.48043 15.625 3.73478 15.625 4V7" stroke="#E2B252" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M4.16663 7H20.8333M10.4166 11V17M14.5833 11V17M5.20829 7L6.24996 19C6.24996 19.5304 6.46945 20.0391 6.86015 20.4142C7.25085 20.7893 7.78076 21 8.33329 21H16.6666C17.2192 21 17.7491 20.7893 18.1398 20.4142C18.5305 20.0391 18.75 19.5304 18.75 19L19.7916 7M9.37496 7V4C9.37496 3.73478 9.48471 3.48043 9.68006 3.29289C9.87541 3.10536 10.1404 3 10.4166 3H14.5833C14.8596 3 15.1245 3.10536 15.3199 3.29289C15.5152 3.48043 15.625 3.73478 15.625 4V7" class="stroke-background-gold" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                     </svg>
                     </a>   
             </td>';

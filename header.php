@@ -88,6 +88,7 @@ if ( ! defined( 'ABSPATH' ) ) {
                 </div>
                 <div class="modal-footer">
                     <button type="submit" class="save background-gold bold font-18">כן</button>
+                    <button type="button" data-bs-dismiss="modal" class="ok background-gold bold font-18 hidden">כן</button>
                     <button type="button" class="background-white gold" data-bs-dismiss="modal" class=" font-18">לא</button>
 
                 </div>

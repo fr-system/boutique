@@ -156,6 +156,7 @@ function send_mail($to,$subject,$message)
 {
     $headers = 'MIME-Version: 1.0' . "\r\n";
     $headers .= 'Content-type: text/html; charset=utf-8' . "\r\n";
+    $headers .= "From: ".get_option("blogname")." <info@kosherboutique.co.il> \r\n";
     $headers .= "Reply-To: ".get_option("blogname")." <".get_option('admin_email')."> \r\n";
 
     $body = '<div style="direction: rtl;font-family:system-ui,-apple-system,BlinkMacSystemFont,SF Pro,Segoe UI,Helvetica Neue,Helvetica,Arial,sans-serif; color:black"">

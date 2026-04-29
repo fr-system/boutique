@@ -38,15 +38,13 @@ input:not([type=search]):-webkit-autofill {
 
 .product{
     width: 200px;
-   /* width: 150px;
-    margin-left: 10px;*/
+    background-color: white;
 }
 .product:hover{
     border-color: var(--b-global-color-dark-gold);
+    border-width: 2px;
+    box-shadow: 2px 2px 6px 1px rgba(0, 0, 0, 0.13);
 }
-.products-gallery .add-order-product{
-    min-width: 150px;
- }
 .product .product-img{
     height: 100%;
     overflow: hidden;
@@ -94,6 +92,9 @@ input:not([type=search]):-webkit-autofill {
 .product .input-label input{
     width: 100%;
     margin-left: 5px;
+}
+.plus-minus-count .plus:hover, .plus-minus-count .minus:hover{
+    background-color: var(--b-global-color-light-gray);
 }
 .plus-minus-count .plus, .plus-minus-count .minus{
     display: flex;
@@ -203,7 +204,9 @@ ul.menu li a{
 .quick-action svg{
     margin-left: 10px;
 }
-
+.quick-action:hover{
+    box-shadow: 1px 1px 6px 1px rgba(0, 0, 0, 0.13);
+}
 .archive-search {
     width: 220px;
     height: 40px;

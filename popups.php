@@ -65,14 +65,18 @@ function get_svg($svg_name,$action='',$side_menu = true)
 <path fill-rule="evenodd" clip-rule="evenodd" d="M14 15.6667C15.8417 15.6667 17.3333 14.175 17.3333 12.3333C17.3333 10.4917 15.8417 9 14 9C12.1583 9 10.6667 10.4917 10.6667 12.3333C10.6667 14.175 12.1583 15.6667 14 15.6667ZM16.6667 12.3333C16.6667 13.8067 15.4733 15 14 15C12.5267 15 11.3333 13.8067 11.3333 12.3333C11.3333 10.86 12.5267 9.66667 14 9.66667C15.4733 9.66667 16.6667 10.86 16.6667 12.3333ZM15.6783 16.2913L14.6667 19.1813V19L14.475 17.6597C14.5362 17.6468 14.5925 17.6169 14.6375 17.5736C14.6826 17.5302 14.7145 17.475 14.7297 17.4143L14.8963 16.7477C14.9086 16.6985 14.9096 16.6473 14.8991 16.5977C14.8886 16.5482 14.867 16.5017 14.8359 16.4617C14.8047 16.4218 14.7649 16.3895 14.7194 16.3672C14.6739 16.345 14.624 16.3334 14.5733 16.3333H13.4273C13.3767 16.3333 13.3267 16.3449 13.2812 16.3671C13.2357 16.3893 13.1959 16.4216 13.1647 16.4615C13.1336 16.5014 13.1119 16.5479 13.1014 16.5974C13.0908 16.6469 13.0917 16.6982 13.104 16.7473L13.2707 17.414C13.2858 17.4747 13.3177 17.53 13.3627 17.5734C13.4077 17.6169 13.4641 17.6468 13.5253 17.6597L13.338 18.9703L12.32 16.2877L12.3133 16.2733C12.2641 16.1723 12.182 16.0912 12.0804 16.0432C11.9788 15.9953 11.8639 15.9834 11.7547 16.0097C11.641 16.0373 11.5157 16.0663 11.3833 16.0977C11.071 16.1707 10.7187 16.253 10.3847 16.346C9.91367 16.4773 9.42567 16.6427 9.08667 16.8653C8.46233 17.2753 8 17.8177 8 18.5V21H20V18.5C20 17.8177 19.538 17.275 18.9133 16.8653C18.5747 16.6427 18.0867 16.4773 17.6157 16.346C17.2845 16.2564 16.9516 16.1736 16.617 16.0977C16.4931 16.0689 16.3693 16.0396 16.2457 16.0097C16.1365 15.9835 16.0217 15.9954 15.9202 16.0434C15.8186 16.0913 15.7365 16.1724 15.6873 16.2733L15.6783 16.2913ZM16.4813 16.7507L16.2437 16.6947L14.9697 20.3333H19.3333V18.5C19.3333 18.1513 19.0987 17.7843 18.5477 17.4227C18.303 17.2617 17.9043 17.1183 17.437 16.9883C17.1202 16.9025 16.8014 16.8233 16.4813 16.7507ZM11.7607 16.6937L13.1417 20.3333H8.66667V18.5C8.66667 18.1513 8.90133 17.7843 9.45233 17.4227C9.697 17.2617 10.0957 17.1183 10.563 16.9883C10.8797 16.9024 11.1983 16.8232 11.5183 16.7507L11.7607 16.6937Z" fill="black" stroke="black" stroke-width="0.2"/>
 <path fill-rule="evenodd" clip-rule="evenodd" d="M21.5 11C21.6326 11 21.7598 11.0527 21.8536 11.1464C21.9473 11.2402 22 11.3674 22 11.5V13H23.5C23.6326 13 23.7598 13.0527 23.8536 13.1464C23.9473 13.2402 24 13.3674 24 13.5C24 13.6326 23.9473 13.7598 23.8536 13.8536C23.7598 13.9473 23.6326 14 23.5 14H22V15.5C22 15.6326 21.9473 15.7598 21.8536 15.8536C21.7598 15.9473 21.6326 16 21.5 16C21.3674 16 21.2402 15.9473 21.1464 15.8536C21.0527 15.7598 21 15.6326 21 15.5V14H19.5C19.3674 14 19.2402 13.9473 19.1464 13.8536C19.0527 13.7598 19 13.6326 19 13.5C19 13.3674 19.0527 13.2402 19.1464 13.1464C19.2402 13.0527 19.3674 13 19.5 13H21V11.5C21 11.3674 21.0527 11.2402 21.1464 11.1464C21.2402 11.0527 21.3674 11 21.5 11Z" fill="black"/>
 </svg>';
-            return '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="13" viewBox="0 0 14 13" fill="none">
-                <path d="M7 1.08334C6.42314 1.08334 5.85923 1.24218 5.37959 1.53978C4.89994 1.83738 4.52611 2.26036 4.30535 2.75524C4.0846 3.25013 4.02684 3.79468 4.13938 4.32005C4.25192 4.84541 4.5297 5.32799 4.93761 5.70676C5.34551 6.08553 5.86521 6.34347 6.43099 6.44797C6.99676 6.55247 7.58321 6.49884 8.11616 6.29385C8.64911 6.08886 9.10463 5.74173 9.42512 5.29635C9.74561 4.85096 9.91667 4.32733 9.91667 3.79168C9.91667 3.07338 9.60938 2.38451 9.06239 1.8766C8.51541 1.36868 7.77355 1.08334 7 1.08334ZM7 5.41668C6.65388 5.41668 6.31554 5.32137 6.02775 5.14282C5.73997 4.96426 5.51566 4.71047 5.38321 4.41354C5.25076 4.11661 5.2161 3.78987 5.28363 3.47466C5.35115 3.15944 5.51782 2.86989 5.76256 2.64263C6.0073 2.41537 6.31913 2.2606 6.65859 2.1979C6.99806 2.1352 7.34993 2.16738 7.6697 2.29037C7.98947 2.41337 8.26278 2.62165 8.45507 2.88888C8.64736 3.15611 8.75 3.47028 8.75 3.79168C8.75 4.22265 8.56563 4.63598 8.23744 4.94073C7.90925 5.24547 7.46413 5.41668 7 5.41668ZM12.25 11.375V10.8333C12.25 9.82773 11.8198 8.86331 11.054 8.15223C10.2882 7.44116 9.24963 7.04168 8.16667 7.04168H5.83333C4.75037 7.04168 3.71175 7.44116 2.94598 8.15223C2.18021 8.86331 1.75 9.82773 1.75 10.8333V11.375H2.91667V10.8333C2.91667 10.115 3.22396 9.42617 3.77094 8.91826C4.31792 8.41035 5.05979 8.12501 5.83333 8.12501H8.16667C8.94021 8.12501 9.68208 8.41035 10.2291 8.91826C10.776 9.42617 11.0833 10.115 11.0833 10.8333V11.375H12.25Z" fill="black"/>
-            </svg>';
+            return '<svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 11 11" fill="none">
+<path fill-rule="evenodd" clip-rule="evenodd" d="M5.3501 5.93331C6.96156 5.93331 8.26676 4.6281 8.26676 3.01664C8.26676 1.40518 6.96156 0.0999756 5.3501 0.0999756C3.73864 0.0999756 2.43343 1.40518 2.43343 3.01664C2.43343 4.6281 3.73864 5.93331 5.3501 5.93331ZM7.68343 3.01664C7.68343 4.30581 6.63926 5.34998 5.3501 5.34998C4.06093 5.34998 3.01676 4.30581 3.01676 3.01664C3.01676 1.72748 4.06093 0.683309 5.3501 0.683309C6.63926 0.683309 7.68343 1.72748 7.68343 3.01664ZM6.81864 6.47989L5.93343 9.00864V8.84998L5.76572 7.67718C5.81926 7.6659 5.86855 7.63979 5.90795 7.60183C5.94735 7.56387 5.97529 7.5156 5.98856 7.46252L6.13439 6.87918C6.14516 6.8362 6.14599 6.79133 6.13682 6.74798C6.12766 6.70463 6.10874 6.66393 6.08149 6.62899C6.05425 6.59404 6.0194 6.56576 5.9796 6.54629C5.93979 6.52683 5.89607 6.51669 5.85176 6.51664H4.84901C4.80471 6.51665 4.76099 6.52676 4.72118 6.54619C4.68136 6.56562 4.6465 6.59387 4.61923 6.62878C4.59196 6.6637 4.573 6.70437 4.56379 6.7477C4.55459 6.79104 4.55538 6.83591 4.5661 6.87889L4.71193 7.46223C4.72515 7.51536 4.75306 7.5637 4.79247 7.60171C4.83188 7.63973 4.88119 7.66588 4.93476 7.67718L4.77085 8.82402L3.8801 6.47668L3.87426 6.46414C3.83122 6.37578 3.75931 6.30475 3.67043 6.2628C3.58154 6.22085 3.481 6.21049 3.38543 6.23343C3.28597 6.25764 3.17631 6.28302 3.06051 6.31043C2.78722 6.37431 2.47893 6.44635 2.18668 6.52773C1.77456 6.64264 1.34756 6.78731 1.05093 6.98214C0.504639 7.34089 0.100098 7.81543 0.100098 8.41248V10.6H10.6001V8.41248C10.6001 7.81543 10.1958 7.3406 9.64926 6.98214C9.35293 6.78731 8.92593 6.64264 8.51381 6.52773C8.22405 6.44931 7.93271 6.37686 7.63997 6.31043C7.53155 6.28525 7.42324 6.25959 7.31506 6.23343C7.21953 6.21056 7.11905 6.22096 7.03023 6.26291C6.94141 6.30485 6.86954 6.37584 6.82651 6.46414L6.81864 6.47989ZM7.52126 6.88181L7.31331 6.83281L6.19856 10.0166H10.0168V8.41248C10.0168 8.10739 9.81143 7.78627 9.32931 7.46981C9.11522 7.32893 8.76639 7.20352 8.35747 7.08977C8.08031 7.01466 7.80131 6.94532 7.52126 6.88181ZM3.39068 6.83193L4.59906 10.0166H0.683431V8.41248C0.683431 8.10739 0.888764 7.78627 1.37089 7.46981C1.58497 7.32893 1.93381 7.20352 2.34272 7.08977C2.61987 7.01458 2.89857 6.94524 3.17864 6.88181L3.39068 6.83193Z" fill="black" stroke="black" stroke-width="0.2"/>
+</svg>';
         case "report":
             return '<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 15 15" fill="none">
                 <path d="M12.4394 5.36625C12.4097 5.29842 12.3683 5.23641 12.3169 5.18313L8.56687 1.43312C8.51359 1.38174 8.45158 1.34026 8.38375 1.31062C8.365 1.30187 8.345 1.29687 8.325 1.29C8.2727 1.2722 8.21826 1.26148 8.16313 1.25813C8.15 1.25688 8.13812 1.25 8.125 1.25H3.75C3.06062 1.25 2.5 1.81062 2.5 2.5V12.5C2.5 13.1894 3.06062 13.75 3.75 13.75H11.25C11.9394 13.75 12.5 13.1894 12.5 12.5V5.625C12.5 5.61188 12.4931 5.6 12.4919 5.58625C12.4888 5.53107 12.4781 5.47659 12.46 5.42438C12.4538 5.40438 12.4481 5.385 12.4394 5.36625ZM10.3663 5H8.75V3.38375L10.3663 5ZM3.75 12.5V2.5H7.5V5.625C7.5 5.79076 7.56585 5.94973 7.68306 6.06694C7.80027 6.18415 7.95924 6.25 8.125 6.25H11.25L11.2513 12.5H3.75Z" fill="black"/>
                 <path d="M5 7.5H10V8.75H5V7.5ZM5 10H10V11.25H5V10ZM5 5H6.25V6.25H5V5Z" fill="black"/>
             </svg>';
+        case "collection":
+            return '<svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 11 11" fill="none">
+<path d="M7.21808 7.06669C7.21808 6.5405 5.79354 6.11431 4.03627 6.11431M7.21808 7.06669C7.21808 7.59288 5.79354 8.01907 4.03627 8.01907C2.27899 8.01907 0.854448 7.59288 0.854448 7.06669M7.21808 7.06669V9.41764C7.21808 9.96002 5.79354 10.4 4.03627 10.4C2.27899 10.4 0.854448 9.9605 0.854448 9.41764V7.06669M7.21808 7.06669C8.95627 7.06669 10.3999 6.59669 10.3999 6.11431V1.35241M4.03627 6.11431C2.27899 6.11431 0.854448 6.5405 0.854448 7.06669M4.03627 6.11431C2.02808 6.11431 0.399902 5.64431 0.399902 5.16193V2.78098M4.03627 1.8286C2.02808 1.8286 0.399902 2.25479 0.399902 2.78098M0.399902 2.78098C0.399902 3.30717 2.02808 3.73336 4.03627 3.73336C4.03627 4.21574 5.5149 4.68574 7.25308 4.68574C8.99081 4.68574 10.3999 4.21574 10.3999 3.73336M10.3999 1.35241C10.3999 0.826215 8.99081 0.400024 7.25308 0.400024C5.5149 0.400024 4.10627 0.826215 4.10627 1.35241M10.3999 1.35241C10.3999 1.8786 8.99081 2.30479 7.25308 2.30479C5.51536 2.30479 4.10627 1.8786 4.10627 1.35241M4.10627 1.35241V6.19336" stroke="black" stroke-width="0.8" stroke-linecap="round"/>
+</svg>';
         default:
             return '<div></div>';
     }
@@ -271,8 +275,13 @@ function create_input($field,$value = null,$readonly = "")
             ?>
         <div class="products-gallery grid-display padding-10 start one-row">
             <?php if(empty($readonly)){  ?>
-            <div class="pointer add-order-product border-dark-gray flex-display direction-column space-between product padding-15 margin-after-10">
-                הוספת מוצר להזמנה
+            <div class="pointer add-order-product  flex-display direction-column center ">
+                <svg class="align-self-center" data-tooltip="הוספת מוצר להזמנה" xmlns="http://www.w3.org/2000/svg" width="90" height="90" viewBox="0 0 60 60" fill="none">
+                    <circle cx="30" cy="30" r="29.5" class="background-dark-green" stroke="white"/>
+                    <line x1="30" y1="20" x2="30" y2="42" stroke="white" stroke-width="2"/>
+                    <line x1="41" y1="31" x2="19" y2="31" stroke="white" stroke-width="2"/>
+                </svg>
+
             </div>
         <?php
             }
@@ -301,7 +310,7 @@ function create_product_view($product=null,$options=null)
         $options["key"] = 0;
     }
     ?>
-    <div class="border-dark-gray flex-display direction-column space-between product font-15 padding-15" data-id="<?php echo $product->id?>">
+    <div class="border-dark-gray pointer flex-display direction-column space-between product font-15 padding-15" data-id="<?php echo $product->id?>">
         <?php if($options["table_name"]=="orders"){ ?>
         <input type="hidden" name="products[<?php echo $options["key"]?>][id]" value="<?php echo $product->id?>"><!--id של השורה של מוצר_הזמנה-->
         <input type="hidden" name="products[<?php echo $options["key"]?>][order_id]" value="<?php echo $product->order_id?>">
@@ -322,6 +331,14 @@ function create_product_view($product=null,$options=null)
                 $price = null;
                 if(!empty($product->order_price)){
                     $price = $product->order_price;
+                }
+
+                if ($options["table_name"] == "orders") {}
+                else{
+                    $product->count = null;
+                    $product->discount_percent = null;
+                    $product->bonus = null;
+
                 }
 //                else if(!empty($product->price)){
 //                    $price = $product->price;
@@ -348,7 +365,7 @@ function create_product_view($product=null,$options=null)
         <div class="flex-display space-around part-15 buttons">
         <?php //if($options["table_name"]=="products"){?>
             <a href="single?subject=products&action=edit&id=<?php echo $product->id?>" class="part-15 button background-white gold bold font-15 <?php echo $options["table_name"]=="products" ? '':"hidden" ?>">מעבר למוצר</a>
-      <?php //} ?>
+        <?php //} ?>
         <?php //if($options["table_name"]=="orders"){
             //$link = "single?subject=products&action=edit&id=".$product->id;
             ?>
@@ -357,6 +374,13 @@ function create_product_view($product=null,$options=null)
         //}
         //else if ($options["table_name"]=="order_products"){?>
             <button type="button" class="background-gold bold font-15 order-product <?php echo $options["table_name"]=="order_products" ? '':"hidden" ?>">הזמן מוצר</button>
+            <?php if($options["table_name"]=="orders"){?>
+            <a data-bs-toggle="modal" href="#bout-massage" role="button" data-action="remove">
+                <svg class=""  xmlns="http://www.w3.org/2000/svg" width="25" height="24" viewBox="0 0 25 24" fill="none">
+                    <path d="M4.16663 7H20.8333M10.4166 11V17M14.5833 11V17M5.20829 7L6.24996 19C6.24996 19.5304 6.46945 20.0391 6.86015 20.4142C7.25085 20.7893 7.78076 21 8.33329 21H16.6666C17.2192 21 17.7491 20.7893 18.1398 20.4142C18.5305 20.0391 18.75 19.5304 18.75 19L19.7916 7M9.37496 7V4C9.37496 3.73478 9.48471 3.48043 9.68006 3.29289C9.87541 3.10536 10.1404 3 10.4166 3H14.5833C14.8596 3 15.1245 3.10536 15.3199 3.29289C15.5152 3.48043 15.625 3.73478 15.625 4V7" class="stroke-background-gold" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </a>
+            <?php } ?>
         </div>
         <?php //}
         ?>
@@ -377,8 +401,11 @@ function get_list_ajax(){
     $format =  isset($_POST["format"])? $_POST["format"] :"options";
     switch ($format) {
         case  'table':
-            write_log ("table_display ");
+            //write_log ("table_display ");
             $table = build_table_rows ($table_name, '');
+            $title = BOUTIQUE_LISTS[$table_name]["title"];
+            $options = array();
+            $options["title"] = $title;
             //write_log ("rows " . $table);
             break;
         case 'array':
@@ -412,7 +439,13 @@ function view_archive_actions($table_name,$view_only = false,$add_text="", $clie
                     <path d="M12.5 13.2412C12.5 12.1534 13.382 11.2725 14.4688 11.2725H28.5312C29.618 11.2725 30.5 12.1534 30.5 13.2412V16.0537C30.5 16.5759 30.2926 17.0767 29.9234 17.4459C29.5542 17.8151 29.0534 18.0225 28.5312 18.0225H14.4688C13.9466 18.0225 13.4458 17.8151 13.0766 17.4459C12.7074 17.0767 12.5 16.5759 12.5 16.0537V13.2412ZM14.4688 12.96C14.3942 12.96 14.3226 12.9896 14.2699 13.0424C14.2171 13.0951 14.1875 13.1667 14.1875 13.2412V16.0537C14.1875 16.209 14.3135 16.335 14.4688 16.335H28.5312C28.6058 16.335 28.6774 16.3054 28.7301 16.2526C28.7829 16.1999 28.8125 16.1283 28.8125 16.0537V13.2412C28.8125 13.1667 28.7829 13.0951 28.7301 13.0424C28.6774 12.9896 28.6058 12.96 28.5312 12.96H14.4688ZM12.5 21.1162C12.5 20.0284 13.382 19.1475 14.4688 19.1475H28.5312C29.618 19.1475 30.5 20.0284 30.5 21.1162V23.9287C30.5 24.4509 30.2926 24.9517 29.9234 25.3209C29.5542 25.6901 29.0534 25.8975 28.5312 25.8975H14.4688C13.9466 25.8975 13.4458 25.6901 13.0766 25.3209C12.7074 24.9517 12.5 24.4509 12.5 23.9287V21.1162ZM14.4688 20.835C14.3942 20.835 14.3226 20.8646 14.2699 20.9174C14.2171 20.9701 14.1875 21.0417 14.1875 21.1162V23.9287C14.1875 24.084 14.3135 24.21 14.4688 24.21H28.5312C28.6058 24.21 28.6774 24.1804 28.7301 24.1276C28.7829 24.0749 28.8125 24.0033 28.8125 23.9287V21.1162C28.8125 21.0417 28.7829 20.9701 28.7301 20.9174C28.6774 20.8646 28.6058 20.835 28.5312 20.835H14.4688ZM14.4688 27.0225C13.9466 27.0225 13.4458 27.2299 13.0766 27.5991C12.7074 27.9683 12.5 28.4691 12.5 28.9912V31.8037C12.5 32.8905 13.382 33.7725 14.4688 33.7725H28.5312C29.0534 33.7725 29.5542 33.5651 29.9234 33.1959C30.2926 32.8267 30.5 32.3259 30.5 31.8037V28.9912C30.5 28.4691 30.2926 27.9683 29.9234 27.5991C29.5542 27.2299 29.0534 27.0225 28.5312 27.0225H14.4688ZM14.1875 28.9912C14.1875 28.9167 14.2171 28.8451 14.2699 28.7924C14.3226 28.7396 14.3942 28.71 14.4688 28.71H28.5312C28.6058 28.71 28.6774 28.7396 28.7301 28.7924C28.7829 28.8451 28.8125 28.9167 28.8125 28.9912V31.8037C28.8125 31.8783 28.7829 31.9499 28.7301 32.0026C28.6774 32.0554 28.6058 32.085 28.5312 32.085H14.4688C14.3942 32.085 14.3226 32.0554 14.2699 32.0026C14.2171 31.9499 14.1875 31.8783 14.1875 31.8037V28.9912Z" fill="#1A7870"/>
                 </svg>
             <?php }//get_svg ("clients","new",false,"class-name"); ?>
-            <h1 class="page-title font-30 bold"><?php echo BOUTIQUE_TABLES[$table_name]["title"].$add_text  ?></h1>
+            <?php if($table_name == "lists"){
+                $title = BOUTIQUE_LISTS["cities"]["title"];
+            }
+            else{
+                $title = BOUTIQUE_TABLES[$table_name]["title"];
+            } ?>
+            <h1 class="page-title font-30 bold"><?php echo $title.$add_text  ?></h1>
         </div>
         <div class="flex-display align-center  space-between">
         <?php if(!$view_only){?>
@@ -479,7 +512,7 @@ function view_archive_actions($table_name,$view_only = false,$add_text="", $clie
 
 add_action('wp_ajax_view_catalog_gallery_ajax', 'view_catalog_gallery_ajax');
 function view_catalog_gallery_ajax(){//לתוח פופאפ לבחור איזה מוצר להוסיף להזמנה
-write_log("1");
+//write_log("1");
     //$cache_key = 'catalog_result';
 
     //$result = $cached_output = get_transient($cache_key);
@@ -538,7 +571,7 @@ function build_table_rows($list_name)
     }
     $rows .= '</tr>';
     foreach ($list as $row) {
-        $rows .= '<tr>';
+        $rows .= '<tr data-id="'. $row->id .'">';
         foreach (BOUTIQUE_LISTS[$list_name]["columns"] as $column) {
             if (isset($column['join_value'])) {
                 $field = $column['join_value'];
@@ -548,13 +581,12 @@ function build_table_rows($list_name)
             $rows .= '<td>' . $row->$field . '</td>';
         }
         //?subject=' . $list_name . '&action=edit&id=' . $row->id . '
-        $rows .= '<td class="td-action"><a data-bs-toggle="modal" href="#edit-list" data-id="'. $row->id .'" role="button" data-action="edit"> 
+        $rows .= '<td class="td-action"><a data-bs-toggle="modal" href="#edit-list" role="button" data-action="edit"> 
                         <svg class="edit-row" xmlns="http://www.w3.org/2000/svg" width="24" height="23" viewBox="0 0 24 23" fill="none">
                             <path d="M7 16.3041L11.413 16.2898L21.045 7.14726C21.423 6.78501 21.631 6.30393 21.631 5.79218C21.631 5.28043 21.423 4.79934 21.045 4.43709L19.459 2.91717C18.703 2.19267 17.384 2.19651 16.634 2.9143L7 12.0587V16.3041ZM18.045 4.27226L19.634 5.7893L18.037 7.30538L16.451 5.78643L18.045 4.27226ZM9 12.858L15.03 7.13384L16.616 8.65376L10.587 14.376L9 14.3808V12.858Z" fill="#E2B252"/>
                             <path d="M5 20.125H19C20.103 20.125 21 19.2654 21 18.2083V9.9015L19 11.8182V18.2083H8.158C8.132 18.2083 8.105 18.2179 8.079 18.2179C8.046 18.2179 8.013 18.2093 7.979 18.2083H5V4.79167H11.847L13.847 2.875H5C3.897 2.875 3 3.73462 3 4.79167V18.2083C3 19.2654 3.897 20.125 5 20.125Z" fill="#E2B252"/>
                         </svg></a>
                   </td>';
-        /*data-id="'. $row->id .'"*/
         $rows .='<td class="td-action"><a data-bs-toggle="modal" href="#bout-massage" role="button" data-action="remove">
                     <svg class="remove-row"  xmlns="http://www.w3.org/2000/svg" width="25" height="24" viewBox="0 0 25 24" fill="none">
                     <path d="M4.16663 7H20.8333M10.4166 11V17M14.5833 11V17M5.20829 7L6.24996 19C6.24996 19.5304 6.46945 20.0391 6.86015 20.4142C7.25085 20.7893 7.78076 21 8.33329 21H16.6666C17.2192 21 17.7491 20.7893 18.1398 20.4142C18.5305 20.0391 18.75 19.5304 18.75 19L19.7916 7M9.37496 7V4C9.37496 3.73478 9.48471 3.48043 9.68006 3.29289C9.87541 3.10536 10.1404 3 10.4166 3H14.5833C14.8596 3 15.1245 3.10536 15.3199 3.29289C15.5152 3.48043 15.625 3.73478 15.625 4V7" stroke="#E2B252" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -633,30 +665,31 @@ function get_column_value($column,$row,$field,$list)
 add_action('wp_ajax_on_order_confirmation', 'on_order_confirmation');
 function on_order_confirmation(){
     global  $wpdb;
-    write_log("on_order_confirmation");
+    //write_log("on_order_confirmation");
     if(isset($_POST['order_id'])){
         $order_id = $_POST['order_id'];
         $query = "UPDATE ".$wpdb->prefix."orders SET done = 1, user_confirms = ".get_current_user_id()."
                   WHERE id = ".$order_id;
-        run_query ($query);
-        write_log("order_confirmation");
+        //run_query ($query);
+        //write_log("order_confirmation");
         //add_notice( 'order_confirmation' ,"ההזמנה אושרה נשלח מייל ללקוח ולספקים" );
 
-        echo json_encode(array(
+        /*echo json_encode(array(
             'status' => 'success',
             'redirect' => $_POST["previous_page"],
         ));
-        die();
+        die();*/
 
 
-        $order_confirmation = get_page_data("orders","id" ,$order_id);
+        $order_confirmation = get_page_data("orders","id" ,$order_id)[0];
 
         //שליחת מייל ללקוח על ההזמנה שאושרה
-        $client = get_page_data("clients","id" ,$order_confirmation->client_id);
-        $body = "הזמנה מתאריך ".$order_confirmation->order_date."<br><br>";
+        $client = get_page_data("clients","id" ,$order_confirmation->client_id)[0];
+
+        $body = "הזמנה מתאריך ".date('d/m/Y',strtotime ( $order_confirmation->order_date)) ."<br><br>";
         $products = get_page_data("order_products","order_id",$order_id);
         $order_supplier = array();
-
+        //write_log("client ".json_encode($client));
         foreach ($products as $product){
             if(!is_array($order_supplier[$product->supplier_id])){
                 $order_supplier[$product->supplier_id] = array();
@@ -671,14 +704,14 @@ function on_order_confirmation(){
             }
             $body .= "<br>";
         }
-        $body.= "<br>".$order_confirmation->notes;
-
-        send_mail($client->email,"סיכום הזמנה מס. ".$order_id,$body);
+        $body.= "<br>הערות: ".$order_confirmation->notes;
+        //write_log("to ".$client->email." body ".$body);
+        //send_mail($client->email,"סיכום הזמנתך מס. ".$order_id,$body);
 
 
         //שליחת מייל לכל ספק על ההזמנה בשבילו
         foreach ($order_supplier as $key=>$order){
-            $supplier = get_page_data("suppliers","id",$key);
+            $supplier = get_page_data("suppliers","id",$key)[0];
 
             $body = "נא לספק ללקוח  ".$client->name." את המוצרים הבאים:<br>";
             foreach ($order as $product){
@@ -686,9 +719,16 @@ function on_order_confirmation(){
                 $body .= $product->name." כמות: ".$product->count+$product->bonus." מחיר ";
                 $body .= "<br>";
             }
-            send_mail($supplier->email,"סיכום הזמנה מס. ".$order_id,$body);
+            //write_log("to ".$supplier->email." body ".$body);
+            //send_mail($supplier->email,"סיכום הזמנה מס. ".$order_id,$body);
         }
 
+        echo json_encode(array(
+            'status' => 'success',
+            'notice' => 'ההזמנה אושרה נשלח מייל ללקוח ולספקים',
+            'redirect' => isset($_POST["previous_page"]) ? $_POST["previous_page"]:'',
+        ));
+        die();
     }
 }
 

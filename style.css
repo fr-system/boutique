@@ -16,8 +16,8 @@ Text Domain: boutique
     --b-global-color-dark-green: #1A7870;
     --b-global-color-dark-green-hover: #0f544e;
     --b-global-color-light-light-blue: #D9F5F3;
+    --b-global-color-light-light-blue-hover: #c2e3e0;
     --b-global-color-light-orange: #f8d9a3;
-    --b-global-color-light-green:#D9F5F3;
 
     color: #000000;
 ;
@@ -67,7 +67,7 @@ svg circle.background-light-light-blue, svg rect.background-light-light-blue{
     fill: var(--b-global-color-light-light-blue);
 }
 svg:hover circle.background-light-light-blue, a:hover svg rect.background-light-light-blue{
-    fill: var(--b-global-color-light-orange);
+    fill: var(--b-global-color-light-light-blue-hover);
 }
 
 svg circle.background-dark-green, svg rect.background-dark-green{
@@ -84,6 +84,12 @@ svg:hover path.background-gold, a:hover svg path.background-gold{
     fill: var(--b-global-color-dark-green-hover);
 }
 
+svg path.stroke-background-gold {
+    stroke: var(--b-global-color-gold);
+ }
+svg:hover path.stroke-background-gold, a:hover svg path.stroke-background-gold{
+    stroke: var(--b-global-color-dark-green-hover);
+}
 
 .background-light-light-blue:hover{
     background-color: #c6e2e0;
@@ -327,6 +333,9 @@ a.button{
     text-decoration: none;
     justify-content: center;
 }
+button svg, a.button svg{
+    margin-left: 5px;
+}
 button.background-white:hover, .button.background-white:hover{
     background-color: var(--b-global-color-light-gray);
 }
@@ -554,8 +563,8 @@ label span{
 }
 .login-area button{
     border: none;
-    padding: 10px 40px;
- border-radius:   100px;
+    /*padding: 10px 40px;*/
+    border-radius:   100px;
     width: fit-content;
 }
 
@@ -572,7 +581,7 @@ svg{
     cursor: pointer;
 }
 ul.tables-list li:hover{
-     background-color: var(--b-global-color-light-green);
+     background-color: var(--b-global-color-light-light-blue);
  }
 ul.tables-list li.selected {
     font-weight: bold;
