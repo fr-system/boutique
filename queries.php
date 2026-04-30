@@ -69,9 +69,9 @@ function create_query($table_name,$id,$action, $results)
     if (!empty($id)) {
         $query .= " where id = " . $id;
     }
-    //if ($table_name == "order_products") {
-        //write_log(" query " . $query);
-    //}
+    /*if ($table_name == "order_products") {
+        write_log(" query " . $query);
+    }*/
     $ok = run_query($query, "execute");
 
     //return $query;
@@ -94,7 +94,7 @@ function build_query_boutique()
     }
 
     global $wpdb;
-    if(isset($_POST["remove"])){
+    if(isset($_POST["remove"]) && $_POST["remove"]){
         $action = "remove";
         $result = array();
     }
@@ -115,12 +115,12 @@ function build_query_boutique()
                 if ($action == "new") {
                     $row["order_id"] = $id;
                 }
-                //write_log("row order product" . json_encode($row));
-                //write_log("create_query " . "order_products");
+
+                $action_product = (isset($row["id"]) && !empty($row["id"])) ?
+                    (isset($row["remove"]) && $row["remove"]? "remove"  :  "update") :"new";
+                   // write_log("row order product" . json_encode($row));
                 $result = build_query_structure("order_products", $row);
-                create_query("order_products",
-                    $row["id"], (isset($row["id"]) && !empty($row["id"])) ? "update" : "new"
-                    , $result);
+                create_query("order_products",$row["id"], $action_product, $result);
             }
         }
     }

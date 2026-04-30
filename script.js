@@ -339,8 +339,18 @@ jQuery(document).ready(function($){
 
 
     jQuery('#bout-massage').on('hide.bs.modal', function (e,a) {
-        var aa = 1;
+        jQuery(this).find('button.remove-product-order').addClass("hidden");
+        jQuery(this).find('button[type=submit]').show();
+        jQuery(this).find('[name="remove"]').val(0);
     });
+
+    jQuery("#bout-massage button.remove-product-order").click(function (){
+        var id = jQuery('#bout-massage').find('[name="id"]').val();
+        var product = jQuery('.products-gallery .product[data-id='+id+']');
+        product.addClass("hidden");
+        product.find("input.input-remove").val("1");
+        closeModal()
+    })
 
     jQuery('#bout-massage').on('show.bs.modal', function (e) {
         //action = remove
@@ -364,16 +374,17 @@ jQuery(document).ready(function($){
 
         if(subject == "orders" && getParameterByName("action")=="edit" && btn.parent().parent().hasClass("product")){
             single = "מוצר מההזמנה";
-            jQuery(this).find('.ok').removeClass("hidden");
+            jQuery(this).find('button.remove-product-order').removeClass("hidden");
             jQuery(this).find('button[type=submit]').hide();
+            id = btn.parent().parent().data("id");
         }
         else{
-            jQuery(this).find('[name="remove"]').val(true);
+            jQuery(this).find('[name="remove"]').val(1);
             jQuery(this).find('[name="form_func"]').val("build_query_boutique");
             jQuery(this).find('[name="table_name"]').val(subject);
-            jQuery(this).find('[name="id"]').val(id);
         }
 
+        jQuery(this).find('[name="id"]').val(id);
         jQuery("#bout-massage .modal-title").html(title);
         jQuery("#bout-massage .modal-body").html("האם אתה מאשר למחוק את ה"+single+"?");
     });

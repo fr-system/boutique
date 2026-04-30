@@ -312,9 +312,10 @@ function create_product_view($product=null,$options=null)
     ?>
     <div class="border-dark-gray pointer flex-display direction-column space-between product font-15 padding-15" data-id="<?php echo $product->id?>">
         <?php if($options["table_name"]=="orders"){ ?>
-        <input type="hidden" name="products[<?php echo $options["key"]?>][id]" value="<?php echo $product->id?>"><!--id של השורה של מוצר_הזמנה-->
-        <input type="hidden" name="products[<?php echo $options["key"]?>][order_id]" value="<?php echo $product->order_id?>">
-        <input type="hidden" name="products[<?php echo $options["key"]?>][product_id]" value="<?php echo $product->product_id?>">
+            <input type="hidden" class="input-remove" name="products[<?php echo $options["key"]?>][remove]" value="0">
+            <input type="hidden" name="products[<?php echo $options["key"]?>][id]" value="<?php echo $product->id?>"><!--id של השורה של מוצר_הזמנה-->
+            <input type="hidden" name="products[<?php echo $options["key"]?>][order_id]" value="<?php echo $product->order_id?>">
+            <input type="hidden" name="products[<?php echo $options["key"]?>][product_id]" value="<?php echo $product->product_id?>">
     <?php } ?>
         <div class="product-img part-40">
             <svg class="pointer view-product" xmlns="http://www.w3.org/2000/svg" width="12" height="9" viewBox="0 0 12 9" fill="none">

@@ -83,7 +83,7 @@ else{
             <input type="hidden" name="table_name" value="<?php echo $table_name ?>" />
             <input type="hidden" name="id" value="<?php echo $id ?>" />
             <input type="hidden" name="previous_page" value="<?php echo $previous_page ?>" />
-
+            <input type="hidden" name="action" value="<?php echo $id ?>" />
 
             <?php
             //write_log("row ".json_encode($row));
