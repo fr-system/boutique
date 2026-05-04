@@ -25,7 +25,7 @@ const BOUTIQUE_TABLES = array(
             array("field_name" => "accounting_phone_number", "widget" => "text", "label" => "טלפון הנה\"ח","hidden"=>true),
 
 
-            array("field_name" => "obligo", "un_apostrophe" => true, "widget" => "text", "label" => "תקרת חוב"),
+            array("field_name" => "obligo", "un_apostrophe" => true, "widget" => "text", "label" => "תקרת חוב","sign"=>"₪"),
             array("field_name" => "exceeding_conditions", "widget" => "bool", "label" => "חריגה מתנאי תשלום","hidden"=>true,"filter"=>true),
         ),
         "actions" => array("orders","tasks")
@@ -38,7 +38,7 @@ const BOUTIQUE_TABLES = array(
             array("field_name" => "name", "widget" => "text","label"=>"שם","required"=>true),
             array("field_name" => "barcode", "widget" => "text","label"=>"ברקוד","required"=>true),
             array("field_name" => "supplier_id", "widget" => "select","label"=>"ספק", "join_table" => "suppliers", "join_value" => "name","filter"=>true),
-            array("field_name" => "price", "type" => "float", "widget" => "text","label"=>"מחיר", "un_apostrophe" => true,"popup_button"=>array("label"=>"מחיר מיוחד ללקוח","target_modal"=>"update_client_price")),
+            array("field_name" => "price", "type" => "float", "widget" => "text","label"=>"מחיר", "un_apostrophe" => true,"sign"=>"₪","popup_button"=>array("label"=>"מחיר מיוחד ללקוח","target_modal"=>"update_client_price")),
             array("field_name" => "description", "widget" => "textarea","label"=>"תיאור"),
             array("field_name" => "file_id", "widget" => "file","label"=>"העלאת דף מוצר","hidden"=>true),
             array("field_name" => "image_id", "widget" => "image","label"=>"העלאת תמונת מוצר","hidden"=>true),
@@ -106,9 +106,9 @@ const BOUTIQUE_TABLES = array(
             array("field_name" => "order_id", "widget" => "number"),
             array("field_name" => "product_id", "widget" => "number", "join_table" => "products","join_values_select"=>array("name","price","image_id","supplier_id")),
             array("field_name" => "count", "widget" => "number"),
-            array("field_name" => "order_price", "widget" => "text", "un_apostrophe" => true),
+            array("field_name" => "order_price", "widget" => "text", "un_apostrophe" => true,"sign"=>"₪"),
             array("field_name" => "bonus", "widget" => "checkbox"),
-            array("field_name" => "discount_percent", "widget" => "text", "un_apostrophe" => true),
+            array("field_name" => "discount_percent", "widget" => "text", "un_apostrophe" => true,"sign"=>"%"),
         )),
     "agents" => array(
         "title" => "סוכנים",
@@ -121,7 +121,7 @@ const BOUTIQUE_TABLES = array(
             array("field_name" => "user_id", "widget" => null),
             array("field_name" => "mobile", "widget" => "text", "label" => "נייד"),
             array("field_name" => "work_area_id","widget" => "select", "join_table" => "areas", "join_value" => "area", "label" => "אזור עבודה","required"=>true),// סינון אזור
-            array("field_name" => "target","widget" => "number", "label" => "יעד כללי"),
+            array("field_name" => "target","widget" => "number", "label" => "יעד כללי", "un_apostrophe" => true,"sign"=>"₪"),
             array("field_name" => "notes", "widget" => "textarea", "label" => "הערה","hidden"=>true),
         ),
         //"filter"=>"area_id == []"
@@ -134,7 +134,7 @@ const BOUTIQUE_TABLES = array(
         "columns" => array(
             array("field_name" => "supplier_id","widget" => "select", "join_table" => "suppliers", "join_value" => "name", "label" => "שם הספק"),
             array("field_name" => "client_id","widget" => "select", "join_table" => "clients", "join_value" => "name", "label" => "שם הלקוח"),
-            array("field_name" => "obligation", "widget" => "text","un_apostrophe" => true, "label" => "חיוב"),
+            array("field_name" => "obligation", "widget" => "text","un_apostrophe" => true, "label" => "חיוב","sign"=>"₪"),
             array("field_name" => "doc_number", "widget" => "text","un_apostrophe" => true, "label" => "מס' חשבונית"),
             array("field_name" => "date", "widget" => "date", "label" => "תאריך"),
             array("field_name" => "doc_type", "widget" => "select", "label" => "סוג חשבונית"),

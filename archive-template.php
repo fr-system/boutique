@@ -5,35 +5,36 @@ if(!is_user_logged_in()){
 ?>
 <?php get_header();?>
 <?php
-if(!isset($_GET["subject"]) || !is_manager() && $_GET["subject"] == "clients") return;
+global $wpdb;
+
 $table_name = $_GET["subject"];
 $page_info  = BOUTIQUE_TABLES[$table_name];
   //  write_log("cols  ".json_encode( $page_info["columns"]));
 ?>
 <section class="page" data-single="<?php echo $page_info['single']?>">
     <?php
-        $filter_field = null;
-        $filter_value = null;
-        $add_text = "";
-        $lastKey = array_key_last($_GET);
-        if ($lastKey != "subject") {
-            $filter_field = $lastKey;
-            $filter_value = $_GET[$lastKey];
+    $filters = array();
+    $add_text = "";
+    $lastKey = array_key_last($_GET);
+    if ($lastKey != "subject") {
+        $query = "SELECT name from {$wpdb->prefix}clients WHERE " .$lastKey."=".$_GET[$lastKey];
+        $result = run_query ($query);
+        $add_text =" של ". $result[0]->name;
+        $filters[]=array("filter_field" => "client_id", "filter_value"=>$_GET[$lastKey]);
+    }
 
-            global $wpdb;
-            $query = "SELECT name from {$wpdb->prefix}clients WHERE " .$filter_field."=".$filter_value;
-            $result = run_query ($query);
-            $add_text =" של ". $result[0]->name;
-            $filter_field = "client_id";
+    echo view_archive_actions($table_name,false,$add_text,$_GET[$lastKey]);
+    //if(!isset($_GET["subject"]) || !is_manager() && $_GET["subject"] == "clients") return;
+    if(is_subscriber() ){
+        if($table_name == "clients") {
+            $filters[] = array("filter_field" => "agent_id", "filter_value" =>get_current_user_id());// 5);
         }
+        if($table_name == "tasks") {
+            $filters[] = array("filter_table"=>"tasks", "filter_field" => "agent_id", "filter_value" => get_current_user_id() );//5);
+        }
+    }
 
-
-        $archive_actions = view_archive_actions($table_name,false,$add_text,$filter_value);
-        echo $archive_actions;
-
-    $table_name = $_GET["subject"];
-
-    $result = get_page_data($table_name,$filter_field,$filter_value);
+    $result = get_page_data($table_name,$filters);
     $user_meta = get_user_meta( get_current_user_id(), "products_view", true);
     if($table_name == "products" && $user_meta == "gallery"){
         $catalog_gallery = view_catalog_gallery($result,array("table_name"=>"products"));
@@ -48,7 +49,7 @@ $page_info  = BOUTIQUE_TABLES[$table_name];
                 <th></th>
             <?php }
             foreach($page_info["columns"] as $column){
-                if(isset($column["hidden"]) || !isset($column["label"]) || !empty($add_text) && $column["field_name"]== "client_id"){continue;}
+                if(isset($column["hidden"]) || !isset($column["label"]) || !empty($add_text) && $column["field_name"]== "client_id" || is_subscriber() && $column["field_name"]== "agent_id"){continue;}
                 ?>
                 <th><?= $column["label"]?></th>
             <?php } ?>

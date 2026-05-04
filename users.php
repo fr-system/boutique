@@ -94,6 +94,9 @@ function get_user_role($user = null){
 function is_manager($user = null){
     return get_user_role($user) == "administrator";
 }
+function is_subscriber($user = null){
+    return get_user_role($user) == "subscriber";
+}
 function get_user_display_name($user_obj = null){
     $user = get_user_connected($user_obj);
     return $user ?  $user->data->display_name : null;

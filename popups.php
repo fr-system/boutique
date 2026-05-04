@@ -83,28 +83,51 @@ function get_svg($svg_name,$action='',$side_menu = true)
 }
 function get_side_menu()
 {
-    $subject =isset($_GET) && isset($_GET["subject"]) ? $_GET["subject"] : "home";
-    ?>
+    $subject =isset($_GET) && isset($_GET["subject"]) ? $_GET["subject"] : "home"; ?>
 <div id="sidebar-menu" class="part-10">
-    <ul class="menu flex-display direction-column"  role="navigation">
-        <?php $menu_items = wp_get_nav_menu_items('main_menu');
-        foreach ($menu_items as $item) {
+    <ul class="menu flex-display direction-column" role="navigation">
+        <?php
+        $menu = wp_get_nav_menu_object( get_nav_menu_locations()[ 'main_menu' ] );
+        $menuitems = wp_get_nav_menu_items( $menu->term_id, array( 'order' => 'DESC' ) );
+        $count = 0;
+        $submenu = false;
+        foreach($menuitems as $item ){
             $name = $item->description;
-            $url = $item->url;
-           // if(str_contains($url,"/archive/")){
-           // if($url != "home" && !empty ($name)){
-                $url.="?subject=".$name;
-            //}
+            if(is_subscriber() && ($name=="agents"|| $name=="collection"||$name=="lists"))continue;
+            $url = $item->url."?subject=".$name;
+            if ( !$item->menu_item_parent ){
+
+                $parent_id = $item->ID;?>
+                <li class="pointer flex-display direction-column center  <?=($subject == $name ? 'selected':'') ?> ">
+                    <div class="flex-display space-between align-center">
+                        <?php echo get_svg($name) ?>
+                        <a class="not-link" href="<?= esc_url($url)?>"><?=esc_html($item->title)?></a>
+                    </div>
+            <?php }
+            else{
+                $url.="&action=new";
+            }
             ?>
-            <li class="pointer flex-display space-between align-center <?=($subject == $name ? 'selected':'') ?> ">
-                <?= get_svg($name) ?>
-                <a class="not-link" href="<?= esc_url($url)?>"><?=esc_html($item->title)?></a>
-            </li>
-        <?php }?>
+            <?php if ( $parent_id == $item->menu_item_parent && is_manager()){ ?>
+                <?php if ( !$submenu ){ $submenu = true; ?>
+                    <ul class="sub-menu ">
+                <?php } ?>
+                <li class="pointer flex-display end align-center">
+                    <a class="not-link" href="<?= esc_url($url)?>"><?=esc_html($item->title)?></a>                            </li>
+                    <?php if ( $menuitems[ $count + 1 ]->menu_item_parent != $parent_id && $submenu ){ ?>
+                        </ul>
+                        <?php $submenu = false;
+                    }
+           if ( $menuitems[ $count + 1 ]->menu_item_parent != $parent_id ){ ?>
+                </li>
+                <?php $submenu = false;
+           } ?>
+           <?php $count++;
+           }
+        }?>
     </ul>
 </div>
-    <?php
-}
+<?php }
 
 function get_single_view($table_name,$row,$readonly)
 {?>
@@ -125,8 +148,9 @@ function get_single_view($table_name,$row,$readonly)
                             $value = isset($row->$field_name) ? $row->$field_name :"";
                         }
                         else if($column["widget"] == "products" && isset($row->id)){
-
-                            $value = get_page_data("order_products","order_id",$row->id);
+                            $filters = array();
+                            $filters[]=array("filter_field" => "order_id", "filter_value"=>$row->id);
+                            $value = get_page_data("order_products",$filters);
                             //write_log("q p ".$query);
                             //write_log("products: ".json_encode($value));
                         }
@@ -172,7 +196,7 @@ function create_input($field,$value = null,$readonly = "")
                 //$button = "<button class='client-price' onclick=''>{$field["popup_button"]["label"]}</button>";
             }
             return '<input type="'.$field["widget"].'"  class="grow font-17" id="'.$field["field_name"].'" name="'.$field["field_name"].'" '
-             .($field["widget"]=="text" && isset($field["un_apostrophe"]) ? 'data-a-sign="₪"':'').  'value="'.esc_attr($value).'" '.
+             .($field["widget"]=="text" && isset($field["un_apostrophe"]) && isset($field["sign"]) ? 'data-a-sign="'.$field["sign"].'"':'').  'value="'.esc_attr($value).'" '.
                 option_if_set($field,"class").
                 $required.$autocomplete.$readonly.
                 ($field["widget"] == "number" ? option_if_set($field,"step").option_if_set($field,"min"). option_if_set($field,"max")."style=\"width: 70px\"" : "" ).'/>'.$button;
@@ -207,7 +231,11 @@ function create_input($field,$value = null,$readonly = "")
                     }
                 }
                 else if(isset($field["join_table"])) {
-                    echo build_options($field["join_table"],$value);
+                    $filter = null;
+                    if($field["join_table"] == "clients" && is_subscriber()){
+                        $filter = "agent_id=".get_current_user_id();
+                    }
+                    echo build_options($field["join_table"],$value,$filter);
                 }
                 ?>
             </select>
@@ -275,12 +303,17 @@ function create_input($field,$value = null,$readonly = "")
             ?>
         <div class="products-gallery grid-display padding-10 start one-row">
             <?php if(empty($readonly)){  ?>
-            <div class="pointer add-order-product  flex-display direction-column center ">
-                <svg class="align-self-center" data-tooltip="הוספת מוצר להזמנה" xmlns="http://www.w3.org/2000/svg" width="90" height="90" viewBox="0 0 60 60" fill="none">
+            <div class="add-order-product  flex-display direction-column space-around ">
+                <svg class="pointer  align-self-center" data-tooltip="הוספת מוצר להזמנה" xmlns="http://www.w3.org/2000/svg" width="90" height="90" viewBox="0 0 60 60" fill="none">
                     <circle cx="30" cy="30" r="29.5" class="background-dark-green" stroke="white"/>
                     <line x1="30" y1="20" x2="30" y2="42" stroke="white" stroke-width="2"/>
                     <line x1="41" y1="31" x2="19" y2="31" stroke="white" stroke-width="2"/>
                 </svg>
+                <?php if(empty($value)){?>
+                    <div type="button" class="products-last-order .button hidden flex-display center align-center background-white dark-green bold font-18">
+                        <span>מוצרים מהזמנה קודמת</span>
+                     </div>
+                <?php } ?>
 
             </div>
         <?php
@@ -410,10 +443,10 @@ function get_list_ajax(){
             //write_log ("rows " . $table);
             break;
         case 'array':
-            $result = get_list ($table_name,$filter,true);
+            $result = get_list($table_name,$filter,true);
             break;
         case 'options':
-            $options = build_options ($table_name, $selected_value, $filter);
+            $options = build_options($table_name, $selected_value, $filter);
             //write_log ("options" . $options);
             break;
     }
@@ -484,7 +517,7 @@ function view_archive_actions($table_name,$view_only = false,$add_text="", $clie
                 </svg>
                 <input type="search" id="search" class="" placeholder="חיפוש" />
             </div>
-            <?php if($table_name != "collection" &&  !$view_only){
+            <?php if($table_name != "collection" &&  !$view_only && (!is_subscriber() || $table_name != "tasks")){
                 $href = 'single?subject='.$table_name.'&action=new';
                 if(!empty($client_id)){
                     $href.="&client_id=".$client_id;
@@ -547,14 +580,17 @@ function view_catalog_gallery($products,$options = null)
 {
     $class_grid = isset($options['class_grid']) ?  $options['class_grid'] : 'catalog';
     ob_start();
-    ?>
-    <div class="grid-display products-gallery <?= $class_grid?>">
+    if(!isset($options['not_create_grid'])){?>
+    <div class="grid-display products-gallery <?= $class_grid?>" >
         <?php
-    foreach ($products as $product){
-        create_product_view($product,$options);
-    }?>
+    }
+        foreach ($products as $product){
+            create_product_view($product,$options);
+        }
+
+    if(!isset($options['not_create_grid'])){?>
     </div>
-        <?php
+    <?php }
     return ob_get_clean();
 }
 
@@ -681,14 +717,19 @@ function on_order_confirmation(){
         ));
         die();*/
 
+        $filters= array(array("filter_field" => "id", "filter_value"=>$order_id));
+        $order_confirmation = get_page_data("orders",$filters)[0];
 
-        $order_confirmation = get_page_data("orders","id" ,$order_id)[0];
+        $filters=array(array("filter_field" => "id", "filter_value"=>$order_confirmation->client_id));
 
         //שליחת מייל ללקוח על ההזמנה שאושרה
-        $client = get_page_data("clients","id" ,$order_confirmation->client_id)[0];
+        $client = get_page_data("clients",$filters)[0];
 
         $body = "הזמנה מתאריך ".date('d/m/Y',strtotime ( $order_confirmation->order_date)) ."<br><br>";
-        $products = get_page_data("order_products","order_id",$order_id);
+
+        $filters=array(array("filter_field" => "order_id", "filter_value"=>$order_id));
+
+        $products = get_page_data("order_products",$filters);
         $order_supplier = array();
         //write_log("client ".json_encode($client));
         foreach ($products as $product){
@@ -712,7 +753,8 @@ function on_order_confirmation(){
 
         //שליחת מייל לכל ספק על ההזמנה בשבילו
         foreach ($order_supplier as $key=>$order){
-            $supplier = get_page_data("suppliers","id",$key)[0];
+            $filters=array(array("filter_field" => "id", "filter_value"=>$key));
+            $supplier = get_page_data("suppliers",$filters)[0];
 
             $body = "נא לספק ללקוח  ".$client->name." את המוצרים הבאים:<br>";
             foreach ($order as $product){

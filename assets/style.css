@@ -173,6 +173,7 @@ ul.menu li {
     height: 35px;
    /* padding: 10px 15%;*/
     border-radius: 6px;
+    min-height: fit-content;
 }
 ul.menu li.selected {
     background-color: var(--b-global-color-light-gray);
@@ -183,6 +184,14 @@ ul.menu li.selected a{
 }
 ul.menu li:hover {
     background-color: var(--b-global-color-light-gray);
+}
+ul.menu li .sub-menu{
+    display: none;
+    margin: 0;
+    padding: 0;
+}
+ul.menu li:hover .sub-menu, ul.menu li.selected .sub-menu{
+    /*display: block;*/
 }
 a.not-link{
     text-decoration: none;
