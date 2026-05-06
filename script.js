@@ -115,10 +115,10 @@ jQuery(document).ready(function($){
 
         }
 
-        jQuery(".products-gallery .products-last-order").click(function (){
-            var client_id = jQuery(".page.single select[name=client_id]").val();
-
-            jQuery(".page.single
+        // jQuery(".products-gallery .products-last-order").click(function (){
+        //     var client_id = jQuery(".page.single select[name=client_id]").val();
+        //
+        //     jQuery(".page.single
 
         $form.addClass('disabled').find('[type="submit"]').prop('disabled', true);
         //grecaptcha.execute(globalVars.recaptcha_key, {action: 'submit'})
