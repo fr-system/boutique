@@ -366,14 +366,23 @@ section.page{
 
 table {
     width: 100%;
-    text-align: center;
-    border-collapse: separate;
-    border-spacing: 0 10px;
+    text-align: center !important;
+    border-collapse: separate !important;
+    border-spacing: 0 10px !important;
+}
+
+th{
+    outline: none !important;
+    text-align: center !important;
+}
+
+th:hover{
+    color: var(--b-global-color-dark-gold);
 }
 
 td {
-    border-top: var(--b-global-color-dark-gray) 1px solid;
-    border-bottom: var(--b-global-color-dark-gray) 1px solid;
+    border-top: var(--b-global-color-dark-gray) 1px solid !important;
+    border-bottom: var(--b-global-color-dark-gray) 1px solid !important;
 }
 /* עיצוב לעמודה הראשונה */
 td:first-child {
@@ -392,6 +401,9 @@ td:last-child {
     background-color: var(--a-global-color-light_gray);
 }
 .archive-table thead tr{ position: sticky;}
+table thead tr th{
+    border-bottom: none !important;
+}
 .archive-table tr {height: 50px}
 .archive-table tr img{
     max-width: 55px;

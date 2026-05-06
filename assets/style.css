@@ -343,3 +343,19 @@ td a.button{
 .modal-body{
     min-height: 100px;
 }
+
+.dt-type-numeric{
+
+}
+
+table.dataTable thead > tr > th.dt-orderable-asc span.dt-column-order,
+table.dataTable thead > tr > th.dt-orderable-desc span.dt-column-order{
+    left: 10px;
+    right: unset;
+}
+table.dataTable th.dt-type-numeric,*[dir=rtl]  table.dataTable th.dt-type-date{
+    text-align: right;
+}
+table.dataTable td.dt-type-numeric,*[dir=rtl] table.dataTable td.dt-type-date{
+    text-align: center;
+}

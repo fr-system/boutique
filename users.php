@@ -39,7 +39,7 @@ function login()
 
 }
 
-function register_new_user1($display_name, $email)
+function register_new_user1($display_name, $email,$role)
 {
     $email = fixXSS($email);
     //$pass = fixXSS($_POST['password']);
@@ -65,6 +65,7 @@ function register_new_user1($display_name, $email)
         'user_pass' => null,
         'user_email' => $email,
         'last_name' => fixXSS($display_name),
+        'role' => $role,
     );
     write_log("em1 ".$email);
     $user_id = wp_insert_user($userdata);
@@ -94,8 +95,11 @@ function get_user_role($user = null){
 function is_manager($user = null){
     return get_user_role($user) == "administrator";
 }
-function is_subscriber($user = null){
-    return get_user_role($user) == "subscriber";
+function is_agent($user = null){
+    return get_user_role($user) == "agent";
+}
+function is_supplier($user = null){
+    return get_user_role($user) == "supplier";
 }
 function get_user_display_name($user_obj = null){
     $user = get_user_connected($user_obj);

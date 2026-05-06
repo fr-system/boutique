@@ -15,26 +15,40 @@ jQuery(document).ready(function($){
         getTableAjaxData(selected.data("list-name"));
     }
 
-    if(getParameterByName("subject") == "orders" && getParameterByName("action") && getParameterByName("action") != "readonly")
-    setInterval(function() {
-        if(jQuery('input[name=dirty]').val() =="1" && jQuery('input[name=order_date]').val()
-            && jQuery('.grid-display select[name=client_id]').val() && jQuery('.grid-display .border-dark-gray.product').length > 0){
-            jQuery('input[name=dirty]').val("0");
-            if(getParameterByName("action") == "new"){
-
-            }
-            automaticOrderSaving();
-            //לשאול את פרידי לבדוק אם נגעו ב-2 דקות האלו לשמור ואם לא אז לא לשמור אולי לעשות שרק אם עזבו את המסך ולא נגעו בו כבר יותר מ2 דקות אז ללכת לשמירה
+    if(getParameterByName("subject") == "orders" && getParameterByName("action") && getParameterByName("action") != "readonly") {
+        if(getParameterByName("action") == "new" && jQuery(".page.single .grid-display select[name=client_id]").val()){
+            jQuery(".products-gallery.orders .products-last-order").removeClass("hidden");
         }
-    }, 120000); // 120000 מילישניות = 2 דקות
 
+        jQuery(".page.single .grid-display select[name=client_id]").change(function (){
+            if(getParameterByName("action") == "new" && jQuery(".products-gallery.orders .product").length == 0){
+                jQuery(".products-gallery.orders .products-last-order").removeClass("hidden");
+            }
+        })
+
+
+        setInterval(function () {
+            if (jQuery('input[name=dirty]').val() == "1" && jQuery('input[name=order_date]').val()
+                && jQuery('.grid-display select[name=client_id]').val() && jQuery('.grid-display .border-dark-gray.product').length > 0) {
+                jQuery('input[name=dirty]').val("0");
+/*                if (getParameterByName("action") == "new") {//אין לי מושג למה רציתי לשאול אם זה חדש
+
+                }*/
+                //automaticOrderSaving();
+                //לשאול את פרידי לבדוק אם נגעו ב-2 דקות האלו לשמור ואם לא אז לא לשמור אולי לעשות שרק אם עזבו את המסך ולא נגעו בו כבר יותר מ2 דקות אז ללכת לשמירה
+            }
+        }, 120000); // 120000 מילישניות = 2 דקות
+    }
     jQuery('input, select, textarea').change(function (){
         //לבדוק אם רק הוסיפו מוצר חדש וכמות וכו'
         // לבדוק שבכל האפשרויות הוא רואה שהרשומה עודכנה
         jQuery('input[name=dirty]').val("1");
     })
 
-    jQuery('a, button:not(.save), .logout-button ').click(function(e) {
+    //צריך לבדוק מתי לא לתת לצאת לפני שאלה האם לצאת בלי שמירה
+    //כרגע אני עושה רק על לחצן בטל או logout
+    // a, button:not(.save)
+    jQuery('a.cancel , .logout-button ').click(function(e) {
         if(jQuery('input[name=dirty]').val() == "1"){
             const confirmation = confirm('הערכים עדיין לא נשמרו. האם אתה בטוח שברצונך לצאת ללא שמירה?');
             if (!confirmation) {
@@ -108,17 +122,9 @@ jQuery(document).ready(function($){
             return;
         }
 
-        if(jQuery('.page.single').length > 0){
-            if(jQuery('.products-gallery .product').length ==0){//לא לשמור הזמנה שאין בה מוצרים!!!!
-            }
-
-
+        if(getParameterByName("subject") == "orders" && jQuery('.page.single').length > 0 && jQuery('.products-gallery .product').length ==0) {
+            return;
         }
-
-        // jQuery(".products-gallery .products-last-order").click(function (){
-        //     var client_id = jQuery(".page.single select[name=client_id]").val();
-        //
-        //     jQuery(".page.single
 
         $form.addClass('disabled').find('[type="submit"]').prop('disabled', true);
         //grecaptcha.execute(globalVars.recaptcha_key, {action: 'submit'})
@@ -365,9 +371,19 @@ jQuery(document).ready(function($){
 
     jQuery("#bout-massage button.remove-product-order").click(function (){
         var id = jQuery('#bout-massage').find('[name="id"]').val();
-        var product = jQuery('.products-gallery .product[data-id='+id+']');
-        product.addClass("hidden");
-        product.find("input.input-remove").val("1");
+        if(id) {
+            var product = jQuery('.products-gallery .product[data-id=' + id + ']');
+            product.addClass("hidden");
+            product.find("input.input-remove").val("1");
+        }
+        else{
+            $.each(jQuery('.products-gallery .product'),function () {
+                var product = jQuery(this);
+                if(product.find(".input-remove").val()=="1"){
+                    product.remove();
+                }
+            });
+        }
         closeModal()
     })
 
@@ -391,11 +407,16 @@ jQuery(document).ready(function($){
             id = btn.parent().parent().data("id");
         }
 
-        if(subject == "orders" && getParameterByName("action")=="edit" && btn.parent().parent().hasClass("product")){
+        if(subject == "orders"/* && getParameterByName("action")=="edit"*/ && btn.parent().parent().hasClass("product")){
             single = "מוצר מההזמנה";
+            title = "הזמנות";
             jQuery(this).find('button.remove-product-order').removeClass("hidden");
             jQuery(this).find('button[type=submit]').hide();
-            id = btn.parent().parent().data("id");
+            if(getParameterByName("action")=="new"){
+                id="";
+                btn.parent().parent().find(".input-remove").val("1");
+            }
+            //id = btn.parent().parent().data("id");
         }
         else{
             jQuery(this).find('[name="remove"]').val(1);
@@ -407,13 +428,6 @@ jQuery(document).ready(function($){
         jQuery("#bout-massage .modal-title").html(title);
         jQuery("#bout-massage .modal-body").html("האם אתה מאשר למחוק את ה"+single+"?");
     });
-
-    jQuery(".page.single select[name=client_id]").change(function (){
-        if(jQuery(".products-gallery .product").length == 0){
-            jQuery(".products-gallery .products-last-order").removeClass("hidden");
-        }
-
-    })
 
     jQuery(".products-gallery .products-last-order").click(function (){
         var client_id = jQuery(".page.single select[name=client_id]").val();
@@ -523,7 +537,7 @@ function searchElements(text,selector,searchSelector){
             jQuery('input[name=dirty]').val("1");
             jQuery(".add-order-product").after(element);
 
-            jQuery(".page .products-gallery .product.current .plus-minus-count span").click(function (e) {
+            jQuery(".page .products-gallery .product.current .plus-minus-count div").click(function (e) {
                 plusMinusCountProduct(e);
             })
             //jQuery(".products").prepend(element);
@@ -660,7 +674,7 @@ function fillListTable(result,targetElement){
 
 function automaticOrderSaving(){
     var $form = jQuery('form');
-    if (!$form.valid()) {
+    if (!$form.valid() || jQuery('.products-gallery .product').length ==0) {
         return;
     }
 

@@ -93,7 +93,7 @@ function get_side_menu()
         $submenu = false;
         foreach($menuitems as $item ){
             $name = $item->description;
-            if(is_subscriber() && ($name=="agents"|| $name=="collection"||$name=="lists"))continue;
+            if(is_agent() && ($name=="agents"|| $name=="collection"||$name=="lists"))continue;
             $url = $item->url."?subject=".$name;
             if ( !$item->menu_item_parent ){
 
@@ -107,8 +107,9 @@ function get_side_menu()
             else{
                 $url.="&action=new";
             }
+            //לבדוק מה סוכן יכול להוסיף חדש (הזמנה? מה עוד)
             ?>
-            <?php if ( $parent_id == $item->menu_item_parent && is_manager()){ ?>
+            <?php if ( $parent_id == $item->menu_item_parent && (is_manager() || is_agent() && $name=="orders")){ ?>
                 <?php if ( !$submenu ){ $submenu = true; ?>
                     <ul class="sub-menu ">
                 <?php } ?>
@@ -182,8 +183,12 @@ function create_input($field,$value = null,$readonly = "")
         case "email":
         case "number":
         case "date":
+        case "datetime-local":
             if($field["widget"] == "date" && !empty($value)) {
                 $value = date('Y-m-d', strtotime($value));
+            }
+            if($field["widget"] == "datetime-local" && !empty($value)) {
+                $value = date('Y-m-d H:i:s', strtotime($value));
             }
             if($field["widget"] == "email"){
                 $autocomplete = ' autocomplete="email"';
@@ -232,7 +237,7 @@ function create_input($field,$value = null,$readonly = "")
                 }
                 else if(isset($field["join_table"])) {
                     $filter = null;
-                    if($field["join_table"] == "clients" && is_subscriber()){
+                    if($field["join_table"] == "clients" && is_agent()){
                         $filter = "agent_id=".get_current_user_id();
                     }
                     echo build_options($field["join_table"],$value,$filter);
@@ -301,7 +306,7 @@ function create_input($field,$value = null,$readonly = "")
             break;
         case "products":
             ?>
-        <div class="products-gallery grid-display padding-10 start one-row">
+        <div class="products-gallery orders grid-display padding-10 start one-row">
             <?php if(empty($readonly)){  ?>
             <div class="add-order-product  flex-display direction-column space-around ">
                 <svg class="pointer  align-self-center" data-tooltip="הוספת מוצר להזמנה" xmlns="http://www.w3.org/2000/svg" width="90" height="90" viewBox="0 0 60 60" fill="none">
@@ -310,7 +315,7 @@ function create_input($field,$value = null,$readonly = "")
                     <line x1="41" y1="31" x2="19" y2="31" stroke="white" stroke-width="2"/>
                 </svg>
                 <?php if(empty($value)){?>
-                    <div type="button" class="products-last-order .button hidden flex-display center align-center background-white dark-green bold font-18">
+                    <div type="button" class="products-last-order button hidden flex-display center align-center background-white dark-green bold font-18">
                         <span>מוצרים מהזמנה קודמת</span>
                      </div>
                 <?php } ?>
@@ -344,9 +349,11 @@ function create_product_view($product=null,$options=null)
     }
     ?>
     <div class="border-dark-gray pointer flex-display direction-column space-between product font-15 padding-15" data-id="<?php echo $product->id?>">
-        <?php if($options["table_name"]=="orders"){ ?>
+        <?php if($options["table_name"]=="orders"){
+            $product_order_id = isset($options["get_products_last_order"])? "":$product->id;
+            ?>
             <input type="hidden" class="input-remove" name="products[<?php echo $options["key"]?>][remove]" value="0">
-            <input type="hidden" name="products[<?php echo $options["key"]?>][id]" value="<?php echo $product->id?>"><!--id של השורה של מוצר_הזמנה-->
+            <input type="hidden" name="products[<?php echo $options["key"]?>][id]" value="<?php echo $product_order_id?>"><!--id של השורה של מוצר_הזמנה-->
             <input type="hidden" name="products[<?php echo $options["key"]?>][order_id]" value="<?php echo $product->order_id?>">
             <input type="hidden" name="products[<?php echo $options["key"]?>][product_id]" value="<?php echo $product->product_id?>">
     <?php } ?>
@@ -519,7 +526,7 @@ function view_archive_actions($table_name,$view_only = false,$add_text="", $clie
                 </svg>
                 <input type="search" id="search" class="" placeholder="חיפוש" />
             </div>
-            <?php if($table_name != "collection" &&  !$view_only && (!is_subscriber() || $table_name != "tasks")){
+            <?php if($table_name != "collection" && !$view_only && ($table_name != "tasks" || is_manager())){
                 $href = 'single?subject='.$table_name.'&action=new';
                 if(!empty($client_id)){
                     $href.="&client_id=".$client_id;
@@ -582,7 +589,7 @@ function view_catalog_gallery($products,$options = null)
 {
     $class_grid = isset($options['class_grid']) ?  $options['class_grid'] : 'catalog';
     ob_start();
-    if(!isset($options['not_create_grid'])){?>
+    if(!isset($options['get_products_last_order'])){?>
     <div class="grid-display products-gallery <?= $class_grid?>" >
         <?php
     }
@@ -590,7 +597,7 @@ function view_catalog_gallery($products,$options = null)
             create_product_view($product,$options);
         }
 
-    if(!isset($options['not_create_grid'])){?>
+    if(!isset($options['get_products_last_order'])){?>
     </div>
     <?php }
     return ob_get_clean();
@@ -677,10 +684,16 @@ function get_column_value($column,$row,$field,$list)
                                    ' . $column["values"][$row->$field]["label"] . '
                                 </span>';
             break;
-        case "date":
+            case "date":
+        if ($row->$field) {
+            $timestamp = strtotime($row->$field); // המרת התאריך לאטימות זמן
+            $column_value = date('d/m/Y', $timestamp);
+        }
+        break;
+        case "datetime-local":
             if ($row->$field) {
                 $timestamp = strtotime($row->$field); // המרת התאריך לאטימות זמן
-                $column_value = date('d/m/Y', $timestamp);
+                $column_value = date('d/m/Y H:i:s', $timestamp);
             }
             break;
         default:
