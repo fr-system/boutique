@@ -481,7 +481,7 @@ function searchElements(text,selector,searchSelector){
             jQuery('input[name=dirty]').val("1");
             jQuery(".add-order-product").after(element);
 
-            jQuery(".page .products-gallery .product.current .plus-minus-count div").click(function (e) {
+            jQuery(".page .products-gallery .product.current .plus-minus-count span").click(function (e) {
                 plusMinusCountProduct(e);
             })
             //jQuery(".products").prepend(element);

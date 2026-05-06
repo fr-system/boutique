@@ -116,7 +116,7 @@ function get_single_view($table_name,$row,$readonly)
                     ?>
                     <div class="input-label flex-display <?php echo $column["widget"] != "textarea" && $column["widget"] != "products"  ? 'align-center' :'stretch'?> ">
                         <?php if (isset($column["label"])){?>
-                            <label class="bold" for="<?php echo $column["field_name"] ?>"><?php echo $column["label"].":"?></label>
+                            <label class="bold <?= $column["widget"]== "textarea"? 'textarea-label':''?>" for="<?php echo $column["field_name"] ?>"><?php echo $column["label"].":"?></label>
                         <?php }
                         $value = "";
                         //write_log("q p ".json_encode( $column));
@@ -317,7 +317,7 @@ function create_product_view($product=null,$options=null)
             <input type="hidden" name="products[<?php echo $options["key"]?>][order_id]" value="<?php echo $product->order_id?>">
             <input type="hidden" name="products[<?php echo $options["key"]?>][product_id]" value="<?php echo $product->product_id?>">
     <?php } ?>
-        <div class="product-img part-40">
+        <div class="product-img <?= $options["table_name"]=="orders"? 'part-40':'part-50'?>">
             <svg class="pointer view-product" xmlns="http://www.w3.org/2000/svg" width="12" height="9" viewBox="0 0 12 9" fill="none">
                 <path d="M5.85467 0.515015C2.4715 0.515015 0.830067 3.44152 0.538793 4.02085C0.523225 4.05167 0.515137 4.08547 0.515137 4.11972C0.515137 4.15398 0.523225 4.18778 0.538793 4.2186C0.82953 4.79793 2.47096 7.72444 5.85467 7.72444C9.23838 7.72444 10.8793 4.79793 11.1705 4.2186C11.1861 4.18778 11.1942 4.15398 11.1942 4.11972C11.1942 4.08547 11.1861 4.05167 11.1705 4.02085C10.8798 3.44152 9.23838 0.515015 5.85467 0.515015Z" stroke="black" stroke-width="1.02992" stroke-linecap="round" stroke-linejoin="round"/>
                 <path d="M5.85485 5.66458C6.74361 5.66458 7.4641 4.97292 7.4641 4.1197C7.4641 3.26649 6.74361 2.57483 5.85485 2.57483C4.96609 2.57483 4.24561 3.26649 4.24561 4.1197C4.24561 4.97292 4.96609 5.66458 5.85485 5.66458Z" stroke="black" stroke-width="1.02992" stroke-linecap="round" stroke-linejoin="round"/>
@@ -326,8 +326,8 @@ function create_product_view($product=null,$options=null)
                 <img class="" src="<?php echo wp_get_attachment_url($product->image_id) ?>" />
             <?php } ?>
         </div>
-        <div class="product-name bold"><?php echo $product->name ?></div>
-        <div class="flex-display space-between  <?php echo $options["table_name"]=="orders" ? '':"hidden" ?>  ">
+        <div class="flex-display space-between bold part-20 ">
+            <div class="product-name bold"><?php echo $product->name ?></div>
             <?php
                 $price = null;
                 if(!empty($product->order_price)){
@@ -345,32 +345,34 @@ function create_product_view($product=null,$options=null)
 //                    $price = $product->price;
 //                }
             ?>
-            <div class="part-30"><?php echo (!empty($price) ? $price . " ₪" : "") ?></div>
+            <div class="part-30 <?php echo $options["table_name"]=="orders" ? '':"hidden" ?>"><?php echo (!empty($price) ? $price . " ₪" : "") ?></div>
         </div>
-        <div class="plus-minus-count flex-display <?php echo $options["table_name"]=="orders" ? '':"hidden" ?> ">
-            <div class="minus bold font-60 part-20 pointer">-</div>
-            <input type="number" class="part-60"  min="0" name="products[<?php echo $options["key"]?>][count]" value="<?php echo $product->count?>" />
-            <div class="plus bold font-60 part-20 pointer">+</div>
+        <div class="plus-minus-count flex-display <?php echo $options["table_name"]=="orders" ? '':"hidden" ?> part-20">
+            <span class="minus bold font-60 part-30 pointer">-</span>
+            <input type="number" class="part-50"  min="0" name="products[<?php echo $options["key"]?>][count]" value="<?php echo $product->count?>" />
+            <span class="plus bold font-60 part-30 pointer">+</span>
         </div>
         <div class="discount_percent-bonus flex-display space-between part-20 font-12 <?php echo $options["table_name"]=="orders" ? '':"hidden" ?> ">
                 <div class="input-label flex-display align-center part-45">
-                    <input class="background-white " type="text" pattern="\d*" name="products[<?php echo $options["key"]?>][discount_percent]" value="<?php echo $product->discount_percent?>" >
-                    <label class="">אחוזי הנחה</label>
+                    <input class=" " type="text" pattern="\d*" name="products[<?php echo $options["key"]?>][discount_percent]" value="<?php echo $product->discount_percent?>" >
+                    <label for="" class="">אחוזי הנחה</label>
                 </div>
                 <div class="input-label flex-display align-center part-45">
-                    <input class="background-white " type="number" name="products[<?php echo $options["key"]?>][bonus]" value="<?php echo $product->bonus?>" >
-                    <label class="">בונוס</label>
+                    <input class=" " type="number" name="products[<?php echo $options["key"]?>][bonus]" value="<?php echo $product->bonus?>" >
+                    <label for="" class="">בונוס</label>
                 </div>
+        </div>
+        <div class="flex-display center part-20 <?php echo $options["table_name"]=="orders" ? '':"hidden" ?> ">
+            <div class="input-label flex-display align-center ">
+                <label class="">מחיר סופי</label>
+                <input class="calculated-price" type="text"  name="products[<?php echo $options["key"]?>][order_price]" value="<?php echo $product->order_price?>" >
+            </div>
 
         </div>
         <div class="flex-display space-around part-15 buttons">
         <?php //if($options["table_name"]=="products"){?>
             <a href="single?subject=products&action=edit&id=<?php echo $product->id?>" class="part-15 button background-white gold bold font-15 <?php echo $options["table_name"]=="products" ? '':"hidden" ?>">מעבר למוצר</a>
-        <?php //} ?>
-        <?php //if($options["table_name"]=="orders"){
-            //$link = "single?subject=products&action=edit&id=".$product->id;
-            ?>
-                <button type="button" class="background-white gold bold font-15 <?php echo $options["table_name"]=="orders_" ? '':"hidden" ?>">פרטים</button>
+            <button type="button" class="background-white gold bold font-15 <?php echo $options["table_name"]=="orders_" ? '':"hidden" ?>">פרטים</button>
         <?php
         //}
         //else if ($options["table_name"]=="order_products"){?>

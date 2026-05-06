@@ -618,3 +618,6 @@ ul.tables-list li:last-child{
 .modal button.btn-close{
     min-width: auto;
 }
+.textarea-label{
+    padding: 3px 0;
+}

@@ -107,7 +107,7 @@ const BOUTIQUE_TABLES = array(
             array("field_name" => "product_id", "widget" => "number", "join_table" => "products","join_values_select"=>array("name","price","image_id","supplier_id")),
             array("field_name" => "count", "widget" => "number"),
             array("field_name" => "order_price", "widget" => "text", "un_apostrophe" => true),
-            array("field_name" => "bonus", "widget" => "checkbox"),
+            array("field_name" => "bonus", "widget" => "number"),
             array("field_name" => "discount_percent", "widget" => "text", "un_apostrophe" => true),
         )),
     "agents" => array(
