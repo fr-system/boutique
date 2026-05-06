@@ -108,6 +108,18 @@ jQuery(document).ready(function($){
             return;
         }
 
+        if(jQuery('.page.single').length > 0){
+            if(jQuery('.products-gallery .product').length ==0){//לא לשמור הזמנה שאין בה מוצרים!!!!
+            }
+
+
+        }
+
+        jQuery(".products-gallery .products-last-order").click(function (){
+            var client_id = jQuery(".page.single select[name=client_id]").val();
+
+            jQuery(".page.single
+
         $form.addClass('disabled').find('[type="submit"]').prop('disabled', true);
         //grecaptcha.execute(globalVars.recaptcha_key, {action: 'submit'})
         //.then(function (token) {
@@ -218,12 +230,19 @@ jQuery(document).ready(function($){
         call_ajax_function(postData,"reload_page");
     });
 
-    jQuery('.add-order-product').click(function () {
-        var postData = [
-            {name: "action", value: "view_catalog_gallery_ajax"},
-            {name: "client_id", value: jQuery('.grid-display select[name=client_id]').val()},
-        ];
-        call_ajax_function(postData,"openPopupAddOrderProduct");
+    jQuery('.add-order-product svg').click(function () {
+        if(jQuery('.grid-display select[name=client_id]').val()) {
+
+            var postData = [
+                {name: "action", value: "view_catalog_gallery_ajax"},
+                {name: "client_id", value: jQuery('.grid-display select[name=client_id]').val()},
+            ];
+            call_ajax_function(postData, "openPopupAddOrderProduct");
+        }
+        else{
+            var $form = jQuery('.page.single form.site_form');
+            $form.valid();
+        }
     })
 
     jQuery('#search').on('input', function() {
@@ -389,7 +408,30 @@ jQuery(document).ready(function($){
         jQuery("#bout-massage .modal-body").html("האם אתה מאשר למחוק את ה"+single+"?");
     });
 
+    jQuery(".page.single select[name=client_id]").change(function (){
+        if(jQuery(".products-gallery .product").length == 0){
+            jQuery(".products-gallery .products-last-order").removeClass("hidden");
+        }
+
+    })
+
+    jQuery(".products-gallery .products-last-order").click(function (){
+        var client_id = jQuery(".page.single select[name=client_id]").val();
+        if(client_id) {
+            var postData = [
+                {name: "action", value: "get_products_last_order"},
+                {name: "client_id", value: client_id}
+            ];
+            call_ajax_function(postData, "fillProductsLastOrder");
+        }
+    })
+
 })
+
+function fillProductsLastOrder(result) {
+    jQuery(".add-order-product").after(jQuery(result.products));
+    jQuery(".products-gallery .products-last-order").hide();
+}
 
 function removeRowSuccess(form,result){
     var currentUrl = window.location.pathname;

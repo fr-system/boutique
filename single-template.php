@@ -31,7 +31,8 @@ if($action == "new") {
 else{//edit || readonly
     $id = $_GET["id"];
     $title_page = "עדכון ". $page_info["single"];
-    $result = get_page_data($table_name,"id" ,$id);
+    $filters=array(array("filter_field" => "id", "filter_value"=>$id));
+    $result = get_page_data($table_name,$filters);
     if(count($result)>0){
         $row = $result[0];
         // write_log("row ".json_encode($row));
@@ -126,15 +127,17 @@ else{
                         <span>מחיקת <?php /*echo $page_info["single"]; */?></span>
                     </button>-->
                 <?php }
-                if($table_name == "orders" && (!isset($row->done) || !$row->done)){
-                    ?><button type="button" class="order-confirmation flex-display center align-center background-white dark-green bold font-18">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
-                        <path d="M10.8474 7.14639C10.9411 7.24016 10.9937 7.36731 10.9937 7.49989C10.9937 7.63248 10.9411 7.75963 10.8474 7.85339L8.09736 10.6034C8.00359 10.6971 7.87644 10.7498 7.74386 10.7498C7.61127 10.7498 7.48412 10.6971 7.39036 10.6034L6.14036 9.35339C6.04928 9.25909 5.99888 9.13279 6.00002 9.00169C6.00116 8.87059 6.05374 8.74519 6.14645 8.65248C6.23915 8.55978 6.36456 8.50719 6.49566 8.50606C6.62675 8.50492 6.75305 8.55531 6.84736 8.64639L7.74386 9.54289L10.1404 7.14639C10.2341 7.05266 10.3613 7 10.4939 7C10.6264 7 10.7536 7.05266 10.8474 7.14639Z" fill="#1A7870"/>
-                        <circle cx="8.5" cy="8.5" r="6" stroke="#1A7870"/>
-                    </svg>
-                    <span>אישור <?php echo $page_info["single"]; ?></span>
-                    </button>
-                    <?php
+                 if($table_name == "orders" ){
+                     if(!isset($row->done) || !$row->done){
+                        ?><button type="button" class="order-confirmation flex-display center align-center background-white dark-green bold font-18">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
+                            <path d="M10.8474 7.14639C10.9411 7.24016 10.9937 7.36731 10.9937 7.49989C10.9937 7.63248 10.9411 7.75963 10.8474 7.85339L8.09736 10.6034C8.00359 10.6971 7.87644 10.7498 7.74386 10.7498C7.61127 10.7498 7.48412 10.6971 7.39036 10.6034L6.14036 9.35339C6.04928 9.25909 5.99888 9.13279 6.00002 9.00169C6.00116 8.87059 6.05374 8.74519 6.14645 8.65248C6.23915 8.55978 6.36456 8.50719 6.49566 8.50606C6.62675 8.50492 6.75305 8.55531 6.84736 8.64639L7.74386 9.54289L10.1404 7.14639C10.2341 7.05266 10.3613 7 10.4939 7C10.6264 7 10.7536 7.05266 10.8474 7.14639Z" fill="#1A7870"/>
+                            <circle cx="8.5" cy="8.5" r="6" stroke="#1A7870"/>
+                        </svg>
+                        <span>אישור <?php echo $page_info["single"]; ?></span>
+                        </button>
+                        <?php
+                    }
                 }
                 ?>
             </div>

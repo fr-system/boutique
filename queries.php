@@ -151,7 +151,7 @@ function get_field($table_name, $field_name)
     return count($field) > 0 ? array_pop($field) : null;
 }
 
-function get_page_data($table_name,$filter_field=null ,$filter_value=null)
+function get_page_data($table_name,$filters=null,$orderby = null)
 {
     global $wpdb;
     $columns = BOUTIQUE_TABLES[$table_name]["columns"];
@@ -184,20 +184,32 @@ function get_page_data($table_name,$filter_field=null ,$filter_value=null)
 
     $query = substr($query,0,-2);
     $query .= " FROM ".$wpdb->prefix.$table_name. $join;
-    if($filter_field!=null && $filter_value!=null) {
-        if ($filter_field == "id") {
-            $filter_field=$wpdb->prefix.$table_name.".".$filter_field;
-            $apostrophe = "";
-        } else {
-            $field = get_field($table_name, $filter_field);
-            if ($field != null) {
-                $apostrophe = is_needed_apostrophe($field["widget"], isset($field["un_apostrophe"]));
+    if($filters!=null) {
+        $filter_str = array();
+        foreach ($filters as $filter) {
+            //write_log("filter ".json_encode($filter));
+            if ($filter["filter_field"] == "id") {
+                $filter_field = $wpdb->prefix.$table_name.".".$filter["filter_field"];
+                $apostrophe = "";
+            } else {
+                $filter_field =(isset($filter["filter_table"])?$wpdb->prefix.$filter["filter_table"].".":""). $filter["filter_field"];
+                $field = get_field($table_name, $filter["filter_field"]);
+                if ($field != null) {
+                    $apostrophe = is_needed_apostrophe($field["widget"], isset($field["un_apostrophe"]));
+                }
             }
+            $filter_str[]=$filter_field . " = " . $apostrophe . $filter["filter_value"] . $apostrophe;
         }
-        $query .= " WHERE " . $filter_field . " = " . $apostrophe . $filter_value . $apostrophe;
+        $query .= " WHERE " . implode(" AND ", $filter_str);
+
+    }
+
+    if($orderby != null){
+        $query .= " ORDER BY " . $orderby;
     }
 
     //echo $query;
+    //write_log("query ".$query);
 //    if($filter_value!= 0){
 //        $query .= " WHERE ".get_id_column_in_page($page_name)." = ".$filter_value;
 //    }
@@ -433,4 +445,34 @@ function new_chat_ajax()
         "client_logo" => $media_url));
     die();
 }
+
+add_action('wp_ajax_get_products_last_order', 'get_products_last_order');
+function get_products_last_order()
+{
+    //$query = "SELECT * FROM ".$wpdb->prefix."orders WHERE
+    $aaaa = array();
+    $filters= array(array("filter_field" => "client_id", "filter_value"=>$_POST["client_id"]));
+    $orders = get_page_data("orders",$filters, " id DESC");
+    if(count($orders)>0){
+        $row = $orders[0];
+        $filters = array();
+        $filters[]=array("filter_field" => "order_id", "filter_value"=>$row->id);
+        $value = get_page_data("order_products",$filters);
+        write_log("values: ".json_encode($value));
+        //$aaaa = create_input(array("widget" => "products"),$value);
+
+        if($value && is_array($value)){
+            $products_str = view_catalog_gallery($value,array("table_name"=>"orders","not_create_grid"=>true));
+
+        }
+
+        write_log("products: ".json_encode($products_str));
+
+
+    }
+    echo json_encode (array(
+        "products" => $products_str));
+    die();
+}
+
 ?>
