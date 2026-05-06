@@ -82,8 +82,8 @@ function build_query_boutique()
 {
     $table_name = $_POST["table_name"];
 
-    if($table_name == "agents" && empty($_POST["id"])){
-       $result = register_new_user1( $_POST["display_name"], $_POST["user_email"]);
+    if(($table_name == "agents" || $table_name == "suppliers") && empty($_POST["id"])){
+       $result = register_new_user1( $_POST["display_name"], $_POST["user_email"],$table_name);
        if($result == null || $result["status"] == "failed") {
            echo json_encode($result);
            die();
@@ -221,7 +221,7 @@ function get_page_data($table_name,$filters=null,$orderby = null)
 function is_needed_apostrophe($widget,$un_apostrophe)
 {
     if($un_apostrophe)return "";
-    $widgets = array("text","date","textarea","email");
+    $widgets = array("text","date","datetime-local","textarea","email");
     if(in_array($widget, $widgets)){
         return "'";
     }
@@ -450,7 +450,7 @@ add_action('wp_ajax_get_products_last_order', 'get_products_last_order');
 function get_products_last_order()
 {
     //$query = "SELECT * FROM ".$wpdb->prefix."orders WHERE
-    $aaaa = array();
+    $products_str = "";
     $filters= array(array("filter_field" => "client_id", "filter_value"=>$_POST["client_id"]));
     $orders = get_page_data("orders",$filters, " id DESC");
     if(count($orders)>0){
@@ -458,15 +458,15 @@ function get_products_last_order()
         $filters = array();
         $filters[]=array("filter_field" => "order_id", "filter_value"=>$row->id);
         $value = get_page_data("order_products",$filters);
-        write_log("values: ".json_encode($value));
+        //write_log("values: ".json_encode($value));
         //$aaaa = create_input(array("widget" => "products"),$value);
 
         if($value && is_array($value)){
-            $products_str = view_catalog_gallery($value,array("table_name"=>"orders","not_create_grid"=>true));
+            $products_str = view_catalog_gallery($value,array("table_name"=>"orders","get_products_last_order"=>true));
 
         }
 
-        write_log("products: ".json_encode($products_str));
+        //write_log("products: ".json_encode($products_str));
 
 
     }

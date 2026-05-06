@@ -25,6 +25,9 @@ function boutique_enqueue_scripts()
         $ver
     );
 
+    wp_register_style( 'jq-datatable', get_template_directory_uri(). '/assets/datatables.min.css' );
+    wp_enqueue_style( 'jq-datatable' );
+
     wp_register_style( 'assets-style', get_template_directory_uri(). '/assets/style.css' , array(), $ver);
     wp_enqueue_style( 'assets-style' );
 
@@ -36,6 +39,9 @@ function boutique_enqueue_scripts()
     wp_enqueue_script( 'script', get_template_directory_uri() . '/script.js', array(), $ver );
     wp_enqueue_script( 'fridi-script', get_template_directory_uri() . '/fridi.js', array(), $ver );
     wp_enqueue_script( 'rivka-script', get_template_directory_uri() . '/rivka.js', array(), $ver );
+
+    wp_register_script( 'jq-datatable', get_template_directory_uri(). '/assets/datatables.min.js' );
+    wp_enqueue_script( 'jq-datatable' );
     //wp_register_script('script', get_template_directory_uri() . '/script.js');
    //wp_enqueue_script('script',);
 
@@ -55,6 +61,8 @@ add_action('wp_enqueue_scripts', 'boutique_enqueue_scripts', 98);
 
 function boutique_setup_theme(){
     register_nav_menu("main_menu","תפריט");
+    add_role ('agents', 'סוכן', get_role ('subscriber')->capabilities);
+    add_role ('suppliers', 'ספק', get_role ('subscriber')->capabilities);
 }
 add_action( 'after_setup_theme', 'boutique_setup_theme' );
 

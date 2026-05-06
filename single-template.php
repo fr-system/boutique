@@ -20,11 +20,11 @@ if($action == "new") {
     }
 
     if($table_name == "orders"){
-        $row->order_date = date('Y-m-d');
+        $row->order_date = date('Y-m-d H:i:s');
         $row->user_opens = get_current_user_id();
     }
     if($table_name == "tasks"){
-        $row->open_date = date('Y-m-d');
+        $row->open_date = date('Y-m-d H:i:s');
         //אולי צריך לשמור מי פתח את המשימה???
     }
 }

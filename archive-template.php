@@ -25,7 +25,7 @@ $page_info  = BOUTIQUE_TABLES[$table_name];
 
     echo view_archive_actions($table_name,false,$add_text,$_GET[$lastKey]);
     //if(!isset($_GET["subject"]) || !is_manager() && $_GET["subject"] == "clients") return;
-    if(is_subscriber() ){
+    if(is_agent() ){
         if($table_name == "clients") {
             $filters[] = array("filter_field" => "agent_id", "filter_value" =>get_current_user_id());// 5);
         }
@@ -42,22 +42,26 @@ $page_info  = BOUTIQUE_TABLES[$table_name];
     }
     else{
     ?>
-    <table name="" class="archive-table">
+    <table name="" class="archive-table dataTable">
         <thead><tr class="tr-head gold">
             <?php
             if($table_name == "products"){?>
                 <th></th>
             <?php }
             foreach($page_info["columns"] as $column){
-                if(isset($column["hidden"]) || !isset($column["label"]) || !empty($add_text) && $column["field_name"]== "client_id" || is_subscriber() && $column["field_name"]== "agent_id"){continue;}
+                if(isset($column["hidden"]) || !isset($column["label"]) || !empty($add_text) && $column["field_name"]== "client_id" || is_agent() && $column["field_name"]== "agent_id"){continue;}
                 ?>
                 <th><?= $column["label"]?></th>
             <?php } ?>
             <th></th>
+            <th></th>
             <?php
-            if(isset($page_info["actions"])){?>
+            if(isset($page_info["actions"])){
+            foreach ($page_info["actions"] as $action) {?>
                 <th></th>
-            <?php } ?>
+            <?php }
+            }
+            ?>
 
         </tr></thead>
         <?php foreach($result as $row){

@@ -53,7 +53,7 @@ const BOUTIQUE_TABLES = array(
         "columns" => array(
             array("field_name" => "client_id", "widget" => "select", "join_table" => "clients", "join_value" => "name", "label" => "שם לקוח"),
             array("field_name" => "subject", "widget" => "text", "label" => "משימה","required"=>true),
-            array("field_name" => "open_date", "widget" => "date", "label" => "תאריך פתיחה","locked"=>true),
+            array("field_name" => "open_date", "widget" => "datetime-local", "label" => "תאריך פתיחה","locked"=>true),
             array("field_name" => "agent_id", "widget" => "select", "label" => "סוכן", "join_table" => "agents", "join_value" => "user_id", "user_field" => "display_name","required"=>true,"filter"=>true),//להביא מטבלת יוזר
             array("field_name" => "details", "widget" => "textarea", "label" => "פירוט"),
             array("field_name" => "importance_id", "widget" => "radio", "label" => "חשיבות","filter"=>true,
@@ -90,7 +90,7 @@ const BOUTIQUE_TABLES = array(
         "male_female" => "female",
         "columns" => array(
             array("field_name" => "client_id","widget" => "select", "join_table" => "clients", "join_value" => "name", "label" => "שם הלקוח","required"=>true),
-            array("field_name" => "order_date", "widget" => "date", "label" => "תאריך הזמנה","required"=>true),
+            array("field_name" => "order_date", "widget" => "datetime-local", "label" => "תאריך הזמנה","required"=>true),
             array("widget" => "products"),
 
             array("field_name" => "doc_type","widget" => "file", "label" => "מסמך"),
@@ -121,7 +121,7 @@ const BOUTIQUE_TABLES = array(
             array("field_name" => "user_id", "widget" => null),
             array("field_name" => "mobile", "widget" => "text", "label" => "נייד"),
             array("field_name" => "work_area_id","widget" => "select", "join_table" => "areas", "join_value" => "area", "label" => "אזור עבודה","required"=>true),// סינון אזור
-            array("field_name" => "target","widget" => "number", "label" => "יעד כללי", "un_apostrophe" => true,"sign"=>"₪"),
+            array("field_name" => "target","widget" => "text", "label" => "יעד כללי", "un_apostrophe" => true,"sign"=>"₪"),
             array("field_name" => "notes", "widget" => "textarea", "label" => "הערה","hidden"=>true),
         ),
         //"filter"=>"area_id == []"
