@@ -335,7 +335,6 @@ function create_input($field,$value = null,$readonly = "")
         default:
             break;
     }
-
 }
 
 function create_product_view($product=null,$options=null)
@@ -353,11 +352,12 @@ function create_product_view($product=null,$options=null)
             $product_order_id = isset($options["get_products_last_order"])? "":$product->id;
             ?>
             <input type="hidden" class="input-remove" name="products[<?php echo $options["key"]?>][remove]" value="0">
-            <input type="hidden" name="products[<?php echo $options["key"]?>][id]" value="<?php echo $product_order_id?>"><!--id של השורה של מוצר_הזמנה-->
-            <input type="hidden" name="products[<?php echo $options["key"]?>][order_id]" value="<?php echo $product->order_id?>">
-            <input type="hidden" name="products[<?php echo $options["key"]?>][product_id]" value="<?php echo $product->product_id?>">
+            <input type="hidden" name="products[<?= $options["key"]?>][id]" value="<?= $product_order_id?>"><!--id של השורה של מוצר_הזמנה-->
+            <input type="hidden" name="products[<?= $options["key"]?>][order_id]" value="<?= $product->order_id?>">
+            <input type="hidden" name="products[<?= $options["key"]?>][product_id]" value="<?= $product->product_id?>">
     <?php } ?>
-        <div class="product-img <?= $options["table_name"]=="orders"? 'part-40':'part-50'?>">
+<!--        <input type="hidden" class="units-in-box" name="products[--><?php //= $options["key"]?><!--][units_in_box]" value="--><?php //= $product->units_in_box?><!--">-->
+        <div class="product-img <?= $options["table_name"]=="orders"? 'part-40':'part-60'?>">
             <svg class="pointer view-product" xmlns="http://www.w3.org/2000/svg" width="12" height="9" viewBox="0 0 12 9" fill="none">
                 <path d="M5.85467 0.515015C2.4715 0.515015 0.830067 3.44152 0.538793 4.02085C0.523225 4.05167 0.515137 4.08547 0.515137 4.11972C0.515137 4.15398 0.523225 4.18778 0.538793 4.2186C0.82953 4.79793 2.47096 7.72444 5.85467 7.72444C9.23838 7.72444 10.8793 4.79793 11.1705 4.2186C11.1861 4.18778 11.1942 4.15398 11.1942 4.11972C11.1942 4.08547 11.1861 4.05167 11.1705 4.02085C10.8798 3.44152 9.23838 0.515015 5.85467 0.515015Z" stroke="black" stroke-width="1.02992" stroke-linecap="round" stroke-linejoin="round"/>
                 <path d="M5.85485 5.66458C6.74361 5.66458 7.4641 4.97292 7.4641 4.1197C7.4641 3.26649 6.74361 2.57483 5.85485 2.57483C4.96609 2.57483 4.24561 3.26649 4.24561 4.1197C4.24561 4.97292 4.96609 5.66458 5.85485 5.66458Z" stroke="black" stroke-width="1.02992" stroke-linecap="round" stroke-linejoin="round"/>
@@ -366,48 +366,61 @@ function create_product_view($product=null,$options=null)
                 <img class="" src="<?php echo wp_get_attachment_url($product->image_id) ?>" />
             <?php } ?>
         </div>
-        <div class="flex-display space-between bold part-20 ">
-            <div class="product-name bold"><?php echo $product->name ?></div>
+        <div class="flex-display space-between bold <?= $options["table_name"]=="orders"? 'part-20':'part-10'?> ">
+            <div class="product-name bold"><?= $product->name ?></div>
+        </div>
             <?php
                 $price = null;
+                write_log ('producr '.json_encode ($product));
                 if(!empty($product->order_price)){
                     $price = $product->order_price;
+                    //$calculaded_price = $price*$product->count*$product->discount_percent/100;
                 }
-
+                elseif (!empty($product->client_price)) {//מחיר מיוחד ללקוח
+                    $price =$product->client_price;
+                }
+                else{
+                    $price=$product->price;
+                }
                 if ($options["table_name"] == "orders") {}
                 else{
-                    $product->count = null;
-                    $product->discount_percent = null;
-                    $product->bonus = null;
+                    $product->count = 1;
+                    $product->discount_percent = 0;
+                    $product->bonus = 0;
 
                 }
-//                else if(!empty($product->price)){
-//                    $price = $product->price;
-//                }
+                $calculaded_price =$price*$product->count-  $price*$product->count*$product->discount_percent/100;
             ?>
-            <div class="part-30 <?php echo $options["table_name"]=="orders" ? '':"hidden" ?>"><?php echo (!empty($price) ? $price . " ₪" : "") ?></div>
-        </div>
-        <div class="plus-minus-count flex-display <?php echo $options["table_name"]=="orders" ? '':"hidden" ?> part-20">
+
+        <div class="part-10 d-not-order"><?= (!empty($price) ? $price . " ₪" : "") ?></div>
+        <div class="plus-minus-count flex-display d-order part-20">
             <span class="minus bold font-60 part-30 pointer">-</span>
-            <input type="number" class="part-50"  min="0" name="products[<?php echo $options["key"]?>][count]" value="<?php echo $product->count?>" />
+            <span class="part-70">
+                <input type="number" class=" price-part count"  min="0" name="products[<?= $options["key"]?>][count]" value="<?= $product->count?>" />
+                <?= ($product->individually? '<select><option>ארגז</option><option>בקבוקים</option></select>': 'ארגזים');?>
+            </span>
             <span class="plus bold font-60 part-30 pointer">+</span>
         </div>
-        <div class="discount_percent-bonus flex-display space-between part-20 font-12 <?php echo $options["table_name"]=="orders" ? '':"hidden" ?> ">
-                <div class="input-label flex-display align-center part-45">
-                    <input class=" " type="text" pattern="\d*" name="products[<?php echo $options["key"]?>][discount_percent]" value="<?php echo $product->discount_percent?>" >
-                    <label for="" class="">אחוזי הנחה</label>
-                </div>
-                <div class="input-label flex-display align-center part-45">
-                    <input class=" " type="number" name="products[<?php echo $options["key"]?>][bonus]" value="<?php echo $product->bonus?>" >
-                    <label for="" class="">בונוס</label>
-                </div>
+        <div class="input-label flex-display space-around align-center d-order part-20">
+            <label for="" class="">מחיר ליחידה</label>
+            <input class="unit-price price-part" type="text"  name="products[<?= $options["key"]?>][order_price]" value="<?= $price?>" data-a-sign="₪">
         </div>
-        <div class="flex-display center part-20 <?php echo $options["table_name"]=="orders" ? '':"hidden" ?> ">
-            <div class="input-label flex-display align-center ">
-                <label class="">מחיר סופי</label>
-                <input class="calculated-price" type="text"  name="products[<?php echo $options["key"]?>][order_price]" value="<?php echo $product->order_price?>" >
+        <div class="discount_percent-bonus flex-display space-between part-20 font-12 d-order ">
+                <div class="input-label flex-display align-center part-45">
+                    <label for="" class=""> % </label>
+                    <input class="price-part discount-percent" type="text" pattern="\d*" name="products[<?= $options["key"]?>][discount_percent]" value="<?= $product->discount_percent?>" data-a-sign="%">
+                    <label for="" class=""> הנחה</label>
+                </div>
+            <div class="input-label flex-display align-center part-45">
+                <input class=" " type="number" name="products[<?= $options["key"]?>][bonus]" value="<?php echo $product->bonus?>" >
+                <label for="" class="price-part bonus">בונוס</label>
             </div>
-
+        </div>
+        <div class="flex-display center part-20 d-order ">
+            <div class="input-label flex-display align-center ">
+                <span>סה"כ: <span class="calculaded-price "><?= $calculaded_price ?></span> ₪</span>
+<!--                <input class="calculated-price" type="text"  name="products[--><?php //echo $options["key"]?><!--][order_price]" value="--><?php //echo $product->order_price?><!--" >-->
+            </div>
         </div>
         <div class="flex-display space-around part-15 buttons">
         <?php //if($options["table_name"]=="products"){?>
@@ -416,7 +429,7 @@ function create_product_view($product=null,$options=null)
         <?php
         //}
         //else if ($options["table_name"]=="order_products"){?>
-            <button type="button" class="background-gold bold font-15 order-product <?php echo $options["table_name"]=="order_products" ? '':"hidden" ?>">הזמן מוצר</button>
+            <button type="button" class="background-gold bold font-15 order-product <?= $options["table_name"]=="order_products" && !$product->blocked ? '':"hidden" ?>">הזמן מוצר</button>
             <?php if($options["table_name"]=="orders"){?>
             <a data-bs-toggle="modal" href="#bout-massage" role="button" data-action="remove">
                 <svg class=""  xmlns="http://www.w3.org/2000/svg" width="25" height="24" viewBox="0 0 25 24" fill="none">
@@ -576,7 +589,7 @@ function view_catalog_gallery_ajax(){//לתוח פופאפ לבחור איזה �
             $html .= '<div class="margin-bottom-20"></div>';
         }
     }
-    $result = get_page_data("products");
+    $result = get_page_data("products",'','',"pc.client_id = ".$_POST['client_id']);
     //$archive_actions = view_archive_actions("products",true);
     $html .= view_archive_actions("products",true);
     $html .= view_catalog_gallery($result,array("table_name"=>"order_products","class_grid"=>"catalog one-row"));

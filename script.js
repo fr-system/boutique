@@ -147,6 +147,7 @@ jQuery(document).ready(function($){
         xhr = jQuery.ajax({
             url: "/wp-admin/admin-ajax.php",//globalVars.ajaxurl,
             data: formData,
+            data: formData,
             dataType: 'json',
             method: 'POST'
         }).done(function (data) {
@@ -311,8 +312,8 @@ jQuery(document).ready(function($){
 
     })
 
-    jQuery(".page .products-gallery .product .plus-minus-count div").click(function (e) {
-        plusMinusCountProduct(e)
+    jQuery(".page .products-gallery .product .plus-minus-count span").click(function (e) {
+        plusMinusCountProduct(this)
     })
 
     jQuery('#accept_process_modal').on('hide.bs.modal', function (e) {
@@ -527,9 +528,9 @@ function searchElements(text,selector,searchSelector){
                 '<input type="hidden" name="products['+key+'][product_id]" value="'+id+'">');
             //element.find("input[name*=\"][product_id]").prop("name","products["+key+"][product_id]");
             //element.find("input[name*=\"][count]").prop("name","products["+key+"][count]");
-            element.find('.plus-minus-count').removeClass("hidden");
+
+
             element.find('.plus-minus-count input').prop("name","products["+key+"][count]");
-            element.find('.discount_percent-bonus').removeClass("hidden");
             element.find('.discount_percent-bonus input[type="text"]').prop("name","products["+key+"][discount_percent]");
             element.find('.discount_percent-bonus input[type="text"]').prop("name","products["+key+"][bonus]");
 
@@ -537,8 +538,8 @@ function searchElements(text,selector,searchSelector){
             jQuery('input[name=dirty]').val("1");
             jQuery(".add-order-product").after(element);
 
-            jQuery(".page .products-gallery .product.current .plus-minus-count div").click(function (e) {
-                plusMinusCountProduct(e);
+            jQuery(".page .products-gallery .product .plus-minus-count span").click(function (e) {
+                plusMinusCountProduct(this);
             })
             //jQuery(".products").prepend(element);
             closePopup();
@@ -548,11 +549,11 @@ function searchElements(text,selector,searchSelector){
 
 }
 
-function plusMinusCountProduct(e){
-    var numberInput = jQuery(e.currentTarget).parent().find("input");
+function plusMinusCountProduct(me){
+    var numberInput = jQuery(me).parent().find("input");
     var currentValue = parseInt(numberInput.val()) || 0;
 
-    if(e.currentTarget.classList[0] == "plus"){
+    if(jQuery(me).hasClass("plus")){
         numberInput.val(currentValue + 1);
     }
     else{
@@ -560,6 +561,7 @@ function plusMinusCountProduct(e){
             numberInput.val(currentValue - 1);
         }
     }
+    calculatePrice(me);
 }
 
 function reload_page(data){

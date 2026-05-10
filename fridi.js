@@ -16,6 +16,10 @@ jQuery(document).ready(function($){
         ];
        call_ajax_function(postData,"fillClientPriceModal")
     });
+    jQuery('.products-gallery.orders .product .price-part').on('change', function (e) {
+        calculatePrice(this);
+
+    });
 });
 function fillClientPriceModal(result) {
     if (result.array.length > 0) {
@@ -27,4 +31,14 @@ function fillClientPriceModal(result) {
         jQuery('#update_client_price input[name=id]').val("");
         jQuery('#update_client_price input[name=client_price]').val("");
     }
+}
+
+function calculatePrice(me){
+    var product = jQuery(me).closest(".product");
+    var unitsInBox = parseInt(product.find('.units-in-box').val()) || 1;
+    var count = parseInt(product.find('.count').val());
+    var unitPrice = parseInt(product.find('.unit-price').val().replace('₪',''));
+    var discountPercent = parseInt(product.find('.discount-percent').val());
+    var calculatedPrice = (unitPrice*count) - (unitPrice*count*discountPercent/100);
+    product.find(".calculaded-price").html(calculatedPrice);
 }
