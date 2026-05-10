@@ -356,7 +356,7 @@ function create_product_view($product=null,$options=null)
             <input type="hidden" name="products[<?= $options["key"]?>][order_id]" value="<?= $product->order_id?>">
             <input type="hidden" name="products[<?= $options["key"]?>][product_id]" value="<?= $product->product_id?>">
     <?php } ?>
-<!--        <input type="hidden" class="units-in-box" name="products[--><?php //= $options["key"]?><!--][units_in_box]" value="--><?php //= $product->units_in_box?><!--">-->
+        <input type="hidden" class="units-in-box" name="products[<?= $options["key"]?>][units_in_box]" value="<?= $product->units_in_box?>">
         <div class="product-img <?= $options["table_name"]=="orders"? 'part-40':'part-60'?>">
             <svg class="pointer view-product" xmlns="http://www.w3.org/2000/svg" width="12" height="9" viewBox="0 0 12 9" fill="none">
                 <path d="M5.85467 0.515015C2.4715 0.515015 0.830067 3.44152 0.538793 4.02085C0.523225 4.05167 0.515137 4.08547 0.515137 4.11972C0.515137 4.15398 0.523225 4.18778 0.538793 4.2186C0.82953 4.79793 2.47096 7.72444 5.85467 7.72444C9.23838 7.72444 10.8793 4.79793 11.1705 4.2186C11.1861 4.18778 11.1942 4.15398 11.1942 4.11972C11.1942 4.08547 11.1861 4.05167 11.1705 4.02085C10.8798 3.44152 9.23838 0.515015 5.85467 0.515015Z" stroke="black" stroke-width="1.02992" stroke-linecap="round" stroke-linejoin="round"/>
@@ -395,9 +395,11 @@ function create_product_view($product=null,$options=null)
         <div class="part-10 d-not-order"><?= (!empty($price) ? $price . " ₪" : "") ?></div>
         <div class="plus-minus-count flex-display d-order part-20">
             <span class="minus bold font-60 part-30 pointer">-</span>
-            <span class="part-70">
-                <input type="number" class=" price-part count"  min="0" name="products[<?= $options["key"]?>][count]" value="<?= $product->count?>" />
-                <?= ($product->individually? '<select><option>ארגז</option><option>בקבוקים</option></select>': 'ארגזים');?>
+            <span class="part-70 flex-display space-between">
+                <input type="number" class="part-20 price-part count align-self-center"  min="0" name="products[<?= $options["key"]?>][count]" value="<?= $product->count?>" />
+                <?= ($product->individually ?
+                    '<select class="price-part individually part-70 align-self-center" name="123"><option value="1">ארגז</option><option value="2">בקבוק</option></select>'
+                    :'<label class="part-70 align-self-center">ארגזים</label>');?>
             </span>
             <span class="plus bold font-60 part-30 pointer">+</span>
         </div>

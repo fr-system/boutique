@@ -40,7 +40,7 @@ const BOUTIQUE_TABLES = array(
             array("field_name" => "supplier_id", "widget" => "select","label"=>"ספק", "join_table" => "suppliers", "join_value" => "name","filter"=>true),
             array("field_name" => "price", "type" => "float", "widget" => "text","label"=>"מחיר", "un_apostrophe" => true,"sign"=>"₪","popup_button"=>array("label"=>"מחיר מיוחד ללקוח","target_modal"=>"update_client_price")),
             array("field_name" => "description", "widget" => "textarea","label"=>"תיאור"),
-            array("field_name" => "count", "widget" => "number","label"=>"כמות בקבוקים בארגז","hidden"=>true),
+            //array("field_name" => "count", "widget" => "number","label"=>"כמות בקבוקים בארגז","hidden"=>true),
             array("field_name" => "file_id", "widget" => "file","label"=>"העלאת דף מוצר","hidden"=>true),
             array("field_name" => "image_id", "widget" => "image","label"=>"העלאת תמונת מוצר","hidden"=>true),
             array("field_name" => "blocked", "widget" => "checkbox","label"=>"מוצר חסום","hidden"=>true),
@@ -106,7 +106,7 @@ const BOUTIQUE_TABLES = array(
         "title" => "הזמנות מוצרים",
         "columns" => array(
             array("field_name" => "order_id", "widget" => "number"),
-            array("field_name" => "product_id", "widget" => "number", "join_table" => "products","join_values_select"=>array("name","price","image_id","supplier_id")),
+            array("field_name" => "product_id", "widget" => "number", "join_table" => "products","join_values_select"=>array("name","price","image_id","supplier_id","individually","units_in_box")),
             array("field_name" => "count", "widget" => "number"),
             array("field_name" => "order_price", "widget" => "text", "un_apostrophe" => true,"sign"=>"₪"),
             array("field_name" => "bonus", "widget" => "number"),

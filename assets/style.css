@@ -77,14 +77,6 @@ input:not([type=search]):-webkit-autofill {
     height: 30px;
     margin: 0;
 }
-
-.product input[type=number]{
-    width: 100%;
-    text-align: center;
-    moz-appearance: textfield;
-    padding: 0;
-}
-
 .product input[type=number]::-webkit-inner-spin-button,
 .product input[type=number]::-webkit-outer-spin-button {
     -webkit-appearance: none; /* Chrome, Safari, Edge */
@@ -98,11 +90,11 @@ input:not([type=search]):-webkit-autofill {
 .product .input-label input{
     background-color: var(--b-global-color-light-gray);
     width: 30px;
-
     margin-left: 5px;
     border-radius: 5px;
     border: 0.5px solid  #D9D9D9;
     height: 23px !important;
+    text-align: center;
 }
 .product .input-label input.unit-price{ width: 75px;}
 .product .calculated-price{
@@ -110,13 +102,24 @@ input:not([type=search]):-webkit-autofill {
     height: 35px !important;
 }
 .plus-minus-count{
-    height: 35px;
+    /*height: 35px;*/
     align-self: center;
-    width: 80%;
+    width: 95%;
 }
 .plus-minus-count span, .plus-minus-count input{
     border:solid 1px var(--b-global-color-dark-gray);
-    height: 25px;
+    height: 30px;
+}
+.product .plus-minus-count input[type=number]{
+    width: 20%;
+    text-align: left;
+    moz-appearance: textfield;
+    padding: 0;
+    border: none;
+}
+.product .plus-minus-count select {
+    height: 100%;
+    padding: 1px;
 }
 .plus-minus-count .plus:hover, .plus-minus-count .minus:hover{
     background-color: var(--b-global-color-light-gray);
