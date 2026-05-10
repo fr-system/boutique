@@ -39,6 +39,24 @@ jQuery(document).ready(function($){
             }
         }, 120000); // 120000 מילישניות = 2 דקות
     }
+
+    if(getParameterByName("subject") == "tasks" && getParameterByName("action") == "edit"){
+        var postData = [
+            {name: "action", value: "get_chat_ajax"},
+            {name: "task_id", value: getParameterByName("id")},
+        ];
+
+        call_ajax_function(postData,"onAddChat");
+
+        /*   setInterval(function () {
+            var postData = [
+                {name: "action", value: "get_chat_ajax"},
+                {name: "task_id", value: getParameterByName("id")},
+            ];
+            call_ajax_function(postData,"onAddChat");
+        }, 120000); // 120000 מילישניות = 2 דקות*/
+    }
+
     jQuery('input, select, textarea').change(function (){
         //לבדוק אם רק הוסיפו מוצר חדש וכמות וכו'
         // לבדוק שבכל האפשרויות הוא רואה שהרשומה עודכנה
@@ -465,15 +483,34 @@ function removeRowSuccess(form,result){
 
 function onAddChat(result,targetElement){
     var chatList = jQuery(".chat-list");
-    chatList.append(jQuery(' <div class="input-label flex-display space-between">'+
-        '<div class="part-20"><img class="user-logo" src="'+result.client_logo+'"></div>'+
-        '<div class="text part-50 text-center">'+jQuery( "#newChat" ).val()+'</div>'+
-        '<div class="date text-left part-20">'+result.time +'</div></div>'));
+    var get_mes = result.get_messages;
+    jQuery.each(result.rows,function (){
+        var row = this;
+        //'+result.client_logo+'
+        var message = '<div class="input-label flex-display space-between" data-id="'+row.id+'">'+
+            '<div class="part-20"><img class="user-logo" src=""></div>'+
+            '<div class="text part-50 text-center">'+row.text+'</div>'+
+            '<div class="date text-left part-20">'+row.time +'</div></div>';
+
+        /*if(get_mes){
+            var result = jQuery.grep(jQuery(".chat-list .input-label"), function (mess) {
+                return jQuery(mess).data("id") == row.id
+            });
+            if (result.length > 0) {
+                return false;
+            }
+        }*/
+
+        chatList.append(jQuery(message));
+    })
 
     if (chatList.length) {
         chatList.scrollTop(chatList[0].scrollHeight);
     }
-    jQuery( "#newChat" ).val("");
+
+    if(result.add_message) {
+        jQuery("#newChat").val("");
+    }
 }
 
 function searchElements(text,selector,searchSelector){

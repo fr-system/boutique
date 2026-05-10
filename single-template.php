@@ -154,14 +154,15 @@ else{
 
                     <div class="chat-list">
                         <?php
-                        $query = "SELECT * FROM chat where task_id = ".$id;
+                        global $wpdb;
+                        $query = "SELECT * FROM ".$wpdb->prefix."chat where task_id = ".$id;
                         $chat_list  = run_query($query);
 
                         foreach($chat_list as $message)
                         {
                             $user_info = get_userdata($message->user_id);
                             ?>
-                            <div class="input-label flex-display space-between">
+                            <div class="input-label flex-display space-between" data-id="<?php echo $message->id ?>">
                                 <div class="part-20">
                                     <img class="user-logo" src="<?= wp_get_attachment_url(9); ?>"/>
                                 </div>

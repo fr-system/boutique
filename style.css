@@ -379,6 +379,13 @@ th{
 th:hover{
     color: var(--b-global-color-dark-gold);
 }
+.dt-length, .dt-search{
+    display: none !important;
+}
+
+th .dt-column-header{
+    flex-direction: row !important;
+}
 
 td {
     border-top: var(--b-global-color-dark-gray) 1px solid !important;

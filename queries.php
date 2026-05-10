@@ -9,7 +9,7 @@ function run_query($query, $type="")
         $result = $wpdb->get_results($query);
     }
 
-    //error_log("result ". json_encode($result));
+    //write_log("result ". json_encode($result));
     return $result;
 }
 
@@ -189,16 +189,21 @@ function get_page_data($table_name,$filters=null,$orderby = null)
         foreach ($filters as $filter) {
             //write_log("filter ".json_encode($filter));
             if ($filter["filter_field"] == "id") {
-                $filter_field = $wpdb->prefix.$table_name.".".$filter["filter_field"];
+                $filter_field = $wpdb->prefix . $table_name . "." . $filter["filter_field"];
                 $apostrophe = "";
             } else {
-                $filter_field =(isset($filter["filter_table"])?$wpdb->prefix.$filter["filter_table"].".":""). $filter["filter_field"];
+                $filter_field = (isset($filter["filter_table"]) ? $wpdb->prefix . $filter["filter_table"] . "." : "") . $filter["filter_field"];
                 $field = get_field($table_name, $filter["filter_field"]);
                 if ($field != null) {
                     $apostrophe = is_needed_apostrophe($field["widget"], isset($field["un_apostrophe"]));
                 }
             }
-            $filter_str[]=$filter_field . " = " . $apostrophe . $filter["filter_value"] . $apostrophe;
+
+            if (isset($filter["filter_type"]) && $filter["filter_type"] == "date") {
+                $filter_str[] = $filter_field ." ". $filter["filter_ratio"]." " . $filter["filter_value"];
+            } else {
+                $filter_str[] = $filter_field . " = " . $apostrophe . $filter["filter_value"] . $apostrophe;
+            }
         }
         $query .= " WHERE " . implode(" AND ", $filter_str);
 
@@ -214,7 +219,7 @@ function get_page_data($table_name,$filters=null,$orderby = null)
 //        $query .= " WHERE ".get_id_column_in_page($page_name)." = ".$filter_value;
 //    }
     $result = run_query ($query);
-    //write_log("res ".json_encode($result));
+   // write_log("res ".json_encode($result));
     return $result ;
 }
 
@@ -430,19 +435,48 @@ function new_chat_ajax()
 {
     global $wpdb;
     $user_id = get_current_user_id();
-    write_log ('new chat user id '.$user_id);
+    //write_log ('new chat user id '.$user_id);
     $query = "INSERT into ".$wpdb->prefix."chat(text,task_id,user_id,date) select '" . $_POST['text'] . "'," . $_POST['task_id'] . "," . get_current_user_id () . ",NOW()";
-    run_query ($query);
+    run_query ($query,"execute");
     //run_query ("UPDATE tasks set treatment_date = NOW()");
 
     $media_id =9 ;
     //write_log ("media id new chat " .json_encode ( $media_id));
-    $query = "SELECT date FROM ".$wpdb->prefix."chat where task_id = " . $_POST['task_id'] ." ORDER BY id DESC LIMIT 1";
-    $chat_time = run_query ($query);
+    $query = "SELECT id,date FROM ".$wpdb->prefix."chat where task_id = " . $_POST['task_id'] ." ORDER BY id DESC LIMIT 1";
+    $rows = run_query ($query);
+
     $media_url =  wp_get_attachment_url($media_id );
     echo json_encode (array(
-        "time" => date("H:i:s",strtotime( $chat_time[0]->date))/*date("d/m/y H:i")*/,
-        "client_logo" => $media_url));
+        "rows" => $rows,
+        "add_message" => true
+      /*  "id" => $chat_time[0]->id,
+        "time" => date("H:i:s",strtotime( $chat_time[0]->date)),
+        "client_logo" => $media_url*/
+        )
+    );
+    die();
+}
+
+add_action('wp_ajax_get_chat_ajax', 'get_chat_ajax');
+//add_action('wp_ajax_nopriv_new_chat_ajax', 'new_chat_ajax');
+function get_chat_ajax()
+{
+    global $wpdb;
+    $user_id = get_current_user_id();
+    $media_id =9 ;
+    $filters=array();
+    $filters[]=array("filter_field" => "task_id", "filter_value"=>$_POST['task_id']);
+    $filters[]=array("filter_field" => "date", "filter_value"=>"NOW() - interval 120 minute","filter_type"=>"date","filter_ratio"=>">");
+    $rows = get_page_data("chat",$filters);
+    write_log("rows ".json_encode($rows));
+    //$query = "SELECT date FROM ".$wpdb->prefix."chat where task_id = " . $_POST['task_id'] ." ORDER BY id DESC LIMIT 1";
+    //$chat_time = run_query ($query);
+    //$media_url =  wp_get_attachment_url($media_id );
+    echo json_encode (array(
+        "rows" => $rows,
+        "get_messages" => true
+        )
+    );
     die();
 }
 

@@ -46,19 +46,19 @@ $page_info  = BOUTIQUE_TABLES[$table_name];
         <thead><tr class="tr-head gold">
             <?php
             if($table_name == "products"){?>
-                <th></th>
+                <th class="no-sort"></th>
             <?php }
             foreach($page_info["columns"] as $column){
                 if(isset($column["hidden"]) || !isset($column["label"]) || !empty($add_text) && $column["field_name"]== "client_id" || is_agent() && $column["field_name"]== "agent_id"){continue;}
                 ?>
                 <th><?= $column["label"]?></th>
             <?php } ?>
-            <th></th>
-            <th></th>
+            <th class="no-sort"></th>
+            <th class="no-sort"></th>
             <?php
             if(isset($page_info["actions"])){
             foreach ($page_info["actions"] as $action) {?>
-                <th></th>
+                <th class="no-sort"></th>
             <?php }
             }
             ?>

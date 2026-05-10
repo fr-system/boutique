@@ -1,6 +1,12 @@
 
 jQuery(document).ready(function($) {
 
+    var aTargets = [];
+    $.each(jQuery( "table" ).find( "th.no-sort" ),function (){
+        var th = jQuery(this);
+        aTargets.push(th.index());
+    });
+
     setTimeout(function () {
         var table = jQuery('.dataTable').DataTable({
             //bFilter: true,
@@ -29,10 +35,17 @@ jQuery(document).ready(function($) {
 
             },
             "ordering": true,
-            "columnDefs": [
-                {"type": "date", "targets": [3, 4]}, // החל על העמודה הראשונה
-                {"type": "num", "targets": [6]} // החל על העמודה השנייה
+          /*  "columnDefs": [{
+                orderable: false,
+                targets: "no-sort"
+            }],*/
+            "aoColumnDefs": [
+                { "bSortable": false, "aTargets": aTargets }//[ 4, 5, 6 ]
             ],
+            /*   "columnDefs": [
+                   {"type": "date", "targets": [3, 4]}, // החל על העמודה הראשונה
+                   {"type": "num", "targets": [6]} // החל על העמודה השנייה
+               ],*/
             // "order": []
             // "order": [[ 3, "desc" ]]
         });
@@ -41,6 +54,7 @@ jQuery(document).ready(function($) {
     }, 500);
 
 })
+/*
 jQuery.fn.dataTable.ext.type.order['date-pre'] = function (dateString) {
     let parts = dateString.split("/"); // מפצל את המחרוזת
     let dateObject = new Date(parts[2], parts[1] - 1, parts[0]); // בונה את התאריך
@@ -49,4 +63,4 @@ jQuery.fn.dataTable.ext.type.order['date-pre'] = function (dateString) {
 
 jQuery.fn.dataTable.ext.type.order['num-pre'] = function (data) {
     return data == ""? 0: parseInt(data);
-};
+};*/
