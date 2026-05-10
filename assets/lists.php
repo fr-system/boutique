@@ -46,6 +46,7 @@ const BOUTIQUE_TABLES = array(
             array("field_name" => "blocked", "widget" => "checkbox","label"=>"מוצר חסום","hidden"=>true),
             array("field_name" => "factor_of_friction", "widget" => "select","label"=>"גורם אירוז","hidden"=>true),
             array("field_name" => "individually", "widget" => "checkbox","label"=>"ניתן למכירה בבודדים","hidden"=>true),
+            array("field_name" => "units_in_box", "widget" => "number","label"=>"כמות יחידות בארגז","required"=>true),
         )),
     "tasks" => array(
         "title" => "משימות",
@@ -110,6 +111,7 @@ const BOUTIQUE_TABLES = array(
             array("field_name" => "order_price", "widget" => "text", "un_apostrophe" => true,"sign"=>"₪"),
             array("field_name" => "bonus", "widget" => "number"),
             array("field_name" => "discount_percent", "widget" => "text", "un_apostrophe" => true,"sign"=>"%"),
+           // array("field_name" => "product_id", "widget" => "text", "un_apostrophe" => true, "join_table" => "products_clients","join_id_column" => "product_id", "join_value" => "client_price","sign"=>"₪"),
         )),
     "agents" => array(
         "title" => "סוכנים",

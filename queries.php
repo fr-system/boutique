@@ -151,7 +151,7 @@ function get_field($table_name, $field_name)
     return count($field) > 0 ? array_pop($field) : null;
 }
 
-function get_page_data($table_name,$filters=null,$orderby = null)
+function get_page_data($table_name,$filters=null,$orderby = null,$join_filter=null)
 {
     global $wpdb;
     $columns = BOUTIQUE_TABLES[$table_name]["columns"];
@@ -177,11 +177,16 @@ function get_page_data($table_name,$filters=null,$orderby = null)
             else{
                 $query .= $wpdb->prefix . $column['join_table'] . ".*, " ;
             }
-            $join .= " LEFT JOIN " . $wpdb->prefix.$column['join_table'] . " ON " .$wpdb->prefix. $table_name . "." . $column["field_name"] . " = " . $wpdb->prefix.$column['join_table'] . ".id";
+            $join .= " LEFT JOIN " . $wpdb->prefix.$column['join_table'] . " ON " .$wpdb->prefix. $table_name . "." . $column["field_name"] . " = " . $wpdb->prefix.$column['join_table'] .".id";
         }
 
     }
-
+    if($table_name=="products") {
+        $query .= " pc.client_price, " ;
+        $join .= " LEFT JOIN " .$wpdb->prefix . "products_clients as pc 
+        ON {$wpdb->prefix}products.id = pc.product_id ".
+            (empty($join_filter)?'':"AND ".$join_filter);
+    }
     $query = substr($query,0,-2);
     $query .= " FROM ".$wpdb->prefix.$table_name. $join;
     if($filters!=null) {

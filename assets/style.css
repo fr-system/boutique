@@ -29,11 +29,12 @@ input:not([type=search]):-webkit-autofill {
     grid-auto-rows: 270px;
     overflow-x: auto;
     /* overflow-y: hidden; */
-    max-height: 550px;
+    max-height: 75vh;
     /* grid-template-columns: repeat(5, 1fr); */
 }
 .products-gallery.one-row {
     grid-auto-flow: column;
+    /*max-height: 290px;*/
 }
 
 .product{
@@ -52,9 +53,11 @@ input:not([type=search]):-webkit-autofill {
 }
 
 .product img{
-    height: 100%;
+    max-height: 100%;
+    max-width: 100%;
     object-fit: cover;
     width: auto;
+    height: auto;
     border-radius: 10px;
 }
 .product-img{
@@ -63,6 +66,12 @@ input:not([type=search]):-webkit-autofill {
 .view-product {
     position: absolute;
     top: 10px;
+}
+.products-gallery.orders .product .d-not-order{
+    display: none;
+}
+.products-gallery.catalog .product .d-order,.products-gallery.favorite .product .d-order{
+    display: none;
 }
 .product .button, .product button{
     height: 30px;
@@ -89,11 +98,13 @@ input:not([type=search]):-webkit-autofill {
 .product .input-label input{
     background-color: var(--b-global-color-light-gray);
     width: 30px;
+
     margin-left: 5px;
     border-radius: 5px;
     border: 0.5px solid  #D9D9D9;
     height: 23px !important;
 }
+.product .input-label input.unit-price{ width: 75px;}
 .product .calculated-price{
     width: 80px !important;
     height: 35px !important;
@@ -358,4 +369,7 @@ table.dataTable th.dt-type-numeric,*[dir=rtl]  table.dataTable th.dt-type-date{
 }
 table.dataTable td.dt-type-numeric,*[dir=rtl] table.dataTable td.dt-type-date{
     text-align: center;
+}
+table.dataTable>tbody>tr>td,table.dataTable>tbody>tr>th{
+    padding: 0;
 }
