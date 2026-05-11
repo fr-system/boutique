@@ -330,7 +330,7 @@ jQuery(document).ready(function($){
 
     })
 
-    jQuery(".page .products-gallery .product .plus-minus-count span").click(function (e) {
+    jQuery(".page .products-gallery .product .plus-minus-count span.pointer").click(function (e) {
         plusMinusCountProduct(this)
     })
 
@@ -594,7 +594,7 @@ function searchElements(text,selector,searchSelector){
             jQuery('input[name=dirty]').val("1");
             jQuery(".add-order-product").after(element);
 
-            jQuery(".page .products-gallery .product .plus-minus-count span").click(function (e) {
+            jQuery(".page .products-gallery .product .plus-minus-count span.pointer").click(function (e) {
                 plusMinusCountProduct(this);
             })
             //jQuery(".products").prepend(element);
