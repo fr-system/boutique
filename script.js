@@ -41,20 +41,20 @@ jQuery(document).ready(function($){
     }
 
     if(getParameterByName("subject") == "tasks" && getParameterByName("action") == "edit"){
-        var postData = [
+        /*var postData = [
             {name: "action", value: "get_chat_ajax"},
             {name: "task_id", value: getParameterByName("id")},
         ];
 
-        call_ajax_function(postData,"onAddChat");
+        call_ajax_function(postData,"onAddChat");*/
 
-        /*   setInterval(function () {
+           setInterval(function () {
             var postData = [
                 {name: "action", value: "get_chat_ajax"},
                 {name: "task_id", value: getParameterByName("id")},
             ];
             call_ajax_function(postData,"onAddChat");
-        }, 120000); // 120000 מילישניות = 2 דקות*/
+        }, 10000); // 120000 מילישניות = 2 דקות
     }
 
     jQuery('input, select, textarea').change(function (){
@@ -487,20 +487,39 @@ function onAddChat(result,targetElement){
     var get_mes = result.get_messages;
     jQuery.each(result.rows,function (){
         var row = this;
+
+        var d = new Date(row.date),
+            month = '' + (d.getMonth() + 1),
+            day = '' + d.getDate(),
+            year = d.getFullYear(),
+            hour = d.getHours(),
+            minutes = d.getMinutes();
+
+        if (month.length < 2)
+            month = '0' + month;
+        if (day.length < 2)
+            day = '0' + day;
+        if (hour.length < 2)
+            hour = '0' + hour;
+        if (minutes.length < 2)
+            minutes = '0' + minutes;
+
+        var date = [day, month, year].join('/')+ "\n" + hour+":"+minutes;
+
         //'+result.client_logo+'
         var message = '<div class="input-label flex-display space-between" data-id="'+row.id+'">'+
             '<div class="part-20"><img class="user-logo" src=""></div>'+
             '<div class="text part-50 text-center">'+row.text+'</div>'+
-            '<div class="date text-left part-20">'+row.time +'</div></div>';
+            '<div class="date text-left part-20 font-12">'+date +'</div></div>';
 
-        /*if(get_mes){
+        if(get_mes){
             var result = jQuery.grep(jQuery(".chat-list .input-label"), function (mess) {
                 return jQuery(mess).data("id") == row.id
             });
             if (result.length > 0) {
                 return false;
             }
-        }*/
+        }
 
         chatList.append(jQuery(message));
     })

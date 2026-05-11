@@ -111,7 +111,7 @@ function get_side_menu()
             ?>
             <?php if ( $parent_id == $item->menu_item_parent && (is_manager() || is_agent() && $name=="orders")){ ?>
                 <?php if ( !$submenu ){ $submenu = true; ?>
-                    <ul class="sub-menu ">
+                    <ul class="sub-menu">
                 <?php } ?>
                 <li class="pointer flex-display end align-center">
                     <a class="not-link" href="<?= esc_url($url)?>"><?=esc_html($item->title)?></a>                            </li>
@@ -315,9 +315,9 @@ function create_input($field,$value = null,$readonly = "")
                     <line x1="41" y1="31" x2="19" y2="31" stroke="white" stroke-width="2"/>
                 </svg>
                 <?php if(empty($value)){?>
-                    <div type="button" class="products-last-order button hidden flex-display center align-center background-white dark-green bold font-18">
-                        <span>מוצרים מהזמנה קודמת</span>
-                     </div>
+                    <svg class="pointer products-last-order" xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 26 26" fill="none">
+                        <circle cx="13" cy="13" r="12.5" fill="#E2B252" stroke="white"/>
+                    </svg>
                 <?php } ?>
 
             </div>

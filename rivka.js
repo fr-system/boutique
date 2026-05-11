@@ -2,7 +2,7 @@
 jQuery(document).ready(function($) {
 
     var aTargets = [];
-    $.each(jQuery( "table" ).find( "th.no-sort" ),function (){
+    jQuery.each(jQuery( "table" ).find( "th.no-sort" ),function (){
         var th = jQuery(this);
         aTargets.push(th.index());
     });

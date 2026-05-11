@@ -192,7 +192,9 @@ ul.menu{
     height: 60%;
     justify-content: space-around;
 }
-
+ul.menu li:not(.sub-menu li){
+    position: relative;
+}
 ul.menu li {
     height: 35px;
    /* padding: 10px 15%;*/
@@ -206,17 +208,22 @@ ul.menu li.selected {
 ul.menu li.selected a{
     font-weight: bold;
 }
-ul.menu li:hover {
+ul.menu li:hover:not(.sub-menu li) {
     background-color: var(--b-global-color-light-gray);
 }
 ul.menu li .sub-menu{
     display: none;
+    background-color: white;
+    position: absolute;
+    top: 30px;
+    width: 100%;
     margin: 0;
     padding: 0;
 }
 ul.menu li:hover .sub-menu, ul.menu li.selected .sub-menu{
-    /*display: block;*/
+    display: block;
 }
+
 a.not-link{
     text-decoration: none;
     color: black;

@@ -57,7 +57,7 @@ const BOUTIQUE_TABLES = array(
             array("field_name" => "subject", "widget" => "text", "label" => "משימה","required"=>true),
             array("field_name" => "open_date", "widget" => "datetime-local", "label" => "תאריך פתיחה","locked"=>true),
             array("field_name" => "agent_id", "widget" => "select", "label" => "סוכן", "join_table" => "agents", "join_value" => "user_id", "user_field" => "display_name","required"=>true,"filter"=>true),//להביא מטבלת יוזר
-            array("field_name" => "details", "widget" => "textarea", "label" => "פירוט"),
+            array("field_name" => "details", "widget" => "textarea", "label" => "פירוט","display" => false),
             array("field_name" => "importance_id", "widget" => "radio", "label" => "חשיבות","filter"=>true,
                 "values"=>array(
                     1=>array("class"=>"high","label"=> "גבוהה","color"=>"#1A7870"),
@@ -183,14 +183,14 @@ const BOUTIQUE_LISTS = array(
                 array("field_name" => "area","widget" => "text"),
             )
         ),
-    "importance" =>
+    /*"importance" =>
         array(
             "title" => "חשיבות",
             "single" => "חשיבות",
             "columns" => array(
                 array("field_name" => "importance","widget" => "text"),
             )
-        ),
+        ),*/
     "payment_terms" =>
         array(
             "title" => "תנאי תשלום",

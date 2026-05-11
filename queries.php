@@ -447,7 +447,7 @@ function new_chat_ajax()
 
     $media_id =9 ;
     //write_log ("media id new chat " .json_encode ( $media_id));
-    $query = "SELECT id,date FROM ".$wpdb->prefix."chat where task_id = " . $_POST['task_id'] ." ORDER BY id DESC LIMIT 1";
+    $query = "SELECT * FROM ".$wpdb->prefix."chat where task_id = " . $_POST['task_id'] ." ORDER BY id DESC LIMIT 1";
     $rows = run_query ($query);
 
     $media_url =  wp_get_attachment_url($media_id );
@@ -471,9 +471,9 @@ function get_chat_ajax()
     $media_id =9 ;
     $filters=array();
     $filters[]=array("filter_field" => "task_id", "filter_value"=>$_POST['task_id']);
-    $filters[]=array("filter_field" => "date", "filter_value"=>"NOW() - interval 120 minute","filter_type"=>"date","filter_ratio"=>">");
+    $filters[]=array("filter_field" => "date", "filter_value"=>"NOW() - interval 30 minute","filter_type"=>"date","filter_ratio"=>">");
     $rows = get_page_data("chat",$filters);
-    write_log("rows ".json_encode($rows));
+    //write_log("rows ".json_encode($rows));
     //$query = "SELECT date FROM ".$wpdb->prefix."chat where task_id = " . $_POST['task_id'] ." ORDER BY id DESC LIMIT 1";
     //$chat_time = run_query ($query);
     //$media_url =  wp_get_attachment_url($media_id );
