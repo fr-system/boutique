@@ -35,15 +35,16 @@ function fillClientPriceModal(result) {
 
 function calculatePrice(me){
     var product = jQuery(me).closest(".product");
-    var unitsInBox = parseInt(product.find('.units-in-box').val()) || 1;
+
     var count = parseInt(product.find('.count').val());
     var unitsInBox = parseInt(product.find('.units-in-box').val());
-    var individually = parseInt(product.find('.individually').val());
-    if(individually ==1){
+    var selectIndividually  = product.find("select.price-part.individually")
+    if(selectIndividually.length>0 && selectIndividually.val()==1 ||selectIndividually.length ==0) {// אם לא ניתן לבחור בודדים , או שבחור ארגז
         count=count*unitsInBox;
     }
     var unitPrice = parseInt(product.find('.unit-price').val().replace('₪',''));
     var discountPercent = parseInt(product.find('.discount-percent').val());
     var calculatedPrice = (unitPrice*count) - (unitPrice*count*discountPercent/100);
     product.find(".calculaded-price").html(calculatedPrice);
+    jQuery(".calculaded-price-input").val(calculatedPrice);
 }

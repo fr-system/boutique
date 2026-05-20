@@ -111,6 +111,9 @@ const BOUTIQUE_TABLES = array(
             array("field_name" => "order_price", "widget" => "text", "un_apostrophe" => true,"sign"=>"₪"),
             array("field_name" => "bonus", "widget" => "number"),
             array("field_name" => "discount_percent", "widget" => "text", "un_apostrophe" => true,"sign"=>"%"),
+            array("field_name" => "individually", "widget" => "bool"),
+            array("field_name" => "total", "widget" => "text", "un_apostrophe" => true,"sign"=>"₪"),
+
            // array("field_name" => "product_id", "widget" => "text", "un_apostrophe" => true, "join_table" => "products_clients","join_id_column" => "product_id", "join_value" => "client_price","sign"=>"₪"),
         )),
     "agents" => array(

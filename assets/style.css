@@ -63,9 +63,10 @@ input:not([type=search]):-webkit-autofill {
 .product-img{
     position: relative;
 }
-.view-product {
+.remove-product {
     position: absolute;
-    top: 10px;
+    top: 0;
+    left: 0;
 }
 .products-gallery.orders .product .d-not-order{
     display: none;
@@ -104,7 +105,7 @@ input:not([type=search]):-webkit-autofill {
 .plus-minus-count{
     /*height: 35px;*/
     align-self: center;
-    width: 95%;
+    /*width: 95%;*/
 }
 .plus-minus-count span, .plus-minus-count input{
     border:solid 1px var(--b-global-color-dark-gray);

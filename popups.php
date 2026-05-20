@@ -358,10 +358,17 @@ function create_product_view($product=null,$options=null)
     <?php } ?>
         <input type="hidden" class="units-in-box" name="products[<?= $options["key"]?>][units_in_box]" value="<?= $product->units_in_box?>">
         <div class="product-img <?= $options["table_name"]=="orders"? 'part-40':'part-60'?>">
-            <svg class="pointer view-product" xmlns="http://www.w3.org/2000/svg" width="12" height="9" viewBox="0 0 12 9" fill="none">
-                <path d="M5.85467 0.515015C2.4715 0.515015 0.830067 3.44152 0.538793 4.02085C0.523225 4.05167 0.515137 4.08547 0.515137 4.11972C0.515137 4.15398 0.523225 4.18778 0.538793 4.2186C0.82953 4.79793 2.47096 7.72444 5.85467 7.72444C9.23838 7.72444 10.8793 4.79793 11.1705 4.2186C11.1861 4.18778 11.1942 4.15398 11.1942 4.11972C11.1942 4.08547 11.1861 4.05167 11.1705 4.02085C10.8798 3.44152 9.23838 0.515015 5.85467 0.515015Z" stroke="black" stroke-width="1.02992" stroke-linecap="round" stroke-linejoin="round"/>
-                <path d="M5.85485 5.66458C6.74361 5.66458 7.4641 4.97292 7.4641 4.1197C7.4641 3.26649 6.74361 2.57483 5.85485 2.57483C4.96609 2.57483 4.24561 3.26649 4.24561 4.1197C4.24561 4.97292 4.96609 5.66458 5.85485 5.66458Z" stroke="black" stroke-width="1.02992" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
+            <?php if($options["table_name"]=="orders"){?>
+                <a class="remove-product" data-bs-toggle="modal" href="#bout-massage" role="button" data-action="remove">
+                    <svg class=""  xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 25 24" fill="none">
+                        <path d="M4.16663 7H20.8333M10.4166 11V17M14.5833 11V17M5.20829 7L6.24996 19C6.24996 19.5304 6.46945 20.0391 6.86015 20.4142C7.25085 20.7893 7.78076 21 8.33329 21H16.6666C17.2192 21 17.7491 20.7893 18.1398 20.4142C18.5305 20.0391 18.75 19.5304 18.75 19L19.7916 7M9.37496 7V4C9.37496 3.73478 9.48471 3.48043 9.68006 3.29289C9.87541 3.10536 10.1404 3 10.4166 3H14.5833C14.8596 3 15.1245 3.10536 15.3199 3.29289C15.5152 3.48043 15.625 3.73478 15.625 4V7" class="stroke-background-gold" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </a>
+            <?php } ?>
+<!--            <svg class="pointer view-product" xmlns="http://www.w3.org/2000/svg" width="12" height="9" viewBox="0 0 12 9" fill="none">-->
+<!--                <path d="M5.85467 0.515015C2.4715 0.515015 0.830067 3.44152 0.538793 4.02085C0.523225 4.05167 0.515137 4.08547 0.515137 4.11972C0.515137 4.15398 0.523225 4.18778 0.538793 4.2186C0.82953 4.79793 2.47096 7.72444 5.85467 7.72444C9.23838 7.72444 10.8793 4.79793 11.1705 4.2186C11.1861 4.18778 11.1942 4.15398 11.1942 4.11972C11.1942 4.08547 11.1861 4.05167 11.1705 4.02085C10.8798 3.44152 9.23838 0.515015 5.85467 0.515015Z" stroke="black" stroke-width="1.02992" stroke-linecap="round" stroke-linejoin="round"/>-->
+<!--                <path d="M5.85485 5.66458C6.74361 5.66458 7.4641 4.97292 7.4641 4.1197C7.4641 3.26649 6.74361 2.57483 5.85485 2.57483C4.96609 2.57483 4.24561 3.26649 4.24561 4.1197C4.24561 4.97292 4.96609 5.66458 5.85485 5.66458Z" stroke="black" stroke-width="1.02992" stroke-linecap="round" stroke-linejoin="round"/>-->
+<!--            </svg>-->
             <?php if($product->image_id){  ?>
                 <img class="" src="<?php echo wp_get_attachment_url($product->image_id) ?>" />
             <?php } ?>
@@ -371,7 +378,7 @@ function create_product_view($product=null,$options=null)
         </div>
             <?php
                 $price = null;
-                write_log ('producr '.json_encode ($product));
+               // write_log ('producr '.json_encode ($product));
                 if(!empty($product->order_price)){
                     $price = $product->order_price;
                     //$calculaded_price = $price*$product->count*$product->discount_percent/100;
@@ -394,14 +401,14 @@ function create_product_view($product=null,$options=null)
 
         <div class="part-10 d-not-order"><?= (!empty($price) ? $price . " ₪" : "") ?></div>
         <div class="plus-minus-count flex-display d-order part-20">
-            <span class="minus bold font-60 part-30 pointer">-</span>
+            <span class="minus bold font-25 part-20 pointer">-</span>
             <span class="part-70 flex-display space-between">
-                <input type="number" class="part-20 price-part count align-self-center"  min="0" name="products[<?= $options["key"]?>][count]" value="<?= $product->count?>" />
+                <input type="number" class="part-30 price-part count align-self-center"  min="0" name="products[<?= $options["key"]?>][count]" value="<?= $product->count?>" />
                 <?= ($product->individually ?
-                    '<select class="price-part individually part-70 align-self-center" name="123"><option value="1">ארגז</option><option value="2">בקבוק</option></select>'
-                    :'<label class="part-70 align-self-center">ארגזים</label>');?>
+                    '<select class="price-part individually part-70 font-12 align-self-center" name="products['.$options["key"].'][individually]"><option value="1">ארגזים</option><option value="2">בקבוקים</option></select>'
+                    :'<label class="part-60 align-self-center">ארגזים</label>');?>
             </span>
-            <span class="plus bold font-60 part-30 pointer">+</span>
+            <span class="plus bold font-25 part-20 pointer">+</span>
         </div>
         <div class="input-label flex-display space-around align-center d-order part-20">
             <label for="" class="">מחיר ליחידה</label>
@@ -409,7 +416,7 @@ function create_product_view($product=null,$options=null)
         </div>
         <div class="discount_percent-bonus flex-display space-between part-20 font-12 d-order ">
                 <div class="input-label flex-display align-center part-45">
-                    <label for="" class=""> % </label>
+                    <label for="" class="">%&nbsp;</label>
                     <input class="price-part discount-percent" type="text" pattern="\d*" name="products[<?= $options["key"]?>][discount_percent]" value="<?= $product->discount_percent?>" data-a-sign="%">
                     <label for="" class=""> הנחה</label>
                 </div>
@@ -418,30 +425,17 @@ function create_product_view($product=null,$options=null)
                 <label for="" class="price-part bonus">בונוס</label>
             </div>
         </div>
-        <div class="flex-display center part-20 d-order ">
-            <div class="input-label flex-display align-center ">
-                <span>סה"כ: <span class="calculaded-price "><?= $calculaded_price ?></span> ₪</span>
-<!--                <input class="calculated-price" type="text"  name="products[--><?php //echo $options["key"]?><!--][order_price]" value="--><?php //echo $product->order_price?><!--" >-->
+        <div class="flex-display center part-15 d-order ">
+            <div class="input-label flex-display align-center bold">
+                <span>סה"כ: <span class="calculaded-price "><?=empty($product->total)? $calculaded_price:$product->total; ?></span> ₪</span>
+                 <input class="calculated-price-input" type="text"  name="products[<?= $options["key"]?>][total1]" value="<?= $product->total?>" >
             </div>
         </div>
         <div class="flex-display space-around part-15 buttons">
-        <?php //if($options["table_name"]=="products"){?>
             <a href="single?subject=products&action=edit&id=<?php echo $product->id?>" class="part-15 button background-white gold bold font-15 <?php echo $options["table_name"]=="products" ? '':"hidden" ?>">מעבר למוצר</a>
             <button type="button" class="background-white gold bold font-15 <?php echo $options["table_name"]=="orders_" ? '':"hidden" ?>">פרטים</button>
-        <?php
-        //}
-        //else if ($options["table_name"]=="order_products"){?>
             <button type="button" class="background-gold bold font-15 order-product <?= $options["table_name"]=="order_products" && !$product->blocked ? '':"hidden" ?>">הזמן מוצר</button>
-            <?php if($options["table_name"]=="orders"){?>
-            <a data-bs-toggle="modal" href="#bout-massage" role="button" data-action="remove">
-                <svg class=""  xmlns="http://www.w3.org/2000/svg" width="25" height="24" viewBox="0 0 25 24" fill="none">
-                    <path d="M4.16663 7H20.8333M10.4166 11V17M14.5833 11V17M5.20829 7L6.24996 19C6.24996 19.5304 6.46945 20.0391 6.86015 20.4142C7.25085 20.7893 7.78076 21 8.33329 21H16.6666C17.2192 21 17.7491 20.7893 18.1398 20.4142C18.5305 20.0391 18.75 19.5304 18.75 19L19.7916 7M9.37496 7V4C9.37496 3.73478 9.48471 3.48043 9.68006 3.29289C9.87541 3.10536 10.1404 3 10.4166 3H14.5833C14.8596 3 15.1245 3.10536 15.3199 3.29289C15.5152 3.48043 15.625 3.73478 15.625 4V7" class="stroke-background-gold" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-            </a>
-            <?php } ?>
         </div>
-        <?php //}
-        ?>
     </div>
     <?php
 }

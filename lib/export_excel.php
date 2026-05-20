@@ -6,10 +6,10 @@ if(!isset($_GET['export']))return;
 $data = array();
 switch ( fixXSS( $_GET['export'] ) ) {
 	case 'archive':
-		test_mode_table_prefix();
+		//test_mode_table_prefix();
 		$table_name = $_GET["subject"];
 		$page_info = BOUTIQUE_TABLES[$table_name];
-		$list = get_page_data($table_name);
+		//$list = get_page_data($table_name);
 
 		$fname = BOUTIQUE_TABLES[$table_name]["title"];
 		$header = array();
@@ -47,9 +47,24 @@ $time   = date( 'd-m-Y' );
 //$fname  = "$fname $time.xlsx";
 //header( 'Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' );
 //header( 'Content-Disposition: attachment;filename="' . $fname . '"' );
-//header( 'Cache-Control: max-age=0' );
+
+ob_end_clean();
 header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-header('Content-Disposition: attachment; filename="file.csv"');
+header('Content-Disposition: attachment; filename="file.xlsx"');
+header( 'Cache-Control: max-age=0' );
+$writer = new XLSXWriter();
+$writer->writeSheetHeader('Sheet1', [
+	'id' => 'integer',
+	'name' => 'string',
+]);
+
+$writer->writeSheetRow('Sheet1', [1, 'David']);
+
+$writer->writeToStdOut();
+exit;
+
+header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+header('Content-Disposition: attachment; filename="file.xlsx"');
 
 $writer = new XLSXWriter();
 $writer->writeSheetHeader('Sheet1', []);
