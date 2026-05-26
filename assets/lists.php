@@ -94,8 +94,8 @@ const BOUTIQUE_TABLES = array(
             array("field_name" => "client_id","widget" => "select", "join_table" => "clients", "join_value" => "name", "label" => "שם הלקוח","required"=>true),
             array("field_name" => "order_date", "widget" => "datetime-local", "label" => "תאריך הזמנה","required"=>true),
             array("widget" => "products"),
-
             array("field_name" => "doc_type","widget" => "file", "label" => "מסמך"),
+            array("field_name" => "total","widget" => "text", "label" => "סה\"כ", "un_apostrophe" => true,"sign"=>"₪"),
             array("field_name" => "notes","widget" => "textarea", "label" => "הערות"),
             //array("field_name" => "user_opens","widget" => "select","locked"=>true, "label" => "מקים ההזמנה","join_table" => "agents", "join_value" => "user_id", "user_field" => "display_name"),
             array("field_name" => "user_confirms","widget" => "select","locked"=>true, "label" => "מאשר ההזמנה","join_table" => "agents", "join_value" => "user_id", "user_field" => "display_name"),
@@ -111,7 +111,7 @@ const BOUTIQUE_TABLES = array(
             array("field_name" => "order_price", "widget" => "text", "un_apostrophe" => true,"sign"=>"₪"),
             array("field_name" => "bonus", "widget" => "number"),
             array("field_name" => "discount_percent", "widget" => "text", "un_apostrophe" => true,"sign"=>"%"),
-            array("field_name" => "individually", "widget" => "bool"),
+            array("field_name" => "order_individual", "widget" => "bool"),
             array("field_name" => "total", "widget" => "text", "un_apostrophe" => true,"sign"=>"₪"),
 
            // array("field_name" => "product_id", "widget" => "text", "un_apostrophe" => true, "join_table" => "products_clients","join_id_column" => "product_id", "join_value" => "client_price","sign"=>"₪"),

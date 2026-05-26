@@ -45,7 +45,7 @@ function boutique_enqueue_scripts()
     //wp_register_script('script', get_template_directory_uri() . '/script.js');
    //wp_enqueue_script('script',);
 
-    wp_register_script('autoNumeric', get_template_directory_uri() . '/assets/autoNumeric.js');
+    wp_register_script('autoNumeric', get_template_directory_uri() . '/assets/autoNumeric_old.js');
     wp_enqueue_script('autoNumeric');
     wp_enqueue_script( 'boostrap', get_template_directory_uri(). '/assets/bootstrap.bundle.min.js', array('jquery'), $ver );
     wp_register_script('jquery-validate', get_template_directory_uri() . '/assets/jquery.validate.js');

@@ -405,7 +405,9 @@ function create_product_view($product=null,$options=null)
             <span class="part-70 flex-display space-between">
                 <input type="number" class="part-30 price-part count align-self-center"  min="0" name="products[<?= $options["key"]?>][count]" value="<?= $product->count?>" />
                 <?= ($product->individually ?
-                    '<select class="price-part individually part-70 font-12 align-self-center" name="products['.$options["key"].'][individually]"><option value="1">ארגזים</option><option value="2">בקבוקים</option></select>'
+                    '<select class="price-part individually part-70 font-12 align-self-center" name="products['.$options["key"].'][order_individual]">
+                    <option value="0" '. ($product->order_individual? '':'selected').'> ארגזים</option>
+                    <option value="1" '.($product->order_individual? "selected":"").' >בקבוקים</option></select>'
                     :'<label class="part-60 align-self-center">ארגזים</label>');?>
             </span>
             <span class="plus bold font-25 part-20 pointer">+</span>
@@ -428,7 +430,7 @@ function create_product_view($product=null,$options=null)
         <div class="flex-display center part-15 d-order ">
             <div class="input-label flex-display align-center bold">
                 <span>סה"כ: <span class="calculaded-price "><?=empty($product->total)? $calculaded_price:$product->total; ?></span> ₪</span>
-                 <input class="calculated-price-input" type="text"  name="products[<?= $options["key"]?>][total1]" value="<?= $product->total?>" >
+                 <input class="calculated-price-input" type="hidden"  name="products[<?= $options["key"]?>][total]" value="<?= $product->total?>" >
             </div>
         </div>
         <div class="flex-display space-around part-15 buttons">

@@ -74,7 +74,17 @@ jQuery(document).ready(function($){
             }
         }
     });
-
+    // jQuery('input[data-a-sign=₪]').each(function () {
+    //
+    //     new AutoNumeric(this, {
+    //         currencySymbol: '₪ ',
+    //         decimalPlaces: 2
+    //     });
+    //  });
+    // new AutoNumeric('input[data-a-sign=₪]', {
+    //     currencySymbol: '₪ ',
+    //     decimalPlaces: 2
+    // });
     jQuery('input[data-a-sign=₪]').autoNumeric('init', { vMin: '-9999999999999' });
 
     jQuery("form").validate({
