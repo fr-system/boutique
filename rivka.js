@@ -1,6 +1,15 @@
 
 jQuery(document).ready(function($) {
-
+    /*jQuery(".send-email").click(function (){
+        var postData = [
+            {name: "action", value: "import_from_xlsx"},
+            {name: "table_name", value: tableName },
+            {name: "filter", value: "client_id = "+ $(this).val() +" And product_id = "+  $('#update_client_price input[name=product_id]').val() },
+            {name: "format", value: "array"},
+        ];
+        call_ajax_function()
+    })
+*/
     var aTargets = [];
     jQuery.each(jQuery( "table" ).find( "th.no-sort" ),function (){
         var th = jQuery(this);

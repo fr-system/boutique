@@ -517,7 +517,7 @@ function onAddChat(result,targetElement){
                 return jQuery(mess).data("id") == row.id
             });
             if (result.length > 0) {
-                return false;
+                return;
             }
         }
 

@@ -514,4 +514,30 @@ function get_products_last_order()
     die();
 }
 
+function import_from_xlsx()
+{
+    write_log("import_from_xlsx");
+    require('lib/XLSXReader.php');
+    $msg = "";
+    if (empty($_FILES) || ($_FILES["bills"]["size"] == 0)) {
+        write_log("_FILES ".json_encode($_FILES));
+        write_log("empty_FILES ");
+        die(json_encode(array(
+            'status' => 'error',
+            'msg' => 'לא נמצא קובץ.'
+        )));
+    }
+    write_log("_FILES ".json_encode($_FILES));
+    $sheets = getXlsxData($_FILES["bills"]["tmp_name"]);
+    write_log("heets ".json_encode($sheets));
+    foreach ($sheets as $sheet) {
+        foreach ($sheet as $key => $row) {
+            if ($key == 0) continue;
+
+        }
+    }
+
+}
+
+
 ?>
