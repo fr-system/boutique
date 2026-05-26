@@ -191,11 +191,21 @@ input:not([type=search]):-webkit-autofill {
 
 ul.menu{
     list-style-type: none;
-    margin: 70px 0 0 0;
+    margin: 50px 0 0 0;
     padding: 0 15px;
-    height: 60%;
+    height: 70%;
     justify-content: space-around;
 }
+ul.menu li svg{
+    /*margin-left: 10px;*/
+    height: 15px;
+    width: 15px;
+    flex-basis:30% !important;
+}
+ul.menu li a:not(.sub-menu li a){
+    flex-basis:70% !important;
+}
+
 ul.menu li:not(.sub-menu li){
     position: relative;
 }
@@ -205,11 +215,11 @@ ul.menu li {
     border-radius: 6px;
     min-height: fit-content;
 }
-ul.menu li.selected {
+ul.menu li.selected:not(.sub-menu li) {
     background-color: var(--b-global-color-light-gray);
 }
 
-ul.menu li.selected a{
+ul.menu li.selected a:not(.sub-menu li a){
     font-weight: bold;
 }
 ul.menu li:hover:not(.sub-menu li) {
@@ -219,27 +229,23 @@ ul.menu li .sub-menu{
     display: none;
     background-color: white;
     position: absolute;
+    margin-right: 30%;
+    /*right: 100px;*/
     top: 30px;
-    width: 100%;
+    width: 120px;
     margin: 0;
     padding: 0;
+    /*z-index: 9;*/
 }
-ul.menu li:hover .sub-menu, ul.menu li.selected .sub-menu{
+ul.menu li:hover .sub-menu{
     display: block;
 }
-
+ul.menu li .sub-menu li{
+    height: 25px;
+}
 a.not-link{
     text-decoration: none;
     color: black;
-}
-ul.menu li svg{
-    /*margin-left: 10px;*/
-    height: 15px;
-    width: 15px;
-    flex-basis:30% !important;
-}
-ul.menu li a{
-    flex-basis:70% !important;
 }
 .quick-action{
     padding: 12px 25px;
@@ -330,7 +336,7 @@ input[type="radio"] + label:before {
 
 .chat-list {
     max-height: 45vh;
-    height: 70%;
+    height: 95%;
     overflow-y: scroll;
     scrollbar-width: none;
 }
