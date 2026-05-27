@@ -34,7 +34,7 @@ jQuery(document).ready(function($){
 /*                if (getParameterByName("action") == "new") {//אין לי מושג למה רציתי לשאול אם זה חדש
 
                 }*/
-                automaticOrderSaving();
+                //automaticOrderSaving();
                 //לשאול את פרידי לבדוק אם נגעו ב-2 דקות האלו לשמור ואם לא אז לא לשמור אולי לעשות שרק אם עזבו את המסך ולא נגעו בו כבר יותר מ2 דקות אז ללכת לשמירה
             }
         }, 120000); // 120000 מילישניות = 2 דקות
@@ -159,29 +159,28 @@ jQuery(document).ready(function($){
         //.then(function (token) {
         $form.find('#form_error_msgs_container').html('');
 
-        var formData = $form.serializeArray();
-        //formData.append('file', jQuery('input[type=file]')[0].files[0]);
-        if (jQuery('input[type=file]').length > 0) {
+        //var formData = $form.serializeArray();
+
+       // if (jQuery('input[type=file]').length > 0) {
             var formData = new FormData($form[0]);
-            //new FormData(document.getElementById('myForm'));
-            formData.append('file', jQuery('input[type=file]')[0].files[0]);
+            //formData.append('file', jQuery('input[type=file]')[0].files[0]);
             formData.append('action', 'send_site_forms');
             // formData.push({
             //     name: "file",
             //     value: jQuery('input[type=file]')[0].files[0]
             // });
-        } else {
+       // } else {
 
-            formData.push({
-                name: "action",
-                value: "send_site_forms"
-            });
+            // formData.push({
+            //     name: "action",
+            //     value: "send_site_forms"
+            // });
 
             /*formData.push({
                 name: "recaptcha_token",
                 value: token
             });*/
-        }
+     //   }
         if (xhr && xhr.readyState != 4)
             xhr.abort();
         xhr = jQuery.ajax({
@@ -766,7 +765,7 @@ function automaticOrderSaving(){
         value: "send_site_forms"
     });
 
-    call_ajax_function(formData,"fillOrderId");
+    call_ajax_function(formData);
 }
 function fill_modal_list(result){
     jQuery(".modal-body select").html(result.options);
