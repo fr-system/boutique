@@ -143,14 +143,14 @@ jQuery(document).ready(function($){
         closePopup();
     });
 
-    jQuery('body').on('submit', '.site_form', function(e){
+    jQuery('body').on('submit', '.site_form', function(e) {
         e.preventDefault();
         var $form = jQuery(this);
         if (!$form.valid()) {
             return;
         }
 
-        if(getParameterByName("subject") == "orders" && jQuery('.page.single').length > 0 && jQuery('.products-gallery .product').length ==0) {
+        if (getParameterByName("subject") == "orders" && jQuery('.page.single').length > 0 && jQuery('.products-gallery .product').length == 0) {
             return;
         }
 
@@ -160,22 +160,35 @@ jQuery(document).ready(function($){
         $form.find('#form_error_msgs_container').html('');
 
         var formData = $form.serializeArray();
+        //formData.append('file', jQuery('input[type=file]')[0].files[0]);
+        if (jQuery('input[type=file]').length > 0) {
+            var formData = new FormData($form[0]);
+            //new FormData(document.getElementById('myForm'));
+            formData.append('file', jQuery('input[type=file]')[0].files[0]);
+            formData.append('action', 'send_site_forms');
+            // formData.push({
+            //     name: "file",
+            //     value: jQuery('input[type=file]')[0].files[0]
+            // });
+        } else {
 
-        formData.push({
-            name: "action",
-            value: "send_site_forms"
-        });
-        /*formData.push({
-            name: "recaptcha_token",
-            value: token
-        });*/
+            formData.push({
+                name: "action",
+                value: "send_site_forms"
+            });
 
+            /*formData.push({
+                name: "recaptcha_token",
+                value: token
+            });*/
+        }
         if (xhr && xhr.readyState != 4)
             xhr.abort();
         xhr = jQuery.ajax({
             url: "/wp-admin/admin-ajax.php",//globalVars.ajaxurl,
             data: formData,
-            data: formData,
+            processData: false,
+            contentType: false,
             dataType: 'json',
             method: 'POST'
         }).done(function (data) {

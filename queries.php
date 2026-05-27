@@ -538,6 +538,15 @@ function import_from_xlsx()
     }
 
 }
-
+function getXlsxData ($file){
+    $xlsx = new XLSXReader($file);
+    $sheetNames = $xlsx->getSheetNames();
+    $data = array();
+    foreach($sheetNames as $sheetName) {
+        $sheet = $xlsx->getSheet($sheetName);
+        $data[] = $sheet->getData();
+    }
+    return $data;
+}
 
 ?>

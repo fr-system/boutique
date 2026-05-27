@@ -2,14 +2,15 @@
 require("xlsxwriter.class.php");
 require_once( dirname( dirname( dirname( dirname( dirname( __FILE__ ) ) ) ) ) . '/wp-load.php' );
 
-if(!isset($_GET['export']))return;
-$data = array();
-switch ( fixXSS( $_GET['export'] ) ) {
-	case 'archive':
-		test_mode_table_prefix();
-		$table_name = $_GET["subject"];
-		$page_info = BOUTIQUE_TABLES[$table_name];
-		$list = get_page_data($table_name);
+if(isset($_GET['export'])) {
+	$headers = [];
+	$data = array();
+	switch (fixXSS ($_GET['export'])) {
+		case 'archive':
+			test_mode_table_prefix ();
+			$table_name = $_GET["subject"];
+			$page_info = BOUTIQUE_TABLES[$table_name];
+			$list = get_page_data ($table_name);
 
 			$fname = $page_info["title"];
 
@@ -18,7 +19,7 @@ switch ( fixXSS( $_GET['export'] ) ) {
 					continue;
 				}
 
-				$headers[$column["label"]] = get_column_type($column["widget"]);
+				$headers[$column["label"]] = get_column_type ($column["widget"]);
 			}
 
 			$data = [];
@@ -29,11 +30,11 @@ switch ( fixXSS( $_GET['export'] ) ) {
 						continue;
 					}
 
-					$field = isset($column['join_table']) ? substr($column['join_table'], 0, -1) . "_" . $column['join_value'] : $column["field_name"];
-					$list_name = isset($column['table_name']) ? constant($column['table_name']) : null;
+					$field = isset($column['join_table']) ? substr ($column['join_table'], 0, -1) . "_" . $column['join_value'] : $column["field_name"];
+					$list_name = isset($column['table_name']) ? constant ($column['table_name']) : null;
 
 					if (!isset($column["hidden"]) && isset($column["label"])) {
-						$column_value = get_value($column, $item, $field);
+						$column_value = get_value ($column, $item, $field);
 						$row[] = $column_value;
 					}
 				}
@@ -42,22 +43,22 @@ switch ( fixXSS( $_GET['export'] ) ) {
 			break;
 	}
 
-	ob_end_clean();
-	header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-	header('Content-Disposition: attachment; filename="file.xlsx"');
-	header('Cache-Control: max-age=0');
+	ob_end_clean ();
+	header ('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+	header ('Content-Disposition: attachment; filename="file.xlsx"');
+	header ('Cache-Control: max-age=0');
 
 	$writer = new XLSXWriter();
 
-	$writer->writeSheetHeader('Sheet1',
+	$writer->writeSheetHeader ('Sheet1',
 		$headers
 	);
 	foreach ($data as $row) {
 		//$writer->writeSheetRow('Sheet1', [1, 'David']);
-		$writer->writeSheetRow('Sheet1', $row);
+		$writer->writeSheetRow ('Sheet1', $row);
 	}
 
-	$writer->writeToStdOut();
+	$writer->writeToStdOut ();
 	exit;
 }
 
