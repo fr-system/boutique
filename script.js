@@ -34,7 +34,7 @@ jQuery(document).ready(function($){
 /*                if (getParameterByName("action") == "new") {//אין לי מושג למה רציתי לשאול אם זה חדש
 
                 }*/
-                //automaticOrderSaving();
+                automaticOrderSaving();
                 //לשאול את פרידי לבדוק אם נגעו ב-2 דקות האלו לשמור ואם לא אז לא לשמור אולי לעשות שרק אם עזבו את המסך ולא נגעו בו כבר יותר מ2 דקות אז ללכת לשמירה
             }
         }, 120000); // 120000 מילישניות = 2 דקות
@@ -766,7 +766,7 @@ function automaticOrderSaving(){
         value: "send_site_forms"
     });
 
-    call_ajax_function(formData);
+    call_ajax_function(formData,"fillOrderId");
 }
 function fill_modal_list(result){
     jQuery(".modal-body select").html(result.options);

@@ -1,15 +1,47 @@
+function fillObligation(results){
+    jQuery("input[name=obligation]").val(results.obligation);
+
+    if(results.obligation){
+        jQuery(".manager-approval").removeClass("hidden");
+    }
+    else{
+        jQuery(".order-confirmation").removeClass("hidden");
+    }
+}
+
+function getObligationClient(clientId){
+    var postData = [
+        {name: "action", value: "get_obligation_client"},
+        {name: "client_id", value: clientId }
+    ];
+    call_ajax_function(postData,"fillObligation");
+}
+
+function fillOrderId(result){
+    //צריך לשים למעלה בכתובת של האתר את מספר ההזמנה ולשנות את ה action ל edit
+
+    if(!jQuery("input[name=id]").val()) {
+        window.history.pushState({}, '', 'single/?subject=orders&action=edit&id='+result.id);
+        jQuery("input[name=id]").val(result.id);
+        var selectedOption = jQuery("section select[name=client_id]").find('option:selected');
+        getObligationClient(selectedOption.val());
+    }
+}
 
 jQuery(document).ready(function($) {
-    /*jQuery(".send-email").click(function (){
+    if(getParameterByName("subject") == "orders" && getParameterByName("action") == "edit"){
+        var selectedOption = jQuery("section select[name=client_id]").find('option:selected');
+        getObligationClient(selectedOption.val());
+    }
+
+    jQuery(".manager-approval").click(function (){
         var postData = [
-            {name: "action", value: "import_from_xlsx"},
-            {name: "table_name", value: tableName },
-            {name: "filter", value: "client_id = "+ $(this).val() +" And product_id = "+  $('#update_client_price input[name=product_id]').val() },
-            {name: "format", value: "array"},
+            {name: "action", value: "sent_to_manager"},
+            {name: "id", value: jQuery('input[name=id]').val() },
         ];
-        call_ajax_function()
+        call_ajax_function(postData,"mail_sent");
     })
-*/
+
     var aTargets = [];
     jQuery.each(jQuery( "table" ).find( "th.no-sort" ),function (){
         var th = jQuery(this);

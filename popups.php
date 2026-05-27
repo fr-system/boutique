@@ -685,7 +685,7 @@ function get_column_value($column,$row,$field,$list)
     $column_value = "";
     switch ($column["widget"]) {
         case "select":
-            if ($column["join_table"] == "agents") {
+            if (isset($column["join_table"]) &&  $column["join_table"] == "agents") {
                 //write_log ('fiel ' . $field);
                 //write_log ('row ' . json_encode ($row));
                 $user_field = $column["field_name"];

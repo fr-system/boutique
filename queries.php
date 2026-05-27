@@ -199,13 +199,15 @@ function get_page_data($table_name,$filters=null,$orderby = null,$join_filter=nu
             } else {
                 $filter_field = (isset($filter["filter_table"]) ? $wpdb->prefix . $filter["filter_table"] . "." : "") . $filter["filter_field"];
                 $field = get_field($table_name, $filter["filter_field"]);
-                if ($field != null) {
+                if ($field != null && $filter["filter_value"] != null) {
                     $apostrophe = is_needed_apostrophe($field["widget"], isset($field["un_apostrophe"]));
                 }
             }
 
             if (isset($filter["filter_type"]) && $filter["filter_type"] == "date") {
-                $filter_str[] = $filter_field ." ". $filter["filter_ratio"]." " . $filter["filter_value"];
+                $filter_str[] = $filter_field . " " . $filter["filter_ratio"] . " " . $filter["filter_value"];
+            } else if (isset($filter["filter_type"]) && $filter["filter_type"] == "null") {
+                $filter_str[] = $filter_field . " is null ";
             } else {
                 $filter_str[] = $filter_field . " = " . $apostrophe . $filter["filter_value"] . $apostrophe;
             }
