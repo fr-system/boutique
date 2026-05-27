@@ -370,7 +370,7 @@ function create_product_view($product=null,$options=null)
         </div>
             <?php
                 $price = null;
-                write_log ('producr '.json_encode ($product));
+                //write_log ('producr '.json_encode ($product));
                 if(!empty($product->order_price)){
                     $price = $product->order_price;
                     //$calculaded_price = $price*$product->count*$product->discount_percent/100;
@@ -689,7 +689,7 @@ function get_column_value($column,$row,$field,$list)
     $column_value = "";
     switch ($column["widget"]) {
         case "select":
-            if ($column["join_table"] == "agents") {
+            if (isset($column["join_table"]) &&  $column["join_table"] == "agents") {
                 //write_log ('fiel ' . $field);
                 //write_log ('row ' . json_encode ($row));
                 $user_field = $column["field_name"];
