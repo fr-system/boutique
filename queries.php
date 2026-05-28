@@ -20,12 +20,16 @@ function build_query_structure($table_name,$row){
 
     foreach ($row as $key => $value) {
         $field = get_field($table_name, $key);
-        //write_log("field: ".$field["field_name"]." value ".$value);
         if ($field != null) {
-            if (!empty($value) && isset($field["un_apostrophe"])) {
-                $value = str_replace("₪", "", $value);
-                $value = str_replace(",", "", $value);
-                $value = (int)$value;
+            if($field["widget"] == "file" || $field["widget"] == "image"){
+                $value = upload_file($field["field_name"]);
+            }
+            else {
+                if (!empty($value) && isset($field["un_apostrophe"])) {
+                    $value = str_replace("₪", "", $value);
+                    $value = str_replace(",", "", $value);
+                    $value = (int)$value;
+                }
             }
 
             $apostrophe = is_needed_apostrophe($field["widget"], isset($field["un_apostrophe"]));
@@ -81,7 +85,6 @@ add_action('wp_ajax_build_query_boutique', 'build_query_boutique');
 function build_query_boutique()
 {
     $table_name = $_POST["table_name"];
-
     if(($table_name == "agents" || $table_name == "suppliers") && empty($_POST["id"])){
        $result = register_new_user1( $_POST["display_name"], $_POST["user_email"],$table_name);
        if($result == null || $result["status"] == "failed") {
@@ -123,7 +126,13 @@ function build_query_boutique()
                 create_query("order_products",$row["id"], $action_product, $result);
             }
         }
-    }
+
+            //if (empty($_FILES) || ($_FILES["doc_type"]["size"] == 0)) {
+                //write_log("_FILES " . json_encode($_FILES));
+            //}
+
+        }
+
     //return  $ok;
     if(!isset($_POST['save_product'])) {
         echo json_encode(array(
@@ -134,6 +143,21 @@ function build_query_boutique()
         wp_die();
     }
 
+}
+
+function upload_file($field_name)
+{
+    //צריך לשמור את הקובץ שהגיע ואם לא הגיע קובץ לכאורה צריך למחוק את הקובץ ואת הקישור להזמנה למשל
+    require_once ABSPATH . 'wp-admin/includes/file.php';
+    require_once ABSPATH . 'wp-admin/includes/media.php';
+    require_once ABSPATH . 'wp-admin/includes/image.php';
+
+    if (!empty($_FILES) && $_FILES["file_".$field_name]["size"] > 0) {
+        $file_id = media_handle_upload("file_".$field_name, 0);
+        return $file_id;
+    }
+
+    return null;
 }
 
 function get_field($table_name, $field_name)
@@ -339,105 +363,8 @@ function test_mode_table_prefix() {
         //write_log ("prefix ".$wpdb->prefix);
     //}
 }
-add_action('init', 'test_mode_table_prefix');
-
-function get_post_by_name($file_name,$type)
-{
-    $args = array(
-        'name' => $file_name, // הכנס את הכותרת כאן
-        'post_type' => $type,
-        //'post_status' => 'publish',
-        'numberposts' => 1
-    );
-
-    $pages = get_posts($args);
-
-    if (!empty($pages)) {
-        $page = $pages[0]; // הדף הראשון שנמצא
-        return $page->id;
-    }
-    return null;
-}
-
-function save_media($file,$file_name)
-{
-    $file_attr = wp_handle_upload ($file, array('test_form' => FALSE));
-    if ($file_attr && !isset($file_attr['error'])) {
-
-        setlocale (LC_ALL, 'he_IL.UTF-8');
-        $attachment = array(
-            'guid' => $file_attr['url'],
-            'post_mime_type' => $file_attr['type'],
-            'post_title' => basename ($file_attr['file']),
-            'post_content' => '',
-            'post_status' => 'inherit'
-        );
-        $attachment_id = wp_insert_attachment ($attachment, $file_attr['file'], null,$file_name);
-        $attachedData = wp_generate_attachment_metadata ($attachment_id, $file_attr['file']);
-
-        wp_update_attachment_metadata ($attachment_id, $attachedData);
-
-        return $attachment_id;
-    }
-}
-
-
-if(isset($_POST['save_product']) && $_SERVER["REQUEST_METHOD"] == "POST") {
-//write_log("save_product");
-    test_mode_table_prefix();
-
-    $columns = BOUTIQUE_TABLES[$_POST['table_name']]["columns"];
-    $array_uploads = array_filter($columns, function ($field_row) {
-        return ($field_row["widget"] == "image" || $field_row["widget"] == "file");
-    });
-    foreach ($array_uploads as $field) {
-        $field_name = $field["field_name"];
-        if (isset($_FILES[$field_name]['name']) && $_FILES[$field_name]["size"] > 0) {
-            write_log("file!!!!! ");
-            require_once(ABSPATH . 'wp-admin/includes/media.php');
-            require_once(ABSPATH . 'wp-admin/includes/file.php');
-            require_once(ABSPATH . 'wp-admin/includes/image.php');
-            $file = array(
-                'name' => $_FILES[$field_name]['name'],
-                'type' => $_FILES[$field_name]['type'],
-                'tmp_name' => $_FILES[$field_name]['tmp_name'],
-                'error' => $_FILES[$field_name]['error'],
-                'size' => $_FILES[$field_name]['size']
-            );
-            if ($file["error"] == 1) {
-                $error_msg = '&error_msg=upload_err_ini_size&file_index=';
-                write_log("upload_image err " . $error_msg);
-            }
-            //$exist_image = get_post_by_name($file["name"], 'attachment');
-            //write_log ("exist_image ".json_encode ( $exist_image));
-            $image_id = null;
-            //if ($exist_image) {
-                //$image_id = $exist_image->id;
-                //$image_id = 38;
-            //} else {
-                if ($file["size"] > 0) {
-                    write_log("upload_" . $field_name);
-                    $image_id = save_media($file, $_POST['name']);
-                }
-            //}
-
-            if ($image_id) {
-                write_log("imag ".$image_id);
-                $_POST[$field_name] = $image_id;
-            }
-        }
-    }
-
-    //write_log("post ".json_encode($_POST));
-
-    build_query_boutique($_POST,false);
-
-    wp_redirect($_POST["previous_page"]);
-    exit();
-}
 
 add_action('wp_ajax_new_chat_ajax', 'new_chat_ajax');
-//add_action('wp_ajax_nopriv_new_chat_ajax', 'new_chat_ajax');
 function new_chat_ajax()
 {
     global $wpdb;
