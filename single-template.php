@@ -76,12 +76,14 @@ else{
         <input type="hidden" name="dirty" value="" />
             <form class="site_form <?php echo $class_form?> " novalidate="" data-success='reload_page' data-failed='show_error_messages'>
                 <div id="form_error_msgs_container" class="margin-bottom-20"></div>
-                <input type="hidden" name="form_func" value="build_query_boutique" />
+                <input type="hidden" name="form_func" value="save_single_data" />
                 <input type="hidden" name="table_name" value="<?php echo $table_name ?>" />
                 <input type="hidden" name="id" value="<?php echo $id ?>" />
                 <input type="hidden" name="previous_page" value="<?php echo $previous_page ?>" />
                 <input type="hidden" name="action" value="<?php echo $id ?>" />
+
                 <?php get_single_view($table_name,$row,$readonly); ?>
+
             <div class="buttons flex-display align-self-center">
                 <button type="submit" class="save background-gold flex-display center align-center bold font-18">
                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">

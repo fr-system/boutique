@@ -10,7 +10,11 @@ if(isset($_GET['export'])) {
 			test_mode_table_prefix ();
 			$table_name = $_GET["subject"];
 			$page_info = BOUTIQUE_TABLES[$table_name];
-			$list = get_data_table ($table_name);
+			$filters = array();
+			if(isset($_GET["ids"])){
+				$filters[]=array("filter_field"=>"id","filter_value"=>$_GET["ids"],"filter_type" => "array");
+			}
+			$list = get_data_table ($table_name,$filters);
 
 			$fname = $page_info["title"];
 

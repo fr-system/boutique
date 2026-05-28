@@ -1,6 +1,9 @@
 <?php
+
+test_mode_table_prefix();
 function run_query($query, $type="")
 {
+    write_log("qu ".$query);
     global $wpdb;
 
     if ($type == "execute") {
@@ -46,6 +49,7 @@ function run_action_query($table_name, $id, $action, $options)
 {
     global $wpdb;
 
+
     switch ($action) {
         case "remove":
             $query = "DELETE FROM {$wpdb->prefix}" . $table_name;
@@ -69,7 +73,7 @@ function run_action_query($table_name, $id, $action, $options)
     return $ok;
 }
 
-add_action('wp_ajax_build_query_boutique', 'build_query_boutique');
+add_action('wp_ajax_save_single_data', 'save_single_data');
 function save_single_data()
 {
     $table_name = $_POST["table_name"];
@@ -125,6 +129,8 @@ function save_single_data()
 function get_data_table($table_name, $filters=null, $orderby = null, $join_filter=null)
 {
     global $wpdb;
+    $wpdb->prefix = 'test_';
+
     $columns = BOUTIQUE_TABLES[$table_name]["columns"];
     $join = "";
 
@@ -170,7 +176,7 @@ function get_data_table($table_name, $filters=null, $orderby = null, $join_filte
             } else {
                 $filter_field = (isset($filter["filter_table"]) ? $wpdb->prefix . $filter["filter_table"] . "." : "") . $filter["filter_field"];
                 $field = get_field($table_name, $filter["filter_field"]);
-                if ($field != null && $filter["filter_value"] != null) {
+                if ($field != null && isset($filter["filter_value"]) && $filter["filter_value"] != null) {
                     $apostrophe = is_needed_apostrophe($field["widget"], isset($field["un_apostrophe"]));
                 }
             }
@@ -179,7 +185,11 @@ function get_data_table($table_name, $filters=null, $orderby = null, $join_filte
                 $filter_str[] = $filter_field . " " . $filter["filter_ratio"] . " " . $filter["filter_value"];
             } else if (isset($filter["filter_type"]) && $filter["filter_type"] == "null") {
                 $filter_str[] = $filter_field . " is null ";
-            } else {
+            }
+            else if(isset($filter["filter_type"]) && $filter["filter_type"] == "array"){
+                $filter_str[] = $filter_field . " in ( " . $apostrophe . $filter["filter_value"] . $apostrophe . ")";
+            }
+            else {
                 $filter_str[] = $filter_field . " = " . $apostrophe . $filter["filter_value"] . $apostrophe;
             }
         }

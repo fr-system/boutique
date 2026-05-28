@@ -24,7 +24,7 @@ if(!is_user_logged_in()){
 
 
 <form class="modal fade site_form" id="edit-list"  tabindex='-1' role="dialog" data-success='getTableAjaxData' data-failed='show_error_messages'>
-    <input type="hidden" name="form_func" value="build_query_boutique" />
+    <input type="hidden" name="form_func" value="save_single_data" />
     <input type="hidden" name="table_name" value="" />
     <input type="hidden" name="id" value="" />
         <div class="modal-dialog" role="document">

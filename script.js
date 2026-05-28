@@ -232,8 +232,40 @@ jQuery(document).ready(function($){
     })
 
 
-    jQuery('.open-file-uploader, .file-name').click(function () {
-        jQuery('input.upload-file').click();
+    jQuery('.open-file-uploader').click(function () {
+        //jQuery('input.upload-file').click();
+        let mediaFrame;
+        if (mediaFrame) {
+            mediaFrame.open();
+            return;
+        }
+
+        mediaFrame = wp.media({
+            title: 'Select File',
+            button: {
+                text: 'Use File'
+            },
+            multiple: false
+        });
+
+        mediaFrame.on('select', function(){
+
+            const attachment = mediaFrame
+                .state()
+                .get('selection')
+                .first()
+                .toJSON();
+
+            // מספר המדיהconsole.log(attachment.id);
+
+            // URLconsole.log(attachment.url);
+
+
+            // שם קובץ            console.log(attachment.filename);
+        });
+
+        mediaFrame.open();
+
     });
 
     jQuery('input.upload-file').change(function () {
@@ -241,7 +273,7 @@ jQuery(document).ready(function($){
 
     });
 
-    jQuery('.open-image-uploader , .image-name').click(function () {
+    jQuery('.open-image-uploader').click(function () {
         jQuery('input.upload-image').click();
     });
 
@@ -457,11 +489,14 @@ jQuery(document).ready(function($){
                 id="";
                 btn.parent().parent().find(".input-remove").val("1");
             }
+            else{
+                id = btn.parent().parent().data("id");
+            }
             //id = btn.parent().parent().data("id");
         }
         else{
             jQuery(this).find('[name="remove"]').val(1);
-            jQuery(this).find('[name="form_func"]').val("build_query_boutique");
+            jQuery(this).find('[name="form_func"]').val("save_single_data");
             jQuery(this).find('[name="table_name"]').val(subject);
         }
 
@@ -558,16 +593,27 @@ function onAddChat(result,targetElement){
 function searchElements(text,selector,searchSelector){
 
     jQuery(selector).show();
+    const url = new URL(jQuery(".export-excel").attr("href"));
+    var ids = [];
     if(text.length > 0) {
         jQuery.each(jQuery(selector), function (k) {
             var product = jQuery(this);
             if (product.find(searchSelector+':contains(' + text + ')').length) {
                 product.show();
+                ids.push(product.data("id"));
             } else {
                 product.hide();
             }
         })
+
+
+        url.searchParams.set('ids', ids);
     }
+    else{
+        url.searchParams.delete('id');
+    }
+
+    jQuery(".export-excel").attr("href",url.toString());
 }
 
     function openPopupAddOrderProduct(result,targetElement){

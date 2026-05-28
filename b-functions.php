@@ -199,6 +199,16 @@ function get_column_value($column,$row,$field,$list)
                 $column_value = date('d/m/Y H:i:s', $timestamp);
             }
             break;
+        case "file":
+            if ($row->$field) {
+                $column_value = '<a href="'.wp_get_attachment_url($row->$field).'" target="_blank">'.basename(get_attached_file($row->$field)).'</a>';
+            }
+            break;
+        case "image":
+            if ($row->$field) {
+                $column_value = wp_get_attachment_image($row->$field, 'full');
+            }
+            break;
         default:
             if ($column["field_name"] == "display_name" || $column["field_name"] == "user_email") {
                 $user_field = $column["field_name"];
@@ -311,7 +321,7 @@ function get_favorite_products($client_id)
 function update_client_price_modal() {
     ?>
 <form class="modal fade site_form" id="update_client_price"  tabindex='-1' role="dialog" data-success='getTableAjaxData' data-failed='show_error_messages'>
-    <input type="hidden" name="form_func" value="build_query_boutique" />
+    <input type="hidden" name="form_func" value="save_single_data" />
     <input type="hidden" name="table_name" value="products_clients" />
     <input type="hidden" name="product_id" value="" />
     <input type="hidden" name="id" value="" />
@@ -414,7 +424,7 @@ function get_obligation_client()
     $filters[]=array("filter_field" => "client_id", "filter_value" => $_POST["client_id"]);
     $filters[]=array("filter_field" => "payment_date", "filter_type" => "null");
     $result = get_data_table("collection", $filters);
-    write_log("eres ".json_encode($result));
+    //write_log("eres ".json_encode($result));
     $obligo = 0;
     foreach ($result as $row){
 

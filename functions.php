@@ -27,6 +27,8 @@ function boutique_enqueue_scripts()
         $ver
     );
 
+    wp_enqueue_media();
+
     wp_register_style( 'jq-datatable', get_template_directory_uri(). '/assets/datatables.min.css' );
     wp_enqueue_style( 'jq-datatable' );
 
@@ -54,8 +56,8 @@ function boutique_enqueue_scripts()
     wp_enqueue_script('messages_he');
 
 
-    wp_enqueue_media();
-    test_mode_table_prefix();
+
+
 
 }
 add_action('wp_enqueue_scripts', 'boutique_enqueue_scripts', 98);

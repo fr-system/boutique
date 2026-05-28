@@ -83,10 +83,6 @@ function get_tr_data($table_name, $data, $id_column,$add_text){
     $backgraund_class = ($table_name == "orders" && $row->done ? "order-confirm" : "");
 
     $html='<tr data-id="'.$row->id.'" class="'.$backgraund_class.'">';
-//        <td data-id="checkbox" class="td-checkbox"><input type="checkbox" class="checkbox-row" value="'.$row->$id_column.'" id=""/></td>';
-    if($table_name == "products"){
-        $html.='<td>'.($row->image_id ? '<img class="" src="'.wp_get_attachment_url($row->image_id) .'" /></div>':'') .'</td>';
-    }
 
     foreach($page_info["columns"] as $column) {
         if (!isset($column['field_name']) || $column["field_name"]== "client_id" && !empty($add_text)) {
@@ -101,6 +97,7 @@ function get_tr_data($table_name, $data, $id_column,$add_text){
             $html .= '<td >' . $column_value . '</td>';
         }
     }
+
     if(isset($page_info["actions"])) {
         foreach ($page_info["actions"] as $action) {
             $html .= '<td ><a class="button background-dark-green font-18" href="/archive?subject=' . $action . '&id=' . $row->id . '">' . BOUTIQUE_TABLES[$action]["title"] . '</a></td>';

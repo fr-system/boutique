@@ -23,10 +23,9 @@ const BOUTIQUE_TABLES = array(
             array("field_name" => "email", "widget" => "text", "label" => "דוא\"ל","required"=>true),
             array("field_name" => "email2", "widget" => "text", "label" => "דוא\"ל נוסף","hidden"=>true),
             array("field_name" => "accounting_phone_number", "widget" => "text", "label" => "טלפון הנה\"ח","hidden"=>true),
-
-
             array("field_name" => "obligo", "un_apostrophe" => true, "widget" => "text", "label" => "תקרת חוב","sign"=>"₪"),
             array("field_name" => "exceeding_conditions", "widget" => "bool", "label" => "חריגה מתנאי תשלום","hidden"=>true,"filter"=>true),
+
         ),
         "actions" => array("orders","tasks")
     ),
@@ -41,8 +40,8 @@ const BOUTIQUE_TABLES = array(
             array("field_name" => "price", "type" => "float", "widget" => "text","label"=>"מחיר", "un_apostrophe" => true,"sign"=>"₪","popup_button"=>array("label"=>"מחיר מיוחד ללקוח","target_modal"=>"update_client_price")),
             array("field_name" => "description", "widget" => "textarea","label"=>"תיאור"),
             //array("field_name" => "count", "widget" => "number","label"=>"כמות בקבוקים בארגז","hidden"=>true),
-            array("field_name" => "file_id", "widget" => "file","label"=>"העלאת דף מוצר","hidden"=>true),
-            array("field_name" => "image_id", "widget" => "image","label"=>"העלאת תמונת מוצר","hidden"=>true),
+            array("field_name" => "file_id", "widget" => "file","label"=>"דף מוצר"),
+            array("field_name" => "image_id", "widget" => "image","label"=>"תמונת מוצר"),
             array("field_name" => "blocked", "widget" => "checkbox","label"=>"מוצר חסום","hidden"=>true),
             array("field_name" => "factor_of_friction", "widget" => "select","label"=>"גורם אירוז","hidden"=>true),
             array("field_name" => "individually", "widget" => "checkbox","label"=>"ניתן למכירה בבודדים","hidden"=>true),
