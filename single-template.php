@@ -32,7 +32,7 @@ else{//edit || readonly
     $id = $_GET["id"];
     $title_page = "עדכון ". $page_info["single"];
     $filters=array(array("filter_field" => "id", "filter_value"=>$id));
-    $result = get_page_data($table_name,$filters);
+    $result = get_data_table($table_name,$filters);
     if(count($result)>0){
         $row = $result[0];
         // write_log("row ".json_encode($row));

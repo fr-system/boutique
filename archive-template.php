@@ -25,7 +25,7 @@ $page_info  = BOUTIQUE_TABLES[$table_name];
         $client_id = $_GET[$lastKey];
     }
 
-    echo view_archive_actions($table_name,false,$add_text,$client_id);
+    echo archive_header($table_name,false,$add_text,$client_id);
     //if(!isset($_GET["subject"]) || !is_manager() && $_GET["subject"] == "clients") return;
     if(is_agent() ){
         if($table_name == "clients") {
@@ -36,10 +36,10 @@ $page_info  = BOUTIQUE_TABLES[$table_name];
         }
     }
 
-    $result = get_page_data($table_name,$filters);
+    $result = get_data_table($table_name,$filters);
     $user_meta = get_user_meta( get_current_user_id(), "products_view", true);
     if($table_name == "products" && $user_meta == "gallery"){
-        $catalog_gallery = view_catalog_gallery($result,array("table_name"=>"products"));
+        $catalog_gallery = catalog_gallery($result,array("table_name"=>"products"));
         echo $catalog_gallery;
     }
     else{

@@ -9,9 +9,10 @@
 require_once dirname(__FILE__) . "/assets/lists.php";
 require_once dirname(__FILE__) . "/users.php";
 require_once dirname(__FILE__) . "/queries.php";
-require_once dirname(__FILE__) . "/popups.php";
+require_once dirname(__FILE__) . "/b-functions.php";
+require_once dirname(__FILE__) . "/design_tool.php";
 require_once dirname(__FILE__) . "/rivka.php";
-//require_once dirname(__FILE__) . "/lib/export_excel.php";
+require_once dirname(__FILE__) . "/lib/import_excel.php";
 function boutique_enqueue_scripts()
 {
     $ver = '1.0.0';
@@ -31,8 +32,6 @@ function boutique_enqueue_scripts()
 
     wp_register_style( 'assets-style', get_template_directory_uri(). '/assets/style.css' , array(), $ver);
     wp_enqueue_style( 'assets-style' );
-
-
 
     wp_enqueue_script('jquery');
 
@@ -56,6 +55,7 @@ function boutique_enqueue_scripts()
 
 
     wp_enqueue_media();
+    test_mode_table_prefix();
 
 }
 add_action('wp_enqueue_scripts', 'boutique_enqueue_scripts', 98);

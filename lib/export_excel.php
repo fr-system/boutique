@@ -10,7 +10,7 @@ if(isset($_GET['export'])) {
 			test_mode_table_prefix ();
 			$table_name = $_GET["subject"];
 			$page_info = BOUTIQUE_TABLES[$table_name];
-			$list = get_page_data ($table_name);
+			$list = get_data_table ($table_name);
 
 			$fname = $page_info["title"];
 

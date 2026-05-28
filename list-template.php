@@ -6,7 +6,7 @@ if(!is_user_logged_in()){
 <?php get_header();?>
 <section class="page" data-single="שורה">
     <?php
-    $archive_actions = view_archive_actions("lists",false);
+    $archive_actions = archive_header("lists",false);
     echo $archive_actions;
     ?>
         <ul id="list" class="tables-list font-17 grow"><?php

@@ -2,7 +2,7 @@
 function run_query($query, $type="")
 {
     global $wpdb;
-    //test_mode_table_prefix();
+
     if ($type == "execute") {
         $result = $wpdb->query($query);
     } else {
@@ -13,7 +13,7 @@ function run_query($query, $type="")
     return $result;
 }
 
-function build_query_structure($table_name,$row){
+function pre_action_query($table_name, $row){
     $update = array();
     $fields = array();
     $values = array();
@@ -42,140 +42,87 @@ function build_query_structure($table_name,$row){
     return array("fields"=>$fields, "values"=>$values,"update"=>$update);
 }
 
-function create_query($table_name,$id,$action, $results)
+function run_action_query($table_name, $id, $action, $options)
 {
     global $wpdb;
 
     switch ($action) {
         case "remove":
-
             $query = "DELETE FROM {$wpdb->prefix}" . $table_name;
-
             if($table_name == "orders"){
                 run_query("DELETE FROM {$wpdb->prefix}order_products WHERE order_id = ".$id, "execute");
             }
             //$id = 999999;
             break;
         case "update":
-            $query = "UPDATE {$wpdb->prefix}".$table_name." SET ". implode(",", $results["update"]);
+            $query = "UPDATE {$wpdb->prefix}".$table_name." SET ". implode(",", $options["update"]);
             break;
         case "new":
-            $query = "INSERT INTO {$wpdb->prefix}" . $table_name . " (" . implode(",", $results["fields"]) . " ) 
-                SELECT " . implode(",", $results["values"]);
-            /*
-             * ($table_name == "order_products" ? " VALUES " : " SELECT ")
-             * if($table_name == "tasks"){
-                $fields.= " date_write, assignor_id"." ,";
-                $values .= " NOW(), ". get_current_user_id() ." ,";
-            }*/
+            $query = "INSERT INTO {$wpdb->prefix}" . $table_name . " (" . implode(",", $options["fields"]) . " ) 
+                SELECT " . implode(",", $options["values"]);
             break;
     }
     if (!empty($id)) {
         $query .= " where id = " . $id;
     }
-    /*if ($table_name == "order_products") {
-        write_log(" query " . $query);
-    }*/
     $ok = run_query($query, "execute");
-
-    //return $query;
+    return $ok;
 }
 
 add_action('wp_ajax_build_query_boutique', 'build_query_boutique');
-function build_query_boutique()
+function save_single_data()
 {
     $table_name = $_POST["table_name"];
-    if(($table_name == "agents" || $table_name == "suppliers") && empty($_POST["id"])){
-       $result = register_new_user1( $_POST["display_name"], $_POST["user_email"],$table_name);
-       if($result == null || $result["status"] == "failed") {
-           echo json_encode($result);
-           die();
-       }
-       unset($_POST["display_name"]);
-       unset($_POST["user_email"]);
+    if (($table_name == "agents" || $table_name == "suppliers") && empty($_POST["id"])) {
+        $result = register_new_user1 ($_POST["display_name"], $_POST["user_email"], $table_name);
+        if ($result == null || $result["status"] == "failed") {
+            echo json_encode ($result);
+            die();
+        }
+        unset($_POST["display_name"]);
+        unset($_POST["user_email"]);
         $_POST["user_id"] = $result["user_id"];
     }
 
     global $wpdb;
-    if(isset($_POST["remove"]) && $_POST["remove"]){
+    if (isset($_POST["remove"]) && $_POST["remove"]) {
         $action = "remove";
         $result = array();
-    }
-    else {
+    } else {
         $action = isset($_POST["id"]) && !empty($_POST["id"]) ? "update" : "new";
-        $result = build_query_structure($table_name, $_POST);
+        $result = pre_action_query ($table_name, $_POST);
     }
 
-    $id = isset($_POST["id"])? $_POST["id"]:null;
-    create_query($table_name,$id,$action,$result);
-    if(!$_POST["id"]){
-        $id = $wpdb->get_var("SELECT MAX(id) FROM {$wpdb->prefix}".$table_name);
+    $id = isset($_POST["id"]) ? $_POST["id"] : null;
+    run_action_query ($table_name, $id, $action, $result);
+    if (!$_POST["id"]) {
+        $id = $wpdb->get_var ("SELECT MAX(id) FROM {$wpdb->prefix}" . $table_name);
     }
 
-    if($table_name == "orders" && isset($_POST["products"])) {
+    if ($table_name == "orders" && isset($_POST["products"])) {
         foreach ($_POST["products"] as $row) {
-            if(isset($row["product_id"]) && !empty($row["product_id"]) && !empty($id)) {
+            if (isset($row["product_id"]) && !empty($row["product_id"]) && !empty($id)) {
                 if ($action == "new") {
                     $row["order_id"] = $id;
                 }
 
                 $action_product = (isset($row["id"]) && !empty($row["id"])) ?
-                    (isset($row["remove"]) && $row["remove"]? "remove"  :  "update") :"new";
-                   // write_log("row order product" . json_encode($row));
-                $result = build_query_structure("order_products", $row);
-                create_query("order_products",$row["id"], $action_product, $result);
+                    (isset($row["remove"]) && $row["remove"] ? "remove" : "update") : "new";
+                // write_log("row order product" . json_encode($row));
+                $result = pre_action_query ("order_products", $row);
+                run_action_query ("order_products", $row["id"], $action_product, $result);
             }
         }
-
-            //if (empty($_FILES) || ($_FILES["doc_type"]["size"] == 0)) {
-                //write_log("_FILES " . json_encode($_FILES));
-            //}
-
-        }
-
-    //return  $ok;
-    if(!isset($_POST['save_product'])) {
-        echo json_encode(array(
-            'status' => 'success',
-            'id' => $id,
-            'redirect' => (isset($_POST["previous_page"])? $_POST["previous_page"]:''),
-        ));
-        wp_die();
     }
+    echo json_encode (array(
+        'status' => 'success',
+        'id' => $id,
+        'redirect' => (isset($_POST["previous_page"]) ? $_POST["previous_page"] : ''),
+    ));
+    wp_die ();
 
 }
-
-function upload_file($field_name)
-{
-    //צריך לשמור את הקובץ שהגיע ואם לא הגיע קובץ לכאורה צריך למחוק את הקובץ ואת הקישור להזמנה למשל
-    require_once ABSPATH . 'wp-admin/includes/file.php';
-    require_once ABSPATH . 'wp-admin/includes/media.php';
-    require_once ABSPATH . 'wp-admin/includes/image.php';
-
-    if (!empty($_FILES) && $_FILES["file_".$field_name]["size"] > 0) {
-        $file_id = media_handle_upload("file_".$field_name, 0);
-        return $file_id;
-    }
-
-    return null;
-}
-
-function get_field($table_name, $field_name)
-{
-    if (array_key_exists($table_name, BOUTIQUE_LISTS)) {
-        $page_info = BOUTIQUE_LISTS[$table_name]["columns"];
-    }
-    else if (array_key_exists($table_name, BOUTIQUE_TABLES)) {
-        $page_info = BOUTIQUE_TABLES[$table_name]["columns"];
-    }
-
-    $field = array_filter($page_info, function ($field_row) use ($field_name) {
-        return isset($field_row["field_name"]) && $field_row["field_name"] == $field_name;
-    });
-    return count($field) > 0 ? array_pop($field) : null;
-}
-
-function get_page_data($table_name,$filters=null,$orderby = null,$join_filter=null)
+function get_data_table($table_name, $filters=null, $orderby = null, $join_filter=null)
 {
     global $wpdb;
     $columns = BOUTIQUE_TABLES[$table_name]["columns"];
@@ -254,44 +201,6 @@ function get_page_data($table_name,$filters=null,$orderby = null,$join_filter=nu
     return $result ;
 }
 
-function is_needed_apostrophe($widget,$un_apostrophe)
-{
-    if($un_apostrophe)return "";
-    $widgets = array("text","date","datetime-local","textarea","email");
-    if(in_array($widget, $widgets)){
-        return "'";
-    }
-    return "";
-}
-
-
-function build_options($table_name,$value=null,$filter=null)
-{
-    //write_log("list name " .$table_name);
-    if (array_key_exists($table_name, BOUTIQUE_LISTS)) {
-        $fields_list = BOUTIQUE_LISTS[$table_name];
-    }
-    else if (array_key_exists($table_name, BOUTIQUE_TABLES)) {
-        $fields_list = BOUTIQUE_TABLES[$table_name];
-    }
-
-    //$fields_list = BOUTIQUE_LISTS[$table_name];
-    if(isset($fields_list["data-field"])) {
-        $field = $fields_list["data-field"];
-    }
-    $list = get_list($table_name,$filter);
-    //write_log("list  " .json_encode($list));
-    $options = '<option value=""></option>';
-    foreach ($list as $row) {
-        $data_field = "";
-        if(isset($fields_list["data-field"])){
-            $data_field =' data-field="'.$row->$field.'"';
-        }
-        $options .= '<option '.$data_field.' value="' . $row->value . '"' . (!empty($value)&& (is_array($value) && in_array($row->value, $value) || (!is_array($value) && $row->value == $value || $row->text == $value)) ? 'selected' : '') . '>' . $row->text . '</option>';
-    }
-    return $options;
-}
-
 function get_list($list_name,$filter = '',$table_display =false)
 {
     global $wpdb;
@@ -327,10 +236,6 @@ function get_list($list_name,$filter = '',$table_display =false)
     }
     $table_name=$list_name;
     $query .= " FROM ".$wpdb->prefix.$table_name.$join;
-    /*if(isset($page_info["join_table"]) && $page_info["join_table"] != "" && isset($page_info["join_table_value"])){
-        $query.=" JOIN #_".$page_info["join_table"]." on #_".$page_info["join_table"].".".$page_info["join_table_value"]." = #_".$page_info["table_name"].".".$page_info["field_value"];
-    }
-    $query .= " group by #_".$page_info["table_name"].".".$page_info["field_value"].", #_".$page_info["table_name"].".".$page_info["field_name"];*/
 
     if(isset($page_info["filter"])){
         $query .= " WHERE ".$page_info["filter"];
@@ -401,7 +306,7 @@ function get_chat_ajax()
     $filters=array();
     $filters[]=array("filter_field" => "task_id", "filter_value"=>$_POST['task_id']);
     $filters[]=array("filter_field" => "date", "filter_value"=>"NOW() - interval 30 minute","filter_type"=>"date","filter_ratio"=>">");
-    $rows = get_page_data("chat",$filters);
+    $rows = get_data_table("chat",$filters);
     //write_log("rows ".json_encode($rows));
     //$query = "SELECT date FROM ".$wpdb->prefix."chat where task_id = " . $_POST['task_id'] ." ORDER BY id DESC LIMIT 1";
     //$chat_time = run_query ($query);
@@ -412,78 +317,6 @@ function get_chat_ajax()
         )
     );
     die();
-}
-
-add_action('wp_ajax_get_products_last_order', 'get_products_last_order');
-function get_products_last_order()
-{
-    //$query = "SELECT * FROM ".$wpdb->prefix."orders WHERE
-    $products_str = "";
-    $filters= array(array("filter_field" => "client_id", "filter_value"=>$_POST["client_id"]));
-    $orders = get_page_data("orders",$filters, " id DESC");
-    if(count($orders)>0){
-        $row = $orders[0];
-        $filters = array();
-        $filters[]=array("filter_field" => "order_id", "filter_value"=>$row->id);
-        $value = get_page_data("order_products",$filters);
-        //write_log("values: ".json_encode($value));
-        //$aaaa = create_input(array("widget" => "products"),$value);
-
-        if($value && is_array($value)){
-            $products_str = view_catalog_gallery($value,array("table_name"=>"orders","get_products_last_order"=>true));
-
-        }
-
-        //write_log("products: ".json_encode($products_str));
-
-
-    }
-    echo json_encode (array(
-        "products" => $products_str));
-    die();
-}
-
-function import_from_xlsx()
-{
-    require 'lib/SimpleXLSX.php';
-    write_log("import_from_xlsx");
-    //require('lib/XLSXReader.php');
-    $msg = "";
-    if (empty($_FILES) || ($_FILES["bills"]["size"] == 0)) {
-        write_log("_FILES ".json_encode($_FILES));
-        write_log("empty_FILES ");
-        die(json_encode(array(
-            'status' => 'error',
-            'msg' => 'לא נמצא קובץ.'
-        )));
-    }
-    write_log("_FILES ".json_encode($_FILES));
-    if ($xlsx = SimpleXLSX::parse($_FILES["bills"]["tmp_name"])) {
-        write_log('rows '.json_encode ( $xlsx->rows()));
-    }
-   /* $sheets = getXlsxData($_FILES["bills"]["tmp_name"]);
-    write_log("heets ".json_encode($sheets));
-    foreach ($sheets as $sheet) {
-        foreach ($sheet as $key => $row) {
-            if ($key == 0) continue;
-
-        }
-    }*/
-die;
-}
-function getXlsxData ($file){
-    write_log ('getXlsxData '.$file);
-    $xlsx = new XLSXReader($file);
-    write_log ('getXlsxData xlsx '.json_encode ( $xlsx));
-    $sheetNames = $xlsx->getSheetNames();
-    write_log ('getXlsxData sheetNames '.json_encode ( $sheetNames));
-    die;
-    $data = array();
-    foreach($sheetNames as $sheetName) {
-        $sheet = $xlsx->getSheet($sheetName);
-        $data[] = $sheet->getData();
-    }
-    return $data;
 }
 
 ?>

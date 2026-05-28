@@ -1,0 +1,544 @@
+<?php
+function get_single_view($table_name,$row,$readonly)
+{?>
+    <div class="grid-display cols-2 margin-bottom-40">
+    <?php
+    $columns = BOUTIQUE_TABLES[$table_name]["columns"];
+    foreach($columns as $column){
+        if(!isset($column["widget"]) || isset($column["locked"])){continue;}
+        ?>
+        <div class="input-label flex-display <?php echo $column["widget"] != "textarea" && $column["widget"] != "products"  ? 'align-center' :'stretch'?> ">
+            <?php if (isset($column["label"])){?>
+                <label class="bold <?= $column["widget"]== "textarea"? 'textarea-label':''?>" for="<?php echo $column["field_name"] ?>"><?php echo $column["label"].":"?></label>
+            <?php }
+            $value = "";
+            //write_log("q p ".json_encode( $column));
+            if(isset($column["field_name"])){
+                $field_name = isset($column["field_name"]) ? $column["field_name"] : null;
+                $value = isset($row->$field_name) ? $row->$field_name :"";
+            }
+            else if($column["widget"] == "products" && isset($row->id)){
+                $filters = array();
+                $filters[]=array("filter_field" => "order_id", "filter_value"=>$row->id);
+                $value = get_data_table("order_products",$filters);
+                //write_log("q p ".$query);
+                //write_log("products: ".json_encode($value));
+            }
+            //write_log($field_name .": value ".json_encode($value));
+
+            echo create_input($column,$value,$readonly);
+            ?>
+        </div>
+    <?php } ?>
+
+    </div><?php
+}
+function create_product_view($product=null,$options=null)
+{
+    //$add_class="";
+    if($options == null){
+        $options = array();
+    }
+    if(!isset($options["key"])){
+        $options["key"] = 0;
+    }
+    ?>
+    <div class="border-dark-gray pointer flex-display direction-column space-between product font-15 padding-15" data-id="<?php echo $product->id?>">
+        <?php if($options["table_name"]=="orders"){
+            $product_order_id = isset($options["get_products_last_order"])? "":$product->id;
+            ?>
+            <input type="hidden" class="input-remove" name="products[<?php echo $options["key"]?>][remove]" value="0">
+            <input type="hidden" name="products[<?= $options["key"]?>][id]" value="<?= $product_order_id?>"><!--id של השורה של מוצר_הזמנה-->
+            <input type="hidden" name="products[<?= $options["key"]?>][order_id]" value="<?= $product->order_id?>">
+            <input type="hidden" name="products[<?= $options["key"]?>][product_id]" value="<?= $product->product_id?>">
+        <?php } ?>
+        <input type="hidden" class="units-in-box" name="products[<?= $options["key"]?>][units_in_box]" value="<?= $product->units_in_box?>">
+        <div class="product-img <?= $options["table_name"]=="orders"? 'part-40':'part-60'?>">
+            <?php if($options["table_name"]=="orders"){?>
+                <a class="remove-product" data-bs-toggle="modal" href="#bout-massage" role="button" data-action="remove">
+                    <svg class=""  xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 25 24" fill="none">
+                        <path d="M4.16663 7H20.8333M10.4166 11V17M14.5833 11V17M5.20829 7L6.24996 19C6.24996 19.5304 6.46945 20.0391 6.86015 20.4142C7.25085 20.7893 7.78076 21 8.33329 21H16.6666C17.2192 21 17.7491 20.7893 18.1398 20.4142C18.5305 20.0391 18.75 19.5304 18.75 19L19.7916 7M9.37496 7V4C9.37496 3.73478 9.48471 3.48043 9.68006 3.29289C9.87541 3.10536 10.1404 3 10.4166 3H14.5833C14.8596 3 15.1245 3.10536 15.3199 3.29289C15.5152 3.48043 15.625 3.73478 15.625 4V7" class="stroke-background-gold" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </a>
+            <?php } ?>
+            <!--            <svg class="pointer view-product" xmlns="http://www.w3.org/2000/svg" width="12" height="9" viewBox="0 0 12 9" fill="none">-->
+            <!--                <path d="M5.85467 0.515015C2.4715 0.515015 0.830067 3.44152 0.538793 4.02085C0.523225 4.05167 0.515137 4.08547 0.515137 4.11972C0.515137 4.15398 0.523225 4.18778 0.538793 4.2186C0.82953 4.79793 2.47096 7.72444 5.85467 7.72444C9.23838 7.72444 10.8793 4.79793 11.1705 4.2186C11.1861 4.18778 11.1942 4.15398 11.1942 4.11972C11.1942 4.08547 11.1861 4.05167 11.1705 4.02085C10.8798 3.44152 9.23838 0.515015 5.85467 0.515015Z" stroke="black" stroke-width="1.02992" stroke-linecap="round" stroke-linejoin="round"/>-->
+            <!--                <path d="M5.85485 5.66458C6.74361 5.66458 7.4641 4.97292 7.4641 4.1197C7.4641 3.26649 6.74361 2.57483 5.85485 2.57483C4.96609 2.57483 4.24561 3.26649 4.24561 4.1197C4.24561 4.97292 4.96609 5.66458 5.85485 5.66458Z" stroke="black" stroke-width="1.02992" stroke-linecap="round" stroke-linejoin="round"/>-->
+            <!--            </svg>-->
+            <?php if($product->image_id){  ?>
+                <img class="" src="<?php echo wp_get_attachment_url($product->image_id) ?>" />
+            <?php } ?>
+        </div>
+        <div class="flex-display space-between bold <?= $options["table_name"]=="orders"? 'part-20':'part-10'?> ">
+            <div class="product-name bold"><?= $product->name ?></div>
+        </div>
+        <?php
+        $price = null;
+        // write_log ('producr '.json_encode ($product));
+        if(!empty($product->order_price)){
+            $price = $product->order_price;
+            //$calculaded_price = $price*$product->count*$product->discount_percent/100;
+        }
+        elseif (!empty($product->client_price)) {//מחיר מיוחד ללקוח
+            $price =$product->client_price;
+        }
+        else{
+            $price=$product->price;
+        }
+        if ($options["table_name"] == "orders") {}
+        else{
+            $product->count = 1;
+            $product->discount_percent = 0;
+            $product->bonus = 0;
+
+        }
+        $calculaded_price =$price*$product->count-  $price*$product->count*$product->discount_percent/100;
+        ?>
+
+        <div class="part-10 d-not-order"><?= (!empty($price) ? $price . " ₪" : "") ?></div>
+        <div class="plus-minus-count flex-display d-order part-20">
+            <span class="minus bold font-25 part-20 pointer">-</span>
+            <span class="part-70 flex-display space-between">
+                <input type="number" class="part-30 price-part count align-self-center"  min="0" name="products[<?= $options["key"]?>][count]" value="<?= $product->count?>" />
+                <?= ($product->individually ?
+                    '<select class="price-part individually part-70 font-12 align-self-center" name="products['.$options["key"].'][order_individual]">
+                    <option value="0" '. ($product->order_individual? '':'selected').'> ארגזים</option>
+                    <option value="1" '.($product->order_individual? "selected":"").' >בקבוקים</option></select>'
+                    :'<label class="part-60 align-self-center">ארגזים</label>');?>
+            </span>
+            <span class="plus bold font-25 part-20 pointer">+</span>
+        </div>
+        <div class="input-label flex-display space-around align-center d-order part-20">
+            <label for="" class="">מחיר ליחידה</label>
+            <input class="unit-price price-part" type="text"  name="products[<?= $options["key"]?>][order_price]" value="<?= $price?>" data-a-sign="₪">
+        </div>
+        <div class="discount_percent-bonus flex-display space-between part-20 font-12 d-order ">
+            <div class="input-label flex-display align-center part-45">
+                <label for="" class="">%&nbsp;</label>
+                <input class="price-part discount-percent" type="text" pattern="\d*" name="products[<?= $options["key"]?>][discount_percent]" value="<?= $product->discount_percent?>" data-a-sign="%">
+                <label for="" class=""> הנחה</label>
+            </div>
+            <div class="input-label flex-display align-center part-45">
+                <input class=" " type="number" name="products[<?= $options["key"]?>][bonus]" value="<?php echo $product->bonus?>" >
+                <label for="" class="price-part bonus">בונוס</label>
+            </div>
+        </div>
+        <div class="flex-display center part-15 d-order ">
+            <div class="input-label flex-display align-center bold">
+                <span>סה"כ: <span class="calculaded-price "><?=empty($product->total)? $calculaded_price:$product->total; ?></span> ₪</span>
+                <input class="calculated-price-input" type="hidden"  name="products[<?= $options["key"]?>][total]" value="<?= $product->total?>" >
+            </div>
+        </div>
+        <div class="flex-display space-around part-15 buttons">
+            <a href="single?subject=products&action=edit&id=<?php echo $product->id?>" class="part-15 button background-white gold bold font-15 <?php echo $options["table_name"]=="products" ? '':"hidden" ?>">מעבר למוצר</a>
+            <button type="button" class="background-white gold bold font-15 <?php echo $options["table_name"]=="orders_" ? '':"hidden" ?>">פרטים</button>
+            <button type="button" class="background-gold bold font-15 order-product <?= $options["table_name"]=="order_products" && !$product->blocked ? '':"hidden" ?>">הזמן מוצר</button>
+        </div>
+    </div>
+    <?php
+}
+function archive_header($table_name, $view_only = false, $add_text="", $client_id = null)
+{
+    ob_start();
+    ?>
+    <div class="archive-actions flex-display space-between margin-bottom-20">
+        <div class="flex-display space-between">
+            <?php if($table_name=="products" && !$view_only){ ?>
+                <svg class="margin-after-10" data-view="gallery" xmlns="http://www.w3.org/2000/svg" width="44" height="44" viewBox="0 0 44 44" fill="none">
+                    <circle cx="22" cy="22" r="22" class="background-light-light-blue"/>
+                    <rect x="13" y="13" width="7.55827" height="7.23077" rx="1" stroke="#1A7870" stroke-width="2"/>
+                    <rect x="24.1511" y="13" width="7.55827" height="7.23077" rx="1" stroke="#1A7870" stroke-width="2"/>
+                    <rect x="13" y="23.7692" width="7.55827" height="7.23077" rx="1" stroke="#1A7870" stroke-width="2"/>
+                    <rect x="24.1511" y="23.7692" width="7.55827" height="7.23077" rx="1" stroke="#1A7870" stroke-width="2"/>
+                </svg>
+                <svg class="margin-after-10" data-view=table" xmlns="http://www.w3.org/2000/svg" width="44" height="44" viewBox="0 0 44 44" fill="none">
+                    <circle cx="22" cy="22" r="22" class="background-light-light-blue"/>
+                    <path d="M12.5 13.2412C12.5 12.1534 13.382 11.2725 14.4688 11.2725H28.5312C29.618 11.2725 30.5 12.1534 30.5 13.2412V16.0537C30.5 16.5759 30.2926 17.0767 29.9234 17.4459C29.5542 17.8151 29.0534 18.0225 28.5312 18.0225H14.4688C13.9466 18.0225 13.4458 17.8151 13.0766 17.4459C12.7074 17.0767 12.5 16.5759 12.5 16.0537V13.2412ZM14.4688 12.96C14.3942 12.96 14.3226 12.9896 14.2699 13.0424C14.2171 13.0951 14.1875 13.1667 14.1875 13.2412V16.0537C14.1875 16.209 14.3135 16.335 14.4688 16.335H28.5312C28.6058 16.335 28.6774 16.3054 28.7301 16.2526C28.7829 16.1999 28.8125 16.1283 28.8125 16.0537V13.2412C28.8125 13.1667 28.7829 13.0951 28.7301 13.0424C28.6774 12.9896 28.6058 12.96 28.5312 12.96H14.4688ZM12.5 21.1162C12.5 20.0284 13.382 19.1475 14.4688 19.1475H28.5312C29.618 19.1475 30.5 20.0284 30.5 21.1162V23.9287C30.5 24.4509 30.2926 24.9517 29.9234 25.3209C29.5542 25.6901 29.0534 25.8975 28.5312 25.8975H14.4688C13.9466 25.8975 13.4458 25.6901 13.0766 25.3209C12.7074 24.9517 12.5 24.4509 12.5 23.9287V21.1162ZM14.4688 20.835C14.3942 20.835 14.3226 20.8646 14.2699 20.9174C14.2171 20.9701 14.1875 21.0417 14.1875 21.1162V23.9287C14.1875 24.084 14.3135 24.21 14.4688 24.21H28.5312C28.6058 24.21 28.6774 24.1804 28.7301 24.1276C28.7829 24.0749 28.8125 24.0033 28.8125 23.9287V21.1162C28.8125 21.0417 28.7829 20.9701 28.7301 20.9174C28.6774 20.8646 28.6058 20.835 28.5312 20.835H14.4688ZM14.4688 27.0225C13.9466 27.0225 13.4458 27.2299 13.0766 27.5991C12.7074 27.9683 12.5 28.4691 12.5 28.9912V31.8037C12.5 32.8905 13.382 33.7725 14.4688 33.7725H28.5312C29.0534 33.7725 29.5542 33.5651 29.9234 33.1959C30.2926 32.8267 30.5 32.3259 30.5 31.8037V28.9912C30.5 28.4691 30.2926 27.9683 29.9234 27.5991C29.5542 27.2299 29.0534 27.0225 28.5312 27.0225H14.4688ZM14.1875 28.9912C14.1875 28.9167 14.2171 28.8451 14.2699 28.7924C14.3226 28.7396 14.3942 28.71 14.4688 28.71H28.5312C28.6058 28.71 28.6774 28.7396 28.7301 28.7924C28.7829 28.8451 28.8125 28.9167 28.8125 28.9912V31.8037C28.8125 31.8783 28.7829 31.9499 28.7301 32.0026C28.6774 32.0554 28.6058 32.085 28.5312 32.085H14.4688C14.3942 32.085 14.3226 32.0554 14.2699 32.0026C14.2171 31.9499 14.1875 31.8783 14.1875 31.8037V28.9912Z" fill="#1A7870"/>
+                </svg>
+            <?php }//get_svg ("clients","new",false,"class-name"); ?>
+            <?php if($table_name == "lists"){
+                $title = BOUTIQUE_LISTS["cities"]["title"];
+            }
+            else{
+                $title = BOUTIQUE_TABLES[$table_name]["title"];
+            } ?>
+            <h1 class="page-title font-30 bold"><?php echo $title.$add_text  ?></h1>
+        </div>
+        <div class="flex-display align-center  space-between">
+            <?php if(!$view_only){
+                if($table_name == "collection"){?>
+                    <form novalidate  class="site_form" data-success="alert_msg" >
+                        <input type="hidden" name="form_func" value="import_from_xlsx"/>
+                        <input type='file' name='bills' id='bills' accept="*.xls,*.xlsx">
+                        <button type="submit" class="btn-login font-18 bold background-gold ">קליטת הקובץ</button>
+                    </form>
+                <?php } ?>
+
+
+                <!--<svg class="send-email margin-after-10" xmlns="http://www.w3.org/2000/svg" width="44" height="44" viewBox="0 0 44 44" fill="none">
+                    <circle cx="22" cy="22" r="22" fill="#D9F5F3"/>
+                    <path fill-rule="evenodd" clip-rule="evenodd" d="M30.6875 16.605L22.7963 23.14C22.572 23.3258 22.29 23.4275 21.9987 23.4275C21.7075 23.4275 21.4255 23.3258 21.2013 23.14L13.3138 16.605C13.2714 16.7324 13.2499 16.8658 13.25 17V27C13.25 27.3315 13.3817 27.6495 13.6161 27.8839C13.8505 28.1183 14.1685 28.25 14.5 28.25H29.5C29.8315 28.25 30.1495 28.1183 30.3839 27.8839C30.6183 27.6495 30.75 27.3315 30.75 27V17C30.7505 16.8658 30.7294 16.7325 30.6875 16.605ZM14.5 14.5H29.5C30.163 14.5 30.7989 14.7634 31.2678 15.2322C31.7366 15.7011 32 16.337 32 17V27C32 27.663 31.7366 28.2989 31.2678 28.7678C30.7989 29.2366 30.163 29.5 29.5 29.5H14.5C13.837 29.5 13.2011 29.2366 12.7322 28.7678C12.2634 28.2989 12 27.663 12 27V17C12 16.337 12.2634 15.7011 12.7322 15.2322C13.2011 14.7634 13.837 14.5 14.5 14.5ZM14.2375 15.75L21.2075 21.5038C21.4307 21.6881 21.711 21.7893 22.0006 21.79C22.2901 21.7907 22.5709 21.6908 22.795 21.5075L29.835 15.75H14.2375Z" fill="#1A7870"/>
+                </svg>-->
+
+                <a class="margin-after-10" data-tooltip="הורדה לאקסל" href="<?= get_bloginfo('stylesheet_directory'); ?>/lib/export_excel.php/lib/export_excel.php?export=archive&subject=<?= $table_name; ?>" target="_blank">
+                    <svg class="download-file" xmlns="http://www.w3.org/2000/svg" width="44" height="44" viewBox="0 0 44 44" fill="none">
+                        <circle cx="22" cy="22" r="22" class="background-light-light-blue"/>
+                        <path d="M30.4661 24.6748C30.6759 24.6748 30.8776 24.7616 31.0266 24.916C31.1757 25.0706 31.26 25.2806 31.26 25.5V29.002C31.2932 29.8006 31.0213 30.5809 30.5032 31.1719C29.9851 31.7628 29.2626 32.1166 28.4944 32.1582H14.5042C14.1211 32.1419 13.7447 32.048 13.3967 31.8809C13.0485 31.7135 12.7349 31.4757 12.4749 31.1826C12.215 30.8896 12.013 30.546 11.8811 30.1719C11.7492 29.7977 11.69 29.4001 11.7063 29.002V25.5C11.7063 25.2806 11.7906 25.0706 11.9397 24.916C12.0887 24.7616 12.2904 24.6748 12.5002 24.6748C12.7101 24.6749 12.9118 24.7615 13.0608 24.916C13.2098 25.0706 13.2942 25.2807 13.2942 25.5V29C13.2653 29.3573 13.3688 29.7127 13.5852 29.9932C13.8025 30.2748 14.1166 30.4593 14.4622 30.5078V30.5088H28.4973L28.5042 30.5078C28.8497 30.4593 29.1639 30.2748 29.3811 29.9932C29.5712 29.7467 29.6743 29.4424 29.677 29.1299L29.6721 28.9961V25.5C29.6721 25.2807 29.7565 25.0706 29.9055 24.916C30.0545 24.7615 30.2562 24.6749 30.4661 24.6748Z" fill="#1A7870" stroke="#D9F5F3" stroke-width="0.1"/>
+                        <path d="M21.5 26.375C21.3892 26.3755 21.2793 26.3531 21.1769 26.309C21.0745 26.2649 20.9817 26.2001 20.9038 26.1183L16.4038 21.4516C16.2547 21.2858 16.1736 21.0664 16.1774 20.8397C16.1813 20.613 16.2698 20.3967 16.4244 20.2364C16.579 20.0761 16.7876 19.9843 17.0062 19.9803C17.2248 19.9763 17.4363 20.0604 17.5963 20.215L21.5 24.2633L25.4038 20.215C25.5637 20.0604 25.7753 19.9763 25.9938 19.9803C26.2124 19.9843 26.421 20.0761 26.5756 20.2364C26.7302 20.3967 26.8187 20.613 26.8226 20.8397C26.8264 21.0664 26.7453 21.2858 26.5963 21.4516L22.0963 26.1183C22.0184 26.2001 21.9255 26.2649 21.8231 26.309C21.7207 26.3531 21.6109 26.3755 21.5 26.375Z" fill="#1A7870"/>
+                        <path d="M21.5 26.375C21.2771 26.3719 21.0642 26.2788 20.9066 26.1153C20.749 25.9519 20.6592 25.7311 20.6563 25.5V12.6666C20.6563 12.4346 20.7452 12.212 20.9034 12.0479C21.0616 11.8838 21.2762 11.7916 21.5 11.7916C21.7238 11.7916 21.9384 11.8838 22.0966 12.0479C22.2549 12.212 22.3438 12.4346 22.3438 12.6666V25.5C22.3408 25.7311 22.251 25.9519 22.0934 26.1153C21.9358 26.2788 21.7229 26.3719 21.5 26.375Z" fill="#1A7870"/>
+                    </svg>
+                </a>
+                <!--fill="#D9F5F3"-->
+                <svg class="print-page margin-after-10" xmlns="http://www.w3.org/2000/svg" width="44" height="44" viewBox="0 0 44 44" fill="none">
+                    <circle cx="22" cy="22" r="22"  class="background-light-light-blue"/>
+                    <path d="M14.4375 22.9375C14.6198 22.9375 14.7947 22.8684 14.9236 22.7453C15.0526 22.6222 15.125 22.4553 15.125 22.2812C15.125 22.1072 15.0526 21.9403 14.9236 21.8172C14.7947 21.6941 14.6198 21.625 14.4375 21.625C14.2552 21.625 14.0803 21.6941 13.9514 21.8172C13.8224 21.9403 13.75 22.1072 13.75 22.2812C13.75 22.4553 13.8224 22.6222 13.9514 22.7453C14.0803 22.8684 14.2552 22.9375 14.4375 22.9375Z" fill="#1A7870"/>
+                    <path d="M17.875 13.75C17.1457 13.75 16.4462 14.0266 15.9305 14.5188C15.4147 15.0111 15.125 15.6788 15.125 16.375V19H13.75C13.0207 19 12.3212 19.2766 11.8055 19.7688C11.2897 20.2611 11 20.9288 11 21.625V25.5625C11 26.2587 11.2897 26.9264 11.8055 27.4187C12.3212 27.9109 13.0207 28.1875 13.75 28.1875H15.125V29.5C15.125 30.1962 15.4147 30.8639 15.9305 31.3562C16.4462 31.8484 17.1457 32.125 17.875 32.125H26.125C26.8543 32.125 27.5538 31.8484 28.0695 31.3562C28.5853 30.8639 28.875 30.1962 28.875 29.5V28.1875H30.25C30.9793 28.1875 31.6788 27.9109 32.1945 27.4187C32.7103 26.9264 33 26.2587 33 25.5625V21.625C33 20.9288 32.7103 20.2611 32.1945 19.7688C31.6788 19.2766 30.9793 19 30.25 19H28.875V16.375C28.875 15.6788 28.5853 15.0111 28.0695 14.5188C27.5538 14.0266 26.8543 13.75 26.125 13.75H17.875ZM16.5 16.375C16.5 16.0269 16.6449 15.6931 16.9027 15.4469C17.1606 15.2008 17.5103 15.0625 17.875 15.0625H26.125C26.4897 15.0625 26.8394 15.2008 27.0973 15.4469C27.3551 15.6931 27.5 16.0269 27.5 16.375V19H16.5V16.375ZM17.875 22.9375C17.1457 22.9375 16.4462 23.2141 15.9305 23.7063C15.4147 24.1986 15.125 24.8663 15.125 25.5625V26.875H13.75C13.3853 26.875 13.0356 26.7367 12.7777 26.4906C12.5199 26.2444 12.375 25.9106 12.375 25.5625V21.625C12.375 21.2769 12.5199 20.9431 12.7777 20.6969C13.0356 20.4508 13.3853 20.3125 13.75 20.3125H30.25C30.6147 20.3125 30.9644 20.4508 31.2223 20.6969C31.4801 20.9431 31.625 21.2769 31.625 21.625V25.5625C31.625 25.9106 31.4801 26.2444 31.2223 26.4906C30.9644 26.7367 30.6147 26.875 30.25 26.875H28.875V25.5625C28.875 24.8663 28.5853 24.1986 28.0695 23.7063C27.5538 23.2141 26.8543 22.9375 26.125 22.9375H17.875ZM27.5 25.5625V29.5C27.5 29.8481 27.3551 30.1819 27.0973 30.4281C26.8394 30.6742 26.4897 30.8125 26.125 30.8125H17.875C17.5103 30.8125 17.1606 30.6742 16.9027 30.4281C16.6449 30.1819 16.5 29.8481 16.5 29.5V25.5625C16.5 25.2144 16.6449 24.8806 16.9027 24.6344C17.1606 24.3883 17.5103 24.25 17.875 24.25H26.125C26.4897 24.25 26.8394 24.3883 27.0973 24.6344C27.3551 24.8806 27.5 25.2144 27.5 25.5625Z" fill="#1A7870"/>
+                </svg>
+            <?php }?>
+            <div class="border-dark-gray archive-search flex-display align-center align-self-center margin-after-10">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 14 14" fill="none">
+                    <g clip-path="url(#clip0_39_370)">
+                        <path fill-rule="evenodd" clip-rule="evenodd" d="M5.6875 10.5C6.31949 10.5 6.94528 10.3755 7.52916 10.1337C8.11304 9.89182 8.64357 9.53733 9.09045 9.09045C9.53733 8.64357 9.89182 8.11304 10.1337 7.52916C10.3755 6.94528 10.5 6.31949 10.5 5.6875C10.5 5.05551 10.3755 4.42972 10.1337 3.84584C9.89182 3.26196 9.53733 2.73143 9.09045 2.28455C8.64357 1.83767 8.11304 1.48318 7.52916 1.24133C6.94528 0.999479 6.31949 0.875 5.6875 0.875C4.41115 0.875 3.18707 1.38203 2.28455 2.28455C1.38203 3.18707 0.875 4.41115 0.875 5.6875C0.875 6.96385 1.38203 8.18793 2.28455 9.09045C3.18707 9.99297 4.41115 10.5 5.6875 10.5ZM11.375 5.6875C11.375 7.19592 10.7758 8.64256 9.70917 9.70917C8.64256 10.7758 7.19592 11.375 5.6875 11.375C4.17908 11.375 2.73244 10.7758 1.66583 9.70917C0.599217 8.64256 0 7.19592 0 5.6875C0 4.17908 0.599217 2.73244 1.66583 1.66583C2.73244 0.599217 4.17908 0 5.6875 0C7.19592 0 8.64256 0.599217 9.70917 1.66583C10.7758 2.73244 11.375 4.17908 11.375 5.6875Z" fill="black"/>
+                        <path d="M9.33337 10.5575C9.35962 10.5925 9.38762 10.6257 9.41912 10.6581L12.7879 14.0268C12.9519 14.191 13.1745 14.2833 13.4066 14.2834C13.6387 14.2835 13.8614 14.1913 14.0256 14.0273C14.1897 13.8632 14.282 13.6406 14.2821 13.4085C14.2822 13.1764 14.1901 12.9538 14.026 12.7896L10.6572 9.42083C10.626 9.38916 10.5923 9.35991 10.5566 9.33333C10.2134 9.80135 9.8009 10.2144 9.33337 10.5583V10.5575Z" fill="black"/>
+                    </g>
+                    <defs>
+                        <clipPath id="clip0_39_370">
+                            <rect width="14" height="14" fill="white"/>
+                        </clipPath>
+                    </defs>
+                </svg>
+                <input type="search" id="search" class="" placeholder="חיפוש" />
+            </div>
+            <?php if($table_name != "collection" && !$view_only && ($table_name != "tasks" || is_manager())){
+            $href = 'single?subject='.$table_name.'&action=new';
+            if(!empty($client_id)){
+                $href.="&client_id=".$client_id;
+            }
+            if($table_name=="lists") { ?>
+            <a data-bs-toggle="modal" href="#edit-list" role="button" data-action="new">
+                <?php }
+                else{
+                ?>
+
+                <a href="<?php echo $href ?>">
+
+                    <?php }?>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="60" height="60" viewBox="0 0 60 60" fill="none">
+                        <circle cx="30" cy="30" r="29.5" class="background-dark-green" stroke="white"/>
+                        <line x1="30" y1="20" x2="30" y2="42" stroke="white" stroke-width="2"/>
+                        <line x1="41" y1="31" x2="19" y2="31" stroke="white" stroke-width="2"/>
+                    </svg>
+                </a>
+                <?php }?>
+        </div>
+    </div>
+    <?php
+    return ob_get_clean();
+}
+function catalog_gallery($products, $options = null)
+{
+    $class_grid = isset($options['class_grid']) ?  $options['class_grid'] : 'catalog';
+    ob_start();
+    if(!isset($options['get_products_last_order'])){?>
+        <div class="grid-display products-gallery <?= $class_grid?>" >
+        <?php
+    }
+    foreach ($products as $product){
+        create_product_view($product,$options);
+    }
+
+    if(!isset($options['get_products_last_order'])){?>
+        </div>
+    <?php }
+    return ob_get_clean();
+}
+function create_popup(){
+    ?>
+    <div class="popup_page_overlay">
+        <div class="popup">
+            <div class="close-popup pointer">
+                <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 22 22" fill="none">
+                    <path d="M13.9776 10.9999L19.7418 5.23577C20.564 4.41352 20.564 3.08042 19.7418 2.25817C18.9195 1.43592 17.5865 1.43592 16.7642 2.25817L11 8.02234L5.23583 2.25817C4.41358 1.43592 3.08048 1.43592 2.25823 2.25817C1.43598 3.08042 1.43598 4.41352 2.25823 5.23577L8.0224 10.9999L2.25823 16.7641C1.43598 17.5864 1.43598 18.9195 2.25823 19.7417C2.66935 20.1528 3.20818 20.3584 3.74701 20.3584C4.28584 20.3584 4.82471 20.1528 5.23579 19.7417L11 13.9776L16.7642 19.7417C17.1753 20.1528 17.7141 20.3584 18.253 20.3584C18.7918 20.3584 19.3306 20.1528 19.7417 19.7417C20.564 18.9195 20.564 17.5864 19.7417 16.7641L13.9776 10.9999Z" fill="black"/>
+                </svg>
+            </div>
+            <div class="popup-body">
+
+            </div>
+        </div>
+    </div>
+    <?php
+}
+function build_select_options($table_name, $value=null, $filter=null)
+{
+    //write_log("list name " .$table_name);
+    if (array_key_exists($table_name, BOUTIQUE_LISTS)) {
+        $fields_list = BOUTIQUE_LISTS[$table_name];
+    }
+    else if (array_key_exists($table_name, BOUTIQUE_TABLES)) {
+        $fields_list = BOUTIQUE_TABLES[$table_name];
+    }
+    if(isset($fields_list["data-field"])) {
+        $field = $fields_list["data-field"];
+    }
+    $list = get_list($table_name,$filter);
+    $options = '<option value=""></option>';
+    foreach ($list as $row) {
+        $data_field = "";
+        if(isset($fields_list["data-field"])){
+            $data_field =' data-field="'.$row->$field.'"';
+        }
+        $options .= '<option '.$data_field.' value="' . $row->value . '"' . (!empty($value)&& (is_array($value) && in_array($row->value, $value) || (!is_array($value) && $row->value == $value || $row->text == $value)) ? 'selected' : '') . '>' . $row->text . '</option>';
+    }
+    return $options;
+}
+
+function create_input($field,$value = null,$readonly = "")
+{
+    if(isset($field['required'])){
+        $required = 'required';
+        //$attrs['label'] .= '<span class="star">*</span>';
+    } else {
+        $required = '';
+    }
+
+    switch($field["widget"]){
+        case "text":
+        case "email":
+        case "number":
+        case "date":
+        case "datetime-local":
+            if($field["widget"] == "date" && !empty($value)) {
+                $value = date('Y-m-d', strtotime($value));
+            }
+            if($field["widget"] == "datetime-local" && !empty($value)) {
+                $value = date('Y-m-d H:i:s', strtotime($value));
+            }
+            if($field["widget"] == "email"){
+                $autocomplete = ' autocomplete="email"';
+            } else {
+                $autocomplete = ' autocomplete="off"';
+            }
+            $button="";
+            if(isset($field["popup_button"])){
+                $button = "<a class='button' data-bs-toggle='modal' href='#{$field["popup_button"]["target_modal"]}' role='button' >{$field["popup_button"]["label"]}</a>";
+                //$button = "<button class='client-price' onclick=''>{$field["popup_button"]["label"]}</button>";
+            }
+            return '<input type="'.$field["widget"].'"  class="grow font-17" id="'.$field["field_name"].'" name="'.$field["field_name"].'" '
+                .($field["widget"]=="text" && isset($field["un_apostrophe"]) && isset($field["sign"]) ? 'data-a-sign="'.$field["sign"].'"':'').  'value="'.esc_attr($value).'" '.
+                option_if_set($field,"class").
+                $required.$autocomplete.$readonly.
+                ($field["widget"] == "number" ? option_if_set($field,"step").option_if_set($field,"min"). option_if_set($field,"max")."style=\"width: 70px\"" : "" ).'/>'.$button;
+        case "checkbox":
+            ?>
+            <input type="checkbox" id="<?php echo $field["field_name"]?>" name="<?php echo $field["field_name"]?>" id="<?php echo $field["field_name"]?>" value="1" <?php echo $required ?> <?php echo  checked($value == "1") ?> <?php echo $readonly ?>/>
+            <!--        כן
+            <input type="checkbox" id="<?php /*echo $field["field_name"]*/?>2" name="<?php /*echo $field["field_name"]*/?>" id="<?php /*echo $field["field_name"]*/?>" value="0" <?php /*echo checked($value == "0") */?> />
+            לא
+-->
+            <?php
+            break;
+        case "textarea":
+            return '<textarea rows ="2" class="font-17 grow" id="'.$field["field_name"].'" name="'.$field["field_name"].'" '. $required.' '.$readonly .'>'.esc_attr( $value).'</textarea>';
+        case "select":?>
+            <select class="<?php echo $field['field_name']?>  font-17 grow" id="<?php echo $field["field_name"]?>"
+                    name="<?php echo $field["field_name"].(isset($field["multiple"]) ? "[]" : "" )?>" <?php echo (isset($field["multiple"]) ? "multiple=\"multiple\" size=\"10\"" : "" )?>
+                <?php echo $required ?>  <?php echo ($readonly == "readonly" ? "disabled" : "") ?>   <?php echo $required ?> onchange="onchangeSelect(event,this, this.value)" data-fill-select="<?php echo (isset($field["select_to_fill"]) ? $field["select_to_fill"] : "") ?>" >
+                <?php
+                //write_log("value ".$value);
+                if(isset($field["options"])){
+                    ?><option value=""  <?php echo empty($value) ? 'selected' : ''?> ></option><?php
+                    $options = $field["options"];
+                    foreach($options as $option){
+                        if(isset($field["multiple"])){ ?>
+                            <option value="<?php echo $option["value"] ?>" <?php echo  (!empty($value) && is_array($value) && in_array($option["value"], $value) ? "selected" : "") ; ?>><?php echo $option["text"] ?></option>
+
+                        <?php }
+                        else { ?>
+                            <option value="<?php echo $option["value"] ?>" <?php echo ($value ==  $option["value"] ?  "selected" : "")?>><?php echo $option["text"] ?></option>
+                        <?php }
+                    }
+                }
+                else if(isset($field["join_table"])) {
+                    $filter = null;
+                    if($field["join_table"] == "clients" && is_agent()){
+                        $filter = "agent_id=".get_current_user_id();
+                    }
+                    echo build_select_options($field["join_table"],$value,$filter);
+                }
+                ?>
+            </select>
+            <?php break;
+        case "file":
+        case "image":
+            if(empty($readonly)){
+                ?>
+                <!--        <span class="grow pointer <?php /*echo $field["widget"]*/?>-name"></span>
+-->        <?php if($field["widget"] ==  "file"){
+                    $accept = ".pdf, .xls, .xlsx, .csv";?>
+                    <svg class="open-file-uploader" xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none">
+                        <path d="M6 22C5.46957 22 4.96086 21.7893 4.58579 21.4142C4.21071 21.0391 4 20.5304 4 20V4C4 3.46957 4.21071 2.96086 4.58579 2.58579C4.96086 2.21072 5.46957 2 6 2H14C14.3166 1.99949 14.6301 2.06161 14.9225 2.18277C15.215 2.30394 15.4806 2.48176 15.704 2.706L19.292 6.294C19.5168 6.51751 19.6952 6.78335 19.8167 7.07616C19.9382 7.36898 20.0005 7.68297 20 8V20C20 20.5304 19.7893 21.0391 19.4142 21.4142C19.0391 21.7893 18.5304 22 18 22H6Z" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M14 2V7C14 7.26522 14.1054 7.51957 14.2929 7.70711C14.4804 7.89464 14.7348 8 15 8H20M12 12V18M12 12L15 15M12 12L9 15" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                <?php }
+
+                else{
+                    $accept = "image/png, image/jpeg";?>
+
+                    <svg class="open-image-uploader" xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none">
+                        <path d="M10.3 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H19C19.5304 3 20.0391 3.21071 20.4142 3.58579C20.7893 3.96086 21 4.46957 21 5V15L17.9 11.9C17.5237 11.5312 17.017 11.3258 16.4901 11.3284C15.9632 11.331 15.4586 11.5415 15.086 11.914L6 21" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M14 19.5L17 16.5M17 16.5L20 19.5M17 16.5V22" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M9 11C10.1046 11 11 10.1046 11 9C11 7.89543 10.1046 7 9 7C7.89543 7 7 7.89543 7 9C7 10.1046 7.89543 11 9 11Z" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                <?php } ?>
+                <span class="file-name"><?php echo ($value ?  basename(get_attached_file($value)):"") ?></span>
+                <input class="upload-<?php echo $field["widget"]?>" type="file" id="<?php echo $field["field_name"]?>" name="<?php echo 'file_'.$field["field_name"]?>" style="display: none;" required  accept="<?= $accept ?>"/>
+                <input type="hidden" name="<?php echo $field["field_name"] ?>" value="<?php echo $value ? '1':'0' ?> "/>
+            <?php }
+            break;
+        case "radio":
+            $direction = "row";
+            $direction_class = $direction == "column" ? "direction-column" : "row";
+            ?>
+
+            <div class="radio-options font-17  flex-display <?=$direction_class?>">
+                <?php
+                if(isset($field["values"])){
+                    foreach ($field["values"] as $key=>$option){?>
+                        <div class="">
+                            <input type="radio" class="<?php echo $field["field_name"].$key ?>" id="<?=$direction.($key)?>" name="<?php echo $field["field_name"]?>" <?php echo $readonly == "readonly" ?"disabled":"" ?> value="<?php echo $key ?>" <?php if (isset($value) && $value == $key) echo 'checked'; ?>>
+                            <label for="<?=$direction.$key?>"><span><?php echo $option["label"] ?></span></label>
+                        </div>
+                    <?php   }
+                }?>
+            </div>
+            <?php
+            break;
+        case "status":?>
+            <div class="status-options flex-display font-17  grow space-around">
+                <?php
+                if(isset($field["values"])){
+                    ?><input type="hidden" id="<?php echo $field["field_name"]?>" name="<?php echo $field["field_name"]?>" value="<?php echo ($value ?? '')?>">
+                    <?php
+                    foreach ($field["values"] as $key=>$option){?>
+                        <span data-value="<?php echo $key ?>" class="<?php echo $readonly ?> pointer ellipse <?php echo ($value && $value == $key ? '' : 'un-value ').$option["class"]?>">
+                            <?php echo $option["label"]?>
+                        </span>
+                    <?php   }
+                }?>
+            </div>
+            <?php
+            break;
+        case "products":
+            ?>
+            <div class="products-gallery orders grid-display padding-10 start one-row">
+                <?php if(empty($readonly)){  ?>
+                    <div class="add-order-product  flex-display direction-column space-around ">
+                        <svg class="pointer  align-self-center" data-tooltip="הוספת מוצר להזמנה" xmlns="http://www.w3.org/2000/svg" width="90" height="90" viewBox="0 0 60 60" fill="none">
+                            <circle cx="30" cy="30" r="29.5" class="background-dark-green" stroke="white"/>
+                            <line x1="30" y1="20" x2="30" y2="42" stroke="white" stroke-width="2"/>
+                            <line x1="41" y1="31" x2="19" y2="31" stroke="white" stroke-width="2"/>
+                        </svg>
+                        <?php if(empty($value)){?>
+                            <svg class="pointer products-last-order" xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 26 26" fill="none">
+                                <circle cx="13" cy="13" r="12.5" fill="#E2B252" stroke="white"/>
+                            </svg>
+                        <?php } ?>
+
+                    </div>
+                    <?php
+                }
+                if($value && is_array($value)){
+                    foreach ($value as $key=>$product) {
+                        //write_log("product ".json_encode($product));
+                        create_product_view($product,array("table_name"=>"orders","key"=>$key));
+                    }
+                } ?>
+            </div>
+            <?php
+            break;
+        default:
+            break;
+    }
+}
+function get_svg($svg_name,$action='',$side_menu = true)
+{
+    switch ($svg_name){
+        case "clients":
+            if($side_menu) return '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="13" viewBox="0 0 14 13" fill="none">
+                <path d="M7 1.08333C6.42314 1.08333 5.85923 1.24217 5.37959 1.53976C4.89994 1.83736 4.52611 2.26034 4.30535 2.75523C4.0846 3.25011 4.02684 3.79467 4.13938 4.32003C4.25192 4.8454 4.5297 5.32798 4.93761 5.70674C5.34551 6.08551 5.86521 6.34345 6.43099 6.44796C6.99676 6.55246 7.58321 6.49882 8.11616 6.29384C8.64911 6.08885 9.10463 5.74171 9.42512 5.29633C9.74561 4.85095 9.91667 4.32732 9.91667 3.79166C9.91667 3.07337 9.60938 2.38449 9.06239 1.87658C8.51541 1.36867 7.77355 1.08333 7 1.08333ZM7 5.41666C6.65388 5.41666 6.31554 5.32136 6.02775 5.1428C5.73997 4.96424 5.51566 4.71045 5.38321 4.41352C5.25076 4.11659 5.2161 3.78986 5.28363 3.47464C5.35115 3.15942 5.51782 2.86987 5.76256 2.64261C6.0073 2.41535 6.31913 2.26059 6.65859 2.19789C6.99806 2.13518 7.34993 2.16737 7.6697 2.29036C7.98947 2.41335 8.26278 2.62163 8.45507 2.88886C8.64736 3.15609 8.75 3.47027 8.75 3.79166C8.75 4.22264 8.56563 4.63596 8.23744 4.94071C7.90925 5.24546 7.46413 5.41666 7 5.41666ZM12.25 11.375V10.8333C12.25 9.82772 11.8198 8.86329 11.054 8.15222C10.2882 7.44114 9.24963 7.04166 8.16667 7.04166H5.83333C4.75037 7.04166 3.71175 7.44114 2.94598 8.15222C2.18021 8.86329 1.75 9.82772 1.75 10.8333V11.375H2.91667V10.8333C2.91667 10.115 3.22396 9.42616 3.77094 8.91825C4.31792 8.41034 5.05979 8.125 5.83333 8.125H8.16667C8.94021 8.125 9.68208 8.41034 10.2291 8.91825C10.776 9.42616 11.0833 10.115 11.0833 10.8333V11.375H12.25Z" fill="black"/>
+            </svg>';
+            if($action == "new") return '<svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 30 30" fill="none">
+<rect width="30" height="30" rx="5" class="background-light-light-blue"/>
+<g clip-path="url(#clip0_27_178)">
+<path d="M13 15C13.7956 15 14.5587 14.6839 15.1213 14.1213C15.6839 13.5587 16 12.7956 16 12C16 11.2044 15.6839 10.4413 15.1213 9.87868C14.5587 9.31607 13.7956 9 13 9C12.2044 9 11.4413 9.31607 10.8787 9.87868C10.3161 10.4413 10 11.2044 10 12C10 12.7956 10.3161 13.5587 10.8787 14.1213C11.4413 14.6839 12.2044 15 13 15ZM15 12C15 12.5304 14.7893 13.0391 14.4142 13.4142C14.0391 13.7893 13.5304 14 13 14C12.4696 14 11.9609 13.7893 11.5858 13.4142C11.2107 13.0391 11 12.5304 11 12C11 11.4696 11.2107 10.9609 11.5858 10.5858C11.9609 10.2107 12.4696 10 13 10C13.5304 10 14.0391 10.2107 14.4142 10.5858C14.7893 10.9609 15 11.4696 15 12ZM19 20C19 21 18 21 18 21H8C8 21 7 21 7 20C7 19 8 16 13 16C18 16 19 19 19 20ZM18 19.996C17.999 19.75 17.846 19.01 17.168 18.332C16.516 17.68 15.289 17 13 17C10.71 17 9.484 17.68 8.832 18.332C8.154 19.01 8.002 19.75 8 19.996H18Z" fill="black"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M20.8333 12.3333C20.9659 12.3333 21.0931 12.386 21.1869 12.4798C21.2807 12.5735 21.3333 12.7007 21.3333 12.8333V14.3333H22.8333C22.9659 14.3333 23.0931 14.386 23.1869 14.4798C23.2807 14.5735 23.3333 14.7007 23.3333 14.8333C23.3333 14.9659 23.2807 15.0931 23.1869 15.1869C23.0931 15.2806 22.9659 15.3333 22.8333 15.3333H21.3333V16.8333C21.3333 16.9659 21.2807 17.0931 21.1869 17.1869C21.0931 17.2807 20.9659 17.3333 20.8333 17.3333C20.7007 17.3333 20.5735 17.2807 20.4798 17.1869C20.386 17.0931 20.3333 16.9659 20.3333 16.8333V15.3333H18.8333C18.7007 15.3333 18.5735 15.2806 18.4798 15.1869C18.386 15.0931 18.3333 14.9659 18.3333 14.8333C18.3333 14.7007 18.386 14.5735 18.4798 14.4798C18.5735 14.386 18.7007 14.3333 18.8333 14.3333H20.3333V12.8333C20.3333 12.7007 20.386 12.5735 20.4798 12.4798C20.5735 12.386 20.7007 12.3333 20.8333 12.3333Z" fill="black"/>
+</g>
+<defs>
+<clipPath id="clip0_27_178">
+<rect width="16" height="16" fill="white" transform="translate(7 7)"/>
+</clipPath>
+</defs>
+</svg>';
+        case "home":
+            return '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12" fill="none">
+                <path d="M7.5 10.5V6.5C7.5 6.36739 7.44732 6.24021 7.35355 6.14645C7.25979 6.05268 7.13261 6 7 6H5C4.86739 6 4.74021 6.05268 4.64645 6.14645C4.55268 6.24021 4.5 6.36739 4.5 6.5V10.5" stroke="black" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M1.5 5C1.49997 4.85454 1.53167 4.71081 1.59289 4.57886C1.65412 4.44691 1.7434 4.3299 1.8545 4.236L5.3545 1.236C5.53499 1.08346 5.76368 0.999763 6 0.999763C6.23632 0.999763 6.46501 1.08346 6.6455 1.236L10.1455 4.236C10.2566 4.3299 10.3459 4.44691 10.4071 4.57886C10.4683 4.71081 10.5 4.85454 10.5 5V9.5C10.5 9.76522 10.3946 10.0196 10.2071 10.2071C10.0196 10.3946 9.76522 10.5 9.5 10.5H2.5C2.23478 10.5 1.98043 10.3946 1.79289 10.2071C1.60536 10.0196 1.5 9.76522 1.5 9.5V5Z" stroke="black" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>';
+        case "products":
+            if($side_menu) return '<svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 11 11" fill="none">
+                <path d="M1.83333 4.73611C1.83333 4.55554 1.8689 4.37674 1.938 4.20992C2.0071 4.0431 2.10838 3.89152 2.23606 3.76384C2.36374 3.63616 2.51532 3.53488 2.68214 3.46578C2.84897 3.39668 3.02777 3.36111 3.20833 3.36111C3.3889 3.36111 3.5677 3.39668 3.73452 3.46578C3.90135 3.53488 4.05292 3.63616 4.1806 3.76384C4.30829 3.89152 4.40957 4.0431 4.47867 4.20992C4.54777 4.37674 4.58333 4.55554 4.58333 4.73611C4.58333 5.10078 4.43847 5.45052 4.1806 5.70838C3.92274 5.96625 3.57301 6.11111 3.20833 6.11111C2.84366 6.11111 2.49392 5.96625 2.23606 5.70838C1.9782 5.45052 1.83333 5.10078 1.83333 4.73611ZM3.20833 4.27778C3.08678 4.27778 2.9702 4.32607 2.88424 4.41202C2.79829 4.49797 2.75 4.61455 2.75 4.73611C2.75 4.85767 2.79829 4.97425 2.88424 5.0602C2.9702 5.14616 3.08678 5.19444 3.20833 5.19444C3.32989 5.19444 3.44647 5.14616 3.53242 5.0602C3.61838 4.97425 3.66667 4.85767 3.66667 4.73611C3.66667 4.61455 3.61838 4.49797 3.53242 4.41202C3.44647 4.32607 3.32989 4.27778 3.20833 4.27778ZM3.20833 6.72222C2.84366 6.72222 2.49392 6.86709 2.23606 7.12495C1.9782 7.38281 1.83333 7.73255 1.83333 8.09722C1.83333 8.46189 1.9782 8.81163 2.23606 9.06949C2.49392 9.32736 2.84366 9.47222 3.20833 9.47222C3.57301 9.47222 3.92274 9.32736 4.1806 9.06949C4.43847 8.81163 4.58333 8.46189 4.58333 8.09722C4.58333 7.73255 4.43847 7.38281 4.1806 7.12495C3.92274 6.86709 3.57301 6.72222 3.20833 6.72222ZM2.75 8.09722C2.75 7.97566 2.79829 7.85909 2.88424 7.77313C2.9702 7.68718 3.08678 7.63889 3.20833 7.63889C3.32989 7.63889 3.44647 7.68718 3.53242 7.77313C3.61838 7.85909 3.66667 7.97566 3.66667 8.09722C3.66667 8.21878 3.61838 8.33536 3.53242 8.42131C3.44647 8.50727 3.32989 8.55556 3.20833 8.55556C3.08678 8.55556 2.9702 8.50727 2.88424 8.42131C2.79829 8.33536 2.75 8.21878 2.75 8.09722ZM5.5 4.73611C5.5 4.61455 5.54829 4.49797 5.63424 4.41202C5.7202 4.32607 5.83678 4.27778 5.95833 4.27778H8.70833C8.82989 4.27778 8.94647 4.32607 9.03242 4.41202C9.11838 4.49797 9.16667 4.61455 9.16667 4.73611C9.16667 4.85767 9.11838 4.97425 9.03242 5.0602C8.94647 5.14616 8.82989 5.19444 8.70833 5.19444H5.95833C5.83678 5.19444 5.7202 5.14616 5.63424 5.0602C5.54829 4.97425 5.5 4.85767 5.5 4.73611ZM5.95833 7.63889C5.83678 7.63889 5.7202 7.68718 5.63424 7.77313C5.54829 7.85909 5.5 7.97566 5.5 8.09722C5.5 8.21878 5.54829 8.33536 5.63424 8.42131C5.7202 8.50727 5.83678 8.55556 5.95833 8.55556H8.70833C8.82989 8.55556 8.94647 8.50727 9.03242 8.42131C9.11838 8.33536 9.16667 8.21878 9.16667 8.09722C9.16667 7.97566 9.11838 7.85909 9.03242 7.77313C8.94647 7.68718 8.82989 7.63889 8.70833 7.63889H5.95833ZM1.83333 2.29167C1.83333 2.17011 1.88162 2.05353 1.96758 1.96758C2.05353 1.88162 2.17011 1.83333 2.29167 1.83333H8.70833C8.82989 1.83333 8.94647 1.88162 9.03242 1.96758C9.11838 2.05353 9.16667 2.17011 9.16667 2.29167C9.16667 2.41322 9.11838 2.5298 9.03242 2.61576C8.94647 2.70171 8.82989 2.75 8.70833 2.75H2.29167C2.17011 2.75 2.05353 2.70171 1.96758 2.61576C1.88162 2.5298 1.83333 2.41322 1.83333 2.29167ZM1.98611 0C1.45936 0 0.954186 0.20925 0.581718 0.581718C0.20925 0.954186 0 1.45936 0 1.98611V9.01389C0 9.54064 0.20925 10.0458 0.581718 10.4183C0.954186 10.7907 1.45936 11 1.98611 11H9.01389C9.54064 11 10.0458 10.7907 10.4183 10.4183C10.7907 10.0458 11 9.54064 11 9.01389V1.98611C11 1.45936 10.7907 0.954186 10.4183 0.581718C10.0458 0.20925 9.54064 0 9.01389 0H1.98611ZM0.916667 1.98611C0.916667 1.39578 1.39578 0.916667 1.98611 0.916667H9.01389C9.60422 0.916667 10.0833 1.39578 10.0833 1.98611V9.01389C10.0833 9.29752 9.97066 9.56954 9.7701 9.7701C9.56954 9.97066 9.29752 10.0833 9.01389 10.0833H1.98611C1.70248 10.0833 1.43046 9.97066 1.2299 9.7701C1.02934 9.56954 0.916667 9.29752 0.916667 9.01389V1.98611Z" fill="black"/>
+            </svg>';
+            if($action == "new") return '<svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 30 30" fill="none">
+<rect width="30" height="30" rx="5" class="background-light-light-blue"/>
+<path d="M19.5604 14.0833H19.5834V22.3333C19.5834 22.8196 19.3902 23.2859 19.0464 23.6297C18.7026 23.9735 18.2363 24.1667 17.75 24.1667H12.25C11.7638 24.1667 11.2975 23.9735 10.9537 23.6297C10.6098 23.2859 10.4167 22.8196 10.4167 22.3333V14.0833H10.4396C10.5199 13.3707 10.8073 12.6973 11.2664 12.1464L12.2839 10.9272C12.5586 10.5973 12.7088 10.1814 12.7084 9.75208V6.74999C12.7084 6.50688 12.8049 6.27372 12.9768 6.10181C13.1487 5.92991 13.3819 5.83333 13.625 5.83333H16.375C16.6181 5.83333 16.8513 5.92991 17.0232 6.10181C17.1951 6.27372 17.2917 6.50688 17.2917 6.74999V9.753C17.2919 10.1818 17.4424 10.597 17.717 10.9263L18.7336 12.1464C19.1927 12.6973 19.4802 13.3707 19.5604 14.0833ZM17.7033 14.0833C17.6387 13.8029 17.509 13.5417 17.3247 13.3207L16.3081 12.1006C15.759 11.4415 15.4583 10.6108 15.4584 9.753V7.66666H14.5417V9.753C14.5416 10.6105 14.2409 11.4409 13.6919 12.0997L12.6744 13.3207C12.4908 13.5418 12.3617 13.8031 12.2977 14.0833H17.7033ZM17.75 20.5H12.25V22.3333H17.75V20.5ZM12.25 15.9167V18.6667H17.75V15.9167H12.25Z" fill="black" stroke="#D9F5F3" stroke-width="0.7"/>
+</svg>';
+            return '<svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 30 30" fill="none">
+<rect width="30" height="30" rx="5" class="background-light-light-blue"/>
+<path d="M9.35893 13.8889C9.35893 13.6262 9.41066 13.3662 9.51117 13.1235C9.61168 12.8809 9.759 12.6604 9.94471 12.4747C10.1304 12.289 10.3509 12.1416 10.5936 12.0411C10.8362 11.9406 11.0963 11.8889 11.3589 11.8889C11.6216 11.8889 11.8816 11.9406 12.1243 12.0411C12.3669 12.1416 12.5874 12.289 12.7731 12.4747C12.9589 12.6604 13.1062 12.8809 13.2067 13.1235C13.3072 13.3662 13.3589 13.6262 13.3589 13.8889C13.3589 14.4193 13.1482 14.928 12.7731 15.3031C12.3981 15.6782 11.8894 15.8889 11.3589 15.8889C10.8285 15.8889 10.3198 15.6782 9.94471 15.3031C9.56964 14.928 9.35893 14.4193 9.35893 13.8889ZM11.3589 13.2222C11.1821 13.2222 11.0125 13.2925 10.8875 13.4175C10.7625 13.5425 10.6923 13.7121 10.6923 13.8889C10.6923 14.0657 10.7625 14.2353 10.8875 14.3603C11.0125 14.4853 11.1821 14.5556 11.3589 14.5556C11.5357 14.5556 11.7053 14.4853 11.8303 14.3603C11.9554 14.2353 12.0256 14.0657 12.0256 13.8889C12.0256 13.7121 11.9554 13.5425 11.8303 13.4175C11.7053 13.2925 11.5357 13.2222 11.3589 13.2222ZM11.3589 16.7778C10.8285 16.7778 10.3198 16.9885 9.94471 17.3636C9.56964 17.7386 9.35893 18.2473 9.35893 18.7778C9.35893 19.3082 9.56964 19.8169 9.94471 20.192C10.3198 20.5671 10.8285 20.7778 11.3589 20.7778C11.8894 20.7778 12.3981 20.5671 12.7731 20.192C13.1482 19.8169 13.3589 19.3082 13.3589 18.7778C13.3589 18.2473 13.1482 17.7386 12.7731 17.3636C12.3981 16.9885 11.8894 16.7778 11.3589 16.7778ZM10.6923 18.7778C10.6923 18.601 10.7625 18.4314 10.8875 18.3064C11.0125 18.1813 11.1821 18.1111 11.3589 18.1111C11.5357 18.1111 11.7053 18.1813 11.8303 18.3064C11.9554 18.4314 12.0256 18.601 12.0256 18.7778C12.0256 18.9546 11.9554 19.1242 11.8303 19.2492C11.7053 19.3742 11.5357 19.4444 11.3589 19.4444C11.1821 19.4444 11.0125 19.3742 10.8875 19.2492C10.7625 19.1242 10.6923 18.9546 10.6923 18.7778ZM14.6923 13.8889C14.6923 13.7121 14.7625 13.5425 14.8875 13.4175C15.0125 13.2925 15.1821 13.2222 15.3589 13.2222H19.3589C19.5357 13.2222 19.7053 13.2925 19.8303 13.4175C19.9554 13.5425 20.0256 13.7121 20.0256 13.8889C20.0256 14.0657 19.9554 14.2353 19.8303 14.3603C19.7053 14.4853 19.5357 14.5556 19.3589 14.5556H15.3589C15.1821 14.5556 15.0125 14.4853 14.8875 14.3603C14.7625 14.2353 14.6923 14.0657 14.6923 13.8889ZM15.3589 18.1111C15.1821 18.1111 15.0125 18.1813 14.8875 18.3064C14.7625 18.4314 14.6923 18.601 14.6923 18.7778C14.6923 18.9546 14.7625 19.1242 14.8875 19.2492C15.0125 19.3742 15.1821 19.4444 15.3589 19.4444H19.3589C19.5357 19.4444 19.7053 19.3742 19.8303 19.2492C19.9554 19.1242 20.0256 18.9546 20.0256 18.7778C20.0256 18.601 19.9554 18.4314 19.8303 18.3064C19.7053 18.1813 19.5357 18.1111 19.3589 18.1111H15.3589ZM9.35893 10.3333C9.35893 10.1565 9.42917 9.98695 9.55419 9.86193C9.67921 9.7369 9.84878 9.66667 10.0256 9.66667H19.3589C19.5357 9.66667 19.7053 9.7369 19.8303 9.86193C19.9554 9.98695 20.0256 10.1565 20.0256 10.3333C20.0256 10.5101 19.9554 10.6797 19.8303 10.8047C19.7053 10.9298 19.5357 11 19.3589 11H10.0256C9.84878 11 9.67921 10.9298 9.55419 10.8047C9.42917 10.6797 9.35893 10.5101 9.35893 10.3333ZM9.58115 7C8.81497 7 8.08017 7.30436 7.5384 7.84614C6.99662 8.38791 6.69226 9.12271 6.69226 9.88889V20.1111C6.69226 20.8773 6.99662 21.6121 7.5384 22.1539C8.08017 22.6956 8.81497 23 9.58115 23H19.8034C20.5696 23 21.3044 22.6956 21.8461 22.1539C22.3879 21.6121 22.6923 20.8773 22.6923 20.1111V9.88889C22.6923 9.12271 22.3879 8.38791 21.8461 7.84614C21.3044 7.30436 20.5696 7 19.8034 7H9.58115ZM8.02559 9.88889C8.02559 9.03022 8.72248 8.33333 9.58115 8.33333H19.8034C20.662 8.33333 21.3589 9.03022 21.3589 9.88889V20.1111C21.3589 20.5237 21.195 20.9193 20.9033 21.2111C20.6116 21.5028 20.2159 21.6667 19.8034 21.6667H9.58115C9.16859 21.6667 8.77293 21.5028 8.48121 21.2111C8.18948 20.9193 8.02559 20.5237 8.02559 20.1111V9.88889Z" fill="black"/>
+</svg>';
+        case "tasks":
+            if($side_menu) return '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 14 14" fill="none">
+                <path d="M4.08337 9.92426L6.65762 9.91551L12.2763 4.35051C12.4968 4.13001 12.6181 3.83718 12.6181 3.52568C12.6181 3.21418 12.4968 2.92135 12.2763 2.70085L11.3511 1.77568C10.9101 1.33468 10.1407 1.33701 9.70321 1.77393L4.08337 7.3401V9.92426ZM10.5263 2.60051L11.4532 3.52393L10.5216 4.44676L9.59646 3.52218L10.5263 2.60051ZM5.25004 7.8266L8.76754 4.34235L9.69271 5.26751L6.17579 8.7506L5.25004 8.75351V7.8266Z" fill="black"/>
+                <path d="M2.91667 12.25H11.0833C11.7267 12.25 12.25 11.7267 12.25 11.0833V6.027L11.0833 7.19367V11.0833H4.75883C4.74367 11.0833 4.72792 11.0892 4.71275 11.0892C4.6935 11.0892 4.67425 11.0839 4.65442 11.0833H2.91667V2.91667H6.91075L8.07742 1.75H2.91667C2.27325 1.75 1.75 2.27325 1.75 2.91667V11.0833C1.75 11.7267 2.27325 12.25 2.91667 12.25Z" fill="black"/>
+            </svg>';
+            if($action == "new") return '<svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 30 30" fill="none">
+<rect x="6.10352e-05" width="30" height="30" rx="5" class="background-light-light-blue"/>
+<path d="M11.6667 19.342L14.6087 19.332L21.03 12.972C21.282 12.72 21.4207 12.3853 21.4207 12.0293C21.4207 11.6733 21.282 11.3387 21.03 11.0867L19.9727 10.0293C19.4687 9.52533 18.5894 9.528 18.0894 10.0273L11.6667 16.3887V19.342ZM19.03 10.972L20.0894 12.0273L19.0247 13.082L17.9674 12.0253L19.03 10.972ZM13 16.9447L17.02 12.9627L18.0774 14.02L14.058 18.0007L13 18.004V16.9447Z" fill="black"/>
+<path d="M10.3333 22H19.6667C20.402 22 21 21.402 21 20.6667V14.888L19.6667 16.2213V20.6667H12.4387C12.4213 20.6667 12.4033 20.6733 12.386 20.6733C12.364 20.6733 12.342 20.6673 12.3193 20.6667H10.3333V11.3333H14.898L16.2313 10H10.3333C9.598 10 9 10.598 9 11.3333V20.6667C9 21.402 9.598 22 10.3333 22Z" fill="black"/>
+</svg>';
+            return '<svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 30 30" fill="none">
+<rect x="6.10352e-05" width="30" height="30" rx="5" class="background-light-light-blue"/>
+<path d="M11.6667 19.342L14.6087 19.332L21.03 12.972C21.282 12.72 21.4207 12.3853 21.4207 12.0293C21.4207 11.6733 21.282 11.3387 21.03 11.0867L19.9727 10.0293C19.4687 9.52533 18.5894 9.528 18.0894 10.0273L11.6667 16.3887V19.342ZM19.03 10.972L20.0894 12.0273L19.0247 13.082L17.9674 12.0253L19.03 10.972ZM13 16.9447L17.02 12.9627L18.0774 14.02L14.058 18.0007L13 18.004V16.9447Z" fill="black"/>
+<path d="M10.3333 22H19.6667C20.402 22 21 21.402 21 20.6667V14.888L19.6667 16.2213V20.6667H12.4387C12.4213 20.6667 12.4033 20.6733 12.386 20.6733C12.364 20.6733 12.342 20.6673 12.3193 20.6667H10.3333V11.3333H14.898L16.2313 10H10.3333C9.598 10 9 10.598 9 11.3333V20.6667C9 21.402 9.598 22 10.3333 22Z" fill="black"/>
+</svg>';
+        case "orders":
+            if($action == "new")  return '<svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 30 30" fill="none">
+                                            <rect width="30" height="30" rx="5" class="background-light-light-blue"/>
+                                            <path d="M15.359 14.3333H17.359V15.6667H15.359V17.6667H14.0256V15.6667H12.0256V14.3333H14.0256V12.3333H15.359V14.3333ZM21.359 10.6667V17.6667L17.359 21.6667H10.359C9.0923 21.6667 8.02563 20.6 8.02563 19.3333V10.6667C8.02563 9.39999 9.0923 8.33333 10.359 8.33333H19.0256C20.2923 8.33333 21.359 9.39999 21.359 10.6667ZM20.0256 10.8667C20.0256 10.2 19.4923 9.66666 18.8256 9.66666H10.559C9.8923 9.66666 9.35897 10.2 9.35897 10.8667V19.2C9.35897 19.8667 9.8923 20.4 10.559 20.4H16.6923V19.4C16.6923 18.1333 17.759 17.0667 19.0256 17.0667H20.0256V10.8667Z" fill="black"/>
+                                            </svg>';
+            return '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12" fill="none">
+                <path d="M6.5 5.5H8V6.5H6.5V8H5.5V6.5H4V5.5H5.5V4H6.5V5.5ZM11 2.75V8L8 11H2.75C1.8 11 1 10.2 1 9.25V2.75C1 1.8 1.8 1 2.75 1H9.25C10.2 1 11 1.8 11 2.75ZM10 2.9C10 2.4 9.6 2 9.1 2H2.9C2.4 2 2 2.4 2 2.9V9.15C2 9.65 2.4 10.05 2.9 10.05H7.5V9.3C7.5 8.35 8.3 7.55 9.25 7.55H10V2.9Z" fill="black"/>
+            </svg>';
+        case "suppliers":
+            if($action == "new") return '<svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 30 30" fill="none">
+<rect x="6.10352e-05" width="30" height="30" rx="5" class="background-light-light-blue"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M14 15.6667C15.8417 15.6667 17.3333 14.175 17.3333 12.3333C17.3333 10.4917 15.8417 9 14 9C12.1583 9 10.6667 10.4917 10.6667 12.3333C10.6667 14.175 12.1583 15.6667 14 15.6667ZM16.6667 12.3333C16.6667 13.8067 15.4733 15 14 15C12.5267 15 11.3333 13.8067 11.3333 12.3333C11.3333 10.86 12.5267 9.66667 14 9.66667C15.4733 9.66667 16.6667 10.86 16.6667 12.3333ZM15.6783 16.2913L14.6667 19.1813V19L14.475 17.6597C14.5362 17.6468 14.5925 17.6169 14.6375 17.5736C14.6826 17.5302 14.7145 17.475 14.7297 17.4143L14.8963 16.7477C14.9086 16.6985 14.9096 16.6473 14.8991 16.5977C14.8886 16.5482 14.867 16.5017 14.8359 16.4617C14.8047 16.4218 14.7649 16.3895 14.7194 16.3672C14.6739 16.345 14.624 16.3334 14.5733 16.3333H13.4273C13.3767 16.3333 13.3267 16.3449 13.2812 16.3671C13.2357 16.3893 13.1959 16.4216 13.1647 16.4615C13.1336 16.5014 13.1119 16.5479 13.1014 16.5974C13.0908 16.6469 13.0917 16.6982 13.104 16.7473L13.2707 17.414C13.2858 17.4747 13.3177 17.53 13.3627 17.5734C13.4077 17.6169 13.4641 17.6468 13.5253 17.6597L13.338 18.9703L12.32 16.2877L12.3133 16.2733C12.2641 16.1723 12.182 16.0912 12.0804 16.0432C11.9788 15.9953 11.8639 15.9834 11.7547 16.0097C11.641 16.0373 11.5157 16.0663 11.3833 16.0977C11.071 16.1707 10.7187 16.253 10.3847 16.346C9.91367 16.4773 9.42567 16.6427 9.08667 16.8653C8.46233 17.2753 8 17.8177 8 18.5V21H20V18.5C20 17.8177 19.538 17.275 18.9133 16.8653C18.5747 16.6427 18.0867 16.4773 17.6157 16.346C17.2845 16.2564 16.9516 16.1736 16.617 16.0977C16.4931 16.0689 16.3693 16.0396 16.2457 16.0097C16.1365 15.9835 16.0217 15.9954 15.9202 16.0434C15.8186 16.0913 15.7365 16.1724 15.6873 16.2733L15.6783 16.2913ZM16.4813 16.7507L16.2437 16.6947L14.9697 20.3333H19.3333V18.5C19.3333 18.1513 19.0987 17.7843 18.5477 17.4227C18.303 17.2617 17.9043 17.1183 17.437 16.9883C17.1202 16.9025 16.8014 16.8233 16.4813 16.7507ZM11.7607 16.6937L13.1417 20.3333H8.66667V18.5C8.66667 18.1513 8.90133 17.7843 9.45233 17.4227C9.697 17.2617 10.0957 17.1183 10.563 16.9883C10.8797 16.9024 11.1983 16.8232 11.5183 16.7507L11.7607 16.6937Z" fill="black" stroke="black" stroke-width="0.2"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M21.5 11C21.6326 11 21.7598 11.0527 21.8536 11.1464C21.9473 11.2402 22 11.3674 22 11.5V13H23.5C23.6326 13 23.7598 13.0527 23.8536 13.1464C23.9473 13.2402 24 13.3674 24 13.5C24 13.6326 23.9473 13.7598 23.8536 13.8536C23.7598 13.9473 23.6326 14 23.5 14H22V15.5C22 15.6326 21.9473 15.7598 21.8536 15.8536C21.7598 15.9473 21.6326 16 21.5 16C21.3674 16 21.2402 15.9473 21.1464 15.8536C21.0527 15.7598 21 15.6326 21 15.5V14H19.5C19.3674 14 19.2402 13.9473 19.1464 13.8536C19.0527 13.7598 19 13.6326 19 13.5C19 13.3674 19.0527 13.2402 19.1464 13.1464C19.2402 13.0527 19.3674 13 19.5 13H21V11.5C21 11.3674 21.0527 11.2402 21.1464 11.1464C21.2402 11.0527 21.3674 11 21.5 11Z" fill="black"/>
+</svg>';
+            return '<svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 11 11" fill="none">
+<path fill-rule="evenodd" clip-rule="evenodd" d="M5.3501 5.93331C6.96156 5.93331 8.26676 4.6281 8.26676 3.01664C8.26676 1.40518 6.96156 0.0999756 5.3501 0.0999756C3.73864 0.0999756 2.43343 1.40518 2.43343 3.01664C2.43343 4.6281 3.73864 5.93331 5.3501 5.93331ZM7.68343 3.01664C7.68343 4.30581 6.63926 5.34998 5.3501 5.34998C4.06093 5.34998 3.01676 4.30581 3.01676 3.01664C3.01676 1.72748 4.06093 0.683309 5.3501 0.683309C6.63926 0.683309 7.68343 1.72748 7.68343 3.01664ZM6.81864 6.47989L5.93343 9.00864V8.84998L5.76572 7.67718C5.81926 7.6659 5.86855 7.63979 5.90795 7.60183C5.94735 7.56387 5.97529 7.5156 5.98856 7.46252L6.13439 6.87918C6.14516 6.8362 6.14599 6.79133 6.13682 6.74798C6.12766 6.70463 6.10874 6.66393 6.08149 6.62899C6.05425 6.59404 6.0194 6.56576 5.9796 6.54629C5.93979 6.52683 5.89607 6.51669 5.85176 6.51664H4.84901C4.80471 6.51665 4.76099 6.52676 4.72118 6.54619C4.68136 6.56562 4.6465 6.59387 4.61923 6.62878C4.59196 6.6637 4.573 6.70437 4.56379 6.7477C4.55459 6.79104 4.55538 6.83591 4.5661 6.87889L4.71193 7.46223C4.72515 7.51536 4.75306 7.5637 4.79247 7.60171C4.83188 7.63973 4.88119 7.66588 4.93476 7.67718L4.77085 8.82402L3.8801 6.47668L3.87426 6.46414C3.83122 6.37578 3.75931 6.30475 3.67043 6.2628C3.58154 6.22085 3.481 6.21049 3.38543 6.23343C3.28597 6.25764 3.17631 6.28302 3.06051 6.31043C2.78722 6.37431 2.47893 6.44635 2.18668 6.52773C1.77456 6.64264 1.34756 6.78731 1.05093 6.98214C0.504639 7.34089 0.100098 7.81543 0.100098 8.41248V10.6H10.6001V8.41248C10.6001 7.81543 10.1958 7.3406 9.64926 6.98214C9.35293 6.78731 8.92593 6.64264 8.51381 6.52773C8.22405 6.44931 7.93271 6.37686 7.63997 6.31043C7.53155 6.28525 7.42324 6.25959 7.31506 6.23343C7.21953 6.21056 7.11905 6.22096 7.03023 6.26291C6.94141 6.30485 6.86954 6.37584 6.82651 6.46414L6.81864 6.47989ZM7.52126 6.88181L7.31331 6.83281L6.19856 10.0166H10.0168V8.41248C10.0168 8.10739 9.81143 7.78627 9.32931 7.46981C9.11522 7.32893 8.76639 7.20352 8.35747 7.08977C8.08031 7.01466 7.80131 6.94532 7.52126 6.88181ZM3.39068 6.83193L4.59906 10.0166H0.683431V8.41248C0.683431 8.10739 0.888764 7.78627 1.37089 7.46981C1.58497 7.32893 1.93381 7.20352 2.34272 7.08977C2.61987 7.01458 2.89857 6.94524 3.17864 6.88181L3.39068 6.83193Z" fill="black" stroke="black" stroke-width="0.2"/>
+</svg>';
+        case "report":
+            return '<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 15 15" fill="none">
+                <path d="M12.4394 5.36625C12.4097 5.29842 12.3683 5.23641 12.3169 5.18313L8.56687 1.43312C8.51359 1.38174 8.45158 1.34026 8.38375 1.31062C8.365 1.30187 8.345 1.29687 8.325 1.29C8.2727 1.2722 8.21826 1.26148 8.16313 1.25813C8.15 1.25688 8.13812 1.25 8.125 1.25H3.75C3.06062 1.25 2.5 1.81062 2.5 2.5V12.5C2.5 13.1894 3.06062 13.75 3.75 13.75H11.25C11.9394 13.75 12.5 13.1894 12.5 12.5V5.625C12.5 5.61188 12.4931 5.6 12.4919 5.58625C12.4888 5.53107 12.4781 5.47659 12.46 5.42438C12.4538 5.40438 12.4481 5.385 12.4394 5.36625ZM10.3663 5H8.75V3.38375L10.3663 5ZM3.75 12.5V2.5H7.5V5.625C7.5 5.79076 7.56585 5.94973 7.68306 6.06694C7.80027 6.18415 7.95924 6.25 8.125 6.25H11.25L11.2513 12.5H3.75Z" fill="black"/>
+                <path d="M5 7.5H10V8.75H5V7.5ZM5 10H10V11.25H5V10ZM5 5H6.25V6.25H5V5Z" fill="black"/>
+            </svg>';
+        case "collection":
+            return '<svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 11 11" fill="none">
+<path d="M7.21808 7.06669C7.21808 6.5405 5.79354 6.11431 4.03627 6.11431M7.21808 7.06669C7.21808 7.59288 5.79354 8.01907 4.03627 8.01907C2.27899 8.01907 0.854448 7.59288 0.854448 7.06669M7.21808 7.06669V9.41764C7.21808 9.96002 5.79354 10.4 4.03627 10.4C2.27899 10.4 0.854448 9.9605 0.854448 9.41764V7.06669M7.21808 7.06669C8.95627 7.06669 10.3999 6.59669 10.3999 6.11431V1.35241M4.03627 6.11431C2.27899 6.11431 0.854448 6.5405 0.854448 7.06669M4.03627 6.11431C2.02808 6.11431 0.399902 5.64431 0.399902 5.16193V2.78098M4.03627 1.8286C2.02808 1.8286 0.399902 2.25479 0.399902 2.78098M0.399902 2.78098C0.399902 3.30717 2.02808 3.73336 4.03627 3.73336C4.03627 4.21574 5.5149 4.68574 7.25308 4.68574C8.99081 4.68574 10.3999 4.21574 10.3999 3.73336M10.3999 1.35241C10.3999 0.826215 8.99081 0.400024 7.25308 0.400024C5.5149 0.400024 4.10627 0.826215 4.10627 1.35241M10.3999 1.35241C10.3999 1.8786 8.99081 2.30479 7.25308 2.30479C5.51536 2.30479 4.10627 1.8786 4.10627 1.35241M4.10627 1.35241V6.19336" stroke="black" stroke-width="0.8" stroke-linecap="round"/>
+</svg>';
+        default:
+            return '<div></div>';
+    }
+}
+?>
