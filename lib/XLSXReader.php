@@ -66,7 +66,7 @@ class XLSXReader {
 		$relationshipsXML = simplexml_load_string($this->getEntryData("_rels/.rels"));
 		foreach($relationshipsXML->Relationship as $rel) {
 			if($rel['Type'] == self::SCHEMA_OFFICEDOCUMENT) {
-				$workbookDir = dirname($rel['Target']) . 'XLSXReader.php/';
+				$workbookDir = dirname($rel['Target']) . '/';
 				$workbookXML = simplexml_load_string($this->getEntryData($rel['Target']));
 				foreach($workbookXML->sheets->sheet as $sheet) {				
 					$r = $sheet->attributes('r', true);
@@ -249,7 +249,7 @@ class XLSXWorksheet {
 			$index = 0;
 
 			for ($i = $colLen-1; $i >= 0; $i--) {
-				$index += (ord($col[$i]) - 64) * pow(26, $colLen-$i-1);
+				$index += (ord($col{$i}) - 64) * pow(26, $colLen-$i-1);
 			}
 			return array($index-1, $row-1);
 		}

@@ -266,7 +266,7 @@ function create_input($field,$value = null,$readonly = "")
                 <path d="M9 11C10.1046 11 11 10.1046 11 9C11 7.89543 10.1046 7 9 7C7.89543 7 7 7.89543 7 9C7 10.1046 7.89543 11 9 11Z" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
         <?php } ?>
-        <input class="upload-<?php echo $field["widget"]?>" type="file" id="<?php echo $field["field_name"]?>" name="<?php echo $field["field_name"]?>" style="display: none;" required  accept="<?php echo $accept ?>"/>
+        <input class="upload-<?php echo $field["widget"]?>" type="file" id="<?php echo $field["field_name"]?>" name="<?php echo $field["field_name"]?>" style="display: none;" required  accept="<?= $accept ?>"/>
 
     <?php }
          break;
@@ -505,7 +505,7 @@ function view_archive_actions($table_name,$view_only = false,$add_text="", $clie
                 if($table_name == "collection"){?>
                     <form novalidate  class="site_form" data-success="alert_msg" >
                         <input type="hidden" name="form_func" value="import_from_xlsx"/>
-                        <input type='file' name='bills' id='bills'>
+                        <input type='file' name='bills' id='bills' accept="*.xls,*.xlsx">
                         <button type="submit" class="btn-login font-18 bold background-gold ">קליטת הקובץ</button>
                     </form>
                 <?php } ?>
