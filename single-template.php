@@ -74,24 +74,14 @@ else{
 <div class="font-30 margin-bottom-20 bold"><?php echo $title_page ?></div>
     <div class="flex-display space-between">
         <input type="hidden" name="dirty" value="" />
-        <?php if($table_name == "products"){
-            ?>
-            <form novalidate="" id="product-form" class=" <?php echo $class_form?>" method="post" enctype="multipart/form-data"  <!--onsubmit="required()-->">
-                <input type="hidden" name="save_product" value="" />
-        <?php }
-        else{?>
             <form class="site_form <?php echo $class_form?> " novalidate="" data-success='reload_page' data-failed='show_error_messages'>
-        <?php } ?>
-            <div id="form_error_msgs_container" class="margin-bottom-20"></div>
-            <input type="hidden" name="form_func" value="build_query_boutique" />
-            <input type="hidden" name="table_name" value="<?php echo $table_name ?>" />
-            <input type="hidden" name="id" value="<?php echo $id ?>" />
-            <input type="hidden" name="previous_page" value="<?php echo $previous_page ?>" />
-            <input type="hidden" name="action" value="<?php echo $id ?>" />
-
-            <?php
-            //write_log("row ".json_encode($row));
-            get_single_view($table_name,$row,$readonly); ?>
+                <div id="form_error_msgs_container" class="margin-bottom-20"></div>
+                <input type="hidden" name="form_func" value="build_query_boutique" />
+                <input type="hidden" name="table_name" value="<?php echo $table_name ?>" />
+                <input type="hidden" name="id" value="<?php echo $id ?>" />
+                <input type="hidden" name="previous_page" value="<?php echo $previous_page ?>" />
+                <input type="hidden" name="action" value="<?php echo $id ?>" />
+                <?php get_single_view($table_name,$row,$readonly); ?>
             <div class="buttons flex-display align-self-center">
                 <button type="submit" class="save background-gold flex-display center align-center bold font-18">
                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
@@ -118,7 +108,7 @@ else{
                 <?php }
                 if($action != "new") {?>
                     <a data-bs-toggle="modal" href="#bout-massage" class=" flex-display center button background-dark-green bold font-18" role="button" data-action="remove">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 14 14" fill="none">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 14 14" fill="none">
                             <path d="M2.3335 4.08333H11.6668M5.8335 6.41667V9.91667M8.16683 6.41667V9.91667M2.91683 4.08333L3.50016 11.0833C3.50016 11.3928 3.62308 11.6895 3.84187 11.9083C4.06066 12.1271 4.35741 12.25 4.66683 12.25H9.3335C9.64292 12.25 9.93966 12.1271 10.1585 11.9083C10.3772 11.6895 10.5002 11.3928 10.5002 11.0833L11.0835 4.08333M5.25016 4.08333V2.33333C5.25016 2.17862 5.31162 2.03025 5.42102 1.92085C5.53041 1.81146 5.67879 1.75 5.8335 1.75H8.16683C8.32154 1.75 8.46991 1.81146 8.57931 1.92085C8.6887 2.03025 8.75016 2.17862 8.75016 2.33333V4.08333" stroke="white" stroke-linecap="round" stroke-linejoin="round"/>
                         </svg>
                         <span>מחיקת <?php echo $page_info["single"]; ?></span>
@@ -136,7 +126,7 @@ else{
                      <?php
                      if(!isset($row->done) || !$row->done){?>
                             <button type="button" class="<?php echo is_manager() ? '':'hidden' ?> order-confirmation flex-display center align-center background-white dark-green bold font-18">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 16 16" fill="none">
                                     <path d="M10.8474 7.14639C10.9411 7.24016 10.9937 7.36731 10.9937 7.49989C10.9937 7.63248 10.9411 7.75963 10.8474 7.85339L8.09736 10.6034C8.00359 10.6971 7.87644 10.7498 7.74386 10.7498C7.61127 10.7498 7.48412 10.6971 7.39036 10.6034L6.14036 9.35339C6.04928 9.25909 5.99888 9.13279 6.00002 9.00169C6.00116 8.87059 6.05374 8.74519 6.14645 8.65248C6.23915 8.55978 6.36456 8.50719 6.49566 8.50606C6.62675 8.50492 6.75305 8.55531 6.84736 8.64639L7.74386 9.54289L10.1404 7.14639C10.2341 7.05266 10.3613 7 10.4939 7C10.6264 7 10.7536 7.05266 10.8474 7.14639Z" fill="#1A7870"/>
                                     <circle cx="8.5" cy="8.5" r="6" stroke="#1A7870"/>
                                 </svg>
@@ -145,7 +135,7 @@ else{
                          <?php
                         if(!is_manager()){?>
                             <button type="button" class="manager-approval hidden flex-display center align-center background-white dark-green bold font-18">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 16 16" fill="none">
                                     <path d="M10.8474 7.14639C10.9411 7.24016 10.9937 7.36731 10.9937 7.49989C10.9937 7.63248 10.9411 7.75963 10.8474 7.85339L8.09736 10.6034C8.00359 10.6971 7.87644 10.7498 7.74386 10.7498C7.61127 10.7498 7.48412 10.6971 7.39036 10.6034L6.14036 9.35339C6.04928 9.25909 5.99888 9.13279 6.00002 9.00169C6.00116 8.87059 6.05374 8.74519 6.14645 8.65248C6.23915 8.55978 6.36456 8.50719 6.49566 8.50606C6.62675 8.50492 6.75305 8.55531 6.84736 8.64639L7.74386 9.54289L10.1404 7.14639C10.2341 7.05266 10.3613 7 10.4939 7C10.6264 7 10.7536 7.05266 10.8474 7.14639Z" fill="#1A7870"/>
                                     <circle cx="8.5" cy="8.5" r="6" stroke="#1A7870"/>
                                 </svg>

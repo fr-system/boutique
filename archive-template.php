@@ -15,15 +15,17 @@ $page_info  = BOUTIQUE_TABLES[$table_name];
     <?php
     $filters = array();
     $add_text = "";
+    $client_id = null;
     $lastKey = array_key_last($_GET);
     if ($lastKey != "subject") {
         $query = "SELECT name from {$wpdb->prefix}clients WHERE " .$lastKey."=".$_GET[$lastKey];
         $result = run_query ($query);
         $add_text =" של ". $result[0]->name;
         $filters[]=array("filter_field" => "client_id", "filter_value"=>$_GET[$lastKey]);
+        $client_id = $_GET[$lastKey];
     }
 
-    echo view_archive_actions($table_name,false,$add_text,$_GET[$lastKey]);
+    echo view_archive_actions($table_name,false,$add_text,$client_id);
     //if(!isset($_GET["subject"]) || !is_manager() && $_GET["subject"] == "clients") return;
     if(is_agent() ){
         if($table_name == "clients") {

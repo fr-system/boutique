@@ -18,7 +18,7 @@ function get_obligation_client()
         $obligo+=$row->obligation;
     }
 
-    write_log("obligo ".$obligo);
+    //write_log("obligo ".$obligo);
     echo json_encode (array("obligation" => $obligo > $client->obligo));
     die();
 
