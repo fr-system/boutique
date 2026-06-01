@@ -384,7 +384,7 @@ jQuery(document).ready(function($){
 
     })
 
-    jQuery(".page .products-gallery .product .plus-minus-count span.pointer").click(function (e) {
+    jQuery(".page .products-gallery .product .plus-minus-count span.pointer:not(.readonly)").click(function (e) {
         plusMinusCountProduct(this)
     })
 
@@ -448,6 +448,10 @@ jQuery(document).ready(function($){
             var product = jQuery('.products-gallery .product[data-id=' + id + ']');
             product.addClass("hidden");
             product.find("input.input-remove").val("1");
+
+            var total_order = parseInt(jQuery(".page.single input[name=total]").autoNumeric('get')||0);
+            total_order-=parseInt( product.find('.calculaded-price').text()||0);
+            jQuery("input[name=total]").autoNumeric('set', total_order);
         }
         else{
             $.each(jQuery('.products-gallery .product'),function () {
@@ -653,18 +657,24 @@ function searchElements(text,selector,searchSelector){
             //element.find("input[name*=\"][product_id]").prop("name","products["+key+"][product_id]");
             //element.find("input[name*=\"][count]").prop("name","products["+key+"][count]");
 
-
             element.find('.plus-minus-count input').prop("name","products["+key+"][count]");
-            element.find('.discount_percent-bonus input[type="text"]').prop("name","products["+key+"][discount_percent]");
-            element.find('.discount_percent-bonus input[type="text"]').prop("name","products["+key+"][bonus]");
-
+            element.find('.price-part.discount-percent').prop("name","products["+key+"][discount_percent]");
+            element.find('.price-part.bonus').prop("name","products["+key+"][bonus]");
+            element.find('.price-part.unit-price').prop("name","products["+key+"][order_price]");
+            element.find('.price-part.unit-price').autoNumeric('init');
+            element.find('.calculated-price-input').prop("name","products["+key+"][total]");
 
             jQuery('input[name=dirty]').val("1");
             jQuery(".add-order-product").after(element);
 
+            var total_order = parseInt(jQuery(".page.single input[name=total]").autoNumeric('get')||0);
+            total_order+=parseInt( element.find('.calculaded-price').text()||0);
+            jQuery("input[name=total]").autoNumeric('set', total_order);
+
             jQuery(".page .products-gallery .product .plus-minus-count span.pointer").click(function (e) {
                 plusMinusCountProduct(this);
             })
+            registerToCalculatePrice();
             //jQuery(".products").prepend(element);
             closePopup();
 
