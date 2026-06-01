@@ -104,9 +104,7 @@ input:not([type=search]):-webkit-autofill {
     height: 35px !important;
 }
 .plus-minus-count{
-    /*height: 35px;*/
     align-self: center;
-    /*width: 95%;*/
 }
 .plus-minus-count span, .plus-minus-count input{
     border:solid 1px var(--b-global-color-dark-gray);
@@ -126,10 +124,16 @@ input:not([type=search]):-webkit-autofill {
 .plus-minus-count .plus:hover, .plus-minus-count .minus:hover{
     background-color: var(--b-global-color-light-gray);
 }
+.plus-minus-count .plus.readonly:hover, .plus-minus-count .minus.readonly:hover{
+    background-color: var(--b-global-color-dark-gray);
+}
 .plus-minus-count .plus, .plus-minus-count .minus{
     display: flex;
     align-items: center;
     justify-content: center;
+}
+.plus-minus-count .plus.readonly, .plus-minus-count .minus.readonly {
+    background-color: var(--b-global-color-light-gray);
 }
 .plus-minus-count .minus {
     border-top-right-radius: 5px;

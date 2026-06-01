@@ -38,14 +38,13 @@ function boutique_enqueue_scripts()
     wp_enqueue_script('jquery');
 
     //wp_enqueue_script( 'script', get_template_directory_uri() . '/script.js', $ver);
-    wp_enqueue_script( 'script', get_template_directory_uri() . '/script.js', array(), $ver );
-    wp_enqueue_script( 'fridi-script', get_template_directory_uri() . '/fridi.js', array(), $ver );
-    wp_enqueue_script( 'rivka-script', get_template_directory_uri() . '/rivka.js', array(), $ver );
+
 
     wp_register_script( 'jq-datatable', get_template_directory_uri(). '/assets/datatables.min.js' );
     wp_enqueue_script( 'jq-datatable' );
     //wp_register_script('script', get_template_directory_uri() . '/script.js');
    //wp_enqueue_script('script',);
+
 
     wp_register_script('autoNumeric', get_template_directory_uri() . '/assets/autoNumeric_old.js');
     wp_enqueue_script('autoNumeric');
@@ -55,10 +54,9 @@ function boutique_enqueue_scripts()
     wp_register_script('messages_he', get_template_directory_uri() . '/assets/messages_he.js');
     wp_enqueue_script('messages_he');
 
-
-
-
-
+    wp_enqueue_script( 'script', get_template_directory_uri() . '/script.js', array(), $ver );
+    wp_enqueue_script( 'fridi-script', get_template_directory_uri() . '/fridi.js', array(), $ver );
+    wp_enqueue_script( 'rivka-script', get_template_directory_uri() . '/rivka.js', array(), $ver );
 }
 add_action('wp_enqueue_scripts', 'boutique_enqueue_scripts', 98);
 

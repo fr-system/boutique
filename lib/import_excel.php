@@ -1,9 +1,8 @@
 <?php
 function import_from_xlsx()
 {
-    require 'lib/SimpleXLSX.php';
+    require 'XLSXReader.php';
     write_log("import_from_xlsx");
-    //require('lib/XLSXReader.php');
     $msg = "";
     if (empty($_FILES) || ($_FILES["bills"]["size"] == 0)) {
         write_log("_FILES ".json_encode($_FILES));
@@ -14,8 +13,30 @@ function import_from_xlsx()
         )));
     }
     write_log("_FILES ".json_encode($_FILES));
-    if ($xlsx = SimpleXLSX::parse($_FILES["bills"]["tmp_name"])) {
-        write_log('rows '.json_encode ( $xlsx->rows()));
+    if (file_exists ($_FILES["bills"]["tmp_name"])) {
+//        $tmpFile = $_FILES['bills']['tmp_name'];
+//
+       $uploadDir = ABSPATH . 'uploads/my-folder/';
+//
+//        if (!file_exists($uploadDir)) {
+//            wp_mkdir_p($uploadDir);
+//        }
+//
+        $destination = $uploadDir . basename($_FILES['bills']['name']);
+//
+//        if (move_uploaded_file($tmpFile, $destination)) {
+//            write_log( 'File moved');
+//        } else {
+//            write_log ('Move failed');
+//        }
+//        if ($xlsx = SimpleXLSX::parse ($destination)) {
+//            write_log ('rows ' . json_encode ($xlsx->rows ()));
+//        }
+        $sheets = getXlsxData($destination);
+        write_log("heets ".json_encode($sheets));
+    }
+    else{
+        write_log ('file no exist');
     }
     /* $sheets = getXlsxData($_FILES["bills"]["tmp_name"]);
      write_log("heets ".json_encode($sheets));

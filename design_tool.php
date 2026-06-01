@@ -42,6 +42,9 @@ function create_product_view($product=null,$options=null)
     if(!isset($options["key"])){
         $options["key"] = 0;
     }
+    if(isset($options["readonly"])){
+        $readonly= $options["readonly"] ?? '';
+    }
     ?>
     <div class="border-dark-gray pointer flex-display direction-column space-between product font-15 padding-15" data-id="<?php echo $product->id?>">
         <?php if($options["table_name"]=="orders"){
@@ -92,35 +95,35 @@ function create_product_view($product=null,$options=null)
             $product->bonus = 0;
 
         }
-        $calculaded_price =$price*$product->count-  $price*$product->count*$product->discount_percent/100;
+        $calculaded_price =$price*$product->count*$product->units_in_box-  $price*$product->count*$product->units_in_box*$product->discount_percent/100;
         ?>
 
         <div class="part-10 d-not-order"><?= (!empty($price) ? $price . " ₪" : "") ?></div>
         <div class="plus-minus-count flex-display d-order part-20">
-            <span class="minus bold font-25 part-20 pointer">-</span>
+            <span class="minus bold font-25 part-20 pointer <?=$readonly?>">-</span>
             <span class="part-70 flex-display space-between">
                 <input type="number" class="part-30 price-part count align-self-center"  min="0" name="products[<?= $options["key"]?>][count]" value="<?= $product->count?>" />
-                <?= ($product->individually ?
+                <?= ($product->individually && empty($readonly) ?
                     '<select class="price-part individually part-70 font-12 align-self-center" name="products['.$options["key"].'][order_individual]">
                     <option value="0" '. ($product->order_individual? '':'selected').'> ארגזים</option>
                     <option value="1" '.($product->order_individual? "selected":"").' >בקבוקים</option></select>'
                     :'<label class="part-60 align-self-center">ארגזים</label>');?>
             </span>
-            <span class="plus bold font-25 part-20 pointer">+</span>
+            <span class="plus bold font-25 part-20 pointer <?=$readonly?>">+</span>
         </div>
         <div class="input-label flex-display space-around align-center d-order part-20">
             <label for="" class="">מחיר ליחידה</label>
-            <input class="unit-price price-part" type="text"  name="products[<?= $options["key"]?>][order_price]" value="<?= $price?>" data-a-sign="₪">
+            <input class="unit-price price-part" type="text"  name="products[<?= $options["key"]?>][order_price]" value="<?= $price?>" data-a-sign="₪" <?=$readonly?>>
         </div>
         <div class="discount_percent-bonus flex-display space-between part-20 font-12 d-order ">
             <div class="input-label flex-display align-center part-45">
                 <label for="" class="">%&nbsp;</label>
-                <input class="price-part discount-percent" type="text" pattern="\d*" name="products[<?= $options["key"]?>][discount_percent]" value="<?= $product->discount_percent?>" data-a-sign="%">
+                <input class="price-part discount-percent" type="text" pattern="\d*" name="products[<?= $options["key"]?>][discount_percent]" value="<?= $product->discount_percent?>" data-a-sign="%" <?=$readonly?>>
                 <label for="" class=""> הנחה</label>
             </div>
             <div class="input-label flex-display align-center part-45">
-                <input class=" " type="number" name="products[<?= $options["key"]?>][bonus]" value="<?php echo $product->bonus?>" >
-                <label for="" class="price-part bonus">בונוס</label>
+                <input class="price-part bonus " type="number" name="products[<?= $options["key"]?>][bonus]" value="<?php echo $product->bonus?>" <?=$readonly?> >
+                <label for="" class="">בונוס</label>
             </div>
         </div>
         <div class="flex-display center part-15 d-order ">
@@ -169,7 +172,7 @@ function archive_header($table_name, $view_only = false, $add_text="", $client_i
                 if($table_name == "collection"){?>
                     <form novalidate  class="site_form" data-success="alert_msg" >
                         <input type="hidden" name="form_func" value="import_from_xlsx"/>
-                        <input type='file' name='bills' id='bills' accept="*.xls,*.xlsx">
+                        <input type='file' name='bills' id='bills' accept=".xls,.xlsx">
                         <button type="submit" class="btn-login font-18 bold background-gold ">קליטת הקובץ</button>
                     </form>
                 <?php } ?>
@@ -446,7 +449,7 @@ function create_input($field,$value = null,$readonly = "")
                 if($value && is_array($value)){
                     foreach ($value as $key=>$product) {
                         //write_log("product ".json_encode($product));
-                        create_product_view($product,array("table_name"=>"orders","key"=>$key));
+                        create_product_view($product,array("table_name"=>"orders","key"=>$key,"readonly"=>$readonly));
                     }
                 } ?>
             </div>

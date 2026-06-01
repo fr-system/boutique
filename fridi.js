@@ -16,6 +16,10 @@ jQuery(document).ready(function($){
         ];
        call_ajax_function(postData,"fillClientPriceModal")
     });
+    registerToCalculatePrice();
+
+});
+function registerToCalculatePrice(){
     jQuery('.products-gallery.orders .product .price-part').on('change', function (e) {
         calculatePrice(this);
     });
@@ -24,13 +28,11 @@ jQuery(document).ready(function($){
         jQuery(".products-gallery.orders .product .calculated-price-input").each(function (i,totalProductPrice){
             total+=parseInt( jQuery(totalProductPrice).val()||0);
         })
-        //jQuery("input[name=total]").val(total+'₪');
         jQuery("input[name=total]").autoNumeric('set', total);
         //jQuery("input[name=total]").autoNumeric.set("input[name=total]", total);
-        //jQuery('input[data-a-sign=₪]').autoNumeric('init', { vMin: '-9999999999999' });
 
     });
-});
+}
 function fillClientPriceModal(result) {
     if (result.array.length > 0) {
         jQuery('#update_client_price input[name=id]').val(result.array[0].id);
