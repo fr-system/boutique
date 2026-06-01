@@ -38,13 +38,13 @@ else{//edit || readonly
         // write_log("row ".json_encode($row));
     }
 
-    if($table_name == "agents"){
+    /*if($table_name == "agents"){
         $user_info = get_userdata($row->user_id);
         if ($user_info) {
             $row->display_name = $user_info->display_name;
             $row->user_email = $user_info->user_email;
         }
-    }
+    }*/
 
     if($action == "edit") {    }
     if($action == "readonly") {
@@ -64,14 +64,22 @@ if($table_name == "orders"){
     $class_form.="part-80 ";
 }
 else{
-    $class_form.="part-60 ";
+    $class_form.="part-65 ";
 }
 
 
 ?>
 
 <section class="page single" data-single="<?php echo $page_info['single']?>">
-<div class="font-30 margin-bottom-20 bold"><?php echo $title_page ?></div>
+    <div class="flex-display ">
+        <div class="flex-display space-between margin-bottom-20 part-80 align-center ">
+            <div class="font-30 bold "><?php echo $title_page ?><span class="font-18"><?php echo $id ?  "  מס. ".$id : "" ?></span></div>
+            <?php if($table_name == "orders" && $row->user_opens){?>
+                    <div class="font-18 "><span class="bold">מקים ההזמנה: </span> <?php echo  get_userdata($row->user_opens)->display_name ?></div>
+            <?php }?>
+
+        </div>
+    </div>
     <div class="flex-display space-between">
         <input type="hidden" name="dirty" value="" />
             <form class="site_form <?php echo $class_form?> " novalidate="" data-success='reload_page' data-failed='show_error_messages'>
@@ -122,6 +130,21 @@ else{
                         <span>מחיקת <?php /*echo $page_info["single"]; */?></span>
                     </button>-->
                 <?php }
+                if($table_name == "clients" && $action != "new"){
+                    $block_text = "חסום לקוח";
+                    if($row->blocked == 1){
+                        $block_text = "בטל חסימת לקוח";
+                    }?>
+                        <button type="submit" class="block-client flex-display center align-center background-red bold font-18">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 16 16" fill="none">
+                                    <path d="M10.8474 7.14639C10.9411 7.24016 10.9937 7.36731 10.9937 7.49989C10.9937 7.63248 10.9411 7.75963 10.8474 7.85339L8.09736 10.6034C8.00359 10.6971 7.87644 10.7498 7.74386 10.7498C7.61127 10.7498 7.48412 10.6971 7.39036 10.6034L6.14036 9.35339C6.04928 9.25909 5.99888 9.13279 6.00002 9.00169C6.00116 8.87059 6.05374 8.74519 6.14645 8.65248C6.23915 8.55978 6.36456 8.50719 6.49566 8.50606C6.62675 8.50492 6.75305 8.55531 6.84736 8.64639L7.74386 9.54289L10.1404 7.14639C10.2341 7.05266 10.3613 7 10.4939 7C10.6264 7 10.7536 7.05266 10.8474 7.14639Z" fill="#1A7870"/>
+                                    <circle cx="8.5" cy="8.5" r="6" stroke="#1A7870"/>
+                                </svg>
+                                <span><?php echo $block_text ?></span>
+                            </button>
+
+                 <?php
+                }
                  if($table_name == "orders" ){
                      ?>
                      <input type="hidden" name="obligation" value="<?php echo $obligo ?>" />
@@ -132,7 +155,7 @@ else{
                                     <path d="M10.8474 7.14639C10.9411 7.24016 10.9937 7.36731 10.9937 7.49989C10.9937 7.63248 10.9411 7.75963 10.8474 7.85339L8.09736 10.6034C8.00359 10.6971 7.87644 10.7498 7.74386 10.7498C7.61127 10.7498 7.48412 10.6971 7.39036 10.6034L6.14036 9.35339C6.04928 9.25909 5.99888 9.13279 6.00002 9.00169C6.00116 8.87059 6.05374 8.74519 6.14645 8.65248C6.23915 8.55978 6.36456 8.50719 6.49566 8.50606C6.62675 8.50492 6.75305 8.55531 6.84736 8.64639L7.74386 9.54289L10.1404 7.14639C10.2341 7.05266 10.3613 7 10.4939 7C10.6264 7 10.7536 7.05266 10.8474 7.14639Z" fill="#1A7870"/>
                                     <circle cx="8.5" cy="8.5" r="6" stroke="#1A7870"/>
                                 </svg>
-                                <span>אישור <?php echo $page_info["single"]; ?></span>
+                                <span>אישור הזמנה</span>
                             </button>
                          <?php
                         if(!is_manager()){?>

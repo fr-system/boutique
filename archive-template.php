@@ -16,16 +16,18 @@ $page_info  = BOUTIQUE_TABLES[$table_name];
     $filters = array();
     $add_text = "";
     $client_id = null;
+    $blocked = null;
     $lastKey = array_key_last($_GET);
     if ($lastKey != "subject") {
-        $query = "SELECT name from {$wpdb->prefix}clients WHERE " .$lastKey."=".$_GET[$lastKey];
+        $query = "SELECT name,blocked from {$wpdb->prefix}clients WHERE " .$lastKey."=".$_GET[$lastKey];
         $result = run_query ($query);
         $add_text =" של ". $result[0]->name;
         $filters[]=array("filter_field" => "client_id", "filter_value"=>$_GET[$lastKey]);
         $client_id = $_GET[$lastKey];
+        $blocked = $result[0]->blocked;
     }
 
-    echo archive_header($table_name,false,$add_text,$client_id);
+    echo archive_header($table_name,false,$add_text,$client_id,$blocked);
     //if(!isset($_GET["subject"]) || !is_manager() && $_GET["subject"] == "clients") return;
     if(is_agent() ){
         if($table_name == "clients") {
@@ -81,7 +83,9 @@ function get_tr_data($table_name, $data, $id_column,$add_text){
     //write_log('row '.json_encode ($row));
     //$html='<tr class="border-dark-gray" data-id="'.$row->id.'">';
     $backgraund_class = ($table_name == "orders" && $row->done ? "order-confirm" : "");
-
+    if($table_name == "clients" && $row->blocked) {
+        $backgraund_class.=" blocked";
+    }
     $html='<tr data-id="'.$row->id.'" class="'.$backgraund_class.'">';
 
     foreach($page_info["columns"] as $column) {

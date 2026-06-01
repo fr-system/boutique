@@ -137,7 +137,7 @@ function create_product_view($product=null,$options=null)
     </div>
     <?php
 }
-function archive_header($table_name, $view_only = false, $add_text="", $client_id = null)
+function archive_header($table_name, $view_only = false, $add_text="", $client_id = null,$blocked = null)
 {
     ob_start();
     ?>
@@ -209,20 +209,17 @@ function archive_header($table_name, $view_only = false, $add_text="", $client_i
                 </svg>
                 <input type="search" id="search" class="" placeholder="חיפוש" />
             </div>
-            <?php if($table_name != "collection" && !$view_only && ($table_name != "tasks" || is_manager())){
+            <?php if($table_name != "collection" && !$view_only && ($table_name != "tasks" || is_manager()) && !($client_id!=null && $blocked ==1)){
             $href = 'single?subject='.$table_name.'&action=new';
             if(!empty($client_id)){
                 $href.="&client_id=".$client_id;
             }
-            if($table_name=="lists") { ?>
-            <a data-bs-toggle="modal" href="#edit-list" role="button" data-action="new">
+                if($table_name=="lists") { ?>
+                    <a data-bs-toggle="modal" href="#edit-list" role="button" data-action="new">
                 <?php }
-                else{
-                ?>
-
-                <a href="<?php echo $href ?>">
-
-                    <?php }?>
+                else {?>
+                    <a href="<?php echo $href ?>">
+                <?php }?>
                     <svg xmlns="http://www.w3.org/2000/svg" width="60" height="60" viewBox="0 0 60 60" fill="none">
                         <circle cx="30" cy="30" r="29.5" class="background-dark-green" stroke="white"/>
                         <line x1="30" y1="20" x2="30" y2="42" stroke="white" stroke-width="2"/>
@@ -307,6 +304,7 @@ function create_input($field,$value = null,$readonly = "")
         case "number":
         case "date":
         case "datetime-local":
+        case "hidden":
             if($field["widget"] == "date" && !empty($value)) {
                 $value = date('Y-m-d', strtotime($value));
             }
@@ -331,10 +329,6 @@ function create_input($field,$value = null,$readonly = "")
         case "checkbox":
             ?>
             <input type="checkbox" id="<?php echo $field["field_name"]?>" name="<?php echo $field["field_name"]?>" id="<?php echo $field["field_name"]?>" value="1" <?php echo $required ?> <?php echo  checked($value == "1") ?> <?php echo $readonly ?>/>
-            <!--        כן
-            <input type="checkbox" id="<?php /*echo $field["field_name"]*/?>2" name="<?php /*echo $field["field_name"]*/?>" id="<?php /*echo $field["field_name"]*/?>" value="0" <?php /*echo checked($value == "0") */?> />
-            לא
--->
             <?php
             break;
         case "textarea":
@@ -397,11 +391,12 @@ function create_input($field,$value = null,$readonly = "")
             <?php }
             break;
         case "radio":
-            $direction = "row";
-            $direction_class = $direction == "column" ? "direction-column" : "row";
+            $direction = "column";
+            /*$direction = "row";
+            $direction_class = $direction == "column" ? "direction-column" : "row";<?=$direction_class?>*/
             ?>
 
-            <div class="radio-options font-17  flex-display <?=$direction_class?>">
+            <div class="radio-options font-17  flex-display ">
                 <?php
                 if(isset($field["values"])){
                     foreach ($field["values"] as $key=>$option){?>

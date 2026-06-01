@@ -3,7 +3,7 @@
 test_mode_table_prefix();
 function run_query($query, $type="")
 {
-    write_log("qu ".$query);
+    //write_log("qu ".$query);
     global $wpdb;
 
     if ($type == "execute") {
@@ -49,7 +49,6 @@ function run_action_query($table_name, $id, $action, $options)
 {
     global $wpdb;
 
-
     switch ($action) {
         case "remove":
             $query = "DELETE FROM {$wpdb->prefix}" . $table_name;
@@ -77,15 +76,22 @@ add_action('wp_ajax_save_single_data', 'save_single_data');
 function save_single_data()
 {
     $table_name = $_POST["table_name"];
-    if (($table_name == "agents" || $table_name == "suppliers") && empty($_POST["id"])) {
-        $result = register_new_user1 ($_POST["display_name"], $_POST["user_email"], $table_name);
-        if ($result == null || $result["status"] == "failed") {
-            echo json_encode ($result);
-            die();
+    if (($table_name == "agents" || $table_name == "suppliers"))  {
+        if(empty($_POST["id"])) {
+            $result = register_new_user1($_POST["name"], $_POST["email"], $table_name);
+            if ($result == null || $result["status"] == "failed") {
+                echo json_encode($result);
+                die();
+            }
+            $_POST["user_id"] = $result["user_id"];
         }
-        unset($_POST["display_name"]);
-        unset($_POST["user_email"]);
-        $_POST["user_id"] = $result["user_id"];
+        else if(!empty($_POST["user_id"])){
+            $result = wp_update_user([
+                'ID'         => $_POST["user_id"],
+                'display_name' => $_POST["name"],
+                'user_email' => $_POST["email"],
+            ]);
+        }
     }
 
     global $wpdb;
@@ -130,6 +136,7 @@ function get_data_table($table_name, $filters=null, $orderby = null, $join_filte
 {
     global $wpdb;
     $wpdb->prefix = 'test_';
+    $apostrophe = "";
 
     $columns = BOUTIQUE_TABLES[$table_name]["columns"];
     $join = "";
@@ -255,7 +262,7 @@ function get_list($list_name,$filter = '',$table_display =false)
     }
     //write_log("quert ".$query." table_name ".$table_name." field_name ".$field_name);
     $list = run_query($query);
-    if($table_name == "agents") {
+    /*if($table_name == "agents") {
         $users = array();
         foreach ($list as $row) {
             $user_info = get_userdata($row->value);
@@ -266,7 +273,7 @@ function get_list($list_name,$filter = '',$table_display =false)
             }
         }
         return $users;
-    }
+    }*/
 
     //write_log("list ".json_encode($list));
     return $list;

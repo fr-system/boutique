@@ -63,6 +63,13 @@ Text Domain: boutique
     color: #000000;
     border: var(--b-global-color-light-light-blue) 1px solid;
 }
+
+.background-red {
+    background-color:red;
+    color: #FFFFFF;
+    border: red 1px solid;
+}
+
 svg circle.background-light-light-blue, svg rect.background-light-light-blue{
     fill: var(--b-global-color-light-light-blue);
 }
@@ -236,6 +243,9 @@ input, textarea, select, button{
 .flex-display .part-60{
     flex-basis:60% !important;
 }
+.flex-display .part-65{
+     flex-basis:65% !important;
+ }
 .flex-display .part-70{
     flex-basis:70% !important;
 }

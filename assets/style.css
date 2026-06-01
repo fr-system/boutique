@@ -391,3 +391,10 @@ table.dataTable td.dt-type-numeric,*[dir=rtl] table.dataTable td.dt-type-date{
 table.dataTable>tbody>tr>td,table.dataTable>tbody>tr>th{
     padding: 0;
 }
+
+tr.blocked{
+    background-color: red !important;
+}
+td.dt-type-numeric{
+    text-align: center !important;
+}

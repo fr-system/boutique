@@ -143,6 +143,12 @@ jQuery(document).ready(function($){
         closePopup();
     });
 
+    let clickedButton = null;
+
+    jQuery('body').on('click', '.site_form button[type="submit"], .site_form input[type="submit"]', function() {
+        clickedButton = this;
+    });
+
     jQuery('body').on('submit', '.site_form', function(e) {
         e.preventDefault();
         var $form = jQuery(this);
@@ -160,11 +166,20 @@ jQuery(document).ready(function($){
         $form.find('#form_error_msgs_container').html('');
 
         //var formData = $form.serializeArray();
+        if(jQuery(clickedButton).hasClass("block-client")){
+            var blocked = "0";
+            if(jQuery('input[name=blocked]').val()!="1"){
+                blocked = "1";
+            }
+            jQuery('input[name=blocked]').val(blocked);
+        }
 
        // if (jQuery('input[type=file]').length > 0) {
             var formData = new FormData($form[0]);
             //formData.append('file', jQuery('input[type=file]')[0].files[0]);
             formData.append('action', 'send_site_forms');
+
+
             // formData.push({
             //     name: "file",
             //     value: jQuery('input[type=file]')[0].files[0]
