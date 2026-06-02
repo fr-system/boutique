@@ -9,6 +9,8 @@ if(!is_user_logged_in()){
 <section class="page">
     <div>
         <div class="font-30 bold margin-bottom-30">פעולות מהירות</div>
+        <?php echo phpversion();
+        exit;?>
         <div class="grid-display cols-4 margin-bottom-20">
             <?php $actions_list = array(
                 array("text"=>"הזמנה חדשה","type"=>"single","subject"=>"orders","action"=>"new"),
