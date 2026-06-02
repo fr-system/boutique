@@ -50,9 +50,6 @@ function option_if_set($set,$option){
     return  (isset($set[$option]) ? "$option=\"".$set[$option]."\"" : "" );
 }
 
-
-
-
 add_action('wp_ajax_get_list_ajax', 'get_list_ajax');
 function get_list_ajax(){
     //write_log ("get_list_ajax " );
@@ -169,14 +166,27 @@ function get_column_value($column,$row,$field,$list)
     $column_value = "";
     switch ($column["widget"]) {
         case "select":
-            if (isset($column["join_table"]) &&  $column["join_table"] == "agents") {
-                //write_log ('fiel ' . $field);
-                //write_log ('row ' . json_encode ($row));
+            //write_log ('fiel ' . $field);
+            //write_log ('row ' . json_encode ($row));
+           /* if (isset($column["join_table"]) &&  $column["join_table"] == "agents") {
+
                 $user_field = $column["field_name"];
                 $column_value = empty($row->$user_field) ? '' : get_userdata($row->$user_field)->display_name;
-            } else {
+            } else {*/
+            //
+            if(isset($column["options"])) {
+                $field_id = $row->$field;
+                $results = array_filter($column["options"], function ($option) use ($field_id) {
+                    return $option["value"] == $field_id;
+                });
+                if (count($results) > 0) {
+                    $column_value = array_pop($results)["text"];
+                }
+            }
+            else {
                 $column_value = $row->$field;
             }
+            /*}*/
             break;
         case "radio":
             $column_value = '<div class="flex-display center align-center" style="color: ' . $column["values"][$row->$field]["color"] . '"><div class="dot" style="background-color: ' . $column["values"][$row->$field]["color"] . '"></div>&nbsp;' . $column["values"][$row->$field]["label"] . '</div>';
@@ -210,16 +220,10 @@ function get_column_value($column,$row,$field,$list)
             }
             break;
         default:
-            if ($column["field_name"] == "display_name" || $column["field_name"] == "user_email") {
-                $user_field = $column["field_name"];
-                $column_value =  get_userdata($row->user_id)->$user_field;
-            }
-            else {
                 $column_value = isset($column['list_name']) && isset($list[$row->$field]) ? $list[$row->$field] : $row->$field;
                 if (!empty($column_value) && isset($column["un_apostrophe"])) {
                     $column_value .= " ₪";
                 }
-            }
             break;
     }
 
@@ -230,13 +234,11 @@ function get_column_value($column,$row,$field,$list)
 add_action('wp_ajax_on_order_confirmation', 'on_order_confirmation');
 function on_order_confirmation(){
     global  $wpdb;
-    //write_log("on_order_confirmation");
     if(isset($_POST['order_id'])){
         $order_id = $_POST['order_id'];
         $query = "UPDATE ".$wpdb->prefix."orders SET done = 1, user_confirms = ".get_current_user_id()."
                   WHERE id = ".$order_id;
-        //run_query ($query);
-        //write_log("order_confirmation");
+        //run_query ($query);//זה עובד טוב פשוט חבל כל הזמן שיאשר ויפריע לבדיקות!!!!
         //add_notice( 'order_confirmation' ,"ההזמנה אושרה נשלח מייל ללקוח ולספקים" );
 
         /*echo json_encode(array(
@@ -451,4 +453,56 @@ function sent_to_manager()
 
     add_notice( 'sent_to_manager' ,"נשלח מייל למנהל לאישור ההזמנה" );
 }
+
+function send_late_bills($attr)
+{
+    write_log("send_who_needs_pay_today");
+    $filters = array();
+    $filters[] = array("filter_field" => "payment_date", "filter_type" => "null");
+    $result = get_data_table("collection", $filters);
+    //write_log("eres ".json_encode($result));
+    $late_pay = "";
+    $count = 0;
+    foreach ($result as $row) {
+        $client = get_data_table("clients", array(array("filter_field" => "client_id", "filter_value" => $row->client_id)));
+        $payment_term_id = $client->payment_term_id;
+        $lastDayOfMonth = date('Y-m-t', strtotime($row->date));
+
+        switch ($payment_term_id) {
+            case 2://שוטף+60"
+                $newDate = date('Y-m-d', strtotime($lastDayOfMonth . ' +60 days'));
+                break;
+            case 3://שוטף+90"
+                $newDate = date('Y-m-d', strtotime($lastDayOfMonth . ' +90 days'));
+                break;
+            case  1: //מזומן
+            default:
+                $newDate = date('Y-m-d', $row->date);
+        }
+
+        write_log("date:  " . $row->date . "  newDate: " . $newDate);
+
+        if ($attr["type"] == "daily" && $newDate === date('Y-m-d') ||//לבדוק אם היום מוצ"ש ???
+            $attr["type"] == "weekly" && $newDate < date('Y-m-d')) {
+            $late_pay = "חשבונית מספר " . $row->doc_number . " נקלטה בתאריך" . $row->date .
+                " ללקוח " . $client->name . "על סך של " . $row->obligation . "₪ <br>";
+            $count++;
+        }
+    }
+
+    if($count > 0) {
+        if ($attr["type"] == "daily") {
+            $body = "להלן רשימת החשבוניות שהיו צריכים לשלם אותן היום ועדיין לא שולמו  <br>";
+            $subject = "חשבוניות שלא שולמו היום";
+        } else if ($attr["type"] == "weekly") {
+            $body = "להלן רשימת החשבוניות עדיין לא שולמו<br>";
+            $subject = "סיכום שבועי לחשבוניות שלא שולמו";
+        }
+        $body .= $late_pay;
+
+
+        send_mail(get_option('admin_email'), $subject, $body);
+    }
+}
+
 ?>

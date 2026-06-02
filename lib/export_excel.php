@@ -84,14 +84,14 @@ function get_value($column,$row,$field)
 {		$column_value = "";
 		switch ($column["widget"]) {
 			case "select":
-				if ($column["join_table"] == "agents") {
+				/*if ($column["join_table"] == "agents") {
 					//write_log ('fiel ' . $field);
 					//write_log ('row ' . json_encode ($row));
 					$user_field = $column["field_name"];
 					$column_value = empty($row->$user_field) ? '' : get_userdata($row->$user_field)->display_name;
-				} else {
+				} else {*/
 					$column_value = $row->$field;
-				}
+				/*}*/
 				break;
 			case "radio":
 				case "status":
@@ -109,13 +109,13 @@ function get_value($column,$row,$field)
 				}
 				break;
 			default:
-				if ($column["field_name"] == "display_name" || $column["field_name"] == "user_email") {
+				/*if ($column["field_name"] == "display_name" || $column["field_name"] == "user_email") {
 					$user_field = $column["field_name"];
 					$column_value =  get_userdata($row->user_id)->$user_field;
 				}
-				else {
+				else {*/
 					$column_value = isset($column['list_name']) && isset($list[$row->$field]) ? $list[$row->$field] : $row->$field;
-				}
+				/*}*/
 				break;
 		}
 

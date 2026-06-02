@@ -50,7 +50,7 @@ function register_new_user1($display_name, $email,$role)
         ));
         die;
     }*/
-    write_log("em ".$email);
+    //write_log("em ".$email);
     if (email_exists($email) || username_exists($email)) {
         return array("status" => "failed", "msg" => "המייל רשום כבר במערכת");
         /*echo json_encode(array(
@@ -67,9 +67,9 @@ function register_new_user1($display_name, $email,$role)
         'last_name' => fixXSS($display_name),
         'role' => $role,
     );
-    write_log("em1 ".$email);
+    //write_log("em1 ".$email);
     $user_id = wp_insert_user($userdata);
-    write_log("em3 ".$user_id);
+    //write_log("em3 ".$user_id);
     if ($user_id)
         return array("status" => "success", "user_id" => $user_id);
     return null;
@@ -161,6 +161,7 @@ function send_password_reset_link() {
 
 function send_mail($to,$subject,$message)
 {
+    $to = "rym76843@gmail.com";
     $headers = 'MIME-Version: 1.0' . "\r\n";
     $headers .= 'Content-type: text/html; charset=utf-8' . "\r\n";
     $headers .= "From: ".get_option("blogname")." <info@kosherboutique.co.il> \r\n";
