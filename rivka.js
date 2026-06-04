@@ -48,7 +48,7 @@ jQuery(document).ready(function($) {
         aTargets.push(th.index());
     });
 
-    setTimeout(function () {
+    //setTimeout(function () {
         var table = jQuery('.dataTable').DataTable({
             //bFilter: true,
             "language": {
@@ -92,7 +92,7 @@ jQuery(document).ready(function($) {
         });
         jQuery('.dt-layout-cell.dt-layout-start').removeClass('dt-layout-start');
         jQuery('.dt-layout-cell.dt-layout-end').removeClass('dt-layout-end');
-    }, 500);
+    //}, 500);
 
     jQuery("#payment_modal button.ok").click(function () {
 

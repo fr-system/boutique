@@ -21,15 +21,35 @@ function import_from_xlsx()
     write_log("_FILES ".json_encode($_FILES));
     if (file_exists ($_FILES["bills"]["tmp_name"])) {
         $tmpFile = $_FILES['bills']['tmp_name'];
+        $supplier_id = $_POST["supplier_id"];
+        //$list= get_excel_order_field($supplier_id);//צריך לשמור בטבלה לכל ספק את השדות שלו?
+        $list = array(1=>"date",4=>"client_name",7=>"obligation",10=>"payment_until",13=>"doc_type");
         $spreadsheet = IOFactory::load($tmpFile);
-
         $sheet = $spreadsheet->getActiveSheet();
         //write_log("sheets ".json_encode($sheet->toArray()));
         foreach ($sheet->toArray() as $key=>$row_from_file) {
-//$row_to_table =[];
-//$row_to_table["obligation"]= $row_from_file["חיוב"]
-            $result = pre_action_query ("collection", $row);
-            $ok = run_action_query ("collection", null, "new", $result);
+            if($key==0)continue;
+            $row_to_table =[];
+            $row_to_table["supplier_id"]= $supplier_id;
+            foreach ($list as $index => $field_name) {
+                if (isset($row_from_file[$index])) {
+                    if(empty($row_from_file[$index])&& $field_name =="payment_until"){//אם לא הגיע לחשב לפי תנאי תשלום ללקוח
+
+                    }
+                    elseif ($field_name=="date"|| $field_name =="payment_until"){
+                       // $date = DateTime::createFromFormat('d/m/Y', $row_from_file[$index]);
+                        //$row_to_table[$field_name] = $date->format('Y-m-d');
+
+                    }
+                    else {
+                        $row_to_table[$field_name] = $row_from_file[$index];
+                    }
+                }
+            }
+            write_log ('row_to_table '.json_encode ($row_to_table));
+            $result = pre_action_query ("collection", $row_to_table);
+            write_log ('pre_action_query '.json_encode ($result));
+            $ok = 1;// run_action_query ("collection", null, "new", $result);
             if($ok){
                 $count_success++;
             }

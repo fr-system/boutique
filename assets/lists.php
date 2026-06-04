@@ -150,6 +150,7 @@ const BOUTIQUE_TABLES = array(
             array("field_name" => "obligation", "widget" => "text","un_apostrophe" => true, "label" => "חיוב","sign"=>"₪"),
             array("field_name" => "doc_number", "widget" => "text","un_apostrophe" => true, "label" => "מס' חשבונית"),
             array("field_name" => "date", "widget" => "date", "label" => "תאריך"),
+            array("field_name" => "payment_until", "widget" => "date", "label" => "לתשלום עד"),
 /*            array("field_name" => "doc_type", "widget" => "select", "label" => "סוג חשבונית"),*/
             array("field_name" => "doc_type", "widget" => "status", "label" => "חשבונית","filter"=>true,
                 "values"=>array(
