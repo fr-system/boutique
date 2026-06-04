@@ -45,6 +45,4 @@ if(!is_user_logged_in()){
             </div>
         </div>
 </form>
-
-
-
+<?php get_footer();?>

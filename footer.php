@@ -4,7 +4,7 @@
  *
  * Contains the body & html closing tags.
  *
- * @package HelloElementor
+ * @package boutique
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -13,7 +13,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 ?>
 
 <?php wp_footer(); ?>
-
 </main>
 </body>
 </html>

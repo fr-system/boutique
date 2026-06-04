@@ -39,7 +39,14 @@ const BOUTIQUE_TABLES = array(
             array("field_name" => "name", "widget" => "text","label"=>"שם","required"=>true),
             array("field_name" => "barcode", "widget" => "text","label"=>"ברקוד","required"=>true),
             array("field_name" => "supplier_id", "widget" => "select","label"=>"ספק", "join_table" => "suppliers", "join_value" => "name","filter"=>true),
-            array("field_name" => "price", "type" => "float", "widget" => "text","label"=>"מחיר", "un_apostrophe" => true,"sign"=>"₪","popup_button"=>array("label"=>"מחיר מיוחד ללקוח","target_modal"=>"update_client_price")),
+            array("field_name" => "price", "type" => "float", "widget" => "text","label"=>"מחיר", "un_apostrophe" => true,"sign"=>"₪",
+                "popup_button"=>array("label"=>"","target_modal"=>"update_client_price","tooltip"=>"מחיר מיוחד ללקוח",
+                    "svg"=>'<svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" viewBox="0 0 25 25" fill="none">
+<path d="M3.125 10.4167V8.33333C3.125 7.7808 3.34449 7.25089 3.73519 6.86019C4.12589 6.46949 4.6558 6.25 5.20833 6.25H7.29167M3.125 10.4167C4.51354 10.4167 7.29167 9.58333 7.29167 6.25M3.125 10.4167V14.5833M7.29167 6.25H17.7083M3.125 14.5833V16.6667C3.125 17.2192 3.34449 17.7491 3.73519 18.1398C4.12589 18.5305 4.6558 18.75 5.20833 18.75H7.29167M3.125 14.5833C4.51354 14.5833 7.29167 15.4167 7.29167 18.75M21.875 10.4167V8.33333C21.875 7.7808 21.6555 7.25089 21.2648 6.86019C20.8741 6.46949 20.3442 6.25 19.7917 6.25H17.7083M21.875 10.4167C20.4865 10.4167 17.7083 9.58333 17.7083 6.25M21.875 10.4167V12.5M7.29167 18.75H11.4583" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M12.5001 14.5833C13.6507 14.5833 14.5834 13.6506 14.5834 12.5C14.5834 11.3494 13.6507 10.4166 12.5001 10.4166C11.3495 10.4166 10.4167 11.3494 10.4167 12.5C10.4167 13.6506 11.3495 14.5833 12.5001 14.5833Z" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M18.75 15.625V18.75M18.75 18.75V21.875M18.75 18.75H15.625M18.75 18.75H21.875" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>')
+            ),
             array("field_name" => "description", "widget" => "textarea","label"=>"תיאור"),
             //array("field_name" => "count", "widget" => "number","label"=>"כמות בקבוקים בארגז","hidden"=>true),
             array("field_name" => "file_id", "widget" => "file","label"=>"דף מוצר"),
@@ -47,7 +54,7 @@ const BOUTIQUE_TABLES = array(
             array("field_name" => "blocked", "widget" => "checkbox","label"=>"מוצר חסום","hidden"=>true),
             array("field_name" => "factor_of_friction", "widget" => "select","label"=>"גורם אירוז","hidden"=>true),
             array("field_name" => "individually", "widget" => "checkbox","label"=>"ניתן למכירה בבודדים","hidden"=>true),
-            array("field_name" => "units_in_box", "widget" => "number","label"=>"כמות יחידות בארגז","required"=>true),
+            array("field_name" => "units_in_box", "widget" => "number","label"=>"כמות יחידות בארגז","required"=>true,"hidden"=>true),
         )),
     "tasks" => array(
         "title" => "משימות",
@@ -152,7 +159,7 @@ const BOUTIQUE_TABLES = array(
 
             array("field_name" => "payment_date", "widget" => "date", "label" => "תאריך תשלום"),
             //array("field_name" => "credit_number", "widget" => "text", "label" => "מספר כרטיס אשראי"),
-            array("field_name" => "payment_type", "widget" => "select", "label" => "אופן תשלום","required"=>true,
+            array("field_name" => "payment_type", "widget" => "select", "label" => "אופן תשלום",
                 "options"=>array(
                     array("value"=>"1","text"=>"מזומן"),
                     array("value"=>"2","text"=>"כרטיס אשראי"),
@@ -164,7 +171,9 @@ const BOUTIQUE_TABLES = array(
             array("field_name" => "check_number", "widget" => "text", "label" => "מספר צ'ק"),
 /*            array("field_name" => "agent_id", "widget" => "select", "label" => "סוכן", "join_table" => "agents", "join_value" => "user_id", "user_field" => "display_name"),//להביא מטבלת יוזר*/
 
-        )),
+        ),
+        "actions" => array(array("title" => "orders","dialog"=> "payment_modal","text"=>"לעדכון תשלום"))
+        ),
     "products_clients"=>array(
         "title" => "מחיר מיוחד ללקוח",
         "columns" => array(

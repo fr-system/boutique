@@ -54,7 +54,7 @@ function boutique_enqueue_scripts()
     wp_register_script('messages_he', get_template_directory_uri() . '/assets/messages_he.js');
     wp_enqueue_script('messages_he');
 
-    wp_enqueue_script( 'script', get_template_directory_uri() . '/script.js', array(), $ver );
+    wp_enqueue_script( 'script', get_template_directory_uri() . '/script.js', array('jquery', 'media-editor', 'media-views'), $ver );
     wp_enqueue_script( 'fridi-script', get_template_directory_uri() . '/fridi.js', array(), $ver );
     wp_enqueue_script( 'rivka-script', get_template_directory_uri() . '/rivka.js', array(), $ver );
 }
@@ -69,6 +69,25 @@ add_action( 'after_setup_theme', 'boutique_setup_theme' );
 
 add_action('wp_ajax_send_site_forms', 'send_site_forms');
 add_action('wp_ajax_nopriv_send_site_forms', 'send_site_forms');
+
+add_action('init', function () {
+    if (strpos($_SERVER['REQUEST_URI'], 'async-upload.php') !== false) {
+
+        $user_id = wp_validate_auth_cookie('', 'auth');
+        $secure_user_id = wp_validate_auth_cookie('', 'secure_auth');
+        $logged_user_id = wp_validate_auth_cookie('', 'logged_in');
+
+        write_log('AUTH USER ID: ' . var_export($user_id, true));
+        write_log('SECURE USER ID: ' . var_export($secure_user_id, true));
+        write_log('LOGGED USER ID: ' . var_export($logged_user_id, true));
+    }
+});
+add_action('init', function () {
+    if (strpos($_SERVER['REQUEST_URI'], 'async-upload.php') !== false) {
+        $sessions = WP_Session_Tokens::get_instance(get_current_user_id());
+        write_log(print_r($sessions->get_all(), true));
+    }
+});
 function send_site_forms()
 {
     $func_name = /*'function_' .*/ $_POST['form_func'];

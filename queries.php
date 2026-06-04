@@ -21,19 +21,20 @@ function pre_action_query($table_name, $row){
     $fields = array();
     $values = array();
 
+    //write_log("row ".json_encode($row));
     foreach ($row as $key => $value) {
         $field = get_field($table_name, $key);
         if ($field != null) {
-            if($field["widget"] == "file" || $field["widget"] == "image"){
+            /*if($field["widget"] == "file" || $field["widget"] == "image"){
                 $value = upload_file($field["field_name"]);
             }
-            else {
-                if (!empty($value) && isset($field["un_apostrophe"])) {
+            else {*/
+                if (!empty($value) && (isset($field["un_apostrophe"]) || $field["widget"] == "file"|| $field["widget"] == "image")) {
                     $value = str_replace("₪", "", $value);
                     $value = str_replace(",", "", $value);
                     $value = (int)$value;
                 }
-            }
+            /*}*/
 
             $apostrophe = is_needed_apostrophe($field["widget"], isset($field["un_apostrophe"]));
             array_push($fields, $key);
