@@ -245,70 +245,40 @@ jQuery(document).ready(function($){
 
         });
     })
+    jQuery('.input-label:has(.open-file-uploader)').find(".remove-file").click(function (e) {
+        var field =  jQuery(this.closest(".input-label"));
 
-
-    jQuery('.open-file-uploader').click(function () {
-        //jQuery('input.upload-file').click();
-        let mediaFrame;
-        if (mediaFrame) {
-            mediaFrame.open();
-            return;
+        field.find("input[type=hidden]").val("");
+        field.find("a").attr("href","");
+        field.find("a").html("");
+        if(field.find(".open-file-uploader").hasClass("product-image")) {
+            jQuery(".protuct-image").attr("src", "");
+            jQuery(".protuct-image").addClass("hidden");
         }
+        field.find(".remove-file").addClass("hidden");
+    });
 
-        mediaFrame = wp.media({
-            title: 'Select File',
-            button: {
-                text: 'Use File'
-            },
+    jQuery('.open-file-uploader').click(function (e) {
+        var field =  jQuery(this.closest(".input-label"));
+
+        e.preventDefault();
+        var image = wp.media({
+            title: 'בחר קובץ',
             multiple: false
-        });
-
-        mediaFrame.on('select', function(){
-
-            const attachment = mediaFrame
-                .state()
-                .get('selection')
-                .first()
-                .toJSON();
-
-            // מספר המדיהconsole.log(attachment.id);
-
-            // URLconsole.log(attachment.url);
-
-
-            // שם קובץ            console.log(attachment.filename);
-        });
-
-        mediaFrame.open();
+        }).open()
+            .on('select', function(e){
+                var uploaded_image = image.state().get('selection').first();
+                field.find("input[type=hidden]").val(uploaded_image.id);
+                field.find("a").attr("href",uploaded_image.attributes.url);
+                field.find("a").html(uploaded_image.attributes.filename);
+                jQuery(".protuct-image").attr("src",uploaded_image.attributes.url);
+                field.find(".remove-file").removeClass("hidden");
+                jQuery(".protuct-image").removeClass("hidden");
+            });
+        //mediaFrame.open();
 
     });
 
-    jQuery('input.upload-file').change(function () {
-       /* jQuery('.file-name').text(this.files[0].name);*/
-
-    });
-
-    jQuery('.open-image-uploader').click(function () {
-        jQuery('input.upload-image').click();
-    });
-
-    jQuery('input.upload-image').change(function () {
-        /*jQuery('.image-name').text(this.files[0].name);*/
-        const file = this.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const img = jQuery('.protuct-image');
-                e.target.result.replace("data:image/png;base64,","");
-                //img.src = e.target.result;
-                img.attr('src', e.target.result).show(); // מציג את התמונה
-                img.removeClass("hidden");
-                //img.style.display = 'block'; // מציג את התמונה
-            }
-            reader.readAsDataURL(file);
-        }
-
-    });
     jQuery('ul.tables-list li').click(function () {
         jQuery(this).parent().children().removeClass("selected");
         jQuery(this).addClass("selected");

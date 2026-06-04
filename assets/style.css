@@ -43,7 +43,7 @@ input:not([type=search]):-webkit-autofill {
     background-color: white;
 }
 .product:hover{
-    border-color: var(--b-global-color-dark-gold);
+    border-color: var(--b-global-color-gold-hover);
     border-width: 2px;
     box-shadow: 2px 2px 6px 1px rgba(0, 0, 0, 0.13);
 }
@@ -358,6 +358,11 @@ input[type="radio"] + label:before {
     width: 20px;
     border-radius: 100px;
 }
+.input-label a{
+    margin: 0;
+    padding: 0;
+    min-width: 0;
+}
 tr.order-confirm{
     background-color: var(--b-global-color-light-gray);
    /* border-color: var(--b-global-color-light-gray);*/
@@ -376,7 +381,9 @@ td a.button{
 .modal-body{
     min-height: 100px;
 }
-
+.modal-body .input-label{
+    margin-bottom: 10px;
+}
 .dt-type-numeric{
 
 }
@@ -395,10 +402,26 @@ table.dataTable td.dt-type-numeric,*[dir=rtl] table.dataTable td.dt-type-date{
 table.dataTable>tbody>tr>td,table.dataTable>tbody>tr>th{
     padding: 0;
 }
-
-tr.blocked{
-    background-color: red !important;
+button.block-client:hover{
+    background-color: #f8adad ;
+    border:solid 1px #f8adad ;
+}
+tr.blocked, button.block-client{
+    background-color: #FFC7C7;
+    border:solid 1px #FFC7C7;
 }
 td.dt-type-numeric{
     text-align: center !important;
+}
+
+.tooltip-box {
+    position: absolute;
+    background: #333;
+    color: #fff;
+    padding: 6px 10px;
+    border-radius: 4px;
+    font-size: 12px;
+    display: none;
+    z-index: 9999;
+    white-space: nowrap;
 }

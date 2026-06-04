@@ -94,7 +94,78 @@ jQuery(document).ready(function($) {
         jQuery('.dt-layout-cell.dt-layout-end').removeClass('dt-layout-end');
     }, 500);
 
+    jQuery("#payment_modal button.ok").click(function () {
+
+        var id = jQuery('#payment_modal input[name="id"]').val();
+        var tr = jQuery('.archive-table tr[data-id=' + id + "]");
+
+        var payment_date = jQuery('#payment_modal input[name="payment_date"]').val();
+        if (payment_date) {
+            const parts = payment_date.split('-');
+            payment_date = `${parts[2]}/${parts[1]}/${parts[0]}`;
+
+        }
+        tr.find("td.payment_date").html(payment_date);
+
+        var payment_type = jQuery('#payment_modal select[name="payment_type"]').val();
+        var text ="";
+        if(payment_type){
+            var text = jQuery('#payment_modal select[name="payment_type"] option:selected').text();
+        }
+        tr.find("td.payment_type").html(text);
+        tr.find("td.payment_type").data("id",payment_type);
+        tr.find("td.check_number").html(jQuery('#payment_modal').find('[name="check_number"]').val());
+
+        closeModal();
+    })
+
+    jQuery('#payment_modal').on('show.bs.modal', function (e) {
+
+        btn = jQuery(e.relatedTarget);
+        var tr = btn.closest('tr');
+        var id = tr.data("id");
+        jQuery(this).find('[name="id"]').val(id);
+        jQuery(this).find('.bill-num').html(id);
+
+        var payment_date = tr.find("td.payment_date").html();
+        if(payment_date){
+            const parts = payment_date.split('/');
+            payment_date = `${parts[2]}-${parts[1]}-${parts[0]}`;
+            jQuery(this).find('[name="payment_date"]').val(payment_date);
+        }
+        var payment_type = tr.find("td.payment_type").html();
+        if(payment_type) {
+            jQuery(this).find('[name="payment_type"]').val(tr.find("td.payment_type").data("id"));
+        }
+        jQuery(this).find('[name="check_number"]').val(tr.find("td.check_number").html());
+        //closeModal();
+    });
+
 })
+
+jQuery(function ($) {
+
+    var $tooltip = $('<div class="tooltip-box"></div>').appendTo('body');
+
+    $('.has-tooltip').on('mouseenter', function (e) {
+        var text = $(this).data('tooltip');
+
+        $tooltip.text(text).fadeIn(150);
+
+        $(this).on('mousemove.tooltip', function (e) {
+            $tooltip.css({
+                top: e.pageY + 10,
+                left: e.pageX + 10
+            });
+        });
+    });
+
+    $('.has-tooltip').on('mouseleave', function () {
+        $(this).off('mousemove.tooltip');
+        $tooltip.fadeOut(150);
+    });
+
+});
 /*
 jQuery.fn.dataTable.ext.type.order['date-pre'] = function (dateString) {
     let parts = dateString.split("/"); // מפצל את המחרוזת

@@ -268,8 +268,9 @@ function create_popup(){
     </div>
     <?php
 }
-function build_select_options($table_name, $value=null, $filter=null)
+function build_select_options($table_name, $value=null,$attr = null)
 {
+    $attr = $attr ?? array("filter"=>null);
     //write_log("list name " .$table_name);
     if (array_key_exists($table_name, BOUTIQUE_LISTS)) {
         $fields_list = BOUTIQUE_LISTS[$table_name];
@@ -277,17 +278,32 @@ function build_select_options($table_name, $value=null, $filter=null)
     else if (array_key_exists($table_name, BOUTIQUE_TABLES)) {
         $fields_list = BOUTIQUE_TABLES[$table_name];
     }
-    if(isset($fields_list["data-field"])) {
-        $field = $fields_list["data-field"];
+
+    if(isset($attr["options"]) && isset($attr["field_name"])){
+        $field_name = $attr["field_name"];
+        $results = array_filter($fields_list["columns"], function ($field_obj) use ($field_name) {
+            return $field_obj["field_name"] == $field_name;
+        });
+        $list = array_pop($results)["options"];
+        $list = array_map(function ($item) {
+            return (object) $item;
+        }, $list);
+        $options='';
     }
-    $list = get_list($table_name,$filter);
-    $options = '<option value=""></option>';
+    else {
+        /*if(isset($fields_list["data-field"])) {
+            $field = $fields_list["data-field"];
+        }*/
+        $list = get_list($table_name, $attr["filter"]);
+        $options = '<option value=""></option>';
+    }
+
     foreach ($list as $row) {
-        $data_field = "";
+        /*$data_field = "";
         if(isset($fields_list["data-field"])){
             $data_field =' data-field="'.$row->$field.'"';
-        }
-        $options .= '<option '.$data_field.' value="' . $row->value . '"' . (!empty($value)&& (is_array($value) && in_array($row->value, $value) || (!is_array($value) && $row->value == $value || $row->text == $value)) ? 'selected' : '') . '>' . $row->text . '</option>';
+        }'.$data_field.'*/
+        $options .= '<option  value="' . $row->value . '"' . (!empty($value)&& (is_array($value) && in_array($row->value, $value) || (!is_array($value) && $row->value == $value || $row->text == $value)) ? 'selected' : '') . '>' . $row->text . '</option>';
     }
     return $options;
 }
@@ -321,7 +337,12 @@ function create_input($field,$value = null,$readonly = "")
             }
             $button="";
             if(isset($field["popup_button"])){
-                $button = "<a class='button' data-bs-toggle='modal' href='#{$field["popup_button"]["target_modal"]}' role='button' >{$field["popup_button"]["label"]}</a>";
+                $button = "<a data-tooltip='{$field["popup_button"]["tooltip"]}' class='has-tooltip button' data-bs-toggle='modal' href='#{$field["popup_button"]["target_modal"]}' role='button' >
+                    {$field["popup_button"]["label"]}";
+                    if(isset($field["popup_button"]["svg"])){
+                        $button .=$field["popup_button"]["svg"];
+                    }
+                $button .="</a>";
                 //$button = "<button class='client-price' onclick=''>{$field["popup_button"]["label"]}</button>";
             }
             return '<input type="'.$field["widget"].'"  class="grow font-17" id="'.$field["field_name"].'" name="'.$field["field_name"].'" '
@@ -360,7 +381,7 @@ function create_input($field,$value = null,$readonly = "")
                     if($field["join_table"] == "clients" && is_agent()){
                         $filter = "agent_id=".get_current_user_id();
                     }
-                    echo build_select_options($field["join_table"],$value,$filter);
+                    echo build_select_options($field["join_table"],$value,array("filter"=>$filter));
                 }
                 ?>
             </select>
@@ -369,28 +390,27 @@ function create_input($field,$value = null,$readonly = "")
         case "image":
             if(empty($readonly)){
                 ?>
-                <!--        <span class="grow pointer <?php /*echo $field["widget"]*/?>-name"></span>
--->        <?php if($field["widget"] ==  "file"){
-                    $accept = ".pdf, .xls, .xlsx, .csv";?>
-                    <svg class="open-file-uploader" xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none">
+                <?php if($field["widget"] ==  "file"){?>
+                    <svg class="open-file-uploader file" xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none">
                         <path d="M6 22C5.46957 22 4.96086 21.7893 4.58579 21.4142C4.21071 21.0391 4 20.5304 4 20V4C4 3.46957 4.21071 2.96086 4.58579 2.58579C4.96086 2.21072 5.46957 2 6 2H14C14.3166 1.99949 14.6301 2.06161 14.9225 2.18277C15.215 2.30394 15.4806 2.48176 15.704 2.706L19.292 6.294C19.5168 6.51751 19.6952 6.78335 19.8167 7.07616C19.9382 7.36898 20.0005 7.68297 20 8V20C20 20.5304 19.7893 21.0391 19.4142 21.4142C19.0391 21.7893 18.5304 22 18 22H6Z" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                         <path d="M14 2V7C14 7.26522 14.1054 7.51957 14.2929 7.70711C14.4804 7.89464 14.7348 8 15 8H20M12 12V18M12 12L15 15M12 12L9 15" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                     </svg>
                 <?php }
-
                 else{
-                    $accept = "image/png, image/jpeg";?>
-
-                    <svg class="open-image-uploader" xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none">
+                    $is_product_image = $field["field_name"]=="image_id" && $_GET["subject"] == "products" ? "product-image":"";
+                ?>
+                    <svg class="open-file-uploader <?php echo $is_product_image ?>" xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none">
                         <path d="M10.3 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H19C19.5304 3 20.0391 3.21071 20.4142 3.58579C20.7893 3.96086 21 4.46957 21 5V15L17.9 11.9C17.5237 11.5312 17.017 11.3258 16.4901 11.3284C15.9632 11.331 15.4586 11.5415 15.086 11.914L6 21" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                         <path d="M14 19.5L17 16.5M17 16.5L20 19.5M17 16.5V22" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                         <path d="M9 11C10.1046 11 11 10.1046 11 9C11 7.89543 10.1046 7 9 7C7.89543 7 7 7.89543 7 9C7 10.1046 7.89543 11 9 11Z" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                     </svg>
                 <?php } ?>
-                <a href="<?php echo wp_get_attachment_url($value)?>" target="_blank"><?php echo ($value ?  basename(get_attached_file($value)):"") ?></a>
-<!--                <span class="file-name"><?php /*echo ($value ?  basename(get_attached_file($value)):"") */?></span>
--->                <input class="upload-<?php echo $field["widget"]?>" type="file" id="<?php echo $field["field_name"]?>" name="<?php echo 'file_'.$field["field_name"]?>" style="display: none;" required  accept="<?= $accept ?>"/>
-                <input type="hidden" name="<?php echo $field["field_name"] ?>" value="<?php echo $value ? '1':'0' ?> "/>
+                <a class="grow" href="<?php echo wp_get_attachment_url($value)?>" target="_blank"><?php echo ($value ?  basename(get_attached_file($value)):"") ?></a>
+                <input type="hidden" name="<?php echo $field["field_name"] ?>" value="<?php echo $value ?>"/>
+                <?php $hidden_svg_remove_file = $value ? "":"hidden" ?>
+                <svg class="remove-file <?php echo $hidden_svg_remove_file ?>"  xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 25 24" fill="none">
+                    <path d="M4.16663 7H20.8333M10.4166 11V17M14.5833 11V17M5.20829 7L6.24996 19C6.24996 19.5304 6.46945 20.0391 6.86015 20.4142C7.25085 20.7893 7.78076 21 8.33329 21H16.6666C17.2192 21 17.7491 20.7893 18.1398 20.4142C18.5305 20.0391 18.75 19.5304 18.75 19L19.7916 7M9.37496 7V4C9.37496 3.73478 9.48471 3.48043 9.68006 3.29289C9.87541 3.10536 10.1404 3 10.4166 3H14.5833C14.8596 3 15.1245 3.10536 15.3199 3.29289C15.5152 3.48043 15.625 3.73478 15.625 4V7" class="stroke-background-black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
             <?php }
             break;
         case "radio":
@@ -431,15 +451,17 @@ function create_input($field,$value = null,$readonly = "")
             ?>
             <div class="products-gallery orders grid-display padding-10 start one-row">
                 <?php if(empty($readonly)){  ?>
-                    <div class="add-order-product  flex-display direction-column space-around ">
-                        <svg class="pointer  align-self-center" data-tooltip="הוספת מוצר להזמנה" xmlns="http://www.w3.org/2000/svg" width="90" height="90" viewBox="0 0 60 60" fill="none">
+                    <div class="add-order-product flex-display direction-column space-around ">
+                        <svg class="pointer align-self-center" data-tooltip="הוספת מוצר להזמנה" xmlns="http://www.w3.org/2000/svg" width="90" height="90" viewBox="0 0 60 60" fill="none">
                             <circle cx="30" cy="30" r="29.5" class="background-dark-green" stroke="white"/>
                             <line x1="30" y1="20" x2="30" y2="42" stroke="white" stroke-width="2"/>
                             <line x1="41" y1="31" x2="19" y2="31" stroke="white" stroke-width="2"/>
                         </svg>
                         <?php if(empty($value)){?>
-                            <svg class="pointer products-last-order" xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 26 26" fill="none">
-                                <circle cx="13" cy="13" r="12.5" fill="#E2B252" stroke="white"/>
+                            <svg data-tooltip="להעתיק מוצרים מהזמנה קודמת" class="pointer products-last-order align-self-center"  xmlns="http://www.w3.org/2000/svg" width="90" height="90" viewBox="0 0 26 26" fill="none">
+                                <circle class="background-gold"  cx="13" cy="13" r="12.5" fill="#E2B252" stroke="white"/>
+                                <path d="M10.5 11.8335C10.5 11.4798 10.6405 11.1407 10.8906 10.8906C11.1407 10.6405 11.4798 10.5 11.8335 10.5H16.1665C16.3416 10.5 16.515 10.5345 16.6768 10.6015C16.8386 10.6685 16.9856 10.7667 17.1094 10.8906C17.2333 11.0144 17.3315 11.1614 17.3985 11.3232C17.4655 11.485 17.5 11.6584 17.5 11.8335V16.1665C17.5 16.3416 17.4655 16.515 17.3985 16.6768C17.3315 16.8386 17.2333 16.9856 17.1094 17.1094C16.9856 17.2333 16.8386 17.3315 16.6768 17.3985C16.515 17.4655 16.3416 17.5 16.1665 17.5H11.8335C11.6584 17.5 11.485 17.4655 11.3232 17.3985C11.1614 17.3315 11.0144 17.2333 10.8906 17.1094C10.7667 16.9856 10.6685 16.8386 10.6015 16.6768C10.5345 16.515 10.5 16.3416 10.5 16.1665V11.8335Z" stroke="white" stroke-width="0.75" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M9.006 15.3685C8.8525 15.2813 8.72482 15.155 8.63595 15.0024C8.54708 14.8499 8.50017 14.6765 8.5 14.5V9.5C8.5 8.95 8.95 8.5 9.5 8.5H14.5C14.875 8.5 15.079 8.6925 15.25 9M12.5 14H15.5M14 12.5V15.5" stroke="white" stroke-width="0.75" stroke-linecap="round" stroke-linejoin="round"/>
                             </svg>
                         <?php } ?>
 

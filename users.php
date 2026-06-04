@@ -90,7 +90,9 @@ function user_logout()
 }
 
 function get_user_role($user = null){
-    return get_user_connected($user)->roles[0];
+    $roles = get_user_connected($user)->roles;
+    return is_array($roles) && count($roles)>0 ? $roles[0] : null;
+
 }
 function is_manager($user = null){
     return get_user_role($user) == "administrator";

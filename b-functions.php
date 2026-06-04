@@ -74,7 +74,7 @@ function get_list_ajax(){
             $result = get_list($table_name,$filter,true);
             break;
         case 'options':
-            $options = build_select_options($table_name, $selected_value, $filter);
+            $options = build_select_options($table_name, $selected_value, array("filter"=>$filter));
             //write_log ("options" . $options);
             break;
     }
@@ -175,6 +175,7 @@ function get_column_value($column,$row,$field,$list)
             } else {*/
             //
             if(isset($column["options"])) {
+
                 $field_id = $row->$field;
                 $results = array_filter($column["options"], function ($option) use ($field_id) {
                     return $option["value"] == $field_id;
@@ -354,6 +355,49 @@ function update_client_price_modal() {
             </div>
         </div>
 </form>
+<?php
+}
+
+function payment_modal(){
+    ?>
+    <form class="modal fade site_form" id="payment_modal" data-success="updateRowSuccess"  tabindex='-1' role="dialog">
+        <input type="hidden" name="form_func" value="save_single_data">
+        <input type="hidden" name="id" value="">
+        <input type="hidden" name="table_name" value="collection">
+        <div class="modal-dialog" role="document">
+
+            <div class="modal-content">
+                <div class="modal-header flex-display">
+                    <h3 class="modal-title grow" >תשלום חשבונית מס.<span class="bill-num"></span></h3>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" data-dismiss="modal" aria-label="סגור">
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="modal-body border-dark-gray padding-20 flex-display direction-column margin-20">
+                        <span class="input-label flex-display align-center">
+                            <label class="bold" for="payment_date">תאריך תשלום:</label>
+                            <input type="date" name="payment_date" value="">
+                        </span>
+                        <span class="input-label flex-display align-center">
+                            <label class="bold" for="payment_type">אופן תשלום:</label>
+                            <select id="payment_type" name="payment_type"  class=" font-17 grow">
+                                <?php echo build_select_options("collection",null,array("filter"=>null,"options"=>true,"field_name"=>"payment_type")) ?>
+                            </select>
+                        </span>
+                        <span class="input-label flex-display align-center">
+                            <label class="bold" for="check_number">מס. צ'ק:</label>
+                            <input type="text" name="check_number" value="">
+                        </span>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="ok background-gold bold font-18">אישור</button>
+                    <button type="button" class="background-white gold" data-bs-dismiss="modal">ביטול</button>
+
+                </div>
+            </div>
+        </div>
+    </form>
 <?php
 }
 function upload_file($field_name)
