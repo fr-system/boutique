@@ -6,6 +6,7 @@
  * @package boutique
  */
 
+
 require_once dirname(__FILE__) . "/assets/lists.php";
 require_once dirname(__FILE__) . "/users.php";
 require_once dirname(__FILE__) . "/queries.php";
@@ -13,6 +14,7 @@ require_once dirname(__FILE__) . "/b-functions.php";
 require_once dirname(__FILE__) . "/design_tool.php";
 require_once dirname(__FILE__) . "/rivka.php";
 require_once dirname(__FILE__) . "/lib/import_excel.php";
+
 function boutique_enqueue_scripts()
 {
     $ver = '1.0.0';
@@ -57,6 +59,7 @@ function boutique_enqueue_scripts()
     wp_enqueue_script( 'script', get_template_directory_uri() . '/script.js', array(), $ver );
     wp_enqueue_script( 'fridi-script', get_template_directory_uri() . '/fridi.js', array(), $ver );
     wp_enqueue_script( 'rivka-script', get_template_directory_uri() . '/rivka.js', array(), $ver );
+
 }
 add_action('wp_enqueue_scripts', 'boutique_enqueue_scripts', 98);
 

@@ -60,3 +60,8 @@ function calculatePrice(me){
     product.find(".calculaded-price").html(calculatedPrice);
     product.find(".calculated-price-input").val(calculatedPrice).trigger("change");
 }
+
+function alert_msg(form,data){
+    alert(data.msg);
+}
+

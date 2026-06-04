@@ -1,0 +1,12 @@
+{
+    "name": "fridi/boutique",
+    "autoload": {
+        "psr-4": {
+            "Fridi\\Boutique\\": "src/"
+        }
+    },
+    "require": {
+        "phpoffice/phpspreadsheet": "^5.7",
+        "mpdf/mpdf": "^8.3"
+    }
+}
