@@ -577,7 +577,7 @@ function checking_duplicates()
     }
     else{
         //write_log("fff");
-        wp_send_json(['status' => 'success']);
+        wp_send_json(['status' => 'success','msg' => ""]);
 
     }
 }

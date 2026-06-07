@@ -27,6 +27,15 @@ function fillOrderId(result){
         getObligationClient(selectedOption.val());
     }
 }
+
+function onCheckingDuplicates(result){
+    show_error_messages(jQuery("form.single-form"), result);
+    if(result.dupple == true){
+        jQuery('input[name=BnNumber]').val("");
+    }
+
+}
+
 jQuery(document).ready(function($) {
     if(getParameterByName("subject") == "clients") {
         jQuery('input[name=BnNumber]').change(function (){
@@ -37,7 +46,7 @@ jQuery(document).ready(function($) {
                     {name: "client_id", value: jQuery('.page.single form input[name=id]').val() },
                 ];
 
-                call_ajax_function(postData);
+                call_ajax_function(postData,"onCheckingDuplicates");
             }
         });
     }

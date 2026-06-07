@@ -116,12 +116,12 @@ function get_tr_data($table_name, $data, $id_column,$add_text){
     if(isset($page_info["actions"])) {
         foreach ($page_info["actions"] as $action) {
             if(is_array($action) && isset($action["dialog"])) {
-                $html .= '<td ><a class="button background-gold font-18" data-bs-toggle="modal" href="#'.$action["dialog"].'" role="button">
+                $html .= '<td ><a class="button background-gold font-17" data-bs-toggle="modal" href="#'.$action["dialog"].'" role="button">
                 '.$action["text"].'
                     </a></td>';
             }
             else {
-                $html .= '<td ><a class="button background-gold font-18" href="/archive?subject=' . $action . '&id=' . $row->id . '">' . BOUTIQUE_TABLES[$action]["title"] . '</a></td>';
+                $html .= '<td ><a class="button background-gold font-17" href="/archive?subject=' . $action . '&id=' . $row->id . '">' . BOUTIQUE_TABLES[$action]["title"] . '</a></td>';
             }
         }
     }

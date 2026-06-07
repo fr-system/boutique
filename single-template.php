@@ -80,7 +80,7 @@ else{
     </div>
     <div class="flex-display space-between">
         <input type="hidden" name="dirty" value="" />
-            <form class="site_form <?php echo $class_form?> " novalidate="" data-success='reload_page' data-failed='show_error_messages'>
+            <form class="site_form single-form <?php echo $class_form?> " novalidate="" data-success='reload_page' data-failed='show_error_messages'>
                 <div id="form_error_msgs_container" class="margin-bottom-20"></div>
                 <input type="hidden" name="form_func" value="save_single_data" />
                 <input type="hidden" name="table_name" value="<?php echo $table_name ?>" />

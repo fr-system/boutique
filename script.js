@@ -528,7 +528,7 @@ function removeRowSuccess(form,result){
     closeModal();
 }
 
-function onAddChat(result,targetElement){
+function onAddChat(result){
     var chatList = jQuery(".chat-list");
     var get_mes = result.get_messages;
     jQuery.each(result.rows,function (){
@@ -605,7 +605,7 @@ function searchElements(text,selector,searchSelector){
     jQuery(".export-excel").attr("href",url.toString());
 }
 
-    function openPopupAddOrderProduct(result,targetElement){
+    function openPopupAddOrderProduct(result){
         jQuery(".popup-body").empty();
         jQuery(".popup-body").html(result.html);
 
@@ -693,9 +693,6 @@ function reload_page(data){
 }
 function show_error_messages($form, data){
     jQuery($form).find('#form_error_msgs_container').html(data.msg);
-    if(data.dupple == true){
-        jQuery('input[name=BnNumber]').val("");
-    }
 }
 
 function show_success_msg($form, data){
@@ -749,7 +746,7 @@ function show_slider_message(options) {
     );
 }
 
-function call_ajax_function(postData,func,targetElement) {
+function call_ajax_function(postData,func) {
 
     xhr = jQuery.ajax({
         url: "/wp-admin/admin-ajax.php",
@@ -759,7 +756,7 @@ function call_ajax_function(postData,func,targetElement) {
     }).done(function (result) {
         //window[func]($form, data);
         if(func) {
-            window[func](result, targetElement);
+            window[func](result);
         }
     })
 }
@@ -775,24 +772,24 @@ function onchangeSelect(e,element,value){
                 {name: "action", value: "get_list_ajax"},
                 {name: "table_name", value: "agents"},
             ];
-        call_ajax_function(postData,"fillAgentsSelect","agent_id");
+        call_ajax_function(postData,"fillAgentsSelect");
     }
 }
 
-function fillAgentsSelect(result,targetElement){
+function fillAgentsSelect(result){
     var options = result.options;
-    var select = jQuery("select[name="+targetElement+"]");
+    var select = jQuery("select[name=agent_id]");
     select.children().remove();
     select.append(result.options);
 }
 
-function fillListTable(result,targetElement){
+function fillListTable(result){
     if(result.tableData) {
-        jQuery("." + targetElement).html(result.tableData);
+        jQuery(".list-table").html(result.tableData);
         jQuery(".page-title").html(result.options["title"]);
     }
     else{
-        jQuery("." + targetElement).html("");
+        jQuery(".list-table").html("");
     }
 }
 
@@ -825,7 +822,7 @@ function getTableAjaxData(tableName){
         {name: "action", value: "get_list_ajax"},
         {name: "table_name", value: tableName},
     ];
-    call_ajax_function(postData,"fillListTable","list-table");
+    call_ajax_function(postData,"fillListTable");
 }
 function openModal(modalId,message){
     //jQuery(modalId+'.modal').modal('show');
