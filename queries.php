@@ -32,7 +32,7 @@ function pre_action_query($table_name, $row){
                 if (!empty($value) && (isset($field["un_apostrophe"]) || $field["widget"] == "file"|| $field["widget"] == "image")) {
                     $value = str_replace("₪", "", $value);
                     $value = str_replace(",", "", $value);
-                    $value = (int)$value;
+                    $value = (float)$value;
                 }
             /*}*/
 

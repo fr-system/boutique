@@ -514,20 +514,7 @@ function send_late_bills($attr)
     $count = 0;
     foreach ($result as $row) {
         $client = get_data_table("clients", array(array("filter_field" => "client_id", "filter_value" => $row->client_id)));
-        $payment_term_id = $client->payment_term_id;
-        $lastDayOfMonth = date('Y-m-t', strtotime($row->date));
-
-        switch ($payment_term_id) {
-            case 2://שוטף+60"
-                $newDate = date('Y-m-d', strtotime($lastDayOfMonth . ' +60 days'));
-                break;
-            case 3://שוטף+90"
-                $newDate = date('Y-m-d', strtotime($lastDayOfMonth . ' +90 days'));
-                break;
-            case  1: //מזומן
-            default:
-                $newDate = date('Y-m-d', $row->date);
-        }
+        $newDate = get_payment_until($client->payment_term_id,$row->date);
 
         write_log("date:  " . $row->date . "  newDate: " . $newDate);
 
@@ -552,6 +539,24 @@ function send_late_bills($attr)
 
         send_mail(get_option('admin_email'), $subject, $body);
     }
+}
+function get_payment_until($payment_term_id,$date)
+{
+    //payment_term_id = $client->payment_term_id;
+    $lastDayOfMonth = date('Y-m-t', strtotime($date));
+
+    switch ($payment_term_id) {
+        case 2://שוטף+60"
+            $newDate = date('Y-m-d', strtotime($lastDayOfMonth . ' +60 days'));
+            break;
+        case 3://שוטף+90"
+            $newDate = date('Y-m-d', strtotime($lastDayOfMonth . ' +90 days'));
+            break;
+        case  1: //מזומן
+        default:
+            $newDate = date('Y-m-d', $date);
+    }
+    return $newDate;
 }
 
 add_action('wp_ajax_checking_duplicates', 'checking_duplicates');

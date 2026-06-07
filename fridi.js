@@ -18,6 +18,18 @@ jQuery(document).ready(function($){
     });
     registerToCalculatePrice();
 
+    jQuery("svg.file-upload").on("click",function (){
+        $(this).closest('form').find('.input-label').removeClass('hidden');
+    })
+    jQuery("select[name=supplier_id]").on("change",function (){
+        $(this).closest('form').find('input[type=file]').click();
+    })
+
+    jQuery('input[type="file"][name="bills"]').on('change', function () {
+        if (this.files.length > 0) {
+            $(this).closest('form').submit();
+        }
+    });
 });
 function registerToCalculatePrice(){
     jQuery('.products-gallery.orders .product .price-part').on('change', function (e) {

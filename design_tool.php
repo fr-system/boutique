@@ -170,10 +170,19 @@ function archive_header($table_name, $view_only = false,$attr = null)
         <div class="flex-display align-center  space-between">
             <?php if(!$view_only){
                 if($table_name == "collection"){?>
-                    <form novalidate  class="site_form" data-success="alert_msg" >
+                    <form novalidate  class="site_form flex-display space-between" data-success="reload_page" >
                         <input type="hidden" name="form_func" value="import_from_xlsx"/>
-                        <input type='file' name='bills' id='bills' accept=".xls,.xlsx">
-                        <button type="submit" class="btn-login font-18 bold background-gold ">קליטת הקובץ</button>
+                        <input type='file' class="hidden" name='bills' id='bills' accept=".xls,.xlsx">
+                        <svg data-tooltip="העלאת קובץ מספק" class="file-upload has-tooltip margin-after-10" xmlns="http://www.w3.org/2000/svg" width="44" height="44" viewBox="0 0 44 44" fill="none">
+                            <circle cx="22" cy="22" r="22" fill="#D9F5F3"/>
+                            <path d="M21.9375 22.7094V27.4276C21.9375 27.5881 21.9911 27.722 22.0984 27.8293C22.2056 27.9365 22.3395 27.9901 22.5 27.9901C22.6605 27.9901 22.7944 27.9365 22.9016 27.8293C23.0089 27.722 23.0625 27.5881 23.0625 27.4276V22.7094L25.0268 24.6736C25.0815 24.7284 25.143 24.7696 25.2113 24.7974C25.2802 24.8244 25.3489 24.8371 25.4171 24.8356C25.4854 24.8334 25.5566 24.8184 25.6309 24.7906C25.7044 24.7636 25.7681 24.7224 25.8221 24.6669C25.9421 24.5431 26.0033 24.4107 26.0055 24.2697C26.0078 24.128 25.947 23.9952 25.8233 23.8715L23.1356 21.1839C23.0381 21.0864 22.938 21.0178 22.8353 20.978C22.7333 20.9383 22.6215 20.9184 22.5 20.9184C22.3785 20.9184 22.2667 20.9383 22.1647 20.978C22.0627 21.0178 21.9626 21.0864 21.8644 21.1839L19.1767 23.8715C19.0672 23.981 19.0099 24.11 19.0046 24.2585C18.9994 24.407 19.059 24.5435 19.1835 24.668C19.3073 24.7872 19.44 24.848 19.5817 24.8502C19.7235 24.8525 19.8559 24.7917 19.9789 24.668L21.9375 22.7094ZM16.443 31.625C15.9248 31.625 15.4924 31.4517 15.1459 31.1052C14.7994 30.7588 14.6258 30.3264 14.625 29.8081V13.1919C14.625 12.6744 14.7986 12.2424 15.1459 11.8959C15.4931 11.5494 15.9255 11.3758 16.443 11.375H24.5576C24.7999 11.375 25.0354 11.4238 25.2641 11.5213C25.4929 11.6188 25.6886 11.7496 25.8514 11.9139L29.835 15.8975C29.9978 16.061 30.1283 16.2567 30.2265 16.4847C30.3247 16.7127 30.3739 16.9483 30.3739 17.1912V29.807C30.3739 30.3245 30.2002 30.7569 29.853 31.1041C29.5057 31.4514 29.0741 31.625 28.5581 31.625H16.443ZM24.75 16.091V12.5H16.443C16.2698 12.5 16.1107 12.572 15.966 12.716C15.8212 12.86 15.7493 13.0186 15.75 13.1919V29.8081C15.75 29.9806 15.822 30.1392 15.966 30.284C16.11 30.4288 16.2686 30.5007 16.4419 30.5H28.5581C28.7306 30.5 28.8893 30.428 29.034 30.284C29.1788 30.14 29.2507 29.981 29.25 29.807V17H25.659C25.3972 17 25.1805 16.9138 25.0087 16.7413C24.837 16.5687 24.7507 16.352 24.75 16.091Z" fill="#1A7870"/>
+                        </svg>
+                        <span class="input-label flex-display align-center hidden">
+                            <label class="bold " for="supplier_id">בחר ספק</label>
+                            <select  name="supplier_id" id="supplier_id">
+                                <?= build_select_options ("suppliers");?>
+                            </select>
+                        </span>
                     </form>
                 <?php } ?>
 
@@ -184,6 +193,7 @@ function archive_header($table_name, $view_only = false,$attr = null)
                 </svg>-->
 
                 <a class="has-tooltip margin-after-10 export-excel" data-tooltip="הורדה לאקסל" href="<?= get_bloginfo('stylesheet_directory'); ?>/lib/export_excel.php/lib/export_excel.php?export=archive&subject=<?= $table_name; ?>" target="_blank">
+                <a class="margin-after-10 export-excel has-tooltip" data-tooltip="הורדה לאקסל" href="<?= get_bloginfo('stylesheet_directory'); ?>/lib/export_excel.php/lib/export_excel.php?export=archive&subject=<?= $table_name; ?>" target="_blank">
                     <svg class="download-file" xmlns="http://www.w3.org/2000/svg" width="44" height="44" viewBox="0 0 44 44" fill="none">
                         <circle cx="22" cy="22" r="22" class="background-light-light-blue"/>
                         <path d="M30.4661 24.6748C30.6759 24.6748 30.8776 24.7616 31.0266 24.916C31.1757 25.0706 31.26 25.2806 31.26 25.5V29.002C31.2932 29.8006 31.0213 30.5809 30.5032 31.1719C29.9851 31.7628 29.2626 32.1166 28.4944 32.1582H14.5042C14.1211 32.1419 13.7447 32.048 13.3967 31.8809C13.0485 31.7135 12.7349 31.4757 12.4749 31.1826C12.215 30.8896 12.013 30.546 11.8811 30.1719C11.7492 29.7977 11.69 29.4001 11.7063 29.002V25.5C11.7063 25.2806 11.7906 25.0706 11.9397 24.916C12.0887 24.7616 12.2904 24.6748 12.5002 24.6748C12.7101 24.6749 12.9118 24.7615 13.0608 24.916C13.2098 25.0706 13.2942 25.2807 13.2942 25.5V29C13.2653 29.3573 13.3688 29.7127 13.5852 29.9932C13.8025 30.2748 14.1166 30.4593 14.4622 30.5078V30.5088H28.4973L28.5042 30.5078C28.8497 30.4593 29.1639 30.2748 29.3811 29.9932C29.5712 29.7467 29.6743 29.4424 29.677 29.1299L29.6721 28.9961V25.5C29.6721 25.2807 29.7565 25.0706 29.9055 24.916C30.0545 24.7615 30.2562 24.6749 30.4661 24.6748Z" fill="#1A7870" stroke="#D9F5F3" stroke-width="0.1"/>
