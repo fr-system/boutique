@@ -177,6 +177,9 @@ function get_data_table($table_name, $filters=null, $orderby = null, $join_filte
     if($filters!=null) {
         $filter_str = array();
         foreach ($filters as $filter) {
+            if(!isset($filter["filter_type"])){
+                $filter["filter_type"]="";
+            }
             //write_log("filter ".json_encode($filter));
             if ($filter["filter_field"] == "id") {
                 $filter_field = $wpdb->prefix . $table_name . "." . $filter["filter_field"];
@@ -189,17 +192,43 @@ function get_data_table($table_name, $filters=null, $orderby = null, $join_filte
                 }
             }
 
-            if (isset($filter["filter_type"]) && $filter["filter_type"] == "date") {
+            switch ($filter["filter_type"]) {
+                case "date":
+                    $filter_str[] = $filter_field . " " . $filter["filter_ratio"] . " " . $filter["filter_value"];
+                    break;
+                case "null":
+                    $filter_str[] = $filter_field . " is null ";
+                    break;
+                case "not_null":
+                    $filter_str[] = $filter_field . " is not null ";
+                    break;
+                case "array":
+                    $filter_str[] = $filter_field . " in ( " . $apostrophe . $filter["filter_value"] . $apostrophe . ")";
+                    break;
+                case "!=":
+                    if($filter["filter_value"]){
+                        $filter_str[] = $filter_field . " != " . $apostrophe . $filter["filter_value"] . $apostrophe;
+                    }
+                    break;
+                default:
+                    $filter_str[] = $filter_field . " = " . $apostrophe . $filter["filter_value"] . $apostrophe;
+                    break;
+            }
+
+           /* if (isset($filter["filter_type"]) && $filter["filter_type"] == "date") {
                 $filter_str[] = $filter_field . " " . $filter["filter_ratio"] . " " . $filter["filter_value"];
             } else if (isset($filter["filter_type"]) && $filter["filter_type"] == "null") {
                 $filter_str[] = $filter_field . " is null ";
+            }
+            else if (isset($filter["filter_type"]) && $filter["filter_type"] == "not_null") {
+                $filter_str[] = $filter_field . " is not null ";
             }
             else if(isset($filter["filter_type"]) && $filter["filter_type"] == "array"){
                 $filter_str[] = $filter_field . " in ( " . $apostrophe . $filter["filter_value"] . $apostrophe . ")";
             }
             else {
                 $filter_str[] = $filter_field . " = " . $apostrophe . $filter["filter_value"] . $apostrophe;
-            }
+            }*/
         }
         $query .= " WHERE " . implode(" AND ", $filter_str);
 
@@ -210,7 +239,7 @@ function get_data_table($table_name, $filters=null, $orderby = null, $join_filte
     }
 
     //echo $query;
-    //write_log("query ".$query);
+    write_log("query ".$query);
 //    if($filter_value!= 0){
 //        $query .= " WHERE ".get_id_column_in_page($page_name)." = ".$filter_value;
 //    }
@@ -247,7 +276,7 @@ function get_list($list_name,$filter = '',$table_display =false)
         $query = substr ($query,0,-2);
     }
     else {
-        $query = "SELECT id as value" . ($list_name == "agents" ? "" : ", " . $field_name . " as text");
+        $query = "SELECT id as value , ". $field_name . " as text";
     }
     if(isset($page_info["data-field"])) {
         $query .= ", ".$page_info["data-field"];

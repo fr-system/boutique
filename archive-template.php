@@ -18,7 +18,8 @@ $page_info  = BOUTIQUE_TABLES[$table_name];
     $client_id = null;
     $blocked = null;
     $lastKey = array_key_last($_GET);
-    if ($lastKey != "subject") {
+
+    if ($lastKey != "subject" && ($table_name == "orders" || $table_name == "tasks")) {
         $query = "SELECT name,blocked from {$wpdb->prefix}clients WHERE " .$lastKey."=".$_GET[$lastKey];
         $result = run_query ($query);
         $add_text =" של ". $result[0]->name;
@@ -26,8 +27,17 @@ $page_info  = BOUTIQUE_TABLES[$table_name];
         $client_id = $_GET[$lastKey];
         $blocked = $result[0]->blocked;
     }
-
-    echo archive_header($table_name,false,$add_text,$client_id,$blocked);
+    if($table_name == "collection") {
+        if (isset($_GET["payed"])) {
+            $filters[] = array("filter_field" => "payment_date", "filter_type" => "not_null");
+            $add_text = " ששולמו";
+        } else {
+            $filters[] = array("filter_field" => "payment_date", "filter_type" => "null");
+        }
+    }
+    $new_single = $page_info['single']. " חדש" . (isset($page_info["male_female"]) && $page_info["male_female"] == "female" ? "ה" : "");
+    $attr = array( "add_text"=>$add_text, "client_id" =>$client_id,"blocked"=>$blocked,"new_single"=>$new_single);
+    echo archive_header($table_name,false,$attr);
     //if(!isset($_GET["subject"]) || !is_manager() && $_GET["subject"] == "clients") return;
     if(is_agent() ){
         if($table_name == "clients") {

@@ -11,7 +11,7 @@ function get_side_menu()
         $submenu = false;
         foreach($menuitems as $item ){
             $name = $item->description;
-            if(is_agent() && ($name=="agents"|| $name=="collection"||$name=="lists"))continue;
+            if((is_agent() ||is_supplier()) && ($name=="agents"|| $name=="collection"||$name=="lists"))continue;
             $url = $item->url."?subject=".$name;
             if ( !$item->menu_item_parent ){
                 $parent_id = $item->ID;?>
@@ -22,7 +22,12 @@ function get_side_menu()
                     </div>
             <?php }
             else{
-                $url.="&action=new";
+                if($name=="collection"){
+                    $url .= "&payed=true";
+                }
+                else {
+                    $url .= "&action=new";
+                }
             }
             //לבדוק מה סוכן יכול להוסיף חדש (הזמנה? מה עוד)
             ?>
@@ -546,6 +551,29 @@ function send_late_bills($attr)
 
 
         send_mail(get_option('admin_email'), $subject, $body);
+    }
+}
+
+add_action('wp_ajax_checking_duplicates', 'checking_duplicates');
+function checking_duplicates()
+{
+    $client = get_data_table("clients", array(
+            array("filter_field" => "id", "filter_value" => $_POST["client_id"],"filter_type"=>"!="),
+            array("filter_field" => "BnNumber", "filter_value" => $_POST["BnNumber"])
+    ));
+
+    if(count($client)>0){
+        //write_log("sss");
+        wp_send_json([
+            'status' => 'failed',
+            'msg' => 'קיים לקוח עם מספר ח_פ כזה',
+            'dupple' => true
+        ]);
+    }
+    else{
+        //write_log("fff");
+        wp_send_json(['status' => 'success']);
+
     }
 }
 

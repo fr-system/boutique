@@ -67,30 +67,15 @@ function boutique_setup_theme(){
     register_nav_menu("main_menu","תפריט");
     add_role ('agents', 'סוכן', get_role ('subscriber')->capabilities);
     add_role ('suppliers', 'ספק', get_role ('subscriber')->capabilities);
+    if (!is_admin()) {
+        show_admin_bar(false);
+    }
 }
 add_action( 'after_setup_theme', 'boutique_setup_theme' );
 
 add_action('wp_ajax_send_site_forms', 'send_site_forms');
 add_action('wp_ajax_nopriv_send_site_forms', 'send_site_forms');
 
-add_action('init', function () {
-    if (strpos($_SERVER['REQUEST_URI'], 'async-upload.php') !== false) {
-
-        $user_id = wp_validate_auth_cookie('', 'auth');
-        $secure_user_id = wp_validate_auth_cookie('', 'secure_auth');
-        $logged_user_id = wp_validate_auth_cookie('', 'logged_in');
-
-        write_log('AUTH USER ID: ' . var_export($user_id, true));
-        write_log('SECURE USER ID: ' . var_export($secure_user_id, true));
-        write_log('LOGGED USER ID: ' . var_export($logged_user_id, true));
-    }
-});
-add_action('init', function () {
-    if (strpos($_SERVER['REQUEST_URI'], 'async-upload.php') !== false) {
-        $sessions = WP_Session_Tokens::get_instance(get_current_user_id());
-        write_log(print_r($sessions->get_all(), true));
-    }
-});
 function send_site_forms()
 {
     $func_name = /*'function_' .*/ $_POST['form_func'];

@@ -693,6 +693,9 @@ function reload_page(data){
 }
 function show_error_messages($form, data){
     jQuery($form).find('#form_error_msgs_container').html(data.msg);
+    if(data.dupple == true){
+        jQuery('input[name=BnNumber]').val("");
+    }
 }
 
 function show_success_msg($form, data){

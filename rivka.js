@@ -27,8 +27,21 @@ function fillOrderId(result){
         getObligationClient(selectedOption.val());
     }
 }
-
 jQuery(document).ready(function($) {
+    if(getParameterByName("subject") == "clients") {
+        jQuery('input[name=BnNumber]').change(function (){
+            if(jQuery(this).val()){
+                var postData = [
+                    {name: "action", value: "checking_duplicates"},
+                    {name: "BnNumber", value: jQuery(this).val()},
+                    {name: "client_id", value: jQuery('.page.single form input[name=id]').val() },
+                ];
+
+                call_ajax_function(postData);
+            }
+        });
+    }
+
     if(getParameterByName("subject") == "orders" && getParameterByName("action") == "edit"){
         var selectedOption = jQuery("section select[name=client_id]").find('option:selected');
         getObligationClient(selectedOption.val());

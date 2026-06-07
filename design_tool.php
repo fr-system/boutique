@@ -140,14 +140,14 @@ function create_product_view($product=null,$options=null)
     </div>
     <?php
 }
-function archive_header($table_name, $view_only = false, $add_text="", $client_id = null,$blocked = null)
+function archive_header($table_name, $view_only = false,$attr = null)
 {
     ob_start();
     ?>
     <div class="archive-actions flex-display space-between margin-bottom-20">
         <div class="flex-display space-between">
             <?php if($table_name=="products" && !$view_only){ ?>
-                <svg class="margin-after-10" data-view="gallery" xmlns="http://www.w3.org/2000/svg" width="44" height="44" viewBox="0 0 44 44" fill="none">
+                <svg data-tooltip="הצג בגלריה" class="has-tooltip margin-after-10" data-view="gallery" xmlns="http://www.w3.org/2000/svg" width="44" height="44" viewBox="0 0 44 44" fill="none">
                     <circle cx="22" cy="22" r="22" class="background-light-light-blue"/>
                     <rect x="13" y="13" width="7.55827" height="7.23077" rx="1" stroke="#1A7870" stroke-width="2"/>
                     <rect x="24.1511" y="13" width="7.55827" height="7.23077" rx="1" stroke="#1A7870" stroke-width="2"/>
@@ -165,7 +165,7 @@ function archive_header($table_name, $view_only = false, $add_text="", $client_i
             else{
                 $title = BOUTIQUE_TABLES[$table_name]["title"];
             } ?>
-            <h1 class="page-title font-30 bold"><?php echo $title.$add_text  ?></h1>
+            <h1 class="page-title font-30 bold"><?php echo $title.(isset($attr["add_text"]) && !empty($attr["add_text"])?$attr["add_text"]:'')  ?></h1>
         </div>
         <div class="flex-display align-center  space-between">
             <?php if(!$view_only){
@@ -183,7 +183,7 @@ function archive_header($table_name, $view_only = false, $add_text="", $client_i
                     <path fill-rule="evenodd" clip-rule="evenodd" d="M30.6875 16.605L22.7963 23.14C22.572 23.3258 22.29 23.4275 21.9987 23.4275C21.7075 23.4275 21.4255 23.3258 21.2013 23.14L13.3138 16.605C13.2714 16.7324 13.2499 16.8658 13.25 17V27C13.25 27.3315 13.3817 27.6495 13.6161 27.8839C13.8505 28.1183 14.1685 28.25 14.5 28.25H29.5C29.8315 28.25 30.1495 28.1183 30.3839 27.8839C30.6183 27.6495 30.75 27.3315 30.75 27V17C30.7505 16.8658 30.7294 16.7325 30.6875 16.605ZM14.5 14.5H29.5C30.163 14.5 30.7989 14.7634 31.2678 15.2322C31.7366 15.7011 32 16.337 32 17V27C32 27.663 31.7366 28.2989 31.2678 28.7678C30.7989 29.2366 30.163 29.5 29.5 29.5H14.5C13.837 29.5 13.2011 29.2366 12.7322 28.7678C12.2634 28.2989 12 27.663 12 27V17C12 16.337 12.2634 15.7011 12.7322 15.2322C13.2011 14.7634 13.837 14.5 14.5 14.5ZM14.2375 15.75L21.2075 21.5038C21.4307 21.6881 21.711 21.7893 22.0006 21.79C22.2901 21.7907 22.5709 21.6908 22.795 21.5075L29.835 15.75H14.2375Z" fill="#1A7870"/>
                 </svg>-->
 
-                <a class="margin-after-10 export-excel" data-tooltip="הורדה לאקסל" href="<?= get_bloginfo('stylesheet_directory'); ?>/lib/export_excel.php/lib/export_excel.php?export=archive&subject=<?= $table_name; ?>" target="_blank">
+                <a class="has-tooltip margin-after-10 export-excel" data-tooltip="הורדה לאקסל" href="<?= get_bloginfo('stylesheet_directory'); ?>/lib/export_excel.php/lib/export_excel.php?export=archive&subject=<?= $table_name; ?>" target="_blank">
                     <svg class="download-file" xmlns="http://www.w3.org/2000/svg" width="44" height="44" viewBox="0 0 44 44" fill="none">
                         <circle cx="22" cy="22" r="22" class="background-light-light-blue"/>
                         <path d="M30.4661 24.6748C30.6759 24.6748 30.8776 24.7616 31.0266 24.916C31.1757 25.0706 31.26 25.2806 31.26 25.5V29.002C31.2932 29.8006 31.0213 30.5809 30.5032 31.1719C29.9851 31.7628 29.2626 32.1166 28.4944 32.1582H14.5042C14.1211 32.1419 13.7447 32.048 13.3967 31.8809C13.0485 31.7135 12.7349 31.4757 12.4749 31.1826C12.215 30.8896 12.013 30.546 11.8811 30.1719C11.7492 29.7977 11.69 29.4001 11.7063 29.002V25.5C11.7063 25.2806 11.7906 25.0706 11.9397 24.916C12.0887 24.7616 12.2904 24.6748 12.5002 24.6748C12.7101 24.6749 12.9118 24.7615 13.0608 24.916C13.2098 25.0706 13.2942 25.2807 13.2942 25.5V29C13.2653 29.3573 13.3688 29.7127 13.5852 29.9932C13.8025 30.2748 14.1166 30.4593 14.4622 30.5078V30.5088H28.4973L28.5042 30.5078C28.8497 30.4593 29.1639 30.2748 29.3811 29.9932C29.5712 29.7467 29.6743 29.4424 29.677 29.1299L29.6721 28.9961V25.5C29.6721 25.2807 29.7565 25.0706 29.9055 24.916C30.0545 24.7615 30.2562 24.6749 30.4661 24.6748Z" fill="#1A7870" stroke="#D9F5F3" stroke-width="0.1"/>
@@ -192,7 +192,7 @@ function archive_header($table_name, $view_only = false, $add_text="", $client_i
                     </svg>
                 </a>
                 <!--fill="#D9F5F3"-->
-                <svg class="print-page margin-after-10" xmlns="http://www.w3.org/2000/svg" width="44" height="44" viewBox="0 0 44 44" fill="none">
+                <svg data-tooltip="הדפסה" class="has-tooltip print-page margin-after-10" xmlns="http://www.w3.org/2000/svg" width="44" height="44" viewBox="0 0 44 44" fill="none">
                     <circle cx="22" cy="22" r="22"  class="background-light-light-blue"/>
                     <path d="M14.4375 22.9375C14.6198 22.9375 14.7947 22.8684 14.9236 22.7453C15.0526 22.6222 15.125 22.4553 15.125 22.2812C15.125 22.1072 15.0526 21.9403 14.9236 21.8172C14.7947 21.6941 14.6198 21.625 14.4375 21.625C14.2552 21.625 14.0803 21.6941 13.9514 21.8172C13.8224 21.9403 13.75 22.1072 13.75 22.2812C13.75 22.4553 13.8224 22.6222 13.9514 22.7453C14.0803 22.8684 14.2552 22.9375 14.4375 22.9375Z" fill="#1A7870"/>
                     <path d="M17.875 13.75C17.1457 13.75 16.4462 14.0266 15.9305 14.5188C15.4147 15.0111 15.125 15.6788 15.125 16.375V19H13.75C13.0207 19 12.3212 19.2766 11.8055 19.7688C11.2897 20.2611 11 20.9288 11 21.625V25.5625C11 26.2587 11.2897 26.9264 11.8055 27.4187C12.3212 27.9109 13.0207 28.1875 13.75 28.1875H15.125V29.5C15.125 30.1962 15.4147 30.8639 15.9305 31.3562C16.4462 31.8484 17.1457 32.125 17.875 32.125H26.125C26.8543 32.125 27.5538 31.8484 28.0695 31.3562C28.5853 30.8639 28.875 30.1962 28.875 29.5V28.1875H30.25C30.9793 28.1875 31.6788 27.9109 32.1945 27.4187C32.7103 26.9264 33 26.2587 33 25.5625V21.625C33 20.9288 32.7103 20.2611 32.1945 19.7688C31.6788 19.2766 30.9793 19 30.25 19H28.875V16.375C28.875 15.6788 28.5853 15.0111 28.0695 14.5188C27.5538 14.0266 26.8543 13.75 26.125 13.75H17.875ZM16.5 16.375C16.5 16.0269 16.6449 15.6931 16.9027 15.4469C17.1606 15.2008 17.5103 15.0625 17.875 15.0625H26.125C26.4897 15.0625 26.8394 15.2008 27.0973 15.4469C27.3551 15.6931 27.5 16.0269 27.5 16.375V19H16.5V16.375ZM17.875 22.9375C17.1457 22.9375 16.4462 23.2141 15.9305 23.7063C15.4147 24.1986 15.125 24.8663 15.125 25.5625V26.875H13.75C13.3853 26.875 13.0356 26.7367 12.7777 26.4906C12.5199 26.2444 12.375 25.9106 12.375 25.5625V21.625C12.375 21.2769 12.5199 20.9431 12.7777 20.6969C13.0356 20.4508 13.3853 20.3125 13.75 20.3125H30.25C30.6147 20.3125 30.9644 20.4508 31.2223 20.6969C31.4801 20.9431 31.625 21.2769 31.625 21.625V25.5625C31.625 25.9106 31.4801 26.2444 31.2223 26.4906C30.9644 26.7367 30.6147 26.875 30.25 26.875H28.875V25.5625C28.875 24.8663 28.5853 24.1986 28.0695 23.7063C27.5538 23.2141 26.8543 22.9375 26.125 22.9375H17.875ZM27.5 25.5625V29.5C27.5 29.8481 27.3551 30.1819 27.0973 30.4281C26.8394 30.6742 26.4897 30.8125 26.125 30.8125H17.875C17.5103 30.8125 17.1606 30.6742 16.9027 30.4281C16.6449 30.1819 16.5 29.8481 16.5 29.5V25.5625C16.5 25.2144 16.6449 24.8806 16.9027 24.6344C17.1606 24.3883 17.5103 24.25 17.875 24.25H26.125C26.4897 24.25 26.8394 24.3883 27.0973 24.6344C27.3551 24.8806 27.5 25.2144 27.5 25.5625Z" fill="#1A7870"/>
@@ -212,16 +212,16 @@ function archive_header($table_name, $view_only = false, $add_text="", $client_i
                 </svg>
                 <input type="search" id="search" class="" placeholder="חיפוש" />
             </div>
-            <?php if($table_name != "collection" && !$view_only && ($table_name != "tasks" || is_manager()) && !($client_id!=null && $blocked ==1)){
+            <?php if($table_name != "collection" && !$view_only && ($table_name != "tasks" || is_manager()) && !(isset($attr["client_id"]) && isset($attr["blocked"]) && $attr["blocked"] ==1)){
             $href = 'single?subject='.$table_name.'&action=new';
-            if(!empty($client_id)){
-                $href.="&client_id=".$client_id;
+            if(isset($attr["client_id"])){
+                $href.="&client_id=".$attr["client_id"];
             }
                 if($table_name=="lists") { ?>
                     <a data-bs-toggle="modal" href="#edit-list" role="button" data-action="new">
                 <?php }
-                else {?>
-                    <a href="<?php echo $href ?>">
+                else { ?>
+                    <a class="has-tooltip" data-tooltip="<?php echo (isset($attr["new_single"])?$attr["new_single"]:'') ?>" href="<?php echo $href ?>">
                 <?php }?>
                     <svg xmlns="http://www.w3.org/2000/svg" width="60" height="60" viewBox="0 0 60 60" fill="none">
                         <circle cx="30" cy="30" r="29.5" class="background-dark-green" stroke="white"/>
