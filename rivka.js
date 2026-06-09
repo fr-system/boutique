@@ -118,32 +118,58 @@ jQuery(document).ready(function($) {
 
     jQuery("#payment_modal button.ok").click(function () {
 
-        var id = jQuery('#payment_modal input[name="id"]').val();
-        var tr = jQuery('.archive-table tr[data-id=' + id + "]");
+        //var id = jQuery('#payment_modal input[name="id"]').val();
+        //var tr = jQuery('.archive-table tr[data-id=' + id + "]");
 
-        var payment_date = jQuery('#payment_modal input[name="payment_date"]').val();
-        if (payment_date) {
-            const parts = payment_date.split('-');
-            payment_date = `${parts[2]}/${parts[1]}/${parts[0]}`;
+        var checkeds = jQuery(".archive-table").find("input:checkbox:checked");
+        jQuery.map(checkeds, function (check) {
+            var tr = jQuery(check).closest('tr');
 
-        }
-        tr.find("td.payment_date").html(payment_date);
 
-        var payment_type = jQuery('#payment_modal select[name="payment_type"]').val();
-        var text ="";
-        if(payment_type){
-            var text = jQuery('#payment_modal select[name="payment_type"] option:selected').text();
-        }
-        tr.find("td.payment_type").html(text);
-        tr.find("td.payment_type").data("id",payment_type);
-        tr.find("td.check_number").html(jQuery('#payment_modal').find('[name="check_number"]').val());
+            var payment_date = jQuery('#payment_modal input[name="payment_date"]').val();
+            if (payment_date) {
+                const parts = payment_date.split('-');
+                payment_date = `${parts[2]}/${parts[1]}/${parts[0]}`;
 
+            }
+            tr.find("td.payment_date").html(payment_date);
+
+            var payment_type = jQuery('#payment_modal select[name="payment_type"]').val();
+            var text = "";
+            if (payment_type) {
+                var text = jQuery('#payment_modal select[name="payment_type"] option:selected').text();
+            }
+            tr.find("td.payment_type").html(text);
+            tr.find("td.payment_type").data("id", payment_type);
+            tr.find("td.check_number").html(jQuery('#payment_modal').find('[name="check_number"]').val());
+        })
         closeModal();
     })
 
     jQuery('#payment_modal').on('show.bs.modal', function (e) {
+        var checkeds = jQuery(".archive-table").find("input:checkbox:checked");
+        if(checkeds.length == 0){
+            alert("לא נבחרו חשבוניות לעדכון תשלום");
+            e.preventDefault();
+            return false;
+        }
 
-        btn = jQuery(e.relatedTarget);
+        var ids = jQuery.map(checkeds , function (check){
+            return jQuery(check).closest('tr').data("id");
+        })
+
+        jQuery(this).find('[name="id"]').val(ids.join(','));
+
+        var date = new Date();
+        var day = String(date.getDate()).padStart(2, '0');
+        var month = String(date.getMonth() + 1).padStart(2, '0');
+        var year = date.getFullYear();
+        var dateStr = `${day}/${month}/${year}`;
+        var parts = dateStr.split('/');
+        var payment_date = `${parts[2]}-${parts[1]}-${parts[0]}`;
+        jQuery(this).find('[name=payment_date]').val(payment_date);
+
+        /*btn = jQuery(e.relatedTarget);
         var tr = btn.closest('tr');
         var id = tr.data("id");
         jQuery(this).find('[name="id"]').val(id);
@@ -159,7 +185,7 @@ jQuery(document).ready(function($) {
         if(payment_type) {
             jQuery(this).find('[name="payment_type"]').val(tr.find("td.payment_type").data("id"));
         }
-        jQuery(this).find('[name="check_number"]').val(tr.find("td.check_number").html());
+        jQuery(this).find('[name="check_number"]').val(tr.find("td.check_number").html());*/
         //closeModal();
     });
 
@@ -168,13 +194,16 @@ jQuery(document).ready(function($) {
 jQuery(function ($) {
 
     var $tooltip = $('<div class="tooltip-box"></div>').appendTo('body');
+    show_tooltip();
+});
 
-    $('.has-tooltip').on('mouseenter', function (e) {
-        var text = $(this).data('tooltip');
-
+function show_tooltip(){
+    jQuery('.has-tooltip').on('mouseenter', function (e) {
+        var text = jQuery(this).data('tooltip');
+        var $tooltip = jQuery(".tooltip-box");
         $tooltip.text(text).fadeIn(150);
 
-        $(this).on('mousemove.tooltip', function (e) {
+        jQuery(this).on('mousemove.tooltip', function (e) {
             $tooltip.css({
                 top: e.pageY + 10,
                 left: e.pageX + 10
@@ -182,12 +211,13 @@ jQuery(function ($) {
         });
     });
 
-    $('.has-tooltip').on('mouseleave', function () {
-        $(this).off('mousemove.tooltip');
+    jQuery('.has-tooltip').on('mouseleave', function () {
+        var $tooltip = jQuery(".tooltip-box");
+        jQuery(this).off('mousemove.tooltip');
         $tooltip.fadeOut(150);
     });
+}
 
-});
 /*
 jQuery.fn.dataTable.ext.type.order['date-pre'] = function (dateString) {
     let parts = dateString.split("/"); // מפצל את המחרוזת

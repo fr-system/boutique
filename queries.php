@@ -67,7 +67,12 @@ function run_action_query($table_name, $id, $action, $options)
             break;
     }
     if (!empty($id)) {
-        $query .= " where id = " . $id;
+        if(str_contains($id, ',')){
+            $query .= " where id in(" . $id.")";
+        }
+        else {
+            $query .= " where id = " . $id;
+        }
     }
     $ok = run_query($query, "execute");
     return $ok;
@@ -146,10 +151,8 @@ function get_data_table($table_name, $filters=null, $orderby = null, $join_filte
     $i = 0;
     foreach ($columns as $column) {
 
-        if(!isset($column["field_name"]) || isset($column["type"]) && $column["type"] == "user_data"  )continue;
-       // if (/*$column["type"] == "action" ||*/isset($column["type"]) && $column["type"] == "user_data" && !isset($column['join_table'])) continue;
-        $i++;
-        $query .=$wpdb->prefix.$table_name.".". $column["field_name"] . ", ";
+        if(!isset($column["field_name"]))continue;
+        $query .= $wpdb->prefix.$table_name.".". $column["field_name"] . ", ";
         if (isset($column['join_table'])) {
             if(isset($column['join_value'])) {
                 $query .= $wpdb->prefix . $column['join_table'] . "." . $column['join_value'] . " AS " . substr($column['join_table'], 0, -1) . "_" . $column['join_value'] . ", ";
@@ -239,7 +242,7 @@ function get_data_table($table_name, $filters=null, $orderby = null, $join_filte
     }
 
     //echo $query;
-    write_log("query ".$query);
+    //write_log("query ".$query);
 //    if($filter_value!= 0){
 //        $query .= " WHERE ".get_id_column_in_page($page_name)." = ".$filter_value;
 //    }

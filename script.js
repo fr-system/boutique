@@ -364,8 +364,9 @@ jQuery(document).ready(function($){
         var postData = [
             {name: "action", value: "on_order_confirmation"},
             {name: "order_id", value: getParameterByName("id")},
+            {name: "order_id", value: getParameterByName("id")},
         ];
-        call_ajax_function(postData,"onOrderConfirmation");
+        call_ajax_function(postData);
 
     })
 
@@ -721,15 +722,14 @@ jQuery(".slider-message").click(function(){
     });
 })
 
-function show_slider_message(options) {
+function show_slider_message(text) {
     var messageElement = jQuery(".slider-message");
-    messageElement.find("h1").text(options.message|| "");
-    messageElement.find(".secondary-text").text(options.subMessage || "");
+    messageElement.find(".text").text(text);
     if(jQuery(window).width() < 767 ){
         messageElement.css("width","80vw");
     }
     else {
-        messageElement.css("width", options.width || "400px");
+        messageElement.css("width", "400px");
     }
 
     messageElement.show();
@@ -739,7 +739,7 @@ function show_slider_message(options) {
         , 500
         ,
         function () {
-            messageElement.fadeOut(10000, function() {
+            messageElement.fadeOut(5000, function() {
                 messageElement.css("right", "-500px");
             });
         }
@@ -754,6 +754,9 @@ function call_ajax_function(postData,func) {
         dataType: 'json',
         method: 'POST'
     }).done(function (result) {
+        if(result.message){
+            show_slider_message(result.message);
+        }
         //window[func]($form, data);
         if(func) {
             window[func](result);
@@ -787,6 +790,7 @@ function fillListTable(result){
     if(result.tableData) {
         jQuery(".list-table").html(result.tableData);
         jQuery(".page-title").html(result.options["title"]);
+        show_tooltip();
     }
     else{
         jQuery(".list-table").html("");
@@ -829,9 +833,4 @@ function openModal(modalId,message){
 }
 function closeModal(){
     jQuery('.modal.show').modal('hide');
-}
-
-function onOrderConfirmation(result){
-    openModal("#bout-massage",result.notice);
-
 }

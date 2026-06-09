@@ -582,13 +582,13 @@ label span{
     width: 400px;
     /* height: 400px;*/
     position: fixed;
-    top:-500px;
+    right:-500px;
     margin: auto;
     /*bottom: 40px;*/
     top: 100px;
     background: #FFFFFF;
     box-shadow: 0px 1px 26px -2px #0000002E;
-    border-radius: 54px;
+    border-radius: 12px;
     padding: 30px;
     text-align: center;
     z-index: 999

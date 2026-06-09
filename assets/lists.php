@@ -61,7 +61,7 @@ const BOUTIQUE_TABLES = array(
             array("field_name" => "blocked", "widget" => "checkbox","label"=>"מוצר חסום","hidden"=>true),
             /*array("field_name" => "factor_of_friction", "widget" => "select","label"=>"גורם אירוז","hidden"=>true),*/
             array("field_name" => "individually", "widget" => "checkbox","label"=>"ניתן למכירה בבודדים","hidden"=>true),
-            array("field_name" => "units_in_box", "widget" => "number","label"=>"כמות יחידות בארגז","required"=>true,"hidden"=>true),
+            array("field_name" => "units_in_box", "widget" => "number","label"=>"כמות יחידות בארגז","required"=>true,"hidden"=>true,"min"=>1,"max"=>49),
         )),
     "tasks" => array(
         "title" => "משימות",
@@ -180,7 +180,6 @@ const BOUTIQUE_TABLES = array(
 /*            array("field_name" => "agent_id", "widget" => "select", "label" => "סוכן", "join_table" => "agents", "join_value" => "user_id", "user_field" => "display_name"),//להביא מטבלת יוזר*/
 
         ),
-        "actions" => array(array("title" => "orders","dialog"=> "payment_modal","text"=>"לעדכון תשלום"))
         ),
     "products_clients"=>array(
         "title" => "מחיר מיוחד ללקוח",

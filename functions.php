@@ -14,6 +14,8 @@ require_once dirname(__FILE__) . "/b-functions.php";
 require_once dirname(__FILE__) . "/design_tool.php";
 require_once dirname(__FILE__) . "/rivka.php";
 require_once dirname(__FILE__) . "/lib/import_excel.php";
+require_once dirname(__FILE__) . "/lib/export_pdf.php";
+
 
 function boutique_enqueue_scripts()
 {
@@ -96,24 +98,6 @@ function write_log($text)
     $log  = date("d-m-Y h:i:s").' ' . $text.' '.PHP_EOL;
 
     file_put_contents( ABSPATH . '/wp-content/themes/boutique/assets/debug.log', $log, FILE_APPEND);
-}
-
-function add_notice(  $type , $notice ){
-    session_start();
-    $_SESSION['notices'][$type] = $notice;
-}
-
-function has_user_notice( $type ){
-    session_start();
-    return isset( $_SESSION['notices'][$type] ) && $_SESSION['notices'][$type];
-}
-
-function show_notice( $type ){
-    session_start();
-    if( has_user_notice( $type ) ){
-        echo "<div class='notice'>" . $_SESSION['notices'][$type] . "</div>";
-        unset( $_SESSION['notices'][$type] );
-    }
 }
 
 ?>

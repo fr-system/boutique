@@ -27,8 +27,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 <body <?php body_class(); ?>>
 <?php create_popup(); ?>
 <div class="slider-message">
-    <h1 class="font-50 blue"></h1>
-    <div class="secondary-text font-30 blue"></div>
+    <div class="text font-30 dark-green bold"></div>
 </div>
 <a class="skip-link screen-reader-text" href="#content"></a>
 <?php if(is_user_logged_in()){ ?>

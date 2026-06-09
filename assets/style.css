@@ -416,12 +416,17 @@ td.dt-type-numeric{
 
 .tooltip-box {
     position: absolute;
-    background: #333;
-    color: #fff;
+    background: white;
+    box-shadow: 1px 1px 6px 1px rgba(0, 0, 0, 0.13);
+    color: black;
     padding: 6px 10px;
     border-radius: 4px;
-    font-size: 12px;
+    font-size: 14px;
     display: none;
     z-index: 9999;
     white-space: nowrap;
+}
+
+.update-payment{
+    width: 200px;
 }
