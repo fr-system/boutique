@@ -10,6 +10,7 @@ function import_from_xlsx()
    // write_log("import_from_xlsx");
     $msg = "";
     $count_success=0;
+    $count_exists = 0;
     if (empty($_FILES) || ($_FILES["bills"]["size"] == 0)) {
         write_log("_FILES ".json_encode($_FILES));
         write_log("empty_FILES ");
@@ -24,23 +25,32 @@ function import_from_xlsx()
         $supplier_id = $_POST["supplier_id"];//supplier_id
         //4 => "client_name",
         //$list= get_excel_order_field($supplier_id);//צריך לשמור בטבלה לכל ספק את השדות שלו
-        $list = array(1 => "date", 7 => "obligation", 10 => "payment_until", 13 => "doc_type", 16 => "BnNumber");
+        $list = array(0=>"doc_number",1 => "date", 7 => "obligation", 10 => "payment_until", 13 => "doc_type", 16 => "BnNumber");
 
         $spreadsheet = IOFactory::load ($tmpFile);
         $sheet = $spreadsheet->getActiveSheet ();
        // write_log ('sheet '.json_encode ($sheet->toArray()));
         $BnNumber_index = array_search ( "BnNumber",$list);
-
-        if ($BnNumber_index) {//אם בין השדות בקובץ של הספק יש ח.פ. ללקוח
+        $doc_number_index = array_search ( "doc_number",$list);//מספר חשבונית
+        if ($BnNumber_index !==false && $doc_number_index !==false) {//אם בין השדות בקובץ של הספק יש ח.פ. ללקוח
             //write_log("sheets ".json_encode($sheet->toArray()));
             foreach ($sheet->toArray() as $key => $row_from_file) {
                 if ($key == 0) continue;
                 $row_to_table = [];
                 $row_to_table["supplier_id"] = $supplier_id;
+                $row_to_table["imported_at"] = date('Y-m-d',strtotime ('today'));
                 write_log ('BnNumber '.json_encode ($row_from_file[$BnNumber_index]));
                 if (empty($row_from_file[$BnNumber_index])) {//אם לא הגיע ח.פ. ללקוח בקובץ
                     continue;
                 }
+                global $wpdb;
+                write_log (' query '."SELECT 1 FROM ".$wpdb->prefix."collection WHERE supplier_id = ".$supplier_id." and  doc_number ='".$row_from_file[$doc_number_index]."' LIMIT 1");
+                $result = run_query ("SELECT 1 FROM ".$wpdb->prefix."collection WHERE supplier_id = ".$supplier_id." and doc_number ='".$row_from_file[$doc_number_index]."' LIMIT 1");
+                write_log ('result '.json_encode ($result));
+                 if(!empty($result)) {//this invoise number is exists
+                     $count_exists++;
+                     continue;
+                 }
                 $client = get_data_table("clients", array(array("filter_field" => "BnNumber", "filter_value" => $row_from_file[$BnNumber_index])));
 
                 if(empty($client)){// אם לא נמצא לקוח עם הח.פ. שבשורה זו
@@ -67,18 +77,21 @@ function import_from_xlsx()
                 write_log ('row_to_table ' . json_encode ($row_to_table));
                 $result = pre_action_query ("collection", $row_to_table);
                 write_log ('pre_action_query ' . json_encode ($result));
-                $ok = 1;// run_action_query ("collection", null, "new", $result);
+                $ok = run_action_query ("collection", null, "new", $result);
                 if ($ok) {
                     $count_success++;
                 }
                 // write_log(json_encode ( $row));
             }
-            if ($count_success == 0) {
+            if($count_exists>0){
+                $msg = "חלק מהחשבוניות כבר קיימות במערכת";
+            }
+            if ($count_success == 0 && $count_exists ==0) {
                 $msg = "אירעה שגיאה בעת קליטת הקובץ , הרשומות לא נקלטו";
             } elseif ($key == $count_success) {
-                $msg = "הקובץ נקלט בהצלחה, {$count_success}   רשומות עודכנו";
+                $msg .= "הקובץ נקלט בהצלחה, {$count_success}   רשומות עודכנו";
             } elseif ($count_success < $key) {
-                $msg = "הקובץ נקלט בהצלחה, עודכנו {$count_success} רשומות, מתוך {$key} רשומות ";
+                $msg .= "הקובץ נקלט בהצלחה, עודכנו {$count_success} רשומות, מתוך {$key} רשומות ";
             }
         }
          else {
@@ -88,7 +101,8 @@ function import_from_xlsx()
     else{
         write_log ('file no exist');
     }
-
+    write_log ('import collaction '.$msg);
+    //add_notice( 'import_excel' ,$msg );
     echo json_encode (array(
         'status' => 'success',
         'msg' => $msg //'הקובץ נקלט בהצלחה',

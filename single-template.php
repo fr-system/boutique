@@ -21,7 +21,7 @@ if($action == "new") {
 
     if($table_name == "orders"){
         $row->order_date = date('Y-m-d H:i:s');
-        $row->user_opens = get_id_by_user();
+        $row->user_opens = get_current_user_id();// get_id_by_user();
     }
     if($table_name == "tasks"){
         $row->open_date = date('Y-m-d H:i:s');
@@ -215,5 +215,5 @@ else{
          <?php } ?>
     </div>
 </section>
-<?php get_header();?>
+<?php get_footer();?>
 

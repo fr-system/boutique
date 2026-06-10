@@ -244,7 +244,7 @@ function on_order_confirmation(){
     global  $wpdb;
     if(isset($_POST['order_id'])){
         $order_id = $_POST['order_id'];
-        $query = "UPDATE ".$wpdb->prefix."orders SET done = 1, user_confirms = ".get_id_by_user()."
+        $query = "UPDATE ".$wpdb->prefix."orders SET done = 1, user_confirms = ".get_current_user_id()."
                   WHERE id = ".$order_id;
         //run_query ($query);//זה עובד טוב פשוט חבל כל הזמן שיאשר ויפריע לבדיקות!!!!
         //add_notice( 'order_confirmation' ,"ההזמנה אושרה נשלח מייל ללקוח ולספקים" );
