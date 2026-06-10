@@ -11,7 +11,8 @@ function get_side_menu()
         $submenu = false;
         foreach($menuitems as $item ){
             $name = $item->description;
-            if((is_agent() ||is_supplier()) && ($name=="agents"|| $name=="collection"||$name=="lists"))continue;
+            if(is_agent() && ($name=="agents" || $name=="suppliers" || $name=="collection"||$name=="lists") ||
+                is_supplier() && $name !="collection")continue;
             $url = $item->url."?subject=".$name;
             if ( !$item->menu_item_parent ){
                 $parent_id = $item->ID;?>
@@ -31,7 +32,8 @@ function get_side_menu()
             }
             //לבדוק מה סוכן יכול להוסיף חדש (הזמנה? מה עוד)
             ?>
-            <?php if ( $parent_id == $item->menu_item_parent && (is_manager() || is_agent() && $name=="orders")){ ?>
+            <?php if ( $parent_id == $item->menu_item_parent && (is_manager() || is_agent() && $name=="orders"
+                || is_supplier() && $name=="collection")){ ?>
                 <?php if ( !$submenu ){ $submenu = true; ?>
                     <ul class="sub-menu font-15">
                 <?php } ?>
@@ -242,7 +244,7 @@ function on_order_confirmation(){
     global  $wpdb;
     if(isset($_POST['order_id'])){
         $order_id = $_POST['order_id'];
-        $query = "UPDATE ".$wpdb->prefix."orders SET done = 1, user_confirms = ".get_current_user_id()."
+        $query = "UPDATE ".$wpdb->prefix."orders SET done = 1, user_confirms = ".get_id_by_user()."
                   WHERE id = ".$order_id;
         //run_query ($query);//זה עובד טוב פשוט חבל כל הזמן שיאשר ויפריע לבדיקות!!!!
         //add_notice( 'order_confirmation' ,"ההזמנה אושרה נשלח מייל ללקוח ולספקים" );
@@ -507,18 +509,16 @@ function send_late_bills($attr)
     write_log("send_who_needs_pay_today");
     $filters = array();
     $filters[] = array("filter_field" => "payment_date", "filter_type" => "null");
+    $filters[] = array("filter_field" => "doc_type","filter_value"=>"1");
     $result = get_data_table("collection", $filters);
     //write_log("eres ".json_encode($result));
     $late_pay = "";
     $count = 0;
     foreach ($result as $row) {
         $client = get_data_table("clients", array(array("filter_field" => "client_id", "filter_value" => $row->client_id)));
-        $newDate = get_payment_until($client->payment_term_id,$row->date);
 
-        write_log("date:  " . $row->date . "  newDate: " . $newDate);
-
-        if ($attr["type"] == "daily" && $newDate === date('Y-m-d') ||//לבדוק אם היום מוצ"ש ???
-            $attr["type"] == "weekly" && $newDate < date('Y-m-d')) {
+        if ($attr["type"] == "daily" && $row->payment_until === date('Y-m-d') ||//לבדוק אם היום מוצ"ש ???
+            $attr["type"] == "weekly" && $row->payment_until < date('Y-m-d')) {
             $late_pay = "חשבונית מספר " . $row->doc_number . " נקלטה בתאריך" . $row->date .
                 " ללקוח " . $client->name . "על סך של " . $row->obligation . "₪ <br>";
             $count++;

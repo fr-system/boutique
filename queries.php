@@ -16,25 +16,20 @@ function run_query($query, $type="")
     return $result;
 }
 
-function pre_action_query($table_name, $row){
+function pre_action_query($table_name, $row)
+{
     $update = array();
     $fields = array();
     $values = array();
 
-    //write_log("row ".json_encode($row));
     foreach ($row as $key => $value) {
         $field = get_field($table_name, $key);
         if ($field != null) {
-            /*if($field["widget"] == "file" || $field["widget"] == "image"){
-                $value = upload_file($field["field_name"]);
+            if (!empty($value) && (isset($field["un_apostrophe"]) || $field["widget"] == "file" || $field["widget"] == "image")) {
+                $value = str_replace("₪", "", $value);
+                $value = str_replace(",", "", $value);
+                $value = (float)$value;
             }
-            else {*/
-                if (!empty($value) && (isset($field["un_apostrophe"]) || $field["widget"] == "file"|| $field["widget"] == "image")) {
-                    $value = str_replace("₪", "", $value);
-                    $value = str_replace(",", "", $value);
-                    $value = (float)$value;
-                }
-            /*}*/
 
             $apostrophe = is_needed_apostrophe($field["widget"], isset($field["un_apostrophe"]));
             array_push($fields, $key);
@@ -43,7 +38,7 @@ function pre_action_query($table_name, $row){
         }
     }
 
-    return array("fields"=>$fields, "values"=>$values,"update"=>$update);
+    return array("fields" => $fields, "values" => $values, "update" => $update);
 }
 
 function run_action_query($table_name, $id, $action, $options)
@@ -55,6 +50,12 @@ function run_action_query($table_name, $id, $action, $options)
             $query = "DELETE FROM {$wpdb->prefix}" . $table_name;
             if($table_name == "orders"){
                 run_query("DELETE FROM {$wpdb->prefix}order_products WHERE order_id = ".$id, "execute");
+            }
+            if($table_name == "suppliers" || $table_name == "agents"){
+                $users = get_data_table($table_name,array(array("filter_field" => "id", "filter_value" =>$id)));
+                if(count($users)) {
+                    wp_delete_user($users[0]->user_id);
+                }
             }
             //$id = 999999;
             break;
@@ -95,6 +96,7 @@ function save_single_data()
             $result = wp_update_user([
                 'ID'         => $_POST["user_id"],
                 'display_name' => $_POST["name"],
+                'last_name'  => $_POST["name"],
                 'user_email' => $_POST["email"],
             ]);
         }
@@ -323,7 +325,7 @@ add_action('wp_ajax_new_chat_ajax', 'new_chat_ajax');
 function new_chat_ajax()
 {
     global $wpdb;
-    $user_id = get_current_user_id();
+    $user_id = get_id_by_user();
     //write_log ('new chat user id '.$user_id);
     $query = "INSERT into ".$wpdb->prefix."chat(text,task_id,user_id,date) select '" . $_POST['text'] . "'," . $_POST['task_id'] . "," . get_current_user_id () . ",NOW()";
     run_query ($query,"execute");

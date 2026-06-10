@@ -402,13 +402,8 @@ table.dataTable td.dt-type-numeric,*[dir=rtl] table.dataTable td.dt-type-date{
 table.dataTable>tbody>tr>td,table.dataTable>tbody>tr>th{
     padding: 0;
 }
-button.block-client:hover{
-    background-color: #f8adad ;
-    border:solid 1px #f8adad ;
-}
-tr.blocked, button.block-client{
-    background-color: #FFC7C7;
-    border:solid 1px #FFC7C7;
+tr.blocked{
+    background-image: repeating-linear-gradient(302deg, #ffffff, #f4f4f4 10px);
 }
 td.dt-type-numeric{
     text-align: center !important;
@@ -429,4 +424,8 @@ td.dt-type-numeric{
 
 .update-payment{
     width: 200px;
+}
+
+.graphs-charts{
+height: 80%;
 }

@@ -98,11 +98,22 @@ function is_manager($user = null){
     return get_user_role($user) == "administrator";
 }
 function is_agent($user = null){
-    return get_user_role($user) == "agent";
+    return get_user_role($user) == "agents";
 }
 function is_supplier($user = null){
-    return get_user_role($user) == "supplier";
+    return get_user_role($user) == "suppliers";
 }
+function get_id_by_user()
+{
+    $filters = array();
+    $table_name = is_agent() ? "agents" : (is_supplier() ? "suppliers" : "");
+    $filters[] = array("filter_field" => "user_id", "filter_value" => get_current_user_id());
+    $users = get_data_table($table_name, $filters);
+    if (count($users) > 0)
+        return $users[0]->id;
+    return null;
+}
+
 function get_user_display_name($user_obj = null){
     $user = get_user_connected($user_obj);
     return $user ?  $user->data->display_name : null;

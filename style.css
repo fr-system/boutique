@@ -306,6 +306,9 @@ input, textarea, select, button{
 .margin-after-10{
     margin-left: 10px;
 }
+.margin-before-10{
+    margin-right: 10px;
+}
 .padding-bottom-20 {
     padding-bottom: 20px;
 }
@@ -631,7 +634,7 @@ form#registration button{
     padding: 0;
 }
 
-label.error, #form_error_msgs_container{
+label.error, #form_error_msgs_container,.color-red{
     color: red;
 }
 
