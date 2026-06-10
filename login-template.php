@@ -1,13 +1,11 @@
 <?php /* Template Name: login */
-if(is_user_logged_in()){
-    if(is_manager()){
-        wp_redirect(get_site_url()."/archive/?subject=clients");
-        exit;
+if(is_user_logged_in()) {
+    if (is_supplier()) {
+        wp_redirect(get_site_url() . "/archive/?subject=collection");
+    } else {
+        wp_redirect(get_site_url());
     }
-    else{
-        wp_redirect(get_site_url()."/archive/?subject=tasks");
-        exit;
-    }
+    exit;
 }
 ?>
 <?php wp_head();

@@ -169,7 +169,7 @@ function archive_header($table_name, $view_only = false,$attr = null)
         </div>
         <div class="flex-display align-center  space-between">
             <?php if(!$view_only){
-                if($table_name == "collection"){?>
+                if(is_manager() && $table_name == "collection"){?>
                     <form novalidate  class="site_form flex-display space-between" data-success="reload_page" >
                         <input type="hidden" name="form_func" value="import_from_xlsx"/>
                         <input type='file' class="hidden" name='bills' id='bills' accept=".xls,.xlsx">
@@ -225,8 +225,15 @@ function archive_header($table_name, $view_only = false,$attr = null)
                 </svg>
                 <input type="search" id="search" class="" placeholder="חיפוש" />
             </div>
-            <?php if($table_name != "collection" && !$view_only && ($table_name != "tasks" || is_manager()) && !(isset($attr["client_id"]) && isset($attr["blocked"]) && $attr["blocked"] ==1)){
-            $href = 'single?subject='.$table_name.'&action=new';
+            <?php
+            //מתי אין אפשרות להוסיף משהו חדש
+            //בחשבוניות ; הוספת מוצר להזמנה(נפתח הקטלוג) ; אם אתה לא מנהל ועכשיו עומדים על משימות ;
+
+            if($table_name == "collection"  || $view_only || (!is_manager() && $table_name != "orders") ||
+             (isset($attr["client_id"]) && isset($attr["blocked"]) && $attr["blocked"] ==1)) {
+            }
+            else{
+                $href = 'single?subject='.$table_name.'&action=new';
             if(isset($attr["client_id"])){
                 $href.="&client_id=".$attr["client_id"];
             }
@@ -392,7 +399,7 @@ function create_input($field,$value = null,$readonly = "")
                 else if(isset($field["join_table"])) {
                     $filter = null;
                     if($field["join_table"] == "clients" && is_agent()){
-                        $filter = "agent_id=".get_current_user_id();
+                        $filter = "agent_id=".get_id_by_user();
                     }
                     echo build_select_options($field["join_table"],$value,array("filter"=>$filter));
                 }
