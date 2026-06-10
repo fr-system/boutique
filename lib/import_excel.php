@@ -18,44 +18,50 @@ function import_from_xlsx()
             'msg' => 'לא נמצא קובץ.'
         )));
     }
-    write_log("_FILES ".json_encode($_FILES));
+   // write_log("_FILES ".json_encode($_FILES));
     if (file_exists ($_FILES["bills"]["tmp_name"])) {
         $tmpFile = $_FILES['bills']['tmp_name'];
-        write_log ('bil  post '.json_encode ($_POST));
-        $supplier_id = $_POST["supplier_id"];
+        $supplier_id = $_POST["supplier_id"];//supplier_id
         //4 => "client_name",
         //$list= get_excel_order_field($supplier_id);//צריך לשמור בטבלה לכל ספק את השדות שלו
-        $list = array(1 => "date", 7 => "obligation", 10 => "payment_until", 13 => "doc_type", 14 => "BnNumber");
+        $list = array(1 => "date", 7 => "obligation", 10 => "payment_until", 13 => "doc_type", 16 => "BnNumber");
+
         $spreadsheet = IOFactory::load ($tmpFile);
         $sheet = $spreadsheet->getActiveSheet ();
-        $BnNumber_index = array_search ($list, "BnNumber");
+       // write_log ('sheet '.json_encode ($sheet->toArray()));
+        $BnNumber_index = array_search ( "BnNumber",$list);
+
         if ($BnNumber_index) {//אם בין השדות בקובץ של הספק יש ח.פ. ללקוח
             //write_log("sheets ".json_encode($sheet->toArray()));
-            foreach ($sheet->toArray () as $key => $row_from_file) {
+            foreach ($sheet->toArray() as $key => $row_from_file) {
                 if ($key == 0) continue;
                 $row_to_table = [];
                 $row_to_table["supplier_id"] = $supplier_id;
+                write_log ('BnNumber '.json_encode ($row_from_file[$BnNumber_index]));
                 if (empty($row_from_file[$BnNumber_index])) {//אם לא הגיע ח.פ. ללקוח בקובץ
                     continue;
                 }
                 $client = get_data_table("clients", array(array("filter_field" => "BnNumber", "filter_value" => $row_from_file[$BnNumber_index])));
+
                 if(empty($client)){// אם לא נמצא לקוח עם הח.פ. שבשורה זו
                     continue;
                 }
+                $client=$client[0];
                 $row_to_table["client_id"] =$client->id;
                 foreach ($list as $index => $field_name) {
                     if (isset($row_from_file[$index])) {
-                        if (empty($row_from_file[$index]) && $field_name == "payment_until") {//אם לא הגיע לחשב לפי תנאי תשלום ללקוח
-                            $date_index =  array_search ($list,"date");
-                            $date= date('Y-m-d', strtotime($row_from_file[$date_index]));
-                            $row_to_table[$field_name] = get_payment_until($client->payment_term_id,$date);
-                        } elseif ($field_name == "date" || $field_name == "payment_until") {// צריך לשמור קודם את תאריך הקבלה ואח"כ לחשב את תשלום עד
-                            $row_to_table[$field_name] = date('Y-m-d', strtotime($row_from_file[$index]));
+                        if ($field_name == "date" || $field_name == "payment_until") {// צריך לשמור קודם את תאריך הקבלה ואח"כ לחשב את תשלום עד
+                            $row_to_table[$field_name] = excel_date_to_php_date ($row_from_file[$index]);
                             // $date = DateTime::createFromFormat('d/m/Y', $row_from_file[$index]);
                             //$row_to_table[$field_name] = $date->format('Y-m-d');
                         } else {
                             $row_to_table[$field_name] = $row_from_file[$index];
                         }
+                    } elseif ($field_name == "payment_until") {//אם לא הגיע לחשב לפי תנאי תשלום ללקוח
+                        $date_index = array_search ("date", $list);
+                        $date = date ('Y-m-d', strtotime (excel_date_to_php_date ($row_from_file[$date_index])));
+                        $row_to_table[$field_name] = get_payment_until ($client->payment_term_id, $date);
+
                     }
                 }
                 write_log ('row_to_table ' . json_encode ($row_to_table));
@@ -89,5 +95,13 @@ function import_from_xlsx()
         //'redirect' => isset($_POST["previous_page"]) ? $_POST["previous_page"]:'',
     ));
     wp_die();
+}
+
+function excel_date_to_php_date($excel_date)
+{
+    $dateString = str_replace('\/', '/', trim ( $excel_date));
+    list($day, $month, $year) = explode('/', $dateString);
+    if (strlen ($year)==2) $year = '20' . $year;
+    return  "$year-$month-$day";
 }
 ?>

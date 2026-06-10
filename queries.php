@@ -217,7 +217,7 @@ function get_data_table($table_name, $filters=null, $orderby = null, $join_filte
                     $filter_str[] = $filter_field . " = " . $apostrophe . $filter["filter_value"] . $apostrophe;
                     break;
             }
-
+            write_log ('filter_str '.json_encode ($filter_str));
            /* if (isset($filter["filter_type"]) && $filter["filter_type"] == "date") {
                 $filter_str[] = $filter_field . " " . $filter["filter_ratio"] . " " . $filter["filter_value"];
             } else if (isset($filter["filter_type"]) && $filter["filter_type"] == "null") {

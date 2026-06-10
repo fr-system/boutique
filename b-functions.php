@@ -553,7 +553,7 @@ function get_payment_until($payment_term_id,$date)
             break;
         case  1: //מזומן
         default:
-            $newDate = date('Y-m-d', $date);
+            $newDate =$date; // date('Y-m-d', $date);
     }
     return $newDate;
 }
