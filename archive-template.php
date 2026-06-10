@@ -68,15 +68,11 @@ $page_info  = BOUTIQUE_TABLES[$table_name];
     <table name="" class="archive-table dataTable">
         <thead><tr class="tr-head gold">
             <?php
+
             if(is_manager() && $table_name == "collection" && !isset($_GET["payed"])){
                 ?><th class="no-sort"></th><?php
             }
-            foreach($page_info["columns"] as $column){
-                if(isset($column["hidden"]) || !isset($column["label"]) || !empty($add_text) && $column["field_name"]== "client_id" || is_agent() && $column["field_name"]== "agent_id"){continue;}
-                ?>
-                <th><?= $column["label"]?></th>
-            <?php } ?>
-            <?php if($table_name != "collection"){
+            if($table_name != "collection"){
                 if(is_manager() || is_agent() && $table_name == "orders"){ ?>
                     <th class="no-sort"></th>
                 <?php }
@@ -84,6 +80,12 @@ $page_info  = BOUTIQUE_TABLES[$table_name];
                     <th class="no-sort"></th>
                 <?php } ?>
             <?php }
+            foreach($page_info["columns"] as $column){
+                if(isset($column["hidden"]) || !isset($column["label"]) || !empty($add_text) && $column["field_name"]== "client_id" || is_agent() && $column["field_name"]== "agent_id"){continue;}
+                ?>
+                <th><?= $column["label"]?></th>
+            <?php } ?>
+            <?php
             if(isset($page_info["actions"])){
                 foreach ($page_info["actions"] as $action) {?>
                     <th class="no-sort"></th>
@@ -114,37 +116,6 @@ function get_tr_data($table_name, $data, $id_column,$add_text){
                 }
                 $html.= '</td>';
     }
-    foreach($page_info["columns"] as $column) {
-        if (!isset($column['field_name']) || $column["field_name"]== "client_id" && !empty($add_text) || is_agent() && $column["field_name"]== "agent_id") {
-            continue;
-        }
-
-        $field = isset($column['join_table']) ? substr($column['join_table'], 0, -1) . "_" . $column['join_value'] : $column["field_name"];
-        $list = isset($column['table_name']) ? constant($column['table_name']) : null;
-
-        if ($field != $id_column && !isset($column["hidden"]) && isset($column["label"])) {
-            $data_id = "";
-            if($column["widget"]=="select" && isset($column["options"])){
-               $data_id = 'data-id="'.$row->$field.'"';
-            }
-            $column_value = get_column_value($column,$row,$field,$list);
-            $html .= '<td '.$data_id.' class="'.$field.'">' . $column_value . '</td>';
-        }
-    }
-
-    if(isset($page_info["actions"])) {
-        foreach ($page_info["actions"] as $action) {
-            if(is_array($action) && isset($action["dialog"])) {
-                $html .= '<td ><a class="button background-gold font-17" data-bs-toggle="modal" href="#'.$action["dialog"].'" role="button">
-                '.$action["text"].'
-                    </a></td>';
-            }
-            else {
-                $html .= '<td ><a class="button background-gold font-17" href="/archive?subject=' . $action . '&id=' . $row->id . '">' . BOUTIQUE_TABLES[$action]["title"] . '</a></td>';
-            }
-        }
-    }
-
     if($table_name != "collection") {
         if (is_manager() || is_agent() && $table_name == "orders") {
             if ($table_name != "orders" || $row->done == 0) {
@@ -173,6 +144,36 @@ function get_tr_data($table_name, $data, $id_column,$add_text){
                     </svg>
                     </a>   
             </td>';
+        }
+    }
+    foreach($page_info["columns"] as $column) {
+        if (!isset($column['field_name']) || $column["field_name"]== "client_id" && !empty($add_text) || is_agent() && $column["field_name"]== "agent_id") {
+            continue;
+        }
+
+        $field = isset($column['join_table']) ? substr($column['join_table'], 0, -1) . "_" . $column['join_value'] : $column["field_name"];
+        $list = isset($column['table_name']) ? constant($column['table_name']) : null;
+
+        if ($field != $id_column && !isset($column["hidden"]) && isset($column["label"])) {
+            $data_id = "";
+            if($column["widget"]=="select" && isset($column["options"])){
+               $data_id = 'data-id="'.$row->$field.'"';
+            }
+            $column_value = get_column_value($column,$row,$field,$list);
+            $html .= '<td '.$data_id.' class="'.$field.'">' . $column_value . '</td>';
+        }
+    }
+
+    if(isset($page_info["actions"])) {
+        foreach ($page_info["actions"] as $action) {
+            if(is_array($action) && isset($action["dialog"])) {
+                $html .= '<td ><a class="button background-gold font-17" data-bs-toggle="modal" href="#'.$action["dialog"].'" role="button">
+                '.$action["text"].'
+                    </a></td>';
+            }
+            else {
+                $html .= '<td ><a class="button background-gold font-17" href="/archive?subject=' . $action . '&id=' . $row->id . '">' . BOUTIQUE_TABLES[$action]["title"] . '</a></td>';
+            }
         }
     }
 
