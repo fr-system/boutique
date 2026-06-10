@@ -23,8 +23,10 @@ const BOUTIQUE_TABLES = array(
             array("field_name" => "email", "widget" => "text", "label" => "דוא\"ל","required"=>true),
             array("field_name" => "email2", "widget" => "text", "label" => "דוא\"ל נוסף","hidden"=>true),
             array("field_name" => "accounting_phone_number", "widget" => "text", "label" => "טלפון הנה\"ח","hidden"=>true),
-            array("field_name" => "obligo", "un_apostrophe" => true, "widget" => "text", "label" => "תקרת חוב","sign"=>"₪"),
+            array("field_name" => "obligo", "un_apostrophe" => true, "widget" => "text", "label" => "אובליגו","sign"=>"₪"),
+            array("field_name" => "doc_type","widget" => "file", "label" => "שטר חוב","hidden"=>true),
             array("field_name" => "blocked", "widget" => "hidden"),
+
 
         ),
         "filter" => "blocked is null or blocked = 0",
@@ -112,10 +114,9 @@ const BOUTIQUE_TABLES = array(
         "columns" => array(
             array("field_name" => "client_id","widget" => "select", "join_table" => "clients", "join_value" => "name", "label" => "שם הלקוח","required"=>true),
             array("field_name" => "order_date", "widget" => "datetime-local", "label" => "תאריך הזמנה","required"=>true),
-            array("field_name" => "user_opens","widget" => "hidden"),
+            array("field_name" => "user_opens","widget" => "hidden", "label" => "מאשר ההזמנה","join_table" => "agents", "join_value" => "name"),
             array("widget" => "products"),
             array("field_name" => "total","widget" => "text", "label" => "סה\"כ", "un_apostrophe" => true,"sign"=>"₪"),
-            array("field_name" => "doc_type","widget" => "file", "label" => "שטר חוב"),
             array("field_name" => "notes","widget" => "textarea", "label" => "הערות","hidden"=>true),
             array("field_name" => "user_confirms","widget" => "select","locked"=>true, "label" => "מאשר ההזמנה","join_table" => "agents", "join_value" => "name"),
             array("field_name" => "done","widget" => "bool"),

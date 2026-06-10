@@ -25,6 +25,7 @@ if($action == "new") {
     }
     if($table_name == "tasks"){
         $row->open_date = date('Y-m-d H:i:s');
+        $row->status_id = 3;
         //אולי צריך לשמור מי פתח את המשימה???
     }
 }
