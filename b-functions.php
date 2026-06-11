@@ -172,6 +172,7 @@ function get_column_value($column,$row,$field,$list)
 {
     $column_value = "";
     switch ($column["widget"]) {
+
         case "select":
             //write_log ('fiel ' . $field);
             //write_log ('row ' . json_encode ($row));
@@ -228,10 +229,18 @@ function get_column_value($column,$row,$field,$list)
             }
             break;
         default:
+            write_log ('fiel ' . $field);
+            write_log ('row ' . json_encode ($row));
+
+        if(isset($column["type"]) &&  $column["type"]=="user"){
+                $column_value = empty($row->$field) ? '' : get_userdata($row->$field)->display_name;
+            }
+            else {
                 $column_value = isset($column['list_name']) && isset($list[$row->$field]) ? $list[$row->$field] : $row->$field;
                 if (!empty($column_value) && isset($column["un_apostrophe"])) {
                     $column_value .= " ₪";
                 }
+            }
             break;
     }
 

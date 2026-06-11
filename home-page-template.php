@@ -42,13 +42,25 @@ if(is_supplier()){
                 <div class="flex-display direction-column">
                     <?php
                     $filters = array(array("filter_field" => "payment_date","filter_type"=>"not_null"));
-                    $filters[] = array("filter_field" => "doc_type","filter_value"=>"1");
+                    $filters[] = array("filter_field" => "test_collection.doc_type","filter_value"=>"1");
                     $result = get_data_table("collection",$filters);
-                    $sum = array_reduce(
+
+                    $agents = array();
+                    foreach ($result as $row){
+                        write_log("row ".json_encode($row));
+                        if(!isset($agents[$row->agents_id])){
+                            $agents[$row->agents_id] = 0;
+                        }
+                        $agents[$row->agents_id]+=$row->obligation;
+                    }
+                        foreach ($agents as $key=>$total){
+                            echo $key." סכום: ".$total;
+                        }
+                    /*$sum = array_reduce(
                         $result,
                         fn($carry, $item) => $carry + $item->obligation,
                         0
-                    );
+                    );*/
                     ?>
                     <div class="font-20 gold bold"></div>
                     <div class="font-17">חובות פתוחים</div>
