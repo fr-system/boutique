@@ -14,6 +14,12 @@ function login()
         );
 
         $user = wp_signon($creds, false);
+        if (!is_wp_error($user)) {
+            wp_set_current_user($user->ID);
+            wp_set_auth_cookie($user->ID, true);
+
+            do_action('wp_login', $user->user_login, $user);
+        }
 
         echo json_encode(array(
             'status' => 'success',

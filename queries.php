@@ -154,22 +154,39 @@ function get_data_table($table_name, $filters=null, $orderby = null, $join_filte
     foreach ($columns as $column) {
 
         if(!isset($column["field_name"]))continue;
-        $query .= $wpdb->prefix.$table_name.".". $column["field_name"] . ", ";
-        if (isset($column['join_table'])) {
-            if(isset($column['join_value'])) {
-                $query .= $wpdb->prefix . $column['join_table'] . "." . $column['join_value'] . " AS " . substr($column['join_table'], 0, -1) . "_" . $column['join_value'] . ", ";
-            }
-            else if(isset($column['join_values_select'])){
-                foreach ($column['join_values_select'] as $join_values_select){
-                    $query .= $wpdb->prefix . $column['join_table'] . "." . $join_values_select. ", ";
+
+        if(isset($column['join_table_from'])) {
+            //קישור של טבלה אחרת עם טבלה אחרת
+            // למשל חשבוניות יש צורך לקשר לקוחות עם סוכנים
+            /*            "join_table_from" => "clients", "join_table" => "agent"
+                        "join_table"."join_value"
+                        "join_table_from"."field_name" =  "join_table"."id"*/
+            $query .= $wpdb->prefix.$column['join_table'].".id as ".$column['join_table']."_id".", ". $wpdb->prefix.$column['join_table'].".".$column["join_value"]. " AS " . substr($column['join_table'], 0, -1) . "_" . $column['join_value']. ", ";
+            $join .= " LEFT JOIN ".$wpdb->prefix.$column['join_table']." ON " . $wpdb->prefix . $column["join_table_from"] . "." . $column["field_name"] . " = " . $wpdb->prefix . $column['join_table'] . ".id";
+        }
+        else {
+            $query .= $wpdb->prefix . $table_name . "." . $column["field_name"] . ", ";
+
+            if (isset($column['join_table'])) {
+
+
+                if (isset($column['join_value'])) {
+                    $query .= $wpdb->prefix . $column['join_table'] . "." . $column['join_value'] . " AS " . substr($column['join_table'], 0, -1) . "_" . $column['join_value'] . ", ";
+                } else if (isset($column['join_values_select'])) {
+                    foreach ($column['join_values_select'] as $join_values_select) {
+                        $query .= $wpdb->prefix . $column['join_table'] . "." . $join_values_select . ", ";
+                    }
+                } else {
+                    $query .= $wpdb->prefix . $column['join_table'] . ".*, ";
+                }
+
+                if (isset($column['join_field'])) {
+                    $join .= " LEFT JOIN " . $wpdb->prefix . $column['join_table'] . " ON " . $wpdb->prefix . $table_name . "." . $column["field_name"] . " = " . $wpdb->prefix . $column['join_table'] . "." . $column['join_field'];
+                } else {
+                    $join .= " LEFT JOIN " . $wpdb->prefix . $column['join_table'] . " ON " . $wpdb->prefix . $table_name . "." . $column["field_name"] . " = " . $wpdb->prefix . $column['join_table'] . ".id";
                 }
             }
-            else{
-                $query .= $wpdb->prefix . $column['join_table'] . ".*, " ;
-            }
-            $join .= " LEFT JOIN " . $wpdb->prefix.$column['join_table'] . " ON " .$wpdb->prefix. $table_name . "." . $column["field_name"] . " = " . $wpdb->prefix.$column['join_table'] .".id";
         }
-
     }
     if($table_name=="products") {
         $query .= " pc.client_price, " ;
@@ -325,11 +342,9 @@ add_action('wp_ajax_new_chat_ajax', 'new_chat_ajax');
 function new_chat_ajax()
 {
     global $wpdb;
-    $user_id = get_id_by_user();
-    //write_log ('new chat user id '.$user_id);
+    //write_log ('new chat user id '.get_current_user_id ());
     $query = "INSERT into ".$wpdb->prefix."chat(text,task_id,user_id,date) select '" . $_POST['text'] . "'," . $_POST['task_id'] . "," . get_current_user_id () . ",NOW()";
     run_query ($query,"execute");
-    //run_query ("UPDATE tasks set treatment_date = NOW()");
 
     $media_id =9 ;
     //write_log ("media id new chat " .json_encode ( $media_id));
