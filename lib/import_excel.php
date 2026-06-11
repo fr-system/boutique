@@ -24,6 +24,10 @@ function import_from_xlsx()
         $tmpFile = $_FILES['bills']['tmp_name'];
         $supplier_id = $_POST["supplier_id"];//supplier_id
         //4 => "client_name",
+        /*$list =get_data_table ("supplier_column_mapping",array(array("filter_field" => "supplier_id", "filter_value" => $supplier_id)));
+        if(empty($list)){
+
+        }*/
         //$list= get_excel_order_field($supplier_id);//צריך לשמור בטבלה לכל ספק את השדות שלו
         $list = array(0=>"doc_number",1 => "date", 7 => "obligation", 10 => "payment_until", 13 => "doc_type", 16 => "BnNumber");
 

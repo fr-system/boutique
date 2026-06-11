@@ -56,9 +56,9 @@ const BOUTIQUE_TABLES = array(
 </defs>
 </svg>')
             ),
-            array("field_name" => "description", "widget" => "textarea","label"=>"תיאור"),
+            array("field_name" => "description", "widget" => "textarea","label"=>"תיאור","width"=>"30%"),
             //array("field_name" => "count", "widget" => "number","label"=>"כמות בקבוקים בארגז","hidden"=>true),
-            array("field_name" => "file_id", "widget" => "file","label"=>"דף מוצר"),
+            array("field_name" => "file_id", "widget" => "file","label"=>"דף מוצר","width"=>"20%"),
             array("field_name" => "image_id", "widget" => "image","label"=>"תמונת מוצר"),
             array("field_name" => "blocked", "widget" => "checkbox","label"=>"מוצר חסום","hidden"=>true),
             /*array("field_name" => "factor_of_friction", "widget" => "select","label"=>"גורם אירוז","hidden"=>true),*/
@@ -107,6 +107,15 @@ const BOUTIQUE_TABLES = array(
             ["field_name" => "notes", "widget" => "textarea", "label" => "הערות"],
             ["field_name" => "user_id", "widget" => "hidden"],
         ]),
+    "supplier_column_mapping" => array(
+        "title" => "מיפוי עמודות ספקים",
+        "single" => "ספק",
+        "male_female" => "male",
+        "columns" => [
+            ["field_name" => "supplier_id", "widget" => "text", "un_apostrophe" => true, "label" => "","required"=>true],
+            ["field_name" => "excel_column_index", "widget" => "text", "un_apostrophe" => true, "label" => "","required"=>true],
+            ["field_name" => "field_name", "widget" => "email","label" => ""],
+        ]),
     "orders" => array(
         "title" => "הזמנות",
         "single" => "הזמנה",
@@ -118,7 +127,7 @@ const BOUTIQUE_TABLES = array(
             array("widget" => "products"),
             array("field_name" => "total","widget" => "text", "label" => "סה\"כ", "un_apostrophe" => true,"sign"=>"₪"),
             array("field_name" => "notes","widget" => "textarea", "label" => "הערות","hidden"=>true),
-            array("field_name" => "user_confirms","widget" => "select","locked"=>true, "label" => "מאשר ההזמנה","join_table" => "agents", "join_value" => "name"),
+            //array("field_name" => "user_confirms","widget" => "select","locked"=>true, "label" => "מאשר ההזמנה","join_table" => "agents", "join_value" => "name"),
             array("field_name" => "done","widget" => "bool"),
         )),
     "order_products" => array(
@@ -126,12 +135,12 @@ const BOUTIQUE_TABLES = array(
         "columns" => array(
             array("field_name" => "order_id", "widget" => "number"),
             array("field_name" => "product_id", "widget" => "number", "join_table" => "products","join_values_select"=>array("name","price","image_id","supplier_id","individually","units_in_box")),
-            array("field_name" => "count", "widget" => "number"),
-            array("field_name" => "order_price", "widget" => "text", "un_apostrophe" => true,"sign"=>"₪"),
-            array("field_name" => "bonus", "widget" => "number"),
-            array("field_name" => "discount_percent", "widget" => "text", "un_apostrophe" => true,"sign"=>"%"),
+            array("field_name" => "count", "widget" => "number", "label" => "כמות"),
+            array("field_name" => "order_price", "widget" => "text", "label" => "מחיר", "un_apostrophe" => true,"sign"=>"₪"),
+            array("field_name" => "bonus", "widget" => "number", "label" => "בונוס"),
+            array("field_name" => "discount_percent", "widget" => "text", "label" => "אחוזי הנחה", "un_apostrophe" => true,"sign"=>"%"),
             array("field_name" => "order_individual", "widget" => "bool"),
-            array("field_name" => "total", "widget" => "text", "un_apostrophe" => true,"sign"=>"₪"),
+            array("field_name" => "total", "widget" => "text", "label" => "סה\"כ", "un_apostrophe" => true,"sign"=>"₪"),
 
            // array("field_name" => "product_id", "widget" => "text", "un_apostrophe" => true, "join_table" => "products_clients","join_id_column" => "product_id", "join_value" => "client_price","sign"=>"₪"),
         )),
@@ -238,7 +247,15 @@ const BOUTIQUE_LISTS = array(
                 array("field_name" => "importance","widget" => "text"),
             )
         ),
-    "specials" =>
+    "mission_topic" =>
+        array(
+            "title" => "נושא משימה",
+            "single" => "נושא המשימה",
+            "columns" => array(
+                array("field_name" => "area","widget" => "text"),
+            )
+        ),
+    /*"specials" =>
         array(
             "title" => "הטבות ומבצעים",
             "single" => "מבצע",
@@ -246,6 +263,6 @@ const BOUTIQUE_LISTS = array(
                 array("field_name" => "descript","widget" => "text"),
                 array("field_name" => "discount","widget" => "text","un_apostrophe" => true),
             )
-        ),
+        ),*/
     );
 ?>

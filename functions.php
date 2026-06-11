@@ -33,8 +33,8 @@ function boutique_enqueue_scripts()
 
     wp_enqueue_media();
 
-    wp_register_style( 'jq-datatable', get_template_directory_uri(). '/assets/datatables.min.css' );
-    wp_enqueue_style( 'jq-datatable' );
+    wp_register_style( 'css-datatable', get_template_directory_uri(). '/assets/datatables.min.css' );
+    wp_enqueue_style( 'css-datatable' );
 
     wp_register_style( 'assets-style', get_template_directory_uri(). '/assets/style.css' , array(), $ver);
     wp_enqueue_style( 'assets-style' );

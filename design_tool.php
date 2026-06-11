@@ -468,33 +468,37 @@ function create_input($field,$value = null,$readonly = "")
             <?php
             break;
         case "products":
+            get_archive_table ("order_products",$value,"");
             ?>
-            <div class="products-gallery orders grid-display padding-10 start one-row">
-                <?php if(empty($readonly)){  ?>
-                    <div class="add-order-product flex-display direction-column space-around ">
-                        <svg class="has-tooltip pointer align-self-center" data-tooltip="הוספת מוצר להזמנה" xmlns="http://www.w3.org/2000/svg" width="90" height="90" viewBox="0 0 60 60" fill="none">
-                            <circle cx="30" cy="30" r="29.5" class="background-dark-green" stroke="white"/>
-                            <line x1="30" y1="20" x2="30" y2="42" stroke="white" stroke-width="2"/>
-                            <line x1="41" y1="31" x2="19" y2="31" stroke="white" stroke-width="2"/>
-                        </svg>
-                        <?php if(empty($value)){?>
-                            <svg data-tooltip="להעתיק מוצרים מהזמנה קודמת" class="has-tooltip pointer products-last-order align-self-center"  xmlns="http://www.w3.org/2000/svg" width="90" height="90" viewBox="0 0 26 26" fill="none">
-                                <circle class="background-gold"  cx="13" cy="13" r="12.5" fill="#E2B252" stroke="white"/>
-                                <path d="M10.5 11.8335C10.5 11.4798 10.6405 11.1407 10.8906 10.8906C11.1407 10.6405 11.4798 10.5 11.8335 10.5H16.1665C16.3416 10.5 16.515 10.5345 16.6768 10.6015C16.8386 10.6685 16.9856 10.7667 17.1094 10.8906C17.2333 11.0144 17.3315 11.1614 17.3985 11.3232C17.4655 11.485 17.5 11.6584 17.5 11.8335V16.1665C17.5 16.3416 17.4655 16.515 17.3985 16.6768C17.3315 16.8386 17.2333 16.9856 17.1094 17.1094C16.9856 17.2333 16.8386 17.3315 16.6768 17.3985C16.515 17.4655 16.3416 17.5 16.1665 17.5H11.8335C11.6584 17.5 11.485 17.4655 11.3232 17.3985C11.1614 17.3315 11.0144 17.2333 10.8906 17.1094C10.7667 16.9856 10.6685 16.8386 10.6015 16.6768C10.5345 16.515 10.5 16.3416 10.5 16.1665V11.8335Z" stroke="white" stroke-width="0.75" stroke-linecap="round" stroke-linejoin="round"/>
-                                <path d="M9.006 15.3685C8.8525 15.2813 8.72482 15.155 8.63595 15.0024C8.54708 14.8499 8.50017 14.6765 8.5 14.5V9.5C8.5 8.95 8.95 8.5 9.5 8.5H14.5C14.875 8.5 15.079 8.6925 15.25 9M12.5 14H15.5M14 12.5V15.5" stroke="white" stroke-width="0.75" stroke-linecap="round" stroke-linejoin="round"/>
-                            </svg>
-                        <?php } ?>
-
-                    </div>
-                    <?php
-                }
-                if($value && is_array($value)){
-                    foreach ($value as $key=>$product) {
-                        //write_log("product ".json_encode($product));
-                        create_product_view($product,array("table_name"=>"orders","key"=>$key,"readonly"=>$readonly));
-                    }
-                } ?>
-            </div>
+<!--            <div class="products-gallery orders grid-display padding-10 start one-row">-->
+<!--                <table name="" class="archive-table dataTable">-->
+<!--                --><?php //if(empty($readonly)){  ?>
+<!--                    <div class="add-order-product flex-display direction-column space-around ">-->
+<!--                        <svg class="has-tooltip pointer align-self-center" data-tooltip="הוספת מוצר להזמנה" xmlns="http://www.w3.org/2000/svg" width="90" height="90" viewBox="0 0 60 60" fill="none">-->
+<!--                            <circle cx="30" cy="30" r="29.5" class="background-dark-green" stroke="white"/>-->
+<!--                            <line x1="30" y1="20" x2="30" y2="42" stroke="white" stroke-width="2"/>-->
+<!--                            <line x1="41" y1="31" x2="19" y2="31" stroke="white" stroke-width="2"/>-->
+<!--                        </svg>-->
+<!--                        --><?php //if(empty($value)){?>
+<!--                            <svg data-tooltip="להעתיק מוצרים מהזמנה קודמת" class="has-tooltip pointer products-last-order align-self-center"  xmlns="http://www.w3.org/2000/svg" width="90" height="90" viewBox="0 0 26 26" fill="none">-->
+<!--                                <circle class="background-gold"  cx="13" cy="13" r="12.5" fill="#E2B252" stroke="white"/>-->
+<!--                                <path d="M10.5 11.8335C10.5 11.4798 10.6405 11.1407 10.8906 10.8906C11.1407 10.6405 11.4798 10.5 11.8335 10.5H16.1665C16.3416 10.5 16.515 10.5345 16.6768 10.6015C16.8386 10.6685 16.9856 10.7667 17.1094 10.8906C17.2333 11.0144 17.3315 11.1614 17.3985 11.3232C17.4655 11.485 17.5 11.6584 17.5 11.8335V16.1665C17.5 16.3416 17.4655 16.515 17.3985 16.6768C17.3315 16.8386 17.2333 16.9856 17.1094 17.1094C16.9856 17.2333 16.8386 17.3315 16.6768 17.3985C16.515 17.4655 16.3416 17.5 16.1665 17.5H11.8335C11.6584 17.5 11.485 17.4655 11.3232 17.3985C11.1614 17.3315 11.0144 17.2333 10.8906 17.1094C10.7667 16.9856 10.6685 16.8386 10.6015 16.6768C10.5345 16.515 10.5 16.3416 10.5 16.1665V11.8335Z" stroke="white" stroke-width="0.75" stroke-linecap="round" stroke-linejoin="round"/>-->
+<!--                                <path d="M9.006 15.3685C8.8525 15.2813 8.72482 15.155 8.63595 15.0024C8.54708 14.8499 8.50017 14.6765 8.5 14.5V9.5C8.5 8.95 8.95 8.5 9.5 8.5H14.5C14.875 8.5 15.079 8.6925 15.25 9M12.5 14H15.5M14 12.5V15.5" stroke="white" stroke-width="0.75" stroke-linecap="round" stroke-linejoin="round"/>-->
+<!--                            </svg>-->
+<!--                        --><?php //} ?>
+<!---->
+<!--                    </div>-->
+<!--                    --><?php
+//                }
+//                if($value && is_array($value)){
+//                    foreach ($value as $key=>$product) {
+//                        echo get_tr_data("order_products",$product ,"id","");
+//                        //write_log("product ".json_encode($product));
+//                        //create_product_view($product,array("table_name"=>"orders","key"=>$key,"readonly"=>$readonly));
+//                    }
+//                } ?>
+<!--                </table>-->
+<!--            </div>-->
             <?php
             break;
         default:
@@ -581,5 +585,125 @@ function get_svg($svg_name,$action='',$side_menu = true)
         default:
             return '<div></div>';
     }
+}
+function get_tr_data($table_name, $data, $id_column,$add_text){
+    $page_info = BOUTIQUE_TABLES[$table_name];
+    $row = is_array ($data)? $data[0]:$data;
+    //echo json_encode ($row);
+    $backgraund_class = ($table_name == "orders" && $row->done ? "order-confirm" : "");
+    if($table_name == "clients" && $row->blocked) {
+        $backgraund_class.=" blocked";
+    }
+    $html='<tr data-id="'.$row->id.'" class="'.$backgraund_class.'">';
+    if(is_manager() && $table_name == "collection" && !isset($_GET["payed"])){
+        $html.= '<td>';
+        if($row->doc_type == 1) {
+            $html .= '<input class="pointer" type="checkbox"/>';
+        }
+        $html.= '</td>';
+    }
+    if($table_name != "collection" && $table_name!="order_products") {
+        if (is_manager() || is_agent() && $table_name == "orders") {
+            if ($table_name != "orders" || $row->done == 0) {
+                $html .= '<td><a   class="has-tooltip" data-tooltip="עדכון ' . $page_info['single'] . '"  href="single?subject=' . $table_name . '&action=edit&id=' . $row->id . '">
+                        <svg class="edit-row" xmlns="http://www.w3.org/2000/svg" width="24" height="23" viewBox="0 0 24 23" fill="none">
+                            <path d="M7 16.3041L11.413 16.2898L21.045 7.14726C21.423 6.78501 21.631 6.30393 21.631 5.79218C21.631 5.28043 21.423 4.79934 21.045 4.43709L19.459 2.91717C18.703 2.19267 17.384 2.19651 16.634 2.9143L7 12.0587V16.3041ZM18.045 4.27226L19.634 5.7893L18.037 7.30538L16.451 5.78643L18.045 4.27226ZM9 12.858L15.03 7.13384L16.616 8.65376L10.587 14.376L9 14.3808V12.858Z" class="background-gold"/>
+                            <path d="M5 20.125H19C20.103 20.125 21 19.2654 21 18.2083V9.9015L19 11.8182V18.2083H8.158C8.132 18.2083 8.105 18.2179 8.079 18.2179C8.046 18.2179 8.013 18.2093 7.979 18.2083H5V4.79167H11.847L13.847 2.875H5C3.897 2.875 3 3.73462 3 4.79167V18.2083C3 19.2654 3.897 20.125 5 20.125Z" class="background-gold"/>
+                        </svg></a>
+                  </td>';
+            }
+            if ($table_name == "orders" && $row->done == 1) {
+                $html .= '<td><a class="has-tooltip" data-tooltip="מעבר להזמנה" href="single?subject=' . $table_name . '&action=readonly&id=' . $row->id . '">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="25" height="24" viewBox="0 0 25 24" fill="none">
+                        <path d="M12.5 5C5.93017 5 2.74267 10.683 2.17704 11.808C2.14681 11.8678 2.1311 11.9335 2.1311 12C2.1311 12.0665 2.14681 12.1322 2.17704 12.192C2.74163 13.317 5.92913 19 12.5 19C19.0708 19 22.2573 13.317 22.8229 12.192C22.8531 12.1322 22.8688 12.0665 22.8688 12C22.8688 11.9335 22.8531 11.8678 22.8229 11.808C22.2583 10.683 19.0708 5 12.5 5Z" class="stroke-background-gold" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M12.5 15C14.2259 15 15.625 13.6569 15.625 12C15.625 10.3431 14.2259 9 12.5 9C10.7741 9 9.375 10.3431 9.375 12C9.375 13.6569 10.7741 15 12.5 15Z" class="background-gold" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                        </a>
+                  </td>';
+            }
+        }
+        if (is_manager() ) {
+
+            $html .= '<td><a  data-bs-toggle="modal" href="#bout-massage" role="button" data-action="remove">
+                <svg  class="has-tooltip" data-tooltip="מחיקת ' . $page_info['single'] . '"  xmlns="http://www.w3.org/2000/svg" width="25" height="24" viewBox="0 0 25 24" fill="none">
+                    <path d="M4.16663 7H20.8333M10.4166 11V17M14.5833 11V17M5.20829 7L6.24996 19C6.24996 19.5304 6.46945 20.0391 6.86015 20.4142C7.25085 20.7893 7.78076 21 8.33329 21H16.6666C17.2192 21 17.7491 20.7893 18.1398 20.4142C18.5305 20.0391 18.75 19.5304 18.75 19L19.7916 7M9.37496 7V4C9.37496 3.73478 9.48471 3.48043 9.68006 3.29289C9.87541 3.10536 10.1404 3 10.4166 3H14.5833C14.8596 3 15.1245 3.10536 15.3199 3.29289C15.5152 3.48043 15.625 3.73478 15.625 4V7" class="stroke-background-gold" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    </a>   
+            </td>';
+        }
+    }
+    foreach($page_info["columns"] as $column) {
+        if (!isset($column['field_name']) || $column["field_name"]== "client_id" && !empty($add_text) || is_agent() && $column["field_name"]== "agent_id") {
+            continue;
+        }
+
+        $field = isset($column['join_table']) ? substr($column['join_table'], 0, -1) .(isset($column['join_value'])? "_" . $column['join_value'] :''): $column["field_name"];
+        $list = isset($column['table_name']) ? constant($column['table_name']) : null;
+        write_log ( 'field ' .$field);
+        if ($field != $id_column && !isset($column["hidden"]) && isset($column["label"])) {
+            $data_id = "";
+            if($column["widget"]=="select" && isset($column["options"])){
+                $data_id = 'data-id="'.$row->$field.'"';
+            }
+            write_log ( 'get_column_value ');
+            $column_value = get_column_value($column,$row,$field,$list);
+            write_log ( 'col_name '. $column_value);
+            $html .= '<td '.$data_id.' class="'.$field.'">' . $column_value . '</td>';
+        }
+    }
+
+    if(isset($page_info["actions"])) {
+        foreach ($page_info["actions"] as $action) {
+            if(is_array($action) && isset($action["dialog"])) {
+                $html .= '<td ><a class="button background-gold font-17" data-bs-toggle="modal" href="#'.$action["dialog"].'" role="button">
+                '.$action["text"].'
+                    </a></td>';
+            }
+            else {
+                $html .= '<td ><a class="button background-gold font-17" href="/archive?subject=' . $action . '&id=' . $row->id . '">' . BOUTIQUE_TABLES[$action]["title"] . '</a></td>';
+            }
+        }
+    }
+
+    $html .='</tr>';
+    return $html;
+}
+function get_archive_table($table_name,$data,$add_text)
+{
+    $page_info  = BOUTIQUE_TABLES[$table_name];
+    ?>
+    <table name="" class="archive-table dataTable">
+        <thead><tr class="tr-head gold">
+            <?php
+            if(is_manager() && $table_name == "collection" && !isset($_GET["payed"])){
+                ?><th class="no-sort"></th><?php
+            }
+            if($table_name != "collection"){
+                if(is_manager() || is_agent() && $table_name == "orders"){ ?>
+                    <th class="no-sort"></th>
+                <?php }
+                if(is_manager()){ ?>
+                    <th class="no-sort"></th>
+                <?php } ?>
+            <?php }
+            foreach($page_info["columns"] as $column){
+                if(isset($column["hidden"]) || !isset($column["label"]) || !empty($add_text) && $column["field_name"]== "client_id" || is_agent() && $column["field_name"]== "agent_id"){continue;}
+                ?>
+                <th <?= isset($column["width"])? 'style="width:'.$column["width"].'" ':''?>><?= $column["label"]?></th>
+            <?php } ?>
+            <?php
+            if(isset($page_info["actions"])){
+                foreach ($page_info["actions"] as $action) {?>
+                    <th class="no-sort"></th>
+                <?php }
+            }
+            ?>
+
+        </tr></thead>
+        <?php foreach($data as $row){
+            echo get_tr_data($table_name,$row ,"id",$add_text);
+        }?>
+    </table>
+    <?php
 }
 ?>
