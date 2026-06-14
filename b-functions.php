@@ -176,13 +176,13 @@ function get_column_value($column,$row,$field,$list)
         case "select":
             //write_log ('fiel ' . $field);
             //write_log ('row ' . json_encode ($row));
-           /* if (isset($column["join_table"]) &&  $column["join_table"] == "agents") {
+            /* if (isset($column["join_table"]) &&  $column["join_table"] == "agents") {
 
-                $user_field = $column["field_name"];
-                $column_value = empty($row->$user_field) ? '' : get_userdata($row->$user_field)->display_name;
-            } else {*/
+                 $user_field = $column["field_name"];
+                 $column_value = empty($row->$user_field) ? '' : get_userdata($row->$user_field)->display_name;
+             } else {*/
             //
-            if(isset($column["options"])) {
+            if (isset($column["options"])) {
 
                 $field_id = $row->$field;
                 $results = array_filter($column["options"], function ($option) use ($field_id) {
@@ -191,8 +191,7 @@ function get_column_value($column,$row,$field,$list)
                 if (count($results) > 0) {
                     $column_value = array_pop($results)["text"];
                 }
-            }
-            else {
+            } else {
                 $column_value = $row->$field;
             }
             /*}*/
@@ -206,12 +205,12 @@ function get_column_value($column,$row,$field,$list)
                                    ' . $column["values"][$row->$field]["label"] . '
                                 </span>';
             break;
-            case "date":
-        if ($row->$field) {
-            $timestamp = strtotime($row->$field); // המרת התאריך לאטימות זמן
-            $column_value = date('d/m/Y', $timestamp);
-        }
-        break;
+        case "date":
+            if ($row->$field) {
+                $timestamp = strtotime($row->$field); // המרת התאריך לאטימות זמן
+                $column_value = date('d/m/Y', $timestamp);
+            }
+            break;
         case "datetime-local":
             if ($row->$field) {
                 $timestamp = strtotime($row->$field); // המרת התאריך לאטימות זמן
@@ -220,7 +219,7 @@ function get_column_value($column,$row,$field,$list)
             break;
         case "file":
             if ($row->$field) {
-                $column_value = '<a href="'.wp_get_attachment_url($row->$field).'" target="_blank">'.basename(get_attached_file($row->$field)).'</a>';
+                $column_value = '<a href="' . wp_get_attachment_url($row->$field) . '" target="_blank">' . basename(get_attached_file($row->$field)) . '</a>';
             }
             break;
         case "image":
@@ -229,13 +228,12 @@ function get_column_value($column,$row,$field,$list)
             }
             break;
         default:
-            write_log ('fiel ' . $field);
-            write_log ('row ' . json_encode ($row));
+            write_log('fiel ' . $field);
+            write_log('row ' . json_encode($row));
 
-        if(isset($column["type"]) &&  $column["type"]=="user"){
+            if (isset($column["type"]) && $column["type"] == "user") {
                 $column_value = empty($row->$field) ? '' : get_userdata($row->$field)->display_name;
-            }
-            else {
+            } else {
                 $column_value = isset($column['list_name']) && isset($list[$row->$field]) ? $list[$row->$field] : $row->$field;
                 if (!empty($column_value) && isset($column["un_apostrophe"])) {
                     $column_value .= " ₪";

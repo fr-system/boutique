@@ -17,13 +17,44 @@ function get_single_view($table_name,$row,$readonly)
             <?php }
             $value = "";
             if(isset($column["field_name"])) {
-                if (isset($column["widget"]) && $column["widget"] == "table") {
+                if ($column["widget"] == "table") {
                     if (isset($row->id)) {
                         $filters = array();
                         $filters[] = array("filter_field" => $column["field_id"], "filter_value" => $row->id);
                         $value = get_data_table($column["field_name"], $filters);
+                        //write_log("value ".json_encode($value));
+                        $list = array();
+                        $target_table_rows = get_data_table($column["target_table"]);
+                        foreach ($target_table_rows as $table_row) {
+                            $id = $table_row->id;
+                            if ($table_name == "agents") {
+                                $results = array_filter($value, function ($row) use ($id) {
+                                    return $row->supplier_id == $id;
+                                });
+                            } else if ($table_name == "orders") {
+                                $results = array_filter($value, function ($row) use ($id) {
+                                    return $row->product_id == $id;
+                                });
+                            }
+
+                            if (count($results) == 0) {
+                                if ($table_name == "agents") {
+                                    $list[] = (object)array("id" => "", "target" => "", "period_days" => "",
+                                        "supplier_id" => $table_row->id, "supplier_name" => $table_row->name);
+                                }
+                                else if ($table_name == "orders") {
+                                    $list[] = (object)array("id" => "", "count" => "", "order_price" => "",
+                                        "bonus" => "", "discount_percent" => "", "order_individual" => "", "total" => "",
+                                        "product_id" => $table_row->id, "product_name" => $table_row->name);
+                                }
+                            } else {
+                                $list[] = $results[0];
+                            }
+                        }
+                        $value = $list;
                     }
-                } //write_log("q p ".json_encode( $column));
+                }
+                 //write_log("q p ".json_encode( $column));
                 else {
                     $field_name = isset($column["field_name"]) ? $column["field_name"] : null;
                     $value = isset($row->$field_name) ? $row->$field_name : "";
@@ -45,6 +76,11 @@ function get_single_view($table_name,$row,$readonly)
 
     </div><?php
 }
+
+function create_table_view(){
+
+}
+
 function create_product_view($product=null,$options=null)
 {
     //$add_class="";
@@ -590,7 +626,7 @@ function get_tr_data($table_name, $data, $id_column,$add_text){
         }
         $html.= '</td>';
     }
-    if($table_name != "collection" && $table_name!="order_products") {
+    if($table_name != "collection" && $table_name!="order_products" && $table_name!="agent_target_supplier") {
         if (is_manager() || is_agent() && $table_name == "orders") {
             if ($table_name != "orders" || $row->done == 0) {
                 $html .= '<td><a   class="has-tooltip" data-tooltip="עדכון ' . $page_info['single'] . '"  href="single?subject=' . $table_name . '&action=edit&id=' . $row->id . '">
@@ -627,15 +663,12 @@ function get_tr_data($table_name, $data, $id_column,$add_text){
 
         $field = isset($column['join_table']) ? substr($column['join_table'], 0, -1) .(isset($column['join_value'])? "_" . $column['join_value'] :''): $column["field_name"];
         $list = isset($column['table_name']) ? constant($column['table_name']) : null;
-        write_log ( 'field ' .$field);
         if ($field != $id_column && !isset($column["hidden"]) && isset($column["label"])) {
             $data_id = "";
             if($column["widget"]=="select" && isset($column["options"])){
                 $data_id = 'data-id="'.$row->$field.'"';
             }
-            write_log ( 'get_column_value ');
             $column_value = get_column_value($column,$row,$field,$list);
-            write_log ( 'col_name '. $column_value);
             $html .= '<td '.$data_id.' class="'.$field.'">' . $column_value . '</td>';
         }
     }
@@ -666,7 +699,7 @@ function get_archive_table($table_name,$data,$add_text)
             if(is_manager() && $table_name == "collection" && !isset($_GET["payed"])){
                 ?><th class="no-sort"></th><?php
             }
-            if($table_name != "collection"){
+            if($table_name != "collection" && $table_name!="order_products" && $table_name!="agent_target_supplier"){
                 if(is_manager() || is_agent() && $table_name == "orders"){ ?>
                     <th class="no-sort"></th>
                 <?php }
