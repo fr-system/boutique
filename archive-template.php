@@ -64,7 +64,8 @@ $page_info  = BOUTIQUE_TABLES[$table_name];
             <a class="update-payment center button background-white gold bold font-18"  data-bs-toggle="modal" href="#payment_modal" role="button">לעדכון תשלום</a>
             <?php
         }
-        get_archive_table($table_name,$result,$add_text);
+        $attr = array("add_text"=>$add_text);
+        get_archive_table($table_name,$result,$attr);
     } ?>
 </section>
 <?php

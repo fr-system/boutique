@@ -236,21 +236,6 @@ function get_data_table($table_name, $filters=null, $orderby = null, $join_filte
                     $filter_str[] = $filter_field . " = " . $apostrophe . $filter["filter_value"] . $apostrophe;
                     break;
             }
-            //write_log ('filter_str '.json_encode ($filter_str));
-           /* if (isset($filter["filter_type"]) && $filter["filter_type"] == "date") {
-                $filter_str[] = $filter_field . " " . $filter["filter_ratio"] . " " . $filter["filter_value"];
-            } else if (isset($filter["filter_type"]) && $filter["filter_type"] == "null") {
-                $filter_str[] = $filter_field . " is null ";
-            }
-            else if (isset($filter["filter_type"]) && $filter["filter_type"] == "not_null") {
-                $filter_str[] = $filter_field . " is not null ";
-            }
-            else if(isset($filter["filter_type"]) && $filter["filter_type"] == "array"){
-                $filter_str[] = $filter_field . " in ( " . $apostrophe . $filter["filter_value"] . $apostrophe . ")";
-            }
-            else {
-                $filter_str[] = $filter_field . " = " . $apostrophe . $filter["filter_value"] . $apostrophe;
-            }*/
         }
         $query .= " WHERE " . implode(" AND ", $filter_str);
 
@@ -312,22 +297,8 @@ function get_list($list_name,$filter = '',$table_display =false)
     else if(!empty($filter)){
         $query .= " WHERE ".$filter;
     }
-    //write_log("quert ".$query." table_name ".$table_name." field_name ".$field_name);
     $list = run_query($query);
-    /*if($table_name == "agents") {
-        $users = array();
-        foreach ($list as $row) {
-            $user_info = get_userdata($row->value);
-            if ($user_info) {
-                $display_name = $user_info->display_name;
-                $row->text = $display_name;
-                array_push($users,$row);
-            }
-        }
-        return $users;
-    }*/
 
-    //write_log("list ".json_encode($list));
     return $list;
 }
 function test_mode_table_prefix() {

@@ -1,5 +1,6 @@
 <?php
-
+//"widget" => "hidden" - בעמוד של סינגל לא להכין לו ווידגט
+//"hidden"=>true - בעמוד ארכיב לא להכין לו עמודה בטבלה
 const BOUTIQUE_TABLES = array(
     "clients" => array(
         "title" => "לקוחות",
@@ -149,6 +150,7 @@ const BOUTIQUE_TABLES = array(
     "agent_target_supplier"=>array(
         "title" => "יעד לסוכן לכל ספק",
         "columns" => array(
+            array("field_name" => "supplier_id","hidden"=>true),
             array("field_name" => "supplier_id", "widget" => "select","label"=>"ספק", "join_table" => "suppliers", "join_value" => "name","filter"=>true),
             array("field_name" => "target", "widget" => "text", "label" => "יעד", "un_apostrophe" => true,"sign"=>"₪"),
             array("field_name" => "period_days", "widget" => "number", "label" => "תקופה" ),

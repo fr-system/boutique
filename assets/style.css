@@ -363,6 +363,9 @@ input[type="radio"] + label:before {
     padding: 0;
     min-width: 0;
 }
+.input-label table tr{
+    height: 25px;
+}
 tr.order-confirm{
     background-color: var(--b-global-color-light-gray);
    /* border-color: var(--b-global-color-light-gray);*/
