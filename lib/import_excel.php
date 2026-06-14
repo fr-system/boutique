@@ -2,6 +2,8 @@
 
 require_once dirname(__DIR__) . '/vendor/autoload.php';
 use PhpOffice\PhpSpreadsheet\IOFactory;
+use PhpOffice\PhpSpreadsheet\Reader\Csv;
+
 function import_from_xlsx()
 {
     //$mpdf = new \Mpdf\Mpdf();
@@ -22,19 +24,33 @@ function import_from_xlsx()
    // write_log("_FILES ".json_encode($_FILES));
     if (file_exists ($_FILES["bills"]["tmp_name"])) {
         $tmpFile = $_FILES['bills']['tmp_name'];
-        $supplier_id = $_POST["supplier_id"];//supplier_id
-        //4 => "client_name",
-        $spreadsheet = IOFactory::load ($tmpFile);
+        $extension = pathinfo($_FILES['bills']['name'], PATHINFO_EXTENSION);
+        if($extension =="csv") {
+            $reader = new Csv();
+            $reader->setDelimiter(',');
+            $reader->setInputEncoding('Windows-1255');
+            $spreadsheet = $reader->load ($tmpFile);
+        }
+        else{
+            $spreadsheet = IOFactory::load ($tmpFile);
+        }
         $sheet = $spreadsheet->getActiveSheet ();
-        $list =get_data_table ("supplier_column_mapping",array(array("filter_field" => "supplier_id", "filter_value" => $supplier_id)));
-        if(empty($list)){
+        //$methodReadSheet = $extension =="csv"? "getRowIterator":"toArray";
+        $supplier_id = $_POST["supplier_id"];
+        $table_data =get_data_table ("supplier_column_mapping",array(array("filter_field" => "supplier_id", "filter_value" => $supplier_id)));
+        if(empty($table_data)){
             $rows = array_slice($sheet->toArray(), 0, 10);
            // $excel_rows=[];
             $html_rows='';
-            foreach ($rows as $row){
+            foreach ($rows as $key=>$row){
                 $html_rows.="<tr>";
                 foreach ($row as $col){
+                    if($key==0){
+                        $html_rows.="<th>{$col}</th>";
+                    }
+                    else{
                     $html_rows.="<td>{$col}</td>";
+                    }
                 }
                 $html_rows.="</tr>";
             }
@@ -46,13 +62,17 @@ function import_from_xlsx()
                 'msg' => 'נא ליצור מיפוי שדות לספק'
             )));
         }
-        //$list= get_excel_order_field($supplier_id);//צריך לשמור בטבלה לכל ספק את השדות שלו
-        $list = array(0=>"doc_number",1 => "date", 7 => "obligation", 10 => "payment_until", 13 => "doc_type", 16 => "BnNumber");
+        foreach ($table_data as $row)
+        {
+            $mapping[$row->excel_column_index] = $row->field_name;
+        }
+        //write_log ('sup mapping '.json_encode ($mapping));
 
+        //$table_data = array(0=>"doc_number",1 => "date", 7 => "obligation", 10 => "payment_until", 13 => "doc_type", 16 => "BnNumber");
 
        // write_log ('sheet '.json_encode ($sheet->toArray()));
-        $BnNumber_index = array_search ( "BnNumber",$list);
-        $doc_number_index = array_search ( "doc_number",$list);//מספר חשבונית
+        $BnNumber_index = array_search ( "BnNumber",$mapping);
+        $doc_number_index = array_search ( "doc_number",$mapping);//מספר חשבונית
         if ($BnNumber_index !==false && $doc_number_index !==false) {//אם בין השדות בקובץ של הספק יש ח.פ. ללקוח
             //write_log("sheets ".json_encode($sheet->toArray()));
             foreach ($sheet->toArray() as $key => $row_from_file) {
@@ -79,7 +99,7 @@ function import_from_xlsx()
                 }
                 $client=$client[0];
                 $row_to_table["client_id"] =$client->id;
-                foreach ($list as $index => $field_name) {
+                foreach ($mapping as $index => $field_name) {
                     if (isset($row_from_file[$index])) {
                         if ($field_name == "date" || $field_name == "payment_until") {// צריך לשמור קודם את תאריך הקבלה ואח"כ לחשב את תשלום עד
                             $row_to_table[$field_name] = excel_date_to_php_date ($row_from_file[$index]);
@@ -89,7 +109,7 @@ function import_from_xlsx()
                             $row_to_table[$field_name] = $row_from_file[$index];
                         }
                     } elseif ($field_name == "payment_until") {//אם לא הגיע לחשב לפי תנאי תשלום ללקוח
-                        $date_index = array_search ("date", $list);
+                        $date_index = array_search ("date", $mapping);
                         $date = date ('Y-m-d', strtotime (excel_date_to_php_date ($row_from_file[$date_index])));
                         $row_to_table[$field_name] = get_payment_until ($client->payment_term_id, $date);
 
@@ -138,5 +158,24 @@ function excel_date_to_php_date($excel_date)
     list($day, $month, $year) = explode('/', $dateString);
     if (strlen ($year)==2) $year = '20' . $year;
     return  "$year-$month-$day";
+}
+add_action('wp_ajax_save_list_data', 'save_list_data');
+function save_list_data(){
+    $table_name = $_POST["table_name"];
+    $fields=[];
+    $fields["supplier_id"]=$_POST["supplier_id"];
+    foreach ($_POST['field_name'] as $field_name => $column_index){
+        $fields["field_name"]=$field_name;
+        $fields["excel_column_index"]=$column_index;
+        $result =pre_action_query ($table_name,$fields);
+        $ok = run_action_query ($table_name, null, "new", $result);
+    }
+
+    echo json_encode (array(
+        'status' => 'success',
+        'msg' => 'נשמרו השדות לספק' //'הקובץ נקלט בהצלחה',
+        //'redirect' => isset($_POST["previous_page"]) ? $_POST["previous_page"]:'',
+    ));
+    wp_die();
 }
 ?>

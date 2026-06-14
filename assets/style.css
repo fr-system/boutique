@@ -381,7 +381,8 @@ td a.button{
     height: 30px;
 }
 .modal-dialog{
-    min-width: max-content;
+    min-width: fit-content;
+    max-width: 1000px;
 }
 .modal-body{
     min-height: 100px;
