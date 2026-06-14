@@ -73,6 +73,8 @@ jQuery(document).ready(function($) {
     //setTimeout(function () {
         var table = jQuery('.dataTable').DataTable({
             //bFilter: true,
+            paging: false,
+            info: false,
             "language": {
                 "lengthMenu": "מציג  _MENU_  שורות",
                 "zeroRecords": "לא נמצאו שורות מתאימות",

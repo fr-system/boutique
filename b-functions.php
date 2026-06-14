@@ -174,16 +174,7 @@ function get_column_value($column,$row,$field,$list)
     switch ($column["widget"]) {
 
         case "select":
-            //write_log ('fiel ' . $field);
-            //write_log ('row ' . json_encode ($row));
-            /* if (isset($column["join_table"]) &&  $column["join_table"] == "agents") {
-
-                 $user_field = $column["field_name"];
-                 $column_value = empty($row->$user_field) ? '' : get_userdata($row->$user_field)->display_name;
-             } else {*/
-            //
             if (isset($column["options"])) {
-
                 $field_id = $row->$field;
                 $results = array_filter($column["options"], function ($option) use ($field_id) {
                     return $option["value"] == $field_id;
@@ -194,7 +185,6 @@ function get_column_value($column,$row,$field,$list)
             } else {
                 $column_value = $row->$field;
             }
-            /*}*/
             break;
         case "radio":
             $column_value = '<div class="flex-display center align-center" style="color: ' . $column["values"][$row->$field]["color"] . '"><div class="dot" style="background-color: ' . $column["values"][$row->$field]["color"] . '"></div>&nbsp;' . $column["values"][$row->$field]["label"] . '</div>';
@@ -228,9 +218,6 @@ function get_column_value($column,$row,$field,$list)
             }
             break;
         default:
-            write_log('fiel ' . $field);
-            write_log('row ' . json_encode($row));
-
             if (isset($column["type"]) && $column["type"] == "user") {
                 $column_value = empty($row->$field) ? '' : get_userdata($row->$field)->display_name;
             } else {

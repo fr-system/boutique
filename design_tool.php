@@ -54,19 +54,10 @@ function get_single_view($table_name,$row,$readonly)
                         $value = $list;
                     }
                 }
-                 //write_log("q p ".json_encode( $column));
                 else {
                     $field_name = isset($column["field_name"]) ? $column["field_name"] : null;
                     $value = isset($row->$field_name) ? $row->$field_name : "";
                 }
-                /*else if($column["widget"] == "products" && isset($row->id)){
-                    $filters = array();
-                    $filters[]=array("filter_field" => "order_id", "filter_value"=>$row->id);
-                    $value = get_data_table("order_products",$filters);
-                    //write_log("q p ".$query);
-                    //write_log("products: ".json_encode($value));
-                }*/
-                //write_log($field_name .": value ".json_encode($value));
 
                 echo create_input($column, $value, $readonly);
             }
@@ -482,18 +473,14 @@ function create_input($field,$value = null,$readonly = "")
             <?php }
             break;
         case "radio":
-            $direction = "column";
-            /*$direction = "row";
-            $direction_class = $direction == "column" ? "direction-column" : "row";<?=$direction_class?>*/
             ?>
-
             <div class="radio-options font-17  flex-display ">
                 <?php
                 if(isset($field["values"])){
                     foreach ($field["values"] as $key=>$option){?>
                         <div class="">
-                            <input type="radio" class="<?php echo $field["field_name"].$key ?>" id="<?=$direction.($key)?>" name="<?php echo $field["field_name"]?>" <?php echo $readonly == "readonly" ?"disabled":"" ?> value="<?php echo $key ?>" <?php if (isset($value) && $value == $key) echo 'checked'; ?>>
-                            <label for="<?=$direction.$key?>"><span><?php echo $option["label"] ?></span></label>
+                            <input type="radio" class="<?php echo $field["field_name"].$key ?>" id="column<?=$key?>" name="<?php echo $field["field_name"]?>" <?php echo $readonly == "readonly" ?"disabled":"" ?> value="<?php echo $key ?>" <?php if (isset($value) && $value == $key) echo 'checked'; ?>>
+                            <label for="column<?=$key?>"><span><?php echo $option["label"] ?></span></label>
                         </div>
                     <?php   }
                 }?>
@@ -515,15 +502,8 @@ function create_input($field,$value = null,$readonly = "")
             </div>
             <?php
             break;
-        /*case "products":
-            get_archive_table ("order_products",$value,"");
-            */?><!--
-            --><?php
-/*            break;*/
         case "table":
-            write_log("column ".json_encode($field));
-            write_log("value ".json_encode($value));
-            get_archive_table ($field["field_name"],$value,"");
+            get_archive_table ($field["field_name"],$value,array("input_table"=>"true"));
             break;
         default:
             break;
@@ -610,7 +590,7 @@ function get_svg($svg_name,$action='',$side_menu = true)
             return '<div></div>';
     }
 }
-function get_tr_data($table_name, $data, $id_column,$add_text){
+function get_tr_data($table_name, $data, $key,$attr){
     $page_info = BOUTIQUE_TABLES[$table_name];
     $row = is_array ($data)? $data[0]:$data;
     //echo json_encode ($row);
@@ -656,20 +636,36 @@ function get_tr_data($table_name, $data, $id_column,$add_text){
             </td>';
         }
     }
+
+
+    //write_log("pageinfo ".json_encode($page_info));
     foreach($page_info["columns"] as $column) {
-        if (!isset($column['field_name']) || $column["field_name"]== "client_id" && !empty($add_text) || is_agent() && $column["field_name"]== "agent_id") {
+        if (!isset($column['field_name']) ||
+            $column["field_name"]== "client_id" && isset($attr["add_text"]) || is_agent() && $column["field_name"]== "agent_id") {
+            //לא לשים עמודה של שם אם זה הזמנות של לקוח מסוים או שם סוכן אם נכנס עכשיו יוזר סוכן
             continue;
         }
 
         $field = isset($column['join_table']) ? substr($column['join_table'], 0, -1) .(isset($column['join_value'])? "_" . $column['join_value'] :''): $column["field_name"];
         $list = isset($column['table_name']) ? constant($column['table_name']) : null;
-        if ($field != $id_column && !isset($column["hidden"]) && isset($column["label"])) {
+        if(isset($column["hidden"]) && ($table_name=="order_products" || $table_name=="agent_target_supplier")) {
+            $html .= '<td><input type="hidden" name="row[' . $key . '][' . $field . ']" value="' . $row->$field . '"/></td>';
+        }
+
+        if ($field != "id" && !isset($column["hidden"]) && isset($column["label"])) {
             $data_id = "";
             if($column["widget"]=="select" && isset($column["options"])){
                 $data_id = 'data-id="'.$row->$field.'"';
             }
             $column_value = get_column_value($column,$row,$field,$list);
-            $html .= '<td '.$data_id.' class="'.$field.'">' . $column_value . '</td>';
+            $html .= '<td '.$data_id.' class="'.$field.'">';
+            if(isset($attr["input_table"])){
+                $html .='<input type="text" name="row['.$key.']['.$field.']" value="'.$column_value.'"/>';
+            }
+            else{
+                $html .=$column_value;
+            }
+            $html .='</td>';
         }
     }
 
@@ -689,7 +685,7 @@ function get_tr_data($table_name, $data, $id_column,$add_text){
     $html .='</tr>';
     return $html;
 }
-function get_archive_table($table_name,$data,$add_text)
+function get_archive_table($table_name,$data,$attr)
 {
     $page_info  = BOUTIQUE_TABLES[$table_name];
     ?>
@@ -707,12 +703,17 @@ function get_archive_table($table_name,$data,$add_text)
                     <th class="no-sort"></th>
                 <?php } ?>
             <?php }
+
             foreach($page_info["columns"] as $column){
-                if(isset($column["hidden"]) || !isset($column["label"]) || !empty($add_text) && $column["field_name"]== "client_id" || is_agent() && $column["field_name"]== "agent_id"){continue;}
+                if(isset($column["hidden"]) || !isset($column["label"]) || isset($attr["add_text"]) && $column["field_name"]== "client_id" || is_agent() && $column["field_name"]== "agent_id"){continue;}
                 ?>
                 <th <?= isset($column["width"])? 'style="width:'.$column["width"].'" ':''?>><?= $column["label"]?></th>
-            <?php } ?>
-            <?php
+            <?php }
+
+            if( $table_name=="order_products" || $table_name=="agent_target_supplier"){
+                ?><th class="no-sort"></th><?php //צריך עמודה נסתרת למס. פריט שישמר בטבלה
+            }
+
             if(isset($page_info["actions"])){
                 foreach ($page_info["actions"] as $action) {?>
                     <th class="no-sort"></th>
@@ -721,8 +722,8 @@ function get_archive_table($table_name,$data,$add_text)
             ?>
 
         </tr></thead>
-        <?php foreach($data as $row){
-            echo get_tr_data($table_name,$row ,"id",$add_text);
+        <?php foreach($data as $key=>$row){
+            echo get_tr_data($table_name,$row ,$key,$attr);
         }?>
     </table>
     <?php
