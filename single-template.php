@@ -36,23 +36,13 @@ else{//edit || readonly
     $result = get_data_table($table_name,$filters);
     if(count($result)>0){
         $row = $result[0];
-        // write_log("row ".json_encode($row));
     }
-
-    /*if($table_name == "agents"){
-        $user_info = get_userdata($row->user_id);
-        if ($user_info) {
-            $row->display_name = $user_info->display_name;
-            $row->user_email = $user_info->user_email;
-        }
-    }*/
 
     if($action == "edit") {    }
     if($action == "readonly") {
         $readonly = "readonly";
     }
 }
-
 
 $previous_page = null;
 if (isset($_SERVER['HTTP_REFERER'])) {
@@ -67,8 +57,6 @@ if($table_name == "orders"){
 else{
     $part_left_side="part-65 ";
 }
-
-
 ?>
 
 <section class="page single" data-single="<?php echo $page_info['single']?>">

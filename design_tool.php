@@ -5,28 +5,40 @@ function get_single_view($table_name,$row,$readonly)
     <?php
     $columns = BOUTIQUE_TABLES[$table_name]["columns"];
     foreach($columns as $column){
-        if(!isset($column["widget"]) || isset($column["locked"])){continue;}
+        if(!isset($column["widget"]) ||$column["widget"] == "hidden" || isset($column["locked"])){continue;}
+        $add_class = "";
+        if($column["widget"] == "table") {
+            $add_class = " direction-column ";
+        }
         ?>
-        <div class="input-label flex-display <?php echo $column["widget"] != "textarea" && $column["widget"] != "products"  ? 'align-center' :'stretch'?> ">
+        <div class="input-label flex-display <?php echo $column["widget"] != "textarea" && $column["widget"] != "table"  ? 'align-center' :'stretch' . $add_class?> ">
             <?php if (isset($column["label"])){?>
                 <label class="bold <?= $column["widget"]== "textarea"? 'textarea-label':''?>" for="<?php echo $column["field_name"] ?>"><?php echo $column["label"].":"?></label>
             <?php }
             $value = "";
-            //write_log("q p ".json_encode( $column));
-            if(isset($column["field_name"])){
-                $field_name = isset($column["field_name"]) ? $column["field_name"] : null;
-                $value = isset($row->$field_name) ? $row->$field_name :"";
-            }
-            else if($column["widget"] == "products" && isset($row->id)){
-                $filters = array();
-                $filters[]=array("filter_field" => "order_id", "filter_value"=>$row->id);
-                $value = get_data_table("order_products",$filters);
-                //write_log("q p ".$query);
-                //write_log("products: ".json_encode($value));
-            }
-            //write_log($field_name .": value ".json_encode($value));
+            if(isset($column["field_name"])) {
+                if (isset($column["widget"]) && $column["widget"] == "table") {
+                    if (isset($row->id)) {
+                        $filters = array();
+                        $filters[] = array("filter_field" => $column["field_id"], "filter_value" => $row->id);
+                        $value = get_data_table($column["field_name"], $filters);
+                    }
+                } //write_log("q p ".json_encode( $column));
+                else {
+                    $field_name = isset($column["field_name"]) ? $column["field_name"] : null;
+                    $value = isset($row->$field_name) ? $row->$field_name : "";
+                }
+                /*else if($column["widget"] == "products" && isset($row->id)){
+                    $filters = array();
+                    $filters[]=array("filter_field" => "order_id", "filter_value"=>$row->id);
+                    $value = get_data_table("order_products",$filters);
+                    //write_log("q p ".$query);
+                    //write_log("products: ".json_encode($value));
+                }*/
+                //write_log($field_name .": value ".json_encode($value));
 
-            echo create_input($column,$value,$readonly);
+                echo create_input($column, $value, $readonly);
+            }
             ?>
         </div>
     <?php } ?>
@@ -467,39 +479,15 @@ function create_input($field,$value = null,$readonly = "")
             </div>
             <?php
             break;
-        case "products":
+        /*case "products":
             get_archive_table ("order_products",$value,"");
-            ?>
-<!--            <div class="products-gallery orders grid-display padding-10 start one-row">-->
-<!--                <table name="" class="archive-table dataTable">-->
-<!--                --><?php //if(empty($readonly)){  ?>
-<!--                    <div class="add-order-product flex-display direction-column space-around ">-->
-<!--                        <svg class="has-tooltip pointer align-self-center" data-tooltip="הוספת מוצר להזמנה" xmlns="http://www.w3.org/2000/svg" width="90" height="90" viewBox="0 0 60 60" fill="none">-->
-<!--                            <circle cx="30" cy="30" r="29.5" class="background-dark-green" stroke="white"/>-->
-<!--                            <line x1="30" y1="20" x2="30" y2="42" stroke="white" stroke-width="2"/>-->
-<!--                            <line x1="41" y1="31" x2="19" y2="31" stroke="white" stroke-width="2"/>-->
-<!--                        </svg>-->
-<!--                        --><?php //if(empty($value)){?>
-<!--                            <svg data-tooltip="להעתיק מוצרים מהזמנה קודמת" class="has-tooltip pointer products-last-order align-self-center"  xmlns="http://www.w3.org/2000/svg" width="90" height="90" viewBox="0 0 26 26" fill="none">-->
-<!--                                <circle class="background-gold"  cx="13" cy="13" r="12.5" fill="#E2B252" stroke="white"/>-->
-<!--                                <path d="M10.5 11.8335C10.5 11.4798 10.6405 11.1407 10.8906 10.8906C11.1407 10.6405 11.4798 10.5 11.8335 10.5H16.1665C16.3416 10.5 16.515 10.5345 16.6768 10.6015C16.8386 10.6685 16.9856 10.7667 17.1094 10.8906C17.2333 11.0144 17.3315 11.1614 17.3985 11.3232C17.4655 11.485 17.5 11.6584 17.5 11.8335V16.1665C17.5 16.3416 17.4655 16.515 17.3985 16.6768C17.3315 16.8386 17.2333 16.9856 17.1094 17.1094C16.9856 17.2333 16.8386 17.3315 16.6768 17.3985C16.515 17.4655 16.3416 17.5 16.1665 17.5H11.8335C11.6584 17.5 11.485 17.4655 11.3232 17.3985C11.1614 17.3315 11.0144 17.2333 10.8906 17.1094C10.7667 16.9856 10.6685 16.8386 10.6015 16.6768C10.5345 16.515 10.5 16.3416 10.5 16.1665V11.8335Z" stroke="white" stroke-width="0.75" stroke-linecap="round" stroke-linejoin="round"/>-->
-<!--                                <path d="M9.006 15.3685C8.8525 15.2813 8.72482 15.155 8.63595 15.0024C8.54708 14.8499 8.50017 14.6765 8.5 14.5V9.5C8.5 8.95 8.95 8.5 9.5 8.5H14.5C14.875 8.5 15.079 8.6925 15.25 9M12.5 14H15.5M14 12.5V15.5" stroke="white" stroke-width="0.75" stroke-linecap="round" stroke-linejoin="round"/>-->
-<!--                            </svg>-->
-<!--                        --><?php //} ?>
-<!---->
-<!--                    </div>-->
-<!--                    --><?php
-//                }
-//                if($value && is_array($value)){
-//                    foreach ($value as $key=>$product) {
-//                        echo get_tr_data("order_products",$product ,"id","");
-//                        //write_log("product ".json_encode($product));
-//                        //create_product_view($product,array("table_name"=>"orders","key"=>$key,"readonly"=>$readonly));
-//                    }
-//                } ?>
-<!--                </table>-->
-<!--            </div>-->
-            <?php
+            */?><!--
+            --><?php
+/*            break;*/
+        case "table":
+            write_log("column ".json_encode($field));
+            write_log("value ".json_encode($value));
+            get_archive_table ($field["field_name"],$value,"");
             break;
         default:
             break;

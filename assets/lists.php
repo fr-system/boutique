@@ -109,7 +109,7 @@ const BOUTIQUE_TABLES = array(
             array("field_name" => "client_id","widget" => "select", "join_table" => "clients", "join_value" => "name", "label" => "שם הלקוח","required"=>true),
             array("field_name" => "order_date", "widget" => "datetime-local", "label" => "תאריך הזמנה","required"=>true),
             array("field_name" => "user_opens","widget" => "hidden", "label" => "מקים ההזמנה", "type" => "user"),//"join_table" => "agents", "join_value" => "name","join_field"=>"user_id"),
-            array("widget" => "products"),
+            array("field_name" => "order_products" ,"widget" => "table","label" => "מוצרים","field_id"=>"order_id"),
             array("field_name" => "total","widget" => "text", "label" => "סה\"כ", "un_apostrophe" => true,"sign"=>"₪"),
             array("field_name" => "notes","widget" => "textarea", "label" => "הערות","hidden"=>true),
             array("field_name" => "user_confirms","widget" => "hidden","locked"=>true, "label" => "מאשר ההזמנה", "type" => "user"),//"join_table" => "agents", "join_value" => "name","join_field"=>"user_id"),
@@ -138,13 +138,21 @@ const BOUTIQUE_TABLES = array(
             array("field_name" => "email", "widget" => "email", "label" => "דוא\"ל","required"=>true),
             array("field_name" => "mobile", "widget" => "text", "label" => "נייד"),
             array("field_name" => "work_area_id","widget" => "select", "join_table" => "areas", "join_value" => "area", "label" => "אזור עבודה","required"=>true),// סינון אזור
+            array("field_name" => "agent_target_supplier", "widget" => "table", "label" => "יעד לכל ספק","hidden"=>true,"field_id"=>"agent_id"),
+
             array("field_name" => "target","widget" => "text", "label" => "יעד כללי", "un_apostrophe" => true,"sign"=>"₪"),
             array("field_name" => "notes", "widget" => "textarea", "label" => "הערה","hidden"=>true),
             array("field_name" => "user_id", "widget" => "hidden"),
         ),
         //"filter"=>"area_id == []"
     ),
-
+    "agent_target_supplier"=>array(
+        "title" => "יעד לסוכן לכל ספק",
+        "columns" => array(
+            array("field_name" => "supplier_id", "widget" => "select","label"=>"ספק", "join_table" => "suppliers", "join_value" => "name","filter"=>true),
+            array("field_name" => "target", "widget" => "text", "label" => "יעד", "un_apostrophe" => true,"sign"=>"₪"),
+            array("field_name" => "period_days", "widget" => "number", "label" => "תקופה" ),
+        )),
     "collection" =>//invoices
         array(
         "title" => "חשבוניות",

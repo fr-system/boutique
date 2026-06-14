@@ -153,7 +153,7 @@ function get_data_table($table_name, $filters=null, $orderby = null, $join_filte
     $i = 0;
     foreach ($columns as $column) {
 
-        if(!isset($column["field_name"]))continue;
+        if(!isset($column["field_name"]) || isset($column["widget"]) && $column["widget"] == "table")continue;
 
         if(isset($column['join_table_from'])) {
             //קישור של טבלה אחרת עם טבלה אחרת

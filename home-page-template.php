@@ -35,26 +35,31 @@ if(is_supplier()){
     <div class=" part-30 flex-display space-between">
         <div class="part-45">
             <div class="flex-display space-between">
-                <div class="font-20 bold">סיכום גבייה</div>
+                <div class="font-20 bold">חובות פתוחים</div>
                 <a class="not-link font-15 dark-green" href="/archive/?subject=collection">לפירוט המלא -></a>
             </div>
             <div class="graphs-charts quick-action border-dark-gray">
-                <div class="flex-display direction-column">
+                <div class="flex-display direction-column font-18">
                     <?php
-                    $filters = array(array("filter_field" => "payment_date","filter_type"=>"not_null"));
+                    $filters = array(array("filter_field" => "payment_date","filter_type"=>"null"));
                     $filters[] = array("filter_field" => "test_collection.doc_type","filter_value"=>"1");
                     $result = get_data_table("collection",$filters);
 
                     $agents = array();
                     foreach ($result as $row){
-                        write_log("row ".json_encode($row));
+                        if(empty($row->agents_id))continue;
+                        //write_log("row ".json_encode($row));
                         if(!isset($agents[$row->agents_id])){
                             $agents[$row->agents_id] = 0;
                         }
                         $agents[$row->agents_id]+=$row->obligation;
                     }
                         foreach ($agents as $key=>$total){
-                            echo $key." סכום: ".$total;
+                            $filters = array(array("filter_field" => "id","filter_value"=>$key));
+                            $agent = get_data_table("agents",$filters)[0];
+                            ?>
+                            <div class="flex-display "><span class="part-30"><?php echo $agent->name ?>:</span><span class="bold gold" ><?php echo "₪".number_format($total) ?> </span> </div>
+                            <?php
                         }
                     /*$sum = array_reduce(
                         $result,
@@ -62,8 +67,6 @@ if(is_supplier()){
                         0
                     );*/
                     ?>
-                    <div class="font-20 gold bold"></div>
-                    <div class="font-17">חובות פתוחים</div>
                 </div>
             </div>
         </div>
