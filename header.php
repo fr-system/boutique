@@ -97,6 +97,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 <?php
 update_client_price_modal();
 payment_modal();
+
 } ?>
 </header>
 <main id="main" class="site-main flex-display" role="main">

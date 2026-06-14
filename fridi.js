@@ -20,6 +20,7 @@ jQuery(document).ready(function($){
 
     jQuery("svg.file-upload").on("click",function (){
         $(this).closest('form').find('.input-label').removeClass('hidden');
+        $(this).closest('form').addClass("margin-after-10");
     })
     jQuery("select[name=supplier_id]").on("change",function (){
         $(this).closest('form').find('input[type=file]').click();
@@ -77,3 +78,8 @@ function alert_msg(form,data){
     alert(data.msg);
 }
 
+function choose_supplier_column_mapping(form, data){
+    jQuery('#supplier_column_mapping_modal').find('input[name=supplier_id]').val(data.supplier_id);
+    jQuery('#supplier_column_mapping_modal').find('table.excel-rows').html(data.excel_rows);
+    openModal("#supplier_column_mapping_modal");
+}

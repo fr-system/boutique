@@ -69,7 +69,9 @@ $page_info  = BOUTIQUE_TABLES[$table_name];
     } ?>
 </section>
 <?php
-
+if($table_name == "collection") {
+    supplier_column_mapping_modal ();
+}
 ?>
 <?php get_footer();?>
 
