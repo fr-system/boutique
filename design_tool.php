@@ -243,7 +243,7 @@ function archive_header($table_name, $view_only = false,$attr = null)
         <div class="flex-display align-center  space-between">
             <?php if(!$view_only){
                 if(is_manager() && $table_name == "collection"){?>
-                    <form novalidate  class="site_form flex-display space-between" data-success="reload_page" >
+                    <form novalidate  class="site_form flex-display space-between" data-success="reload_page" data-failed="choose_supplier_column_mapping">
                         <input type="hidden" name="form_func" value="import_from_xlsx"/>
                         <input type='file' class="hidden" name='bills' id='bills' accept=".xls,.xlsx">
                         <svg data-tooltip="העלאת קובץ מספק" class="file-upload has-tooltip margin-after-10" xmlns="http://www.w3.org/2000/svg" width="44" height="44" viewBox="0 0 44 44" fill="none">

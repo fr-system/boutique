@@ -24,15 +24,32 @@ function import_from_xlsx()
         $tmpFile = $_FILES['bills']['tmp_name'];
         $supplier_id = $_POST["supplier_id"];//supplier_id
         //4 => "client_name",
-        /*$list =get_data_table ("supplier_column_mapping",array(array("filter_field" => "supplier_id", "filter_value" => $supplier_id)));
+        $spreadsheet = IOFactory::load ($tmpFile);
+        $sheet = $spreadsheet->getActiveSheet ();
+        $list =get_data_table ("supplier_column_mapping",array(array("filter_field" => "supplier_id", "filter_value" => $supplier_id)));
         if(empty($list)){
-
-        }*/
+            $rows = array_slice($sheet->toArray(), 0, 10);
+           // $excel_rows=[];
+            $html_rows='';
+            foreach ($rows as $row){
+                $html_rows.="<tr>";
+                foreach ($row as $col){
+                    $html_rows.="<td>{$col}</td>";
+                }
+                $html_rows.="</tr>";
+            }
+            write_log("empty supplier_column_mapping supplier_id ".$supplier_id);
+            die(json_encode(array(
+                'status' => 'failed',
+                'supplier_id'=>$supplier_id,
+                'excel_rows'=>$html_rows,
+                'msg' => 'נא ליצור מיפוי שדות לספק'
+            )));
+        }
         //$list= get_excel_order_field($supplier_id);//צריך לשמור בטבלה לכל ספק את השדות שלו
         $list = array(0=>"doc_number",1 => "date", 7 => "obligation", 10 => "payment_until", 13 => "doc_type", 16 => "BnNumber");
 
-        $spreadsheet = IOFactory::load ($tmpFile);
-        $sheet = $spreadsheet->getActiveSheet ();
+
        // write_log ('sheet '.json_encode ($sheet->toArray()));
         $BnNumber_index = array_search ( "BnNumber",$list);
         $doc_number_index = array_search ( "doc_number",$list);//מספר חשבונית

@@ -829,7 +829,7 @@ function getTableAjaxData(tableName){
     call_ajax_function(postData,"fillListTable");
 }
 function openModal(modalId,message){
-    //jQuery(modalId+'.modal').modal('show');
+    jQuery(modalId+'.modal').modal('show');
 }
 function closeModal(){
     jQuery('.modal.show').modal('hide');

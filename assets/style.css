@@ -377,7 +377,9 @@ td a.button{
     margin: 0;
     height: 30px;
 }
-
+.modal-dialog{
+    min-width: max-content;
+}
 .modal-body{
     min-height: 100px;
 }
