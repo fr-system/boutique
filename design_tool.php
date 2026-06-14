@@ -649,7 +649,7 @@ function get_tr_data($table_name, $data, $key,$attr){
         $field = isset($column['join_table']) ? substr($column['join_table'], 0, -1) .(isset($column['join_value'])? "_" . $column['join_value'] :''): $column["field_name"];
         $list = isset($column['table_name']) ? constant($column['table_name']) : null;
         if(isset($column["hidden"]) && ($table_name=="order_products" || $table_name=="agent_target_supplier")) {
-            $html .= '<td><input type="hidden" name="row[' . $key . '][' . $field . ']" value="' . $row->$field . '"/></td>';
+            $html .= '<td><input type="hidden" name="rows[' . $key . '][' . $field . ']" value="' . $row->$field . '"/></td>';
         }
 
         if ($field != "id" && !isset($column["hidden"]) && isset($column["label"])) {
@@ -660,7 +660,7 @@ function get_tr_data($table_name, $data, $key,$attr){
             $column_value = get_column_value($column,$row,$field,$list);
             $html .= '<td '.$data_id.' class="'.$field.'">';
             if(isset($attr["input_table"])){
-                $html .='<input type="text" name="row['.$key.']['.$field.']" value="'.$column_value.'"/>';
+                $html .='<input type="text" name="rows['.$key.']['.$field.']" value="'.$column_value.'"/>';
             }
             else{
                 $html .=$column_value;

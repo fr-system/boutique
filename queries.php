@@ -117,19 +117,37 @@ function save_single_data()
         $id = $wpdb->get_var ("SELECT MAX(id) FROM {$wpdb->prefix}" . $table_name);
     }
 
-    if ($table_name == "orders" && isset($_POST["products"])) {
-        foreach ($_POST["products"] as $row) {
-            if (isset($row["product_id"]) && !empty($row["product_id"]) && !empty($id)) {
-                if ($action == "new") {
-                    $row["order_id"] = $id;
+    write_log("save_single_data post ".json_encode($_POST));
+    if (($table_name == "orders" || $table_name == "agents") && isset($_POST["rows"])) {
+
+
+        foreach ($_POST["rows"] as $row) {
+            $action_product = (isset($row["id"]) && !empty($row["id"])) ?
+                (isset($row["remove"]) && $row["remove"] ? "remove" : "update") : "new";
+
+            if ($table_name == "agents") {
+                if (!empty($row["target"]) && !empty($row["period_days"])) {
+                    $row["agent_id"] = $id;
                 }
 
-                $action_product = (isset($row["id"]) && !empty($row["id"])) ?
-                    (isset($row["remove"]) && $row["remove"] ? "remove" : "update") : "new";
-                // write_log("row order product" . json_encode($row));
-                $result = pre_action_query ("order_products", $row);
-                run_action_query ("order_products", $row["id"], $action_product, $result);
+                $sub_table_name = "agent_target_supplier";
             }
+
+            if ($table_name == "orders") {
+                if (!empty($row["count"])) {
+                    if ($action == "new") {
+                        $row["order_id"] = $id;
+                    }
+
+                    $sub_table_name = "order_products";
+
+                    // write_log("row order product" . json_encode($row));
+                }
+            }
+             write_log("row to save" . json_encode($row));
+            $result = pre_action_query($sub_table_name, $row);
+            write_log("result to save" . json_encode($result));
+            //run_action_query($sub_table_name, $row["id"], $action_product, $result);
         }
     }
     echo json_encode (array(
