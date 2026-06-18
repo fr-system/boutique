@@ -443,6 +443,7 @@ td {
 }
 /* עיצוב לעמודה הראשונה */
 td:first-child {
+    padding-right: 10px !important;
    border-top-right-radius: 12px;
     border-bottom-right-radius: 12px;
    border-right: var(--b-global-color-dark-gray) 1px solid;
@@ -465,7 +466,20 @@ td:last-child {
 table thead tr th{
     border-bottom: none !important;
 }
-.archive-table tr {height: 50px}
+.archive-table tr {
+    padding-right: 5px;
+    height: 50px
+}
+.archive-table tr td:has(img, a) {
+    text-align: center;
+}
+.input-label .archive-table tr td img{
+    max-width: 25px;
+    max-height: 15px;
+    height: auto;
+    width: auto;
+}
+
 .archive-table tr img{
     max-width: 55px;
     max-height: 45px;
@@ -476,6 +490,32 @@ table thead tr th{
 .archive-table tr a{
     width: fit-content;
     min-width: fit-content;
+}
+
+
+table.dataTable thead > tr > th.dt-orderable-asc span.dt-column-order,
+table.dataTable thead > tr > th.dt-orderable-desc span.dt-column-order{
+    left: 10px;
+    right: unset;
+}
+table.dataTable th.dt-type-numeric,*[dir=rtl]  table.dataTable th.dt-type-date{
+    text-align: right;
+}
+table.dataTable td.dt-type-numeric,*[dir=rtl] table.dataTable td.dt-type-date{
+    text-align: center;
+}
+table.dataTable>tbody>tr>td,table.dataTable>tbody>tr>th{
+    padding: 0;
+}
+td.dt-type-numeric{
+    text-align: right !important;
+}
+table.dataTable>thead>tr>th,
+table.dataTable>tbody>tr>td{
+    padding: 5px 0 5px 5px !important;
+}
+tr.blocked{
+    background-image: repeating-linear-gradient(302deg, #ffffff, #f4f4f4 10px);
 }
 /* popups */
 

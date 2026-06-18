@@ -132,7 +132,7 @@ function lists_table_rows($list_name)
 
 
 
-function get_column_value($column,$row,$field,$list)
+function get_column_value($column,$row,$field,$list,$key)
 {
     $column_value = "";
     switch ($column["widget"]) {
@@ -168,7 +168,7 @@ function get_column_value($column,$row,$field,$list)
         case "datetime-local":
             if ($row->$field) {
                 $timestamp = strtotime($row->$field); // המרת התאריך לאטימות זמן
-                $column_value = date('d/m/Y H:i:s', $timestamp);
+                $column_value = date('d/m/Y H:i', $timestamp);
             }
             break;
         case "file":
@@ -189,6 +189,10 @@ function get_column_value($column,$row,$field,$list)
                 if (!empty($column_value) && isset($column["un_apostrophe"])) {
                     $column_value .= " ₪";
                 }
+            }
+
+            if(isset($column["create_input"])){
+                $column_value = '<input type="'.$column["widget"].'" name="rows[' . $key . '][' . $field . ']" value="' . $column_value . '"/>';
             }
             break;
     }
@@ -479,7 +483,6 @@ function send_late_bills($attr)
 }
 function get_payment_until($payment_term_id,$date)
 {
-    //payment_term_id = $client->payment_term_id;
     $lastDayOfMonth = date('Y-m-t', strtotime($date));
 
     switch ($payment_term_id) {
@@ -491,7 +494,7 @@ function get_payment_until($payment_term_id,$date)
             break;
         case  1: //מזומן
         default:
-            $newDate =$date; // date('Y-m-d', $date);
+            $newDate =$date;
     }
     return $newDate;
 }
@@ -529,7 +532,7 @@ function get_data_to_export($table_name,$file_type)
     $headers = [];
 
     foreach ($page_info["columns"] as $column) {
-        if (!isset($column['field_name']) || !isset($column["label"]) || $file_type == "pdf" && isset($column["hidden"])) { continue; }
+        if (!isset($column['field_name']) || !isset($column["label"]) || $file_type == "pdf" && isset($column["hide_in_table"])) { continue; }
 
         $headers[$column["label"]] = get_column_type ($column["widget"]);
     }
@@ -538,7 +541,7 @@ function get_data_to_export($table_name,$file_type)
     foreach ($list as $item) {
         $row = [];
         foreach ($page_info["columns"] as $column) {
-            if (!isset($column['field_name']) || !isset($column["label"]) || $file_type == "pdf" && isset($column["hidden"]) ) continue;
+            if (!isset($column['field_name']) || !isset($column["label"]) || $file_type == "pdf" && isset($column["hide_in_table"]) ) continue;
             $field = isset($column['join_table']) ? substr($column['join_table'], 0, -1) . "_" . $column['join_value'] : $column["field_name"];
             $column_value = get_value($column, $item, $field);
             $row[] = $column_value;
@@ -561,22 +564,13 @@ function  get_column_type($widget)
         default:
             return "string";
     }
-
-
 }
 
 function get_value($column,$row,$field)
 {		$column_value = "";
     switch ($column["widget"]) {
         case "select":
-            /*if ($column["join_table"] == "agents") {
-                //write_log ('fiel ' . $field);
-                //write_log ('row ' . json_encode ($row));
-                $user_field = $column["field_name"];
-                $column_value = empty($row->$user_field) ? '' : get_userdata($row->$user_field)->display_name;
-            } else {*/
             $column_value = $row->$field;
-            /*}*/
             break;
         case "radio":
         case "status":
@@ -588,70 +582,16 @@ function get_value($column,$row,$field)
                 $timestamp = strtotime($row->$field); // המרת התאריך לאטימות זמן
                 $format = 'd/m/Y';
                 if ($column["widget"] == "datetime-local") {
-                    $format .= " H:i:s";
+                    $format .= " H:i";
                 }
                 $column_value = date($format, $timestamp);
             }
             break;
         default:
-            /*if ($column["field_name"] == "display_name" || $column["field_name"] == "user_email") {
-                $user_field = $column["field_name"];
-                $column_value =  get_userdata($row->user_id)->$user_field;
-            }
-            else {*/
             $column_value = isset($column['list_name']) && isset($list[$row->$field]) ? $list[$row->$field] : $row->$field;
-            /*}*/
             break;
     }
 
     return $column_value;
-}
-function supplier_column_mapping_modal(){
-    ?>
-    <form class="modal fade site_form" id="supplier_column_mapping_modal" data-success="import_from_xlsx"  tabindex='-1' role="dialog">
-        <input type="hidden" name="form_func" value="save_list_data">
-        <input type="hidden" name="supplier_id" value="">
-        <input type="hidden" name="table_name" value="supplier_column_mapping">
-        <div class="modal-dialog" role="document">
-
-            <div class="modal-content">
-                <div class="modal-header flex-display">
-                    <h3 class="modal-title grow" >נא לבחור את המיקום המתאים לכל עמודה בקובץ<span class="bill-num"></span></h3>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" data-dismiss="modal" aria-label="סגור">
-                    </button>
-                </div>
-                <div class="modal-body border-dark-gray padding-30 flex-display direction-column margin-20 font-15">
-                    <table class="part-20">
-                        <tr>
-                            <th>הנתון המבוקש</th>
-                            <td>ח.פ. של הלקוח</td>
-                            <td>מספר חשבונית</td>
-                            <td>תאריך החשבונית</td>
-                            <td>סכום</td>
-                            <td>חיוב/זיכוי</td>
-                            <td>לתשלום עד</td>
-                        </tr>
-                        <tr>
-                            <th>מספר סידורי באקסל</th>
-                            <td><input type="number" name="field_name[BnNumber]" /></td>
-                            <td><input type="number" name="field_name[doc_number]" /></td>
-                            <td><input type="number" name="field_name[date]"/></td>
-                            <td><input type="number" name="field_name[obligation]"/></td>
-                            <td><input type="number" name="field_name[doc_type]"/></td>
-                            <td><input type="number" name="field_name[payment_until]"/></td>
-                        </tr>
-                    </table>
-                    <table class="excel-rows part-70">
-                    </table>
-                </div>
-                <div class="modal-footer">
-                    <button type="submit" class="ok background-gold bold font-18">אישור</button>
-                    <button type="button" class="background-white gold" data-bs-dismiss="modal">ביטול</button>
-
-                </div>
-            </div>
-        </div>
-    </form>
-    <?php
 }
 ?>

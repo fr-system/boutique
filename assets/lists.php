@@ -1,6 +1,6 @@
 <?php
 //"widget" => "hidden" - בעמוד של סינגל לא להכין לו ווידגט
-//"hidden"=>true - בעמוד ארכיב לא להכין לו עמודה בטבלה
+//"hide_in_table"=>true - בעמוד ארכיב לא להכין לו עמודה בטבלה
 const BOUTIQUE_TABLES = array(
     "clients" => array(
         "title" => "לקוחות",
@@ -9,11 +9,11 @@ const BOUTIQUE_TABLES = array(
         "columns" => array(
             array("field_name" => "name", "widget" => "text", "label" => "שם הלקוח","required"=>true),
             array("field_name" => "mobile", "widget" => "text", "label" => "נייד","required"=>true),
-            array("field_name" => "BnNumber", "widget" => "text", "label" => "ח\"פ","required"=>true,"hidden"=>true),
-            array("field_name" => "address", "widget" => "text", "label" => "כתובת","hidden"=>true),
+            array("field_name" => "BnNumber", "widget" => "text", "label" => "ח\"פ","required"=>true,"hide_in_table"=>true),
+            array("field_name" => "address", "widget" => "text", "label" => "כתובת","hide_in_table"=>true),
             array("field_name" => "city_id", "widget" => "select", "join_table" => "cities", "join_value" => "name", "label" => "עיר"),
-            array("field_name" => "note", "widget" => "text", "label" => "הערה","hidden"=>true),
-            array("field_name" => "payment_term_id", "widget" => "select", "label" => "תנאי תשלום","required"=>true,"hidden"=>true,"filter"=>true,
+            array("field_name" => "note", "widget" => "text", "label" => "הערה","hide_in_table"=>true),
+            array("field_name" => "payment_term_id", "widget" => "select", "label" => "תנאי תשלום","required"=>true,"hide_in_table"=>true,"filter"=>true,
                 "options"=>array(
                     array("value"=>"1","text"=>"מזומן"),
                     array("value"=>"2","text"=>"שוטף+60"),
@@ -22,10 +22,10 @@ const BOUTIQUE_TABLES = array(
             ),
             array("field_name" => "agent_id", "widget" => "select", "label" => "סוכן", "join_table" => "agents", "join_value" => "name","required"=>true),
             array("field_name" => "email", "widget" => "text", "label" => "דוא\"ל","required"=>true),
-            array("field_name" => "email2", "widget" => "text", "label" => "דוא\"ל נוסף","hidden"=>true),
-            array("field_name" => "accounting_phone_number", "widget" => "text", "label" => "טלפון הנה\"ח","hidden"=>true),
+            array("field_name" => "email2", "widget" => "text", "label" => "דוא\"ל נוסף","hide_in_table"=>true),
+            array("field_name" => "accounting_phone_number", "widget" => "text", "label" => "טלפון הנה\"ח","hide_in_table"=>true),
             array("field_name" => "obligo", "un_apostrophe" => true, "widget" => "text", "label" => "אובליגו","sign"=>"₪"),
-            array("field_name" => "doc_type","widget" => "file", "label" => "שטר חוב","hidden"=>true),
+            array("field_name" => "doc_type","widget" => "file", "label" => "שטר חוב","hide_in_table"=>true),
             array("field_name" => "blocked", "widget" => "hidden"),
 
 
@@ -42,14 +42,14 @@ const BOUTIQUE_TABLES = array(
             array("field_name" => "barcode", "widget" => "text","label"=>"ברקוד","required"=>true),
             array("field_name" => "supplier_id", "widget" => "select","label"=>"ספק", "join_table" => "suppliers", "join_value" => "name","filter"=>true),
             array("field_name" => "price", "widget" => "text","label"=>"מחיר", "un_apostrophe" => true,"sign"=>"₪"),
-            array("field_name" => "description", "widget" => "textarea","label"=>"תיאור","hidden"=>true),
-            //array("field_name" => "count", "widget" => "number","label"=>"כמות בקבוקים בארגז","hidden"=>true),
-            array("field_name" => "file_id", "widget" => "file","label"=>"דף מוצר","hidden"=>true),
+            array("field_name" => "description", "widget" => "textarea","label"=>"תיאור","hide_in_table"=>true),
+            //array("field_name" => "count", "widget" => "number","label"=>"כמות בקבוקים בארגז","hide_in_table"=>true),
+            array("field_name" => "file_id", "widget" => "file","label"=>"דף מוצר","hide_in_table"=>true),
             array("field_name" => "image_id", "widget" => "image","label"=>"תמונת מוצר"),
-            array("field_name" => "blocked", "widget" => "checkbox","label"=>"מוצר חסום","hidden"=>true),
-            /*array("field_name" => "factor_of_friction", "widget" => "select","label"=>"גורם אירוז","hidden"=>true),*/
-            array("field_name" => "individually", "widget" => "checkbox","label"=>"ניתן למכירה בבודדים","hidden"=>true),
-            array("field_name" => "units_in_box", "widget" => "number","label"=>"כמות יחידות בארגז","required"=>true,"hidden"=>true,"min"=>1,"max"=>49),
+            array("field_name" => "blocked", "widget" => "checkbox","label"=>"מוצר חסום","hide_in_table"=>true),
+            /*array("field_name" => "factor_of_friction", "widget" => "select","label"=>"גורם אירוז","hide_in_table"=>true),*/
+            array("field_name" => "individually", "widget" => "checkbox","label"=>"ניתן למכירה בבודדים","hide_in_table"=>true),
+            array("field_name" => "units_in_box", "widget" => "number","label"=>"כמות יחידות בארגז","required"=>true,"hide_in_table"=>true,"min"=>1,"max"=>49),
         )),
     "tasks" => array(
         "title" => "משימות",
@@ -58,9 +58,9 @@ const BOUTIQUE_TABLES = array(
         "columns" => array(
             array("field_name" => "client_id", "widget" => "select", "join_table" => "clients", "join_value" => "name", "label" => "שם לקוח"),
             array("field_name" => "subject", "widget" => "text", "label" => "משימה","required"=>true),
-            array("field_name" => "open_date", "widget" => "datetime-local", "label" => "תאריך פתיחה","locked"=>true),
+            array("field_name" => "open_date", "widget" => "hidden", "label" => "תאריך פתיחה"),
             array("field_name" => "agent_id", "widget" => "select", "label" => "סוכן", "join_table" => "agents", "join_value" => "name","required"=>true,"filter"=>true),
-            array("field_name" => "details", "widget" => "textarea", "label" => "פירוט","hidden" => true),
+            array("field_name" => "details", "widget" => "textarea", "label" => "פירוט","hide_in_table" => true),
             array("field_name" => "importance_id", "widget" => "radio", "label" => "חשיבות","filter"=>true,
                 "values"=>array(
                     1=>array("class"=>"high","label"=> "גבוהה","color"=>"#1A7870"),
@@ -110,38 +110,34 @@ const BOUTIQUE_TABLES = array(
             array("field_name" => "client_id","widget" => "select", "join_table" => "clients", "join_value" => "name", "label" => "שם הלקוח","required"=>true),
             array("field_name" => "order_date", "widget" => "datetime-local", "label" => "תאריך הזמנה","required"=>true),
             array("field_name" => "user_opens","widget" => "hidden", "label" => "מקים ההזמנה", "type" => "user","join_table" => "agents"/*, "join_value" => "id"*/,"join_field"=>"user_id","join_values_select"=>array("id","name")),//
-            array("field_name" => "order_products" ,"widget" => "table","label" => "מוצרים","field_id"=>"order_id","hidden"=>true,"target_table"=>"products"),
+            array("field_name" => "order_products" ,"widget" => "table","label" => "מוצרים","field_id"=>"order_id","hide_in_table"=>true,"target_table"=>"products"),
             array("field_name" => "total","widget" => "text", "label" => "סה\"כ", "un_apostrophe" => true,"sign"=>"₪"),
-            array("field_name" => "notes","widget" => "textarea", "label" => "הערות","hidden"=>true),
-            array("field_name" => "user_confirms","widget" => "hidden","locked"=>true, "label" => "מאשר ההזמנה", "type" => "user"),//"join_table" => "agents", "join_value" => "name","join_field"=>"user_id"),
+            array("field_name" => "notes","widget" => "textarea", "label" => "הערות","hide_in_table"=>true),
+            array("field_name" => "user_confirms","widget" => "hidden", "label" => "מאשר ההזמנה", "type" => "user"),//"join_table" => "agents", "join_value" => "name","join_field"=>"user_id"),
             array("field_name" => "done","widget" => "bool"),
         )),
     "order_products" => array(
         "title" => "הזמנות מוצרים",
         "columns" => array(
-            array("field_name" => "order_id", "widget" => "number"),
-            array("field_name" => "product_id", "widget" => "number", "join_table" => "products",
                // "join_values_select"=>array("name","price","image_id","supplier_id","individually","units_in_box")
-                ),
-            array("field_name" => "count", "widget" => "number", "label" => "כמות"),
-            array("field_name" => "order_price", "widget" => "text", "label" => "מחיר", "un_apostrophe" => true,"sign"=>"₪"),
-            array("field_name" => "bonus", "widget" => "number", "label" => "בונוס"),
-            array("field_name" => "discount_percent", "widget" => "text", "label" => "אחוזי הנחה", "un_apostrophe" => true,"sign"=>"%"),
+
+            array("field_name" => "count", "widget" => "number", "label" => "כמות","create_input"=>true),
+            array("field_name" => "order_price", "widget" => "text", "label" => "מחיר", "un_apostrophe" => true,"sign"=>"₪","create_input"=>true),
+            array("field_name" => "bonus", "widget" => "number", "label" => "בונוס","create_input"=>true),
+            array("field_name" => "discount_percent", "widget" => "text", "label" => "אחוזי הנחה", "un_apostrophe" => true,"sign"=>"%","create_input"=>true),
             array("field_name" => "order_individual", "widget" => "bool"),
             array("field_name" => "total", "widget" => "text", "label" => "סה\"כ", "un_apostrophe" => true,"sign"=>"₪"),
-
-           // array("field_name" => "product_id", "widget" => "text", "un_apostrophe" => true, "join_table" => "products_clients","join_id_column" => "product_id", "join_value" => "client_price","sign"=>"₪"),
+            array("field_name" => "id", "widget" => "input_hidden"),
+            array("field_name" => "order_id", "widget" => "input_hidden"),
+            array("field_name" => "product_id", "widget" => "input_hidden")
         ),
         "more_columns_in_table" => array(
             array("field_name" => "image_id", "widget" => "image"),
-            array("field_name" => "name", "widget" => "text","label"=>"שם","width"=>"1000px"),
-/*            array("field_name" => "blocked", "widget" => "checkbox","label"=>"מוצר חסום","hidden"=>true),
-            array("field_name" => "individually","label"=>"ניתן למכירה בבודדים","hidden"=>true),
-            array("field_name" => "units_in_box","label"=>"כמות יחידות בארגז","hidden"=>true),*/
-
+            array("field_name" => "name", "widget" => "text","label"=>"שם המוצר"/*,"width"=>"1000px"*/),
         ),
         "update_remove"=>false
     ),
+
     "agents" => array(
         "title" => "סוכנים",
         "single" => "סוכן",
@@ -151,10 +147,10 @@ const BOUTIQUE_TABLES = array(
             array("field_name" => "email", "widget" => "email", "label" => "דוא\"ל","required"=>true),
             array("field_name" => "mobile", "widget" => "text", "label" => "נייד"),
             array("field_name" => "work_area_id","widget" => "select", "join_table" => "areas", "join_value" => "area", "label" => "אזור עבודה","required"=>true),// סינון אזור
-            array("field_name" => "agent_target_supplier", "widget" => "table", "label" => "יעד לכל ספק","hidden"=>true,"field_id"=>"agent_id","target_table"=>"suppliers"),
+            array("field_name" => "agent_target_supplier", "widget" => "table", "label" => "יעד לכל ספק","hide_in_table"=>true,"field_id"=>"agent_id","target_table"=>"suppliers"),
 
             array("field_name" => "target","widget" => "text", "label" => "יעד כללי", "un_apostrophe" => true,"sign"=>"₪"),
-            array("field_name" => "notes", "widget" => "textarea", "label" => "הערה","hidden"=>true),
+            array("field_name" => "notes", "widget" => "textarea", "label" => "הערה","hide_in_table"=>true),
             array("field_name" => "user_id", "widget" => "hidden"),
         ),
         //"filter"=>"area_id == []"
@@ -162,11 +158,14 @@ const BOUTIQUE_TABLES = array(
     "agent_target_supplier"=>array(
         "title" => "יעד לסוכן לכל ספק",
         "columns" => array(
-            array("field_name" => "supplier_id", "widget" => "select","label"=>"ספק", "join_table" => "suppliers", "join_value" => "name","filter"=>true),
-            array("field_name" => "target", "widget" => "text", "label" => "יעד", "un_apostrophe" => true,"sign"=>"₪"),
-            array("field_name" => "period_days", "widget" => "number", "label" => "תקופה" , "un_apostrophe" => true),
-            array("field_name" => "supplier_id","widget" => "number"),
-            array("field_name" => "agent_id","widget" => "number"),
+            array("field_name" => "target", "widget" => "text", "label" => "יעד", "un_apostrophe" => true,"sign"=>"₪","create_input"=>true),
+            array("field_name" => "period_days", "widget" => "number", "label" => "תקופה" , "un_apostrophe" => true,"create_input"=>true),
+            array("field_name" => "id","widget" => "hidden","create_input"=>true),
+            array("field_name" => "supplier_id","widget" => "hidden","create_input"=>true),
+/*            array("field_name" => "agent_id","widget" => "input_hidden"),*/
+        ),
+        "more_columns_in_table" => array(
+            array("field_name" => "name", "widget" => "select","label"=>"ספק"),
         ),
         "update_remove"=>false
     ),

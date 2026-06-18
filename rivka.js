@@ -102,10 +102,12 @@ jQuery(document).ready(function($) {
 
             },
             "ordering": true,
-          /*  "columnDefs": [{
-                orderable: false,
-                targets: "no-sort"
-            }],*/
+            order: [],
+
+            /*  "columnDefs": [{
+                  orderable: false,
+                  targets: "no-sort"
+              }],*/
             "aoColumnDefs": [
                 { "bSortable": false, "aTargets": aTargets }//[ 4, 5, 6 ]
             ],
