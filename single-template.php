@@ -52,7 +52,7 @@ if (isset($_SERVER['HTTP_REFERER'])) {
 $obligo = 0;
 $class_form = "border-dark-gray padding-20 flex-display direction-column ";
 if($table_name == "orders"){
-    $part_left_side="part-80 ";
+    $part_left_side="part-100 ";
 }
 else{
     $part_left_side="part-65 ";

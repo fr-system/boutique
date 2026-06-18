@@ -37,6 +37,7 @@ function onCheckingDuplicates(result){
 }
 
 jQuery(document).ready(function($) {
+    //לבדוק אם יש כבר מספר ח"פ של לקוח לא ליצור לקוח נוסף
     if(getParameterByName("subject") == "clients") {
         jQuery('input[name=BnNumber]').change(function (){
             if(jQuery(this).val()){
@@ -51,6 +52,7 @@ jQuery(document).ready(function($) {
         });
     }
 
+//לדעת אם הלקוח שעכשיו יוצרים לו הזמנה הוא מחאר בתשלום לא לאפשר לאשר הזמנה אלא לשלוח לאישור מנהל
     if(getParameterByName("subject") == "orders" && getParameterByName("action") == "edit"){
         var selectedOption = jQuery("section select[name=client_id]").find('option:selected');
         getObligationClient(selectedOption.val());
@@ -170,25 +172,6 @@ jQuery(document).ready(function($) {
         var parts = dateStr.split('/');
         var payment_date = `${parts[2]}-${parts[1]}-${parts[0]}`;
         jQuery(this).find('[name=payment_date]').val(payment_date);
-
-        /*btn = jQuery(e.relatedTarget);
-        var tr = btn.closest('tr');
-        var id = tr.data("id");
-        jQuery(this).find('[name="id"]').val(id);
-        jQuery(this).find('.bill-num').html(id);
-
-        var payment_date = tr.find("td.payment_date").html();
-        if(payment_date){
-            const parts = payment_date.split('/');
-            payment_date = `${parts[2]}-${parts[1]}-${parts[0]}`;
-            jQuery(this).find('[name="payment_date"]').val(payment_date);
-        }
-        var payment_type = tr.find("td.payment_type").html();
-        if(payment_type) {
-            jQuery(this).find('[name="payment_type"]').val(tr.find("td.payment_type").data("id"));
-        }
-        jQuery(this).find('[name="check_number"]').val(tr.find("td.check_number").html());*/
-        //closeModal();
     });
 
 })
@@ -218,6 +201,61 @@ function show_tooltip(){
         jQuery(this).off('mousemove.tooltip');
         $tooltip.fadeOut(150);
     });
+}
+
+function fillProductsLastOrder(result) {
+    jQuery(".add-order-product").after(jQuery(result.products));
+    jQuery(".products-gallery .products-last-order").hide();
+}
+
+function plusMinusCountProduct(me){
+    var numberInput = jQuery(me).parent().find("input");
+    var currentValue = parseInt(numberInput.val()) || 0;
+
+    if(jQuery(me).hasClass("plus")){
+        numberInput.val(currentValue + 1);
+    }
+    else{
+        if(currentValue > 0) {
+            numberInput.val(currentValue - 1);
+        }
+    }
+    calculatePrice(me);
+}
+
+jQuery(".page .products-gallery .product .plus-minus-count span.pointer:not(.readonly)").click(function (e) {
+    plusMinusCountProduct(this)
+})
+
+function registerToCalculatePrice(){
+    jQuery('.products-gallery.orders .product .price-part').on('change', function (e) {
+        calculatePrice(this);
+    });
+    jQuery(".products-gallery.orders .product .calculated-price-input").on("change", function () {
+        var total = 0;
+        jQuery(".products-gallery.orders .product .calculated-price-input").each(function (i,totalProductPrice){
+            total+=parseInt( jQuery(totalProductPrice).val()||0);
+        })
+        jQuery("input[name=total]").autoNumeric('set', total);
+        //jQuery("input[name=total]").autoNumeric.set("input[name=total]", total);
+
+    });
+}
+
+function calculatePrice(me){
+    var product = jQuery(me).closest(".product");
+
+    var count = parseInt(product.find('.count').val());
+    var unitsInBox = parseInt(product.find('.units-in-box').val());
+    var selectIndividually  = product.find("select.price-part.individually")
+    if(selectIndividually.length>0 && selectIndividually.val()==0 ||selectIndividually.length ==0) {// אם לא ניתן לבחור בודדים , או שבחור ארגז
+        count=count*unitsInBox;
+    }
+    var unitPrice = parseInt(product.find('.unit-price').val().replace('₪',''));
+    var discountPercent = parseInt(product.find('.discount-percent').val()||0);
+    var calculatedPrice = (unitPrice*count) - (unitPrice*count*discountPercent/100);
+    product.find(".calculaded-price").html(calculatedPrice);
+    product.find(".calculated-price-input").val(calculatedPrice).trigger("change");
 }
 
 /*

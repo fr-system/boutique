@@ -363,7 +363,10 @@ input[type="radio"] + label:before {
     padding: 0;
     min-width: 0;
 }
-.input-label table tr{
+.input-label table tr,.input-label .archive-table .tr-head ,.input-label .archive-table thead{
+    height: 25px;
+}
+.input-label table tr input{
     height: 25px;
 }
 tr.order-confirm{
@@ -431,6 +434,9 @@ td.dt-type-numeric{
     width: 200px;
 }
 
-.graphs-charts{
-height: 80%;
+.graphs-charts {
+    height: 80%;
+    width: 100%;
+    position: relative;
+
 }

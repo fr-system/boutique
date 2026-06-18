@@ -61,11 +61,6 @@ if(is_supplier()){
                             <div class="flex-display "><span class="part-30"><?php echo $agent->name ?>:</span><span class="bold gold" ><?php echo "₪".number_format($total) ?> </span> </div>
                             <?php
                         }
-                    /*$sum = array_reduce(
-                        $result,
-                        fn($carry, $item) => $carry + $item->obligation,
-                        0
-                    );*/
                     ?>
                 </div>
             </div>
@@ -75,13 +70,82 @@ if(is_supplier()){
                 <div class="font-20 bold">גרף מכירות</div>
                 <div class="font-15 dark-green" >לפירוט המלא -></div>
             </div>
-            <div class="graphs-charts quick-action border-dark-gray"></div>
+            <div class="graphs-charts quick-action border-dark-gray">
+            <?php
+
+            $agents = get_data_table("agents");
+            //$agents = array_column($agents, null, 'id');
+            //write_log("orders+agents ".json_encode($agents));
+
+            $filters = array(array("filter_field" => "order_date","filter_type"=>"between","filter_value"=> array('2026-04-01','2026-06-15')));
+            $result = get_data_table("orders",$filters);
+                //write_log("orders+agents ".json_encode($result));
+                    //$agents = array();
+            foreach ($result as $row) {
+                if (empty($row->agent_id)) continue;
+                $agent_id = $row->agent_id;
+                //write_log("order".json_encode($row));
+                $index = array_search(
+                    $agent_id,
+                    array_map(fn($a) => $a->id, $agents)
+                );
+
+                if (!isset($agents[$index]->total)) {
+                    $agents[$index]->total = 0;
+                    $agents[$index]->_target = 0;
+                }
+                $agents[$index]->total += $row->total;
+            }
+
+
+            $result = get_data_table("agent_target_supplier");
+
+            foreach ($result as $row) {
+                $index = array_search(
+                    $row->agent_id,
+                    array_map(fn($a) => $a->id, $agents)
+                );
+
+                $agents[$index]->_target += $row->target;
+            }
+
+            write_log("orders+agents ".json_encode($agents));
+
+
+            ?>
+            <canvas id="salesChart"></canvas>
+                <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        const agents = <?= json_encode($agents, JSON_UNESCAPED_UNICODE) ?>;
+        var chart = new Chart(document.getElementById('salesChart'), {
+            type: 'bar',
+            data: {
+                labels: agents.map(a => a.name),
+                datasets: [
+                    {
+                        label: 'מכר',
+                        data: agents.map(a => Number(a.total || 0))
+                    },
+                    {
+                        label: 'יעד',
+                        data: agents.map(a => Number(a._target || 0))
+                    }
+                ]
+            },
+            options: {
+                responsive: true
+            }
+        });
+    </script>
+
+            </div>
         </div>
     </div>
     <div class="part-30">
         <div class="flex-display space-between">
             <div class="font-20 bold">משימות פתוחות</div>
-            <div class="font-15 dark-green" >לפירוט המלא -></div>
+            <a class="not-link font-15 dark-green" href="/archive/?subject=tasks">לפירוט המלא -></a>
+            <!--  צריך להביא פה קישור לעמוד משימות ויראה רק משימות פתוחות -->
         </div>
         <div class="graphs-charts quick-action border-dark-gray">
             <?php

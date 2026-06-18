@@ -32,20 +32,7 @@ jQuery(document).ready(function($){
         }
     });
 });
-function registerToCalculatePrice(){
-    jQuery('.products-gallery.orders .product .price-part').on('change', function (e) {
-        calculatePrice(this);
-    });
-    jQuery(".products-gallery.orders .product .calculated-price-input").on("change", function () {
-        var total = 0;
-        jQuery(".products-gallery.orders .product .calculated-price-input").each(function (i,totalProductPrice){
-            total+=parseInt( jQuery(totalProductPrice).val()||0);
-        })
-        jQuery("input[name=total]").autoNumeric('set', total);
-        //jQuery("input[name=total]").autoNumeric.set("input[name=total]", total);
 
-    });
-}
 function fillClientPriceModal(result) {
     if (result.array.length > 0) {
         jQuery('#update_client_price input[name=id]').val(result.array[0].id);
@@ -58,21 +45,6 @@ function fillClientPriceModal(result) {
     }
 }
 
-function calculatePrice(me){
-    var product = jQuery(me).closest(".product");
-
-    var count = parseInt(product.find('.count').val());
-    var unitsInBox = parseInt(product.find('.units-in-box').val());
-    var selectIndividually  = product.find("select.price-part.individually")
-    if(selectIndividually.length>0 && selectIndividually.val()==0 ||selectIndividually.length ==0) {// אם לא ניתן לבחור בודדים , או שבחור ארגז
-        count=count*unitsInBox;
-    }
-    var unitPrice = parseInt(product.find('.unit-price').val().replace('₪',''));
-    var discountPercent = parseInt(product.find('.discount-percent').val()||0);
-    var calculatedPrice = (unitPrice*count) - (unitPrice*count*discountPercent/100);
-    product.find(".calculaded-price").html(calculatedPrice);
-    product.find(".calculated-price-input").val(calculatedPrice).trigger("change");
-}
 
 function alert_msg(form,data){
     alert(data.msg);

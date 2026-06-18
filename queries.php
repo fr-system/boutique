@@ -75,6 +75,7 @@ function run_action_query($table_name, $id, $action, $options)
             $query .= " where id = " . $id;
         }
     }
+    write_log("query ".$query);
     $ok = run_query($query, "execute");
     return $ok;
 }
@@ -117,20 +118,21 @@ function save_single_data()
         $id = $wpdb->get_var ("SELECT MAX(id) FROM {$wpdb->prefix}" . $table_name);
     }
 
-    write_log("save_single_data post ".json_encode($_POST));
+    //write_log("save_single_data " .json_encode($_POST));
     if (($table_name == "orders" || $table_name == "agents") && isset($_POST["rows"])) {
-
-
         foreach ($_POST["rows"] as $row) {
-            $action_product = (isset($row["id"]) && !empty($row["id"])) ?
-                (isset($row["remove"]) && $row["remove"] ? "remove" : "update") : "new";
 
             if ($table_name == "agents") {
-                if (!empty($row["target"]) && !empty($row["period_days"])) {
-                    $row["agent_id"] = $id;
+                if (empty($row["target"]) ) {
+                    if($row["id"]) {
+                        $row["remove"] = true;
+                    }
+                    else{
+                        continue;
+                    }
                 }
-
                 $sub_table_name = "agent_target_supplier";
+                write_log("row agent_target_supplier" . json_encode($row));
             }
 
             if ($table_name == "orders") {
@@ -144,10 +146,14 @@ function save_single_data()
                     // write_log("row order product" . json_encode($row));
                 }
             }
-             write_log("row to save" . json_encode($row));
+
+            $action_product = (isset($row["id"]) && !empty($row["id"])) ?
+                (isset($row["remove"]) && $row["remove"] ? "remove" : "update") : "new";
+
+            //write_log("row to save" . json_encode($row));
             $result = pre_action_query($sub_table_name, $row);
-            write_log("result to save" . json_encode($result));
-            //run_action_query($sub_table_name, $row["id"], $action_product, $result);
+            //write_log("result to save" . json_encode($result));
+            run_action_query($sub_table_name, $row["id"], $action_product, $result);
         }
     }
     echo json_encode (array(
@@ -186,13 +192,11 @@ function get_data_table($table_name, $filters=null, $orderby = null, $join_filte
             $query .= $wpdb->prefix . $table_name . "." . $column["field_name"] . ", ";
 
             if (isset($column['join_table'])) {
-
-
                 if (isset($column['join_value'])) {
                     $query .= $wpdb->prefix . $column['join_table'] . "." . $column['join_value'] . " AS " . substr($column['join_table'], 0, -1) . "_" . $column['join_value'] . ", ";
                 } else if (isset($column['join_values_select'])) {
                     foreach ($column['join_values_select'] as $join_values_select) {
-                        $query .= $wpdb->prefix . $column['join_table'] . "." . $join_values_select . ", ";
+                        $query .= $wpdb->prefix . $column['join_table'] . "." . $join_values_select. " AS " . substr($column['join_table'], 0, -1) . "_" . $join_values_select . ", ";
                     }
                 } else {
                     $query .= $wpdb->prefix . $column['join_table'] . ".*, ";
@@ -250,6 +254,9 @@ function get_data_table($table_name, $filters=null, $orderby = null, $join_filte
                         $filter_str[] = $filter_field . " != " . $apostrophe . $filter["filter_value"] . $apostrophe;
                     }
                     break;
+                case "between":
+                    $filter_str[] = $filter_field . " between " .$apostrophe . $filter["filter_value"][0] .$apostrophe ." AND ".$apostrophe .$filter["filter_value"][1].$apostrophe;
+                    break;
                 default:
                     $filter_str[] = $filter_field . " = " . $apostrophe . $filter["filter_value"] . $apostrophe;
                     break;
@@ -269,7 +276,7 @@ function get_data_table($table_name, $filters=null, $orderby = null, $join_filte
 //        $query .= " WHERE ".get_id_column_in_page($page_name)." = ".$filter_value;
 //    }
     $result = run_query ($query);
-   // write_log("res ".json_encode($result));
+   //write_log("res ".json_encode($result));
     return $result ;
 }
 

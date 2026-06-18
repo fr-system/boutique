@@ -21,45 +21,94 @@ function get_single_view($table_name,$row,$readonly)
                     if (isset($row->id)) {
                         $filters = array();
                         $filters[] = array("filter_field" => $column["field_id"], "filter_value" => $row->id);
-                        $value = get_data_table($column["field_name"], $filters);
-                        //write_log("value ".json_encode($value));
-                        $list = array();
-                        $target_table_rows = get_data_table($column["target_table"]);
-                        foreach ($target_table_rows as $table_row) {
+                        $value = get_data_table($column["field_name"], $filters);//מביא את המוצרים שרשומים בהזמנה הזו
+                        //write_log("products in order: ".json_encode($value));
+                        //$list = array();
+                        $sub_table = $column["field_name"];
+                        $sub_columns = BOUTIQUE_TABLES[$sub_table]["columns"];//מביא את השדות של מוצרים בהזמנה
+
+                        //$filters = array();לא להביא בהזמנה מוצרים חסומים
+                        //$filters[] = array("filter_field" => "blocked", "filter_value" => " == null ");
+
+                        $target_table_rows = get_data_table($column["target_table"]);//מביא את כל טבלת מוצרים
+                        foreach ($target_table_rows as $table_row) {//עוברים על טבלת מוצרים ומכניסים אם יש מוצר בהזמנה את הכמות לשוה של המוצר
                             $id = $table_row->id;
                             if ($table_name == "agents") {
-                                $results = array_filter($value, function ($row) use ($id) {
-                                    return $row->supplier_id == $id;
+                                $results = array_filter($value, function ($r) use ($id) {
+                                    return $r->supplier_id == $id;
                                 });
                             } else if ($table_name == "orders") {
-                                $results = array_filter($value, function ($row) use ($id) {
-                                    return $row->product_id == $id;
+                                $results = array_filter($value, function ($r) use ($id) {
+                                    return $r->product_id == $id;
                                 });
                             }
 
                             if (count($results) == 0) {
+                                $item = (object)array();
+                            } else {
+                                $item = array_pop($results);
+                            }
+
+                            if ($table_name == "orders") {
+                                $exist_in_order = isset($item->id) ? true: false;
+                                $table_row->id = isset($item->id) ? $item->id : "";
+                                $table_row->product_id = $id;
+
+                                foreach ($sub_columns as $column1) {//מכניסים את שאר השדות בתוך שורה של מוצר
+                                    $field_name = $column1["field_name"];
+                                    if($field_name == "order_price"){
+                                        $price = $table_row->price;
+                                        if($exist_in_order && !empty($item->order_price)){
+                                            $price = $item->order_price;
+                                        }
+                                        elseif (!empty($table_row->client_price)) {//מחיר מיוחד ללקוח
+                                            $price =$table_row->client_price;
+                                        }
+                                       /* else{
+                                            $price=$table_row->price;
+                                        }*/
+                                        $table_row->price = $price;
+
+                                    }
+                                    else {
+                                        //write_log("field_name ".$field_name);
+
+                                        $table_row->$field_name = isset($item->$field_name) ? $item->$field_name : "";
+                                    }
+                                    //write_log($table_row->$field_name);
+                                    //units_in_box = כמות יחידות בארגז
+                                }
+                            }
+
+                            //write_log("table_row ".json_encode($table_row));
+                            /*if (count($results) == 0) {
                                 if ($table_name == "agents") {
-                                    $list[] = (object)array("id" => "", "target" => "", "period_days" => "",
+                                    $list[] = (object)array("id" => "", "target" => "", "period_days" => "","agent_id"=>$row->id,
                                         "supplier_id" => $table_row->id, "supplier_name" => $table_row->name);
                                 }
                                 else if ($table_name == "orders") {
-                                    $list[] = (object)array("id" => "", "count" => "", "order_price" => "",
+                                    $list[] = (object)array("id" => "", "count" => "", "order_price" => "","order_id"=>$row->id,
                                         "bonus" => "", "discount_percent" => "", "order_individual" => "", "total" => "",
                                         "product_id" => $table_row->id, "product_name" => $table_row->name);
                                 }
-                            } else {
-                                $list[] = $results[0];
                             }
+                            else {
+                                //write_log("results ".json_encode($results));
+
+                                //$list[] = array_pop($results);
+                            }
+                            $results=array();*/
                         }
-                        $value = $list;
+                        //write_log("product ".json_encode($target_table_rows));
+                        $list = $target_table_rows;
                     }
                 }
                 else {
                     $field_name = isset($column["field_name"]) ? $column["field_name"] : null;
-                    $value = isset($row->$field_name) ? $row->$field_name : "";
+                    $list = isset($row->$field_name) ? $row->$field_name : "";
                 }
-
-                echo create_input($column, $value, $readonly);
+                //write_log("*******".json_encode($list));
+                echo create_input($column, $list, $readonly);
             }
             ?>
         </div>
@@ -72,113 +121,6 @@ function create_table_view(){
 
 }
 
-function create_product_view($product=null,$options=null)
-{
-    //$add_class="";
-    if($options == null){
-        $options = array();
-    }
-    if(!isset($options["key"])){
-        $options["key"] = 0;
-    }
-    if(isset($options["readonly"])){
-        $readonly= $options["readonly"] ?? '';
-    }
-    ?>
-    <div class="border-dark-gray pointer flex-display direction-column space-between product font-15 padding-15" data-id="<?php echo $product->id?>">
-        <?php if($options["table_name"]=="orders"){
-            $product_order_id = isset($options["get_products_last_order"])? "":$product->id;
-            ?>
-            <input type="hidden" class="input-remove" name="products[<?php echo $options["key"]?>][remove]" value="0">
-            <input type="hidden" name="products[<?= $options["key"]?>][id]" value="<?= $product_order_id?>"><!--id של השורה של מוצר_הזמנה-->
-            <input type="hidden" name="products[<?= $options["key"]?>][order_id]" value="<?= $product->order_id?>">
-            <input type="hidden" name="products[<?= $options["key"]?>][product_id]" value="<?= $product->product_id?>">
-        <?php } ?>
-        <input type="hidden" class="units-in-box" name="products[<?= $options["key"]?>][units_in_box]" value="<?= $product->units_in_box?>">
-        <div class="product-img <?= $options["table_name"]=="orders"? 'part-40':'part-60'?>">
-            <?php if($options["table_name"]=="orders"){?>
-                <a class="has-tooltip remove-product" data-tooltip="מחיקת מוצר מהההזמנה" data-bs-toggle="modal" href="#bout-massage" role="button" data-action="remove">
-                    <svg class=""  xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 25 24" fill="none">
-                        <path d="M4.16663 7H20.8333M10.4166 11V17M14.5833 11V17M5.20829 7L6.24996 19C6.24996 19.5304 6.46945 20.0391 6.86015 20.4142C7.25085 20.7893 7.78076 21 8.33329 21H16.6666C17.2192 21 17.7491 20.7893 18.1398 20.4142C18.5305 20.0391 18.75 19.5304 18.75 19L19.7916 7M9.37496 7V4C9.37496 3.73478 9.48471 3.48043 9.68006 3.29289C9.87541 3.10536 10.1404 3 10.4166 3H14.5833C14.8596 3 15.1245 3.10536 15.3199 3.29289C15.5152 3.48043 15.625 3.73478 15.625 4V7" class="stroke-background-gold" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
-                </a>
-            <?php } ?>
-            <!--            <svg class="pointer view-product" xmlns="http://www.w3.org/2000/svg" width="12" height="9" viewBox="0 0 12 9" fill="none">-->
-            <!--                <path d="M5.85467 0.515015C2.4715 0.515015 0.830067 3.44152 0.538793 4.02085C0.523225 4.05167 0.515137 4.08547 0.515137 4.11972C0.515137 4.15398 0.523225 4.18778 0.538793 4.2186C0.82953 4.79793 2.47096 7.72444 5.85467 7.72444C9.23838 7.72444 10.8793 4.79793 11.1705 4.2186C11.1861 4.18778 11.1942 4.15398 11.1942 4.11972C11.1942 4.08547 11.1861 4.05167 11.1705 4.02085C10.8798 3.44152 9.23838 0.515015 5.85467 0.515015Z" stroke="black" stroke-width="1.02992" stroke-linecap="round" stroke-linejoin="round"/>-->
-            <!--                <path d="M5.85485 5.66458C6.74361 5.66458 7.4641 4.97292 7.4641 4.1197C7.4641 3.26649 6.74361 2.57483 5.85485 2.57483C4.96609 2.57483 4.24561 3.26649 4.24561 4.1197C4.24561 4.97292 4.96609 5.66458 5.85485 5.66458Z" stroke="black" stroke-width="1.02992" stroke-linecap="round" stroke-linejoin="round"/>-->
-            <!--            </svg>-->
-            <?php if($product->image_id){  ?>
-                <img class="" src="<?php echo wp_get_attachment_url($product->image_id) ?>" />
-            <?php } ?>
-        </div>
-        <div class="flex-display space-between bold <?= $options["table_name"]=="orders"? 'part-20':'part-10'?> ">
-            <div class="product-name bold"><?= $product->name ?></div>
-        </div>
-        <?php
-        $price = null;
-        // write_log ('producr '.json_encode ($product));
-        if(!empty($product->order_price)){
-            $price = $product->order_price;
-            //$calculaded_price = $price*$product->count*$product->discount_percent/100;
-        }
-        elseif (!empty($product->client_price)) {//מחיר מיוחד ללקוח
-            $price =$product->client_price;
-        }
-        else{
-            $price=$product->price;
-        }
-        if ($options["table_name"] == "orders") {}
-        else{
-            $product->count = 1;
-            $product->discount_percent = 0;
-            $product->bonus = 0;
-
-        }
-        $calculaded_price =$price*$product->count*$product->units_in_box-  $price*$product->count*$product->units_in_box*$product->discount_percent/100;
-        ?>
-
-        <div class="part-10 d-not-order"><?= (!empty($price) ? $price . " ₪" : "") ?></div>
-        <div class="plus-minus-count flex-display d-order part-20">
-            <span class="minus bold font-25 part-20 pointer <?=$readonly?>">-</span>
-            <span class="part-70 flex-display space-between">
-                <input type="number" class="part-30 price-part count align-self-center"  min="0" name="products[<?= $options["key"]?>][count]" value="<?= $product->count?>" />
-                <?= ($product->individually && empty($readonly) ?
-                    '<select class="price-part individually part-70 font-12 align-self-center" name="products['.$options["key"].'][order_individual]">
-                    <option value="0" '. ($product->order_individual? '':'selected').'> ארגזים</option>
-                    <option value="1" '.($product->order_individual? "selected":"").' >בקבוקים</option></select>'
-                    :'<label class="part-60 align-self-center">ארגזים</label>');?>
-            </span>
-            <span class="plus bold font-25 part-20 pointer <?=$readonly?>">+</span>
-        </div>
-        <div class="input-label flex-display space-around align-center d-order part-20">
-            <label for="" class="">מחיר ליחידה</label>
-            <input class="unit-price price-part" type="text"  name="products[<?= $options["key"]?>][order_price]" value="<?= $price?>" data-a-sign="₪" <?=$readonly?>>
-        </div>
-        <div class="discount_percent-bonus flex-display space-between part-20 font-12 d-order ">
-            <div class="input-label flex-display align-center part-45">
-                <label for="" class="">%&nbsp;</label>
-                <input class="price-part discount-percent" type="text" pattern="\d*" name="products[<?= $options["key"]?>][discount_percent]" value="<?= $product->discount_percent?>" data-a-sign="%" <?=$readonly?>>
-                <label for="" class=""> הנחה</label>
-            </div>
-            <div class="input-label flex-display align-center part-45">
-                <input class="price-part bonus " type="number" name="products[<?= $options["key"]?>][bonus]" value="<?php echo $product->bonus?>" <?=$readonly?> >
-                <label for="" class="">בונוס</label>
-            </div>
-        </div>
-        <div class="flex-display center part-15 d-order ">
-            <div class="input-label flex-display align-center bold">
-                <span>סה"כ: <span class="calculaded-price "><?=empty($product->total)? $calculaded_price:$product->total; ?></span> ₪</span>
-                <input class="calculated-price-input" type="hidden"  name="products[<?= $options["key"]?>][total]" value="<?= $product->total?>" >
-            </div>
-        </div>
-        <div class="flex-display space-around part-15 buttons">
-            <a href="single?subject=products&action=edit&id=<?php echo $product->id?>" class="part-15 button background-white gold bold font-15 <?php echo $options["table_name"]=="products" ? '':"hidden" ?>">מעבר למוצר</a>
-            <button type="button" class="background-white gold bold font-15 <?php echo $options["table_name"]=="orders_" ? '':"hidden" ?>">פרטים</button>
-            <button type="button" class="background-gold bold font-15 order-product <?= $options["table_name"]=="order_products" && !$product->blocked ? '':"hidden" ?>">הזמן מוצר</button>
-        </div>
-    </div>
-    <?php
-}
 function archive_header($table_name, $view_only = false,$attr = null)
 {
     ob_start();
@@ -297,19 +239,35 @@ function archive_header($table_name, $view_only = false,$attr = null)
 function catalog_gallery($products, $options = null)
 {
     $class_grid = isset($options['class_grid']) ?  $options['class_grid'] : 'catalog';
-    ob_start();
-    if(!isset($options['get_products_last_order'])){?>
-        <div class="grid-display products-gallery <?= $class_grid?>" >
-        <?php
-    }
-    foreach ($products as $product){
-        create_product_view($product,$options);
-    }
-
-    if(!isset($options['get_products_last_order'])){?>
-        </div>
-    <?php }
+    ob_start();?>
+    <div class="grid-display products-gallery <?= $class_grid?>">
+        <?php foreach ($products as $product){
+            create_product_view($product,$options);
+        }?>
+    </div>
+    <?php
     return ob_get_clean();
+}
+
+function create_product_view($product=null,$options=null)
+{
+    ?>
+    <div class="border-dark-gray pointer flex-display direction-column space-between product font-15 padding-15" data-id="<?php echo $product->id?>">
+
+        <div class="product-img part-60">
+            <?php if($product->image_id){  ?>
+                <img class="" src="<?php echo wp_get_attachment_url($product->image_id) ?>" />
+            <?php } ?>
+        </div>
+        <div class="flex-display space-between bold part-20">
+            <div class="product-name bold"><?= $product->name ?></div>
+        </div>
+        <div class="part-10 d-not-order"><?= (!empty($product->price) ? $product->price . " ₪" : "") ?></div>
+        <div class="flex-display space-around part-15 buttons">
+            <a href="single?subject=products&action=edit&id=<?php echo $product->id?>" class="part-15 button background-white gold bold font-15 <?php echo $options["table_name"]=="products" ? '':"hidden" ?>">מעבר למוצר</a>
+        </div>
+    </div>
+    <?php
 }
 function create_popup(){
     ?>
@@ -369,6 +327,7 @@ function build_select_options($table_name, $value=null,$attr = null)
 
 function create_input($field,$value = null,$readonly = "")
 {
+    //write_log("create_input".$field["field_name"]);
     if(isset($field['required'])){
         $required = 'required';
         //$attrs['label'] .= '<span class="star">*</span>';
@@ -503,6 +462,7 @@ function create_input($field,$value = null,$readonly = "")
             <?php
             break;
         case "table":
+            //write_log("???????????????? ".json_encode($value));
             get_archive_table ($field["field_name"],$value,array("input_table"=>"true"));
             break;
         default:
@@ -592,6 +552,7 @@ function get_svg($svg_name,$action='',$side_menu = true)
 }
 function get_tr_data($table_name, $data, $key,$attr){
     $page_info = BOUTIQUE_TABLES[$table_name];
+
     $row = is_array ($data)? $data[0]:$data;
     //echo json_encode ($row);
     $backgraund_class = ($table_name == "orders" && $row->done ? "order-confirm" : "");
@@ -606,7 +567,7 @@ function get_tr_data($table_name, $data, $key,$attr){
         }
         $html.= '</td>';
     }
-    if($table_name != "collection" && $table_name!="order_products" && $table_name!="agent_target_supplier") {
+    if(!isset($page_info["update_remove"]) || $page_info["update_remove"] == true) {
         if (is_manager() || is_agent() && $table_name == "orders") {
             if ($table_name != "orders" || $row->done == 0) {
                 $html .= '<td><a   class="has-tooltip" data-tooltip="עדכון ' . $page_info['single'] . '"  href="single?subject=' . $table_name . '&action=edit&id=' . $row->id . '">
@@ -626,8 +587,8 @@ function get_tr_data($table_name, $data, $key,$attr){
                   </td>';
             }
         }
-        if (is_manager() ) {
 
+        if (is_manager() ) {
             $html .= '<td><a  data-bs-toggle="modal" href="#bout-massage" role="button" data-action="remove">
                 <svg  class="has-tooltip" data-tooltip="מחיקת ' . $page_info['single'] . '"  xmlns="http://www.w3.org/2000/svg" width="25" height="24" viewBox="0 0 25 24" fill="none">
                     <path d="M4.16663 7H20.8333M10.4166 11V17M14.5833 11V17M5.20829 7L6.24996 19C6.24996 19.5304 6.46945 20.0391 6.86015 20.4142C7.25085 20.7893 7.78076 21 8.33329 21H16.6666C17.2192 21 17.7491 20.7893 18.1398 20.4142C18.5305 20.0391 18.75 19.5304 18.75 19L19.7916 7M9.37496 7V4C9.37496 3.73478 9.48471 3.48043 9.68006 3.29289C9.87541 3.10536 10.1404 3 10.4166 3H14.5833C14.8596 3 15.1245 3.10536 15.3199 3.29289C15.5152 3.48043 15.625 3.73478 15.625 4V7" class="stroke-background-gold" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -637,35 +598,22 @@ function get_tr_data($table_name, $data, $key,$attr){
         }
     }
 
-
-    //write_log("pageinfo ".json_encode($page_info));
     foreach($page_info["columns"] as $column) {
         if (!isset($column['field_name']) ||
-            $column["field_name"]== "client_id" && isset($attr["add_text"]) || is_agent() && $column["field_name"]== "agent_id") {
+            $column["field_name"] == "client_id" && isset($attr["add_text"]) || is_agent() && $column["field_name"] == "agent_id") {
             //לא לשים עמודה של שם אם זה הזמנות של לקוח מסוים או שם סוכן אם נכנס עכשיו יוזר סוכן
             continue;
         }
 
-        $field = isset($column['join_table']) ? substr($column['join_table'], 0, -1) .(isset($column['join_value'])? "_" . $column['join_value'] :''): $column["field_name"];
+        $field = isset($column['join_table']) && !isset($column['type']) ? substr($column['join_table'], 0, -1) . (isset($column['join_value']) ? "_" . $column['join_value'] : '') : $column["field_name"];
         $list = isset($column['table_name']) ? constant($column['table_name']) : null;
-        if(isset($column["hidden"]) && ($table_name=="order_products" || $table_name=="agent_target_supplier")) {
-            $html .= '<td><input type="hidden" name="rows[' . $key . '][' . $field . ']" value="' . $row->$field . '"/></td>';
-        }
-
         if ($field != "id" && !isset($column["hidden"]) && isset($column["label"])) {
             $data_id = "";
-            if($column["widget"]=="select" && isset($column["options"])){
-                $data_id = 'data-id="'.$row->$field.'"';
+            if ($column["widget"] == "select" && isset($column["options"])) {
+                $data_id = 'data-id="' . $row->$field . '"';
             }
-            $column_value = get_column_value($column,$row,$field,$list);
-            $html .= '<td '.$data_id.' class="'.$field.'">';
-            if(isset($attr["input_table"])){
-                $html .='<input type="text" name="rows['.$key.']['.$field.']" value="'.$column_value.'"/>';
-            }
-            else{
-                $html .=$column_value;
-            }
-            $html .='</td>';
+            $column_value = get_column_value($column, $row, $field, $list);
+            $html .= '<td ' . $data_id . ' class="' . $field . '">' . $column_value . '</td>';
         }
     }
 
@@ -681,21 +629,72 @@ function get_tr_data($table_name, $data, $key,$attr){
             }
         }
     }
-
     $html .='</tr>';
     return $html;
 }
-function get_archive_table($table_name,$data,$attr)
+
+function get_tr_product_order($row, $key)
+{
+    if (isset($page_info["more_columns_in_table"])) {
+        foreach ($page_info["more_columns_in_table"] as $column) {
+            $column_value = get_column_value($column, $row, $column["field_name"], null);
+            $html .= '<td>' . $column_value . '</td>';
+        }
+    }
+
+    foreach ($page_info["columns"] as $column) {
+        $field = isset($column['join_table']) && !isset($column['type']) ? substr($column['join_table'], 0, -1) . (isset($column['join_value']) ? "_" . $column['join_value'] : '') : $column["field_name"];
+        $list = isset($column['table_name']) ? constant($column['table_name']) : null;
+        //write_log("row ".json_encode($row));
+        //write_log("field ".json_encode($field));
+        $html .= '<td><input type="hidden" name="rows[' . $key . '][' . $field . ']" value="' . (isset($row->$field) ? $row->$field : "") . '"/></td>';
+
+
+        if ($field != "id" && !isset($column["hidden"]) && isset($column["label"])) {
+            $data_id = "";
+            if ($column["widget"] == "select" && isset($column["options"])) {
+                $data_id = 'data-id="' . $row->$field . '"';
+            }
+            $column_value = get_column_value($column, $row, $field, $list);
+            $html .= '<td ' . $data_id . ' class="' . $field . '">';
+            $html .= '<input type="text" name="rows[' . $key . '][' . $field . ']" value="' . $column_value . '"/>';
+            $html .= '</td>';
+        }
+    }
+
+    $html .= '<td><input type="hidden" name="rows[' . $key . '][id]" value="' . $row->id . '"/></td>';
+    $html .='</tr>';
+    return $html;
+
+}
+
+    function get_archive_table($table_name,$data,$attr)
 {
     $page_info  = BOUTIQUE_TABLES[$table_name];
     ?>
     <table name="" class="archive-table dataTable">
         <thead><tr class="tr-head gold">
             <?php
+
+            if($table_name == "order_products"){?>
+                <th class="no-sort"></th>
+                <th>שם המוצר</th>
+                <th>כמות</th>
+                <th>מחיר</th>
+                <th>בונוס</th>
+                <th>הנחה</th>
+                <th>סה"כ</th>
+                <th  class="no-sort"></th><?php // ID ?>
+                <?php
+                //מספר מזהה של הפריט בהזמנה(בפריט שכבר הוזמן בהזמנה זו)
+                //, תמונה, שם מוצר , כמות מחיר בונוס אחוזי הנחה סה"כ למוצר הזה בהזמנה
+            }
+            else{
+
             if(is_manager() && $table_name == "collection" && !isset($_GET["payed"])){
                 ?><th class="no-sort"></th><?php
             }
-            if($table_name != "collection" && $table_name!="order_products" && $table_name!="agent_target_supplier"){
+            if(!isset($page_info["update_remove"]) || $page_info["update_remove"] == true){
                 if(is_manager() || is_agent() && $table_name == "orders"){ ?>
                     <th class="no-sort"></th>
                 <?php }
@@ -705,25 +704,34 @@ function get_archive_table($table_name,$data,$attr)
             <?php }
 
             foreach($page_info["columns"] as $column){
-                if(isset($column["hidden"]) || !isset($column["label"]) || isset($attr["add_text"]) && $column["field_name"]== "client_id" || is_agent() && $column["field_name"]== "agent_id"){continue;}
+                if(isset($attr["input_table"]) && !isset($column["label"])){
+                    ?><th class="no-sort"><?php
+                }
+
+                if (isset($column["hidden"]) || !isset($column["label"]) || isset($attr["add_text"]) && $column["field_name"] == "client_id" || is_agent() && $column["field_name"] == "agent_id") {
+                    continue;
+                }
+
                 ?>
                 <th <?= isset($column["width"])? 'style="width:'.$column["width"].'" ':''?>><?= $column["label"]?></th>
             <?php }
-
-            if( $table_name=="order_products" || $table_name=="agent_target_supplier"){
-                ?><th class="no-sort"></th><?php //צריך עמודה נסתרת למס. פריט שישמר בטבלה
-            }
 
             if(isset($page_info["actions"])){
                 foreach ($page_info["actions"] as $action) {?>
                     <th class="no-sort"></th>
                 <?php }
             }
+            }
             ?>
 
         </tr></thead>
         <?php foreach($data as $key=>$row){
-            echo get_tr_data($table_name,$row ,$key,$attr);
+            if($table_name == "order_products"){
+                echo get_tr_product_order($row, $key);
+            }
+            else {
+                echo get_tr_data($table_name, $row, $key, $attr);
+            }
         }?>
     </table>
     <?php
