@@ -100,7 +100,7 @@ const BOUTIQUE_TABLES = array(
         "columns" => [
             ["field_name" => "supplier_id", "widget" => "text", "un_apostrophe" => true, "label" => "","required"=>true],
             ["field_name" => "excel_column_index", "widget" => "text", "un_apostrophe" => true, "label" => "","required"=>true],
-            ["field_name" => "field_name", "widget" => "email","label" => ""],
+            ["field_name" => "field_name", "widget" => "text","label" => ""],
         ]),
     "orders" => array(
         "title" => "הזמנות",

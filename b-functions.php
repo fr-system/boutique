@@ -608,9 +608,8 @@ function get_value($column,$row,$field)
 }
 function supplier_column_mapping_modal(){
     ?>
-    <form class="modal fade site_form" id="supplier_column_mapping_modal" data-success="updateRowSuccess"  tabindex='-1' role="dialog">
-        <input type="hidden" name="form_func" value="save_single_data">
-        <input type="hidden" name="id" value="">
+    <form class="modal fade site_form" id="supplier_column_mapping_modal" data-success="import_from_xlsx"  tabindex='-1' role="dialog">
+        <input type="hidden" name="form_func" value="save_list_data">
         <input type="hidden" name="supplier_id" value="">
         <input type="hidden" name="table_name" value="supplier_column_mapping">
         <div class="modal-dialog" role="document">
@@ -621,34 +620,28 @@ function supplier_column_mapping_modal(){
                     <button type="button" class="btn-close" data-bs-dismiss="modal" data-dismiss="modal" aria-label="סגור">
                     </button>
                 </div>
-                <div class="modal-body border-dark-gray padding-20 flex-display margin-20 font-15">
+                <div class="modal-body border-dark-gray padding-30 flex-display direction-column margin-20 font-15">
                     <table class="part-20">
                         <tr>
                             <th>הנתון המבוקש</th>
-                            <th>מספר סידורי באקסל</th>
-                        </tr>
-                        <tr>
                             <td>ח.פ. של הלקוח</td>
-                            <td><input type="number"></td>
-                        </tr>
-                        <tr>
                             <td>מספר חשבונית</td>
-                            <td><input type="number"></td>
-                        </tr>
-                        <tr>
                             <td>תאריך החשבונית</td>
-                            <td><input type="number"></td>
-                        </tr>
-                        <tr>
-                            <td>סכום לחיוב</td>
-                            <td><input type="number"></td>
-                        </tr>
-                        <tr>
+                            <td>סכום</td>
+                            <td>חיוב/זיכוי</td>
                             <td>לתשלום עד</td>
-                            <td><input type="number"></td>
+                        </tr>
+                        <tr>
+                            <th>מספר סידורי באקסל</th>
+                            <td><input type="number" name="field_name[BnNumber]" /></td>
+                            <td><input type="number" name="field_name[doc_number]" /></td>
+                            <td><input type="number" name="field_name[date]"/></td>
+                            <td><input type="number" name="field_name[obligation]"/></td>
+                            <td><input type="number" name="field_name[doc_type]"/></td>
+                            <td><input type="number" name="field_name[payment_until]"/></td>
                         </tr>
                     </table>
-                    <table class="excel-rows part-50">
+                    <table class="excel-rows part-70">
                     </table>
                 </div>
                 <div class="modal-footer">

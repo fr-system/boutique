@@ -55,3 +55,7 @@ function choose_supplier_column_mapping(form, data){
     jQuery('#supplier_column_mapping_modal').find('table.excel-rows').html(data.excel_rows);
     openModal("#supplier_column_mapping_modal");
 }
+
+function import_from_xlsx(form, data){
+    jQuery('#importCollection').submit();
+}
