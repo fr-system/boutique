@@ -586,7 +586,7 @@ function get_tr_data($table_name, $data, $key,$attr){
     foreach($page_info["columns"] as $column) {
 
         //איזה שדות שמראים בכותרת(גם אם אין כיתוב של כותרת) אותו דבר להראות בשורה בטבלה והפוך שדות שמסתירים בכותרת להסתיר גם בשורה בטבלה
-        if (isset($column["widget"]) && $column["widget"] == "input_hidden") {
+        if (isset($column["create_input"])) {
         } else {
             if (isset($column["hide_in_table"]) || !isset($column["label"]) || isset($attr["add_text"]) && $column["field_name"] == "client_id" || is_agent() && $column["field_name"] == "agent_id") {
                 continue;
@@ -692,7 +692,7 @@ function get_tr_in_single($row, $key,$page_info)
             }
 
             foreach($page_info["columns"] as $column) {
-                if (isset($column["widget"]) && $column["widget"] == "input_hidden") {
+                if (isset($column["create_input"])) {
                     echo '<th class="no-sort"></th>';
                 } else {
                     if (isset($column["hide_in_table"]) || !isset($column["label"]) || isset($attr["add_text"]) && $column["field_name"] == "client_id" || is_agent() && $column["field_name"] == "agent_id") {

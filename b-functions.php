@@ -132,7 +132,7 @@ function lists_table_rows($list_name)
 
 
 
-function get_column_value($column,$row,$field,$list)
+function get_column_value($column,$row,$field,$list,$key)
 {
     $column_value = "";
     switch ($column["widget"]) {
@@ -168,7 +168,7 @@ function get_column_value($column,$row,$field,$list)
         case "datetime-local":
             if ($row->$field) {
                 $timestamp = strtotime($row->$field); // המרת התאריך לאטימות זמן
-                $column_value = date('d/m/Y H:i:s', $timestamp);
+                $column_value = date('d/m/Y H:i', $timestamp);
             }
             break;
         case "file":
@@ -189,6 +189,10 @@ function get_column_value($column,$row,$field,$list)
                 if (!empty($column_value) && isset($column["un_apostrophe"])) {
                     $column_value .= " ₪";
                 }
+            }
+
+            if(isset($column["create_input"])){
+                $column_value = '<input type="'.$column["widget"].'" name="rows[' . $key . '][' . $field . ']" value="' . $column_value . '"/>';
             }
             break;
     }
@@ -479,7 +483,6 @@ function send_late_bills($attr)
 }
 function get_payment_until($payment_term_id,$date)
 {
-    //payment_term_id = $client->payment_term_id;
     $lastDayOfMonth = date('Y-m-t', strtotime($date));
 
     switch ($payment_term_id) {
@@ -491,7 +494,7 @@ function get_payment_until($payment_term_id,$date)
             break;
         case  1: //מזומן
         default:
-            $newDate =$date; // date('Y-m-d', $date);
+            $newDate =$date;
     }
     return $newDate;
 }
@@ -529,7 +532,7 @@ function get_data_to_export($table_name,$file_type)
     $headers = [];
 
     foreach ($page_info["columns"] as $column) {
-        if (!isset($column['field_name']) || !isset($column["label"]) || $file_type == "pdf" && isset($column["hidden"])) { continue; }
+        if (!isset($column['field_name']) || !isset($column["label"]) || $file_type == "pdf" && isset($column["hide_in_table"])) { continue; }
 
         $headers[$column["label"]] = get_column_type ($column["widget"]);
     }
@@ -538,7 +541,7 @@ function get_data_to_export($table_name,$file_type)
     foreach ($list as $item) {
         $row = [];
         foreach ($page_info["columns"] as $column) {
-            if (!isset($column['field_name']) || !isset($column["label"]) || $file_type == "pdf" && isset($column["hidden"]) ) continue;
+            if (!isset($column['field_name']) || !isset($column["label"]) || $file_type == "pdf" && isset($column["hide_in_table"]) ) continue;
             $field = isset($column['join_table']) ? substr($column['join_table'], 0, -1) . "_" . $column['join_value'] : $column["field_name"];
             $column_value = get_value($column, $item, $field);
             $row[] = $column_value;
@@ -561,22 +564,13 @@ function  get_column_type($widget)
         default:
             return "string";
     }
-
-
 }
 
 function get_value($column,$row,$field)
 {		$column_value = "";
     switch ($column["widget"]) {
         case "select":
-            /*if ($column["join_table"] == "agents") {
-                //write_log ('fiel ' . $field);
-                //write_log ('row ' . json_encode ($row));
-                $user_field = $column["field_name"];
-                $column_value = empty($row->$user_field) ? '' : get_userdata($row->$user_field)->display_name;
-            } else {*/
             $column_value = $row->$field;
-            /*}*/
             break;
         case "radio":
         case "status":
@@ -588,23 +582,16 @@ function get_value($column,$row,$field)
                 $timestamp = strtotime($row->$field); // המרת התאריך לאטימות זמן
                 $format = 'd/m/Y';
                 if ($column["widget"] == "datetime-local") {
-                    $format .= " H:i:s";
+                    $format .= " H:i";
                 }
                 $column_value = date($format, $timestamp);
             }
             break;
         default:
-            /*if ($column["field_name"] == "display_name" || $column["field_name"] == "user_email") {
-                $user_field = $column["field_name"];
-                $column_value =  get_userdata($row->user_id)->$user_field;
-            }
-            else {*/
             $column_value = isset($column['list_name']) && isset($list[$row->$field]) ? $list[$row->$field] : $row->$field;
-            /*}*/
             break;
     }
 
     return $column_value;
 }
-
 ?>

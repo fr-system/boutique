@@ -72,6 +72,11 @@ else{
                 $text_left_side = '<span class="bold">מקים ההזמנה: </span>'.get_userdata($row->user_opens)->display_name;
             }
 
+            if($table_name == "tasks") {
+                $timestamp = strtotime($row->open_date); // המרת התאריך לאטימות זמן
+                $text_left_side = '<span class="bold">תאריך פתיחה: </span>'.date('d/m/Y בשעה H:i', $timestamp);
+            }
+
             if(!empty($text_left_side)){ ?>
                     <div class="font-18"><?php echo $text_left_side ?></div>
             <?php }?>
