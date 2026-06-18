@@ -46,13 +46,16 @@ function fillClientPriceModal(result) {
 }
 
 
-function alert_msg(form,data){
+function import_excel_done(form,data){
+    jQuery(".archive-table").parent().html(data.collection_table)
     alert(data.msg);
 }
 
 function choose_supplier_column_mapping(form, data){
     jQuery('#supplier_column_mapping_modal').find('input[name=supplier_id]').val(data.supplier_id);
     jQuery('#supplier_column_mapping_modal').find('table.excel-rows').html(data.excel_rows);
+    jQuery('#supplier_column_mapping_modal').find('select').html(data.columns_options);
+
     openModal("#supplier_column_mapping_modal");
 }
 

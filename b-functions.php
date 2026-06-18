@@ -606,52 +606,5 @@ function get_value($column,$row,$field)
 
     return $column_value;
 }
-function supplier_column_mapping_modal(){
-    ?>
-    <form class="modal fade site_form" id="supplier_column_mapping_modal" data-success="import_from_xlsx"  tabindex='-1' role="dialog">
-        <input type="hidden" name="form_func" value="save_list_data">
-        <input type="hidden" name="supplier_id" value="">
-        <input type="hidden" name="table_name" value="supplier_column_mapping">
-        <div class="modal-dialog" role="document">
 
-            <div class="modal-content">
-                <div class="modal-header flex-display">
-                    <h3 class="modal-title grow" >נא לבחור את המיקום המתאים לכל עמודה בקובץ<span class="bill-num"></span></h3>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" data-dismiss="modal" aria-label="סגור">
-                    </button>
-                </div>
-                <div class="modal-body border-dark-gray padding-30 flex-display direction-column margin-20 font-15">
-                    <table class="part-20">
-                        <tr>
-                            <th>הנתון המבוקש</th>
-                            <td>ח.פ. של הלקוח</td>
-                            <td>מספר חשבונית</td>
-                            <td>תאריך החשבונית</td>
-                            <td>סכום</td>
-                            <td>חיוב/זיכוי</td>
-                            <td>לתשלום עד</td>
-                        </tr>
-                        <tr>
-                            <th>מספר סידורי באקסל</th>
-                            <td><input type="number" name="field_name[BnNumber]" /></td>
-                            <td><input type="number" name="field_name[doc_number]" /></td>
-                            <td><input type="number" name="field_name[date]"/></td>
-                            <td><input type="number" name="field_name[obligation]"/></td>
-                            <td><input type="number" name="field_name[doc_type]"/></td>
-                            <td><input type="number" name="field_name[payment_until]"/></td>
-                        </tr>
-                    </table>
-                    <table class="excel-rows part-70">
-                    </table>
-                </div>
-                <div class="modal-footer">
-                    <button type="submit" class="ok background-gold bold font-18">אישור</button>
-                    <button type="button" class="background-white gold" data-bs-dismiss="modal">ביטול</button>
-
-                </div>
-            </div>
-        </div>
-    </form>
-    <?php
-}
 ?>

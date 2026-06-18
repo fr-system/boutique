@@ -393,6 +393,14 @@ td a.button{
 .modal-body .input-label{
     margin-bottom: 10px;
 }
+.excel-table-container{
+    max-width: 1300px;
+    overflow-y: scroll;
+}
+.excel-table-container .excel-rows td,.excel-table-container .excel-rows th{
+    padding: 5px 10px;
+    white-space: nowrap;
+}
 .dt-type-numeric{
 
 }
