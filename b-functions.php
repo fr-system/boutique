@@ -134,6 +134,7 @@ function lists_table_rows($list_name)
 
 function get_column_value($column,$row,$field,$list,$key)
 {
+    write_log("column ".json_encode($column)." key ".$key);
     $column_value = "";
     switch ($column["widget"]) {
 

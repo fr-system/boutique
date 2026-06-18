@@ -367,6 +367,7 @@ input[type="radio"] + label:before {
     height: 25px;
 }
 .input-label table tr input{
+    width: 50px;
     height: 25px;
 }
 tr.order-confirm{
