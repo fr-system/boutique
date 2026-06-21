@@ -234,13 +234,13 @@ ul.menu li .sub-menu{
     display: none;
     background-color: white;
     position: absolute;
-    margin-right: 30%;
     /*right: 100px;*/
     top: 30px;
-    width: 120px;
-    margin: 0;
-    padding: 0;
+    /*width: 120px;*/
+    margin:  2px 0 0 0;
+    /*padding: 0 10px 0 0;*/
     /*z-index: 9;*/
+    white-space: nowrap;
 }
 ul.menu li:hover .sub-menu{
     display: block;

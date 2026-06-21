@@ -134,7 +134,7 @@ function lists_table_rows($list_name)
 
 function get_column_value($column,$row,$field,$list,$key)
 {
-    write_log("column ".json_encode($column)." key ".$key);
+    //write_log("column ".json_encode($column)." key ".$key);
     $column_value = "";
     switch ($column["widget"]) {
 
@@ -524,6 +524,7 @@ function get_data_to_export($table_name,$file_type)
 {
     $page_info = BOUTIQUE_TABLES[$table_name];
     $filters = array();
+    write_log ('id '.json_encode ($_GET["ids"]));
     if(isset($_GET["ids"])){
         $filters[]=array("filter_field"=>"id","filter_value"=>$_GET["ids"],"filter_type" => "array");
     }
@@ -544,6 +545,7 @@ function get_data_to_export($table_name,$file_type)
         foreach ($page_info["columns"] as $column) {
             if (!isset($column['field_name']) || !isset($column["label"]) || $file_type == "pdf" && isset($column["hide_in_table"]) ) continue;
             $field = isset($column['join_table']) ? substr($column['join_table'], 0, -1) . "_" . $column['join_value'] : $column["field_name"];
+
             $column_value = get_value($column, $item, $field);
             $row[] = $column_value;
 

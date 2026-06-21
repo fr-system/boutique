@@ -47,7 +47,9 @@ function fillClientPriceModal(result) {
 
 
 function import_excel_done(form,data){
-    jQuery(".archive-table").parent().html(data.collection_table)
+    jQuery(".archive-table").closest(".dt-container ").remove();
+    jQuery(".page").append(data.collection_table);
+    setDataTable();
     alert(data.msg);
 }
 
@@ -61,4 +63,53 @@ function choose_supplier_column_mapping(form, data){
 
 function import_from_xlsx(form, data){
     jQuery('#importCollection').submit();
+}
+function setDataTable (){
+    var table = jQuery('.dataTable').DataTable({
+        //bFilter: true,
+        paging: false,
+        info: false,
+        "language": {
+            "lengthMenu": "מציג  _MENU_  שורות",
+            "zeroRecords": "לא נמצאו שורות מתאימות",
+            "info": "מציג עמוד _PAGE_ מתוך _PAGES_",
+            "infoEmpty": "לא נמצאו שורות מתאימות",
+            "emptyTable": "לא נמצאו שורות בטבלה",
+            "infoFiltered": "(מתוך _MAX_ שורות סך הכל)",
+            "infoPostFix": "",
+            "thousands": ",",
+            "loadingRecords": "טוען...",
+            "processing": "בעבודה...",
+            "search": "חיפוש: ",
+            "paginate": {
+                "first": "התחלה",
+                "last": "סוף",
+                "next": "הבא",
+                "previous": "הקודם"
+            },
+            "aria": {
+                "sortAscending": ": activate to sort column ascending",
+                "sortDescending": ": activate to sort column descending"
+            },
+
+        },
+        "ordering": true,
+        order: [],
+
+        /*  "columnDefs": [{
+              orderable: false,
+              targets: "no-sort"
+          }],*/
+        "aoColumnDefs": [
+            { "bSortable": false, "aTargets": aTargets }//[ 4, 5, 6 ]
+        ],
+        /*   "columnDefs": [
+               {"type": "date", "targets": [3, 4]}, // החל על העמודה הראשונה
+               {"type": "num", "targets": [6]} // החל על העמודה השנייה
+           ],*/
+        // "order": []
+        // "order": [[ 3, "desc" ]]
+    });
+    jQuery('.dt-layout-cell.dt-layout-start').removeClass('dt-layout-start');
+    jQuery('.dt-layout-cell.dt-layout-end').removeClass('dt-layout-end');
 }

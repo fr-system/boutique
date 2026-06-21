@@ -154,9 +154,9 @@ function archive_header($table_name, $view_only = false,$attr = null)
         <div class="flex-display align-center  space-between">
             <?php if(!$view_only){
                 if(is_manager() && $table_name == "collection"){?>
-                    <form novalidate id="importCollection"  class="site_form flex-display space-between" data-success="reload_page" data-failed="choose_supplier_column_mapping">
+                    <form novalidate id="importCollection"  class="site_form flex-display space-between" data-success="import_excel_done" data-failed="choose_supplier_column_mapping">
                         <input type="hidden" name="form_func" value="import_from_xlsx"/>
-                        <input type='file' class="hidden" name='bills' id='bills' accept=".xls,.xlsx,.csv">
+                        <input type='file' class="hidden" name='bills' id='bills' accאpt=".xls,.xlsx,.csv">
                         <svg data-tooltip="העלאת קובץ מספק" class="file-upload has-tooltip margin-after-10" xmlns="http://www.w3.org/2000/svg" width="44" height="44" viewBox="0 0 44 44" fill="none">
                             <circle cx="22" cy="22" r="22" fill="#D9F5F3"/>
                             <path d="M21.9375 22.7094V27.4276C21.9375 27.5881 21.9911 27.722 22.0984 27.8293C22.2056 27.9365 22.3395 27.9901 22.5 27.9901C22.6605 27.9901 22.7944 27.9365 22.9016 27.8293C23.0089 27.722 23.0625 27.5881 23.0625 27.4276V22.7094L25.0268 24.6736C25.0815 24.7284 25.143 24.7696 25.2113 24.7974C25.2802 24.8244 25.3489 24.8371 25.4171 24.8356C25.4854 24.8334 25.5566 24.8184 25.6309 24.7906C25.7044 24.7636 25.7681 24.7224 25.8221 24.6669C25.9421 24.5431 26.0033 24.4107 26.0055 24.2697C26.0078 24.128 25.947 23.9952 25.8233 23.8715L23.1356 21.1839C23.0381 21.0864 22.938 21.0178 22.8353 20.978C22.7333 20.9383 22.6215 20.9184 22.5 20.9184C22.3785 20.9184 22.2667 20.9383 22.1647 20.978C22.0627 21.0178 21.9626 21.0864 21.8644 21.1839L19.1767 23.8715C19.0672 23.981 19.0099 24.11 19.0046 24.2585C18.9994 24.407 19.059 24.5435 19.1835 24.668C19.3073 24.7872 19.44 24.848 19.5817 24.8502C19.7235 24.8525 19.8559 24.7917 19.9789 24.668L21.9375 22.7094ZM16.443 31.625C15.9248 31.625 15.4924 31.4517 15.1459 31.1052C14.7994 30.7588 14.6258 30.3264 14.625 29.8081V13.1919C14.625 12.6744 14.7986 12.2424 15.1459 11.8959C15.4931 11.5494 15.9255 11.3758 16.443 11.375H24.5576C24.7999 11.375 25.0354 11.4238 25.2641 11.5213C25.4929 11.6188 25.6886 11.7496 25.8514 11.9139L29.835 15.8975C29.9978 16.061 30.1283 16.2567 30.2265 16.4847C30.3247 16.7127 30.3739 16.9483 30.3739 17.1912V29.807C30.3739 30.3245 30.2002 30.7569 29.853 31.1041C29.5057 31.4514 29.0741 31.625 28.5581 31.625H16.443ZM24.75 16.091V12.5H16.443C16.2698 12.5 16.1107 12.572 15.966 12.716C15.8212 12.86 15.7493 13.0186 15.75 13.1919V29.8081C15.75 29.9806 15.822 30.1392 15.966 30.284C16.11 30.4288 16.2686 30.5007 16.4419 30.5H28.5581C28.7306 30.5 28.8893 30.428 29.034 30.284C29.1788 30.14 29.2507 29.981 29.25 29.807V17H25.659C25.3972 17 25.1805 16.9138 25.0087 16.7413C24.837 16.5687 24.7507 16.352 24.75 16.091Z" fill="#1A7870"/>
@@ -176,7 +176,7 @@ function archive_header($table_name, $view_only = false,$attr = null)
                     <path fill-rule="evenodd" clip-rule="evenodd" d="M30.6875 16.605L22.7963 23.14C22.572 23.3258 22.29 23.4275 21.9987 23.4275C21.7075 23.4275 21.4255 23.3258 21.2013 23.14L13.3138 16.605C13.2714 16.7324 13.2499 16.8658 13.25 17V27C13.25 27.3315 13.3817 27.6495 13.6161 27.8839C13.8505 28.1183 14.1685 28.25 14.5 28.25H29.5C29.8315 28.25 30.1495 28.1183 30.3839 27.8839C30.6183 27.6495 30.75 27.3315 30.75 27V17C30.7505 16.8658 30.7294 16.7325 30.6875 16.605ZM14.5 14.5H29.5C30.163 14.5 30.7989 14.7634 31.2678 15.2322C31.7366 15.7011 32 16.337 32 17V27C32 27.663 31.7366 28.2989 31.2678 28.7678C30.7989 29.2366 30.163 29.5 29.5 29.5H14.5C13.837 29.5 13.2011 29.2366 12.7322 28.7678C12.2634 28.2989 12 27.663 12 27V17C12 16.337 12.2634 15.7011 12.7322 15.2322C13.2011 14.7634 13.837 14.5 14.5 14.5ZM14.2375 15.75L21.2075 21.5038C21.4307 21.6881 21.711 21.7893 22.0006 21.79C22.2901 21.7907 22.5709 21.6908 22.795 21.5075L29.835 15.75H14.2375Z" fill="#1A7870"/>
                 </svg>-->
 
-                <a class="margin-after-10 export-excel has-tooltip" data-tooltip="הורדה לאקסל" href="<?= get_bloginfo('stylesheet_directory'); ?>/lib/export_excel.php/lib/export_excel.php?export=archive&subject=<?= $table_name; ?>" target="_blank">
+                <a class="margin-after-10 export-link has-tooltip" data-tooltip="הורדה לאקסל" href="<?= get_bloginfo('stylesheet_directory'); ?>/lib/export_excel.php/?export=archive&subject=<?= $table_name; ?>" target="_blank">
                     <svg class="download-file" xmlns="http://www.w3.org/2000/svg" width="44" height="44" viewBox="0 0 44 44" fill="none">
                         <circle cx="22" cy="22" r="22" class="background-light-light-blue"/>
                         <path d="M30.4661 24.6748C30.6759 24.6748 30.8776 24.7616 31.0266 24.916C31.1757 25.0706 31.26 25.2806 31.26 25.5V29.002C31.2932 29.8006 31.0213 30.5809 30.5032 31.1719C29.9851 31.7628 29.2626 32.1166 28.4944 32.1582H14.5042C14.1211 32.1419 13.7447 32.048 13.3967 31.8809C13.0485 31.7135 12.7349 31.4757 12.4749 31.1826C12.215 30.8896 12.013 30.546 11.8811 30.1719C11.7492 29.7977 11.69 29.4001 11.7063 29.002V25.5C11.7063 25.2806 11.7906 25.0706 11.9397 24.916C12.0887 24.7616 12.2904 24.6748 12.5002 24.6748C12.7101 24.6749 12.9118 24.7615 13.0608 24.916C13.2098 25.0706 13.2942 25.2807 13.2942 25.5V29C13.2653 29.3573 13.3688 29.7127 13.5852 29.9932C13.8025 30.2748 14.1166 30.4593 14.4622 30.5078V30.5088H28.4973L28.5042 30.5078C28.8497 30.4593 29.1639 30.2748 29.3811 29.9932C29.5712 29.7467 29.6743 29.4424 29.677 29.1299L29.6721 28.9961V25.5C29.6721 25.2807 29.7565 25.0706 29.9055 24.916C30.0545 24.7615 30.2562 24.6749 30.4661 24.6748Z" fill="#1A7870" stroke="#D9F5F3" stroke-width="0.1"/>
@@ -185,7 +185,7 @@ function archive_header($table_name, $view_only = false,$attr = null)
                     </svg>
                 </a>
 
-                <a class="margin-after-10 has-tooltip" data-tooltip="הדפסה" href="<?= get_bloginfo('stylesheet_directory'); ?>/lib/export_pdf.php?file=pdf&export=archive&subject=<?= $table_name; ?>" target="_blank">
+                <a class="margin-after-10 export-link has-tooltip" data-tooltip="הדפסה" href="<?= get_bloginfo('stylesheet_directory'); ?>/lib/export_pdf.php?file=pdf&export=archive&subject=<?= $table_name; ?>" target="_blank">
                     <svg  xmlns="http://www.w3.org/2000/svg" width="44" height="44" viewBox="0 0 44 44" fill="none">
                         <circle cx="22" cy="22" r="22"  class="background-light-light-blue"/>
                         <path d="M14.4375 22.9375C14.6198 22.9375 14.7947 22.8684 14.9236 22.7453C15.0526 22.6222 15.125 22.4553 15.125 22.2812C15.125 22.1072 15.0526 21.9403 14.9236 21.8172C14.7947 21.6941 14.6198 21.625 14.4375 21.625C14.2552 21.625 14.0803 21.6941 13.9514 21.8172C13.8224 21.9403 13.75 22.1072 13.75 22.2812C13.75 22.4553 13.8224 22.6222 13.9514 22.7453C14.0803 22.8684 14.2552 22.9375 14.4375 22.9375Z" fill="#1A7870"/>
@@ -440,7 +440,7 @@ function create_input($field,$value = null,$readonly = "")
             <?php
             break;
         case "table":
-            get_archive_table ($field["field_name"],$value,array("input_table"=>"true"));
+            echo get_archive_table ($field["field_name"],$value,array("input_table"=>"true"));
             break;
         default:
             break;
@@ -588,7 +588,9 @@ function get_tr_data($table_name, $data, $key,$attr){
         //איזה שדות שמראים בכותרת(גם אם אין כיתוב של כותרת) אותו דבר להראות בשורה בטבלה והפוך שדות שמסתירים בכותרת להסתיר גם בשורה בטבלה
         if (isset($column["create_input"])) {
         } else {
-            if (isset($column["hide_in_table"]) || !isset($column["label"]) || isset($attr["add_text"]) && $column["field_name"] == "client_id" || is_agent() && $column["field_name"] == "agent_id") {
+            if (isset($column["hide_in_table"]) || !isset($column["label"]) ||
+                //isset($attr["add_text"]) && $column["field_name"] == "client_id" ||
+                is_agent() && $column["field_name"] == "agent_id") {
                 continue;
             }
         }
@@ -665,67 +667,63 @@ function get_tr_in_single($row, $key,$page_info)
 
 }
 
-    function get_archive_table($table_name,$data,$attr)
+function get_archive_table($table_name,$data,$attr)
 {
-    $page_info  = BOUTIQUE_TABLES[$table_name];
-    ?>
-    <table name="" class="archive-table dataTable">
-        <thead><tr class="tr-head gold">
-            <?php
+    $page_info = BOUTIQUE_TABLES[$table_name];
+    $html = '<table name="" class="archive-table dataTable">
+        <thead><tr class="tr-head gold">';
+    if (isset($page_info["more_columns_in_table"])) {
+        foreach ($page_info["more_columns_in_table"] as $column) {
+            $html .= '<th class="' . (isset($column["label"]) ? '' : 'no-sort') . '">' . (isset($column["label"]) ? $column["label"] : '') . '</th>';
+        }
+    }
 
-            if (isset($page_info["more_columns_in_table"])) {
-                foreach ($page_info["more_columns_in_table"] as $column) {
-                    echo '<th class="' . (isset($column["label"]) ? '' : 'no-sort') .'">' . (isset($column["label"]) ? $column["label"] : '') . '</th>';
-                }
+    if (is_manager () && $table_name == "collection" && !isset($_GET["payed"])) {
+        $html .= '<th class="no-sort"></th>';
+    }
+    if (!isset($page_info["update_remove"]) || $page_info["update_remove"] == true) {
+        if (is_manager () || is_agent () && $table_name == "orders") {//update-readonly
+            $html .= '<th class="no-sort" style="width:10px"></th>';
+        }
+        if (is_manager ()) {//remove
+            $html .= '<th class="no-sort" style="width:20px"></th>';
+        }
+    }
+
+    foreach ($page_info["columns"] as $column) {
+        if (isset($column["create_input"])) {
+            //echo '<th class="no-sort"></th>';
+        } else {
+            if (isset($column["hide_in_table"]) || !isset($column["label"]) ||
+                //isset($attr["add_text"]) && $column["field_name"] == "client_id" ||
+                is_agent () && $column["field_name"] == "agent_id") {
+                continue;
             }
+        }
+        $width = null;//לא עובד רציתי להקטין עמודות של תמונה או של אייקון עדכון
+        if (isset($column["width"])) {
+            $width = $column["width"];
+        } else if ($column["widget"] == "image") {
+            $width = '20px';
+        }
+        $class_ = "";
+        if ($column["widget"] == "hidden") {
+            $class_ = "no-sort";
+        }
 
-            if(is_manager() && $table_name == "collection" && !isset($_GET["payed"])){
-                echo '<th class="no-sort"></th>';
-            }
-            if(!isset($page_info["update_remove"]) || $page_info["update_remove"] == true) {
-                if (is_manager() || is_agent() && $table_name == "orders") {//update-readonly
-                    echo '<th class="no-sort" style="width:10px"></th>';
-                }
-                if (is_manager()) {//remove
-                    echo '<th class="no-sort" style="width:20px"></th>';
-                }
-            }
+        $html .= '<th  class="' . $class_ . '" ' . (empty($width) ? '' : 'style="width:' . $width . '"') . '>' . (isset($column["label"]) ? $column["label"] : '') . '</th>';
+    }
 
-            foreach($page_info["columns"] as $column) {
-                if (isset($column["create_input"])) {
-                    //echo '<th class="no-sort"></th>';
-                } else {
-                    if (isset($column["hide_in_table"]) || !isset($column["label"]) || isset($attr["add_text"]) && $column["field_name"] == "client_id" || is_agent() && $column["field_name"] == "agent_id") {
-                        continue;
-                    }
-                }
-                $width = null;//לא עובד רציתי להקטין עמודות של תמונה או של אייקון עדכון
-                if (isset($column["width"])) {
-                    $width = $column["width"];
-                } else if ($column["widget"] == "image") {
-                    $width = '20px';
-                }
-                $class_ = "";
-                if($column["widget"] == "hidden"){
-                    $class_ = "no-sort";
-                }
-
-                echo '<th  class="'.$class_.'" ' . (empty($width) ? '' : 'style="width:' . $width . '"') . '>' . (isset($column["label"])? $column["label"]:'') . '</th>';
-
-            }
-
-            if(isset($page_info["actions"])) {
-                foreach ($page_info["actions"] as $action) {
-                    echo '<th class="no-sort"></th>';
-                }
-            }
-            ?>
-
-        </tr></thead>
-        <?php foreach($data as $key=>$row){
-                echo get_tr_data($table_name, $row, $key, $attr);
-        }?>
-    </table>
-    <?php
+    if (isset($page_info["actions"])) {
+        foreach ($page_info["actions"] as $action) {
+            $html .= '<th class="no-sort"></th>';
+        }
+    }
+    $html .= '</tr></thead>';
+    foreach ($data as $key => $row) {
+        $html .= get_tr_data ($table_name, $row, $key, $attr);
+    }
+    $html .= '</table>';
+    return $html;
 }
 ?>

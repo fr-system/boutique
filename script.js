@@ -529,7 +529,7 @@ function onAddChat(result){
 function searchElements(text,selector,searchSelector){
 
     jQuery(selector).show();
-    const url = new URL(jQuery(".export-excel").attr("href"));
+    //const url = new URL(jQuery(".export-link").attr("href"));
     var ids = [];
     if(text.length > 0) {
         jQuery.each(jQuery(selector), function (k) {
@@ -541,15 +541,18 @@ function searchElements(text,selector,searchSelector){
                 product.hide();
             }
         })
-
-
-        url.searchParams.set('ids', ids);
     }
-    else{
-        url.searchParams.delete('id');
-    }
-
-    jQuery(".export-excel").attr("href",url.toString());
+    jQuery('.export-link').each(function() {
+        let url = new URL(this.href);
+        if(text.length > 0) {
+            url.searchParams.set('ids', ids);
+        }
+        else{
+            url.searchParams.delete('ids');
+        }
+        this.href = url.toString();
+    });
+    //jQuery(".export-link").attr("href",url.toString());
 }
 
 function reload_page(data){

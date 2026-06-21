@@ -54,6 +54,7 @@ $page_info  = BOUTIQUE_TABLES[$table_name];
     }
 
     $result = get_data_table($table_name,$filters);
+    //write_log ('table data '.json_encode ($result));
     $user_meta = get_user_meta( get_current_user_id(), "products_view", true);
     if($table_name == "products" && $user_meta == "gallery"){
         $catalog_gallery = catalog_gallery($result,array("table_name"=>"products"));
@@ -65,7 +66,7 @@ $page_info  = BOUTIQUE_TABLES[$table_name];
             <?php
         }
         $attr = array("add_text"=>$add_text);
-        get_archive_table($table_name,$result,$attr);
+        echo get_archive_table($table_name,$result,$attr);
     } ?>
 </section>
 <?php
