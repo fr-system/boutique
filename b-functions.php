@@ -134,7 +134,7 @@ function lists_table_rows($list_name)
 
 function get_column_value($column,$row,$field,$list,$key)
 {
-    write_log("column ".json_encode($column)." key ".$key);
+    //write_log("column ".json_encode($column)." key ".$key);
     $column_value = "";
     switch ($column["widget"]) {
 
@@ -193,7 +193,10 @@ function get_column_value($column,$row,$field,$list,$key)
             }
 
             if(isset($column["create_input"])){
-                $column_value = '<input type="'.$column["widget"].'" name="rows[' . $key . '][' . $field . ']" value="' . $column_value . '"/>';
+                $column_value = '<span class="hidden">'. $column_value .'</span>'.
+                    ($column["widget"] == "number" ? '<span class="minus bold font-25  pointer">-</span>' :'' ).
+                    '<input type="text" name="rows[' . $key . '][' . $field . ']" value="' . $column_value . '"/>'.
+                    ($column["widget"] == "number" ? '<span class="plus bold font-25  pointer">+</span>':'');
             }
             break;
     }
