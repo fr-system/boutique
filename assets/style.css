@@ -368,7 +368,8 @@ input[type="radio"] + label:before {
 }
 .input-label table tr input{
     width: 50px;
-    height: 25px;
+    height: 20px;
+    padding: 0;
 }
 tr.order-confirm{
     background-color: var(--b-global-color-light-gray);
@@ -412,10 +413,10 @@ table.dataTable thead > tr > th.dt-orderable-desc span.dt-column-order{
     right: unset;
 }
 table.dataTable th.dt-type-numeric,*[dir=rtl]  table.dataTable th.dt-type-date{
-    text-align: right;
+    text-align: right !important;
 }
 table.dataTable td.dt-type-numeric,*[dir=rtl] table.dataTable td.dt-type-date{
-    text-align: center;
+    text-align: right !important;
 }
 table.dataTable>tbody>tr>td,table.dataTable>tbody>tr>th{
     padding: 0;
@@ -424,7 +425,7 @@ tr.blocked{
     background-image: repeating-linear-gradient(302deg, #ffffff, #f4f4f4 10px);
 }
 td.dt-type-numeric{
-    text-align: center !important;
+    text-align: right !important;
 }
 
 .tooltip-box {

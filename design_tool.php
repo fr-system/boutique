@@ -1,7 +1,7 @@
 <?php
 function get_single_view($table_name,$row,$readonly)
 {?>
-    <div class="grid-display cols-2 margin-bottom-40">
+    <div class="grid-display cols-2 margin-bottom-20">
     <?php
     $columns = BOUTIQUE_TABLES[$table_name]["columns"];
     foreach($columns as $column){
@@ -18,17 +18,6 @@ function get_single_view($table_name,$row,$readonly)
             $value = "";
             if(isset($column["field_name"])) {
                 if ($column["widget"] == "table") {
-                    if (isset($row->id)) {
-                        $filters = array();
-                        $sub_table = $column["field_name"];
-                        $filters[] = array("filter_field" => $column["field_id"], "filter_value" => $row->id);
-                        //מביא את המוצרים שרשומים בהזמנה הזו
-                        //מביא את היעדים של הספקים לסוכן זה
-                        $value = get_data_table($sub_table, $filters);
-                        //מביא את השדות של מוצרים בהזמנה
-                        //מביא שדות של סוכן+ספק+יעד
-                        $sub_columns = BOUTIQUE_TABLES[$sub_table]["columns"];
-
                         //$filters = array();לא להביא בהזמנה מוצרים חסומים
                         //$filters[] = array("filter_field" => "blocked", "filter_value" => " == null ");
                         //מביא את כל טבלת מוצרים
@@ -37,11 +26,28 @@ function get_single_view($table_name,$row,$readonly)
                         $id_field = substr($column["target_table"], 0, -1) . "_id";
                         //עוברים על טבלת מוצרים אם יש את המוצר בהזמנה מכניסים את את הכמות לשורה של המוצר
                         //עוברים על טבלת ספקים ואם יש ספק כזה עם יעד מעודכן לסוכן מעדכנים בליסט
+
+                        $filters = array();
+                        $sub_table = $column["field_name"];
+                    if (isset($row->id)) {
+                        $filters[] = array("filter_field" => $column["field_id"], "filter_value" => $row->id);
+                        //מביא את המוצרים שרשומים בהזמנה הזו
+                        //מביא את היעדים של הספקים לסוכן זה
+                        $value = get_data_table($sub_table, $filters);
+                    }
+                        //מביא את השדות של מוצרים בהזמנה
+                        //מביא שדות של סוכן+ספק+יעד
+                        $sub_columns = BOUTIQUE_TABLES[$sub_table]["columns"];
+
                         foreach ($target_table_rows as $table_row) {
+                            write_log("row".json_encode($table_row));
                             $id = $table_row->id;
-                            $results = array_filter($value, function ($r) use ($id, $id_field) {
-                                return $r->$id_field == $id;
-                            });
+                            $results = array();
+                            if (isset($row->id)) {
+                                $results = array_filter($value, function ($r) use ($id, $id_field) {
+                                    return $r->$id_field == $id;
+                                });
+                            }
 
                             if (count($results) == 0) {
                                 $item = (object)array();
@@ -57,24 +63,26 @@ function get_single_view($table_name,$row,$readonly)
 
                             foreach ($sub_columns as $column1) {//מכניסים את שאר השדות בתוך שורה של מוצר
                                 if ($table_name == "agents") {
-                                    $table_row->target = $exist_in_sub_table ? $item->target : "";
-                                    $table_row->period_days = $exist_in_sub_table ? $item->period_days : "";
+                                    $table_row->target = $exist_in_sub_table ? ($item->target || "") : "";
+                                    $table_row->period_days = $exist_in_sub_table ? ($item->period_days||"") : "";
                                 }
                                 else if ($table_name == "orders") {
-                                    $table_row->order_price = isset($item->order_price) ? $item->order_price : "";
                                     $field_name = $column1["field_name"];
                                     if ($field_name == "order_price") {
-                                        $price = $table_row->price;
-                                        if ($exist_in_sub_table && !empty($item->order_price)) {
-                                            $price = $item->order_price;
-                                        } elseif (!empty($table_row->client_price)) {//מחיר מיוחד ללקוח
-                                            $price = $table_row->client_price;
+                                        //$price = $table_row->price;
+                                        $table_row->order_price = 0;
+                                        if ($exist_in_sub_table) {
                                         }
-                                        /* else{
-                                             $price=$table_row->price;
-                                         }*/
-                                        $table_row->price = $price;
+                                        else {
+                                            if (!empty($table_row->client_price)) {//מחיר מיוחד ללקוח
+                                                $price = $table_row->client_price;
+                                            }
+                                            else {
+                                                $price = empty($table_row->price)? 0 :$table_row->price ;
 
+                                            }
+                                            $table_row->order_price = $price;
+                                        }
                                     } else {
                                         //write_log("field_name ".$field_name);
 
@@ -82,9 +90,8 @@ function get_single_view($table_name,$row,$readonly)
                                     }
                                 }
                             }
-                        }
-                        $list = $target_table_rows;
                     }
+                    $list = $target_table_rows;
                 }
                 else {
                     $field_name = isset($column["field_name"]) ? $column["field_name"] : null;
@@ -577,7 +584,7 @@ function get_tr_data($table_name, $data, $key,$attr){
     $columns_counter = 0;
     if (isset($page_info["more_columns_in_table"])) {
         foreach ($page_info["more_columns_in_table"] as $column) {
-            $column_value = get_column_value($column, $row, $column["field_name"], null,$columns_counter);
+            $column_value = get_column_value($column, $row, $column["field_name"], null,$key);
             $html .= '<td>' . $column_value . '</td>';
             $columns_counter++;
         }
@@ -607,7 +614,7 @@ function get_tr_data($table_name, $data, $key,$attr){
         if ($column["widget"] == "select" && isset($column["options"])) {
             $data_id = 'data-id="' . $row->$field . '"';
         }
-        $column_value = get_column_value($column, $row, $field, $list, $columns_counter);
+        $column_value = get_column_value($column, $row, $field, $list, $key);
         //write_log("value ".$column_value);
 
         $html .= '<td ' . $data_id . ' class="' . $field . '">' . $column_value . '</td>';

@@ -59,7 +59,7 @@ else{
 }
 ?>
 
-<section class="page single" data-single="<?php echo $page_info['single']?>">
+<section class="page single flex-display direction-column" data-single="<?php echo $page_info['single']?>">
     <div class="flex-display ">
         <div class="flex-display space-between margin-bottom-20 <?php echo $part_left_side ?> align-center ">
             <div class="font-30 bold "><?php echo $title_page ?><span class="font-18"><?php echo $id ?  "  מס. ".$id : "" ?></span></div>
@@ -82,7 +82,7 @@ else{
             <?php }?>
         </div>
     </div>
-    <div class="flex-display space-between">
+    <div class="flex-display space-between grow">
         <input type="hidden" name="dirty" value="" />
             <form class="site_form <?php echo $class_form . $part_left_side?> " novalidate="" data-success='reload_page' data-failed='show_error_messages'>
                 <div id="form_error_msgs_container" class="margin-bottom-20"></div>

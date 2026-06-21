@@ -397,7 +397,10 @@ section.page .dt-layout-table .dt-layout-cell{
     overflow-y: auto;
 }
 section.page.single .dt-layout-table .dt-layout-cell{
-    height: 30vh;
+    height: 40vh;
+}
+.dt-layout-row{
+    margin: 0 !important;
 }
 .box {
     border-radius: 30px;
@@ -430,7 +433,7 @@ th:hover{
     color: var(--b-global-color-gold-hover);
 }
 .dt-length, .dt-search{
-    display: none !important;
+    /*display: none !important;*/
 }
 
 th .dt-column-header{
@@ -502,7 +505,7 @@ table.dataTable th.dt-type-numeric,*[dir=rtl]  table.dataTable th.dt-type-date{
     text-align: right;
 }
 table.dataTable td.dt-type-numeric,*[dir=rtl] table.dataTable td.dt-type-date{
-    text-align: center;
+    text-align:  right !important;
 }
 table.dataTable>tbody>tr>td,table.dataTable>tbody>tr>th{
     padding: 0;
@@ -510,6 +513,11 @@ table.dataTable>tbody>tr>td,table.dataTable>tbody>tr>th{
 td.dt-type-numeric{
     text-align: right !important;
 }
+.input-label table.dataTable>thead>tr>th,
+.input-label table.dataTable>tbody>tr>td{
+    padding: 1px !important;
+}
+
 table.dataTable>thead>tr>th,
 table.dataTable>tbody>tr>td{
     padding: 5px 0 5px 5px !important;
