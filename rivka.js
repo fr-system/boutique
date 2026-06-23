@@ -220,10 +220,10 @@ function show_tooltip(){
     });
 }
 
-function fillProductsLastOrder(result) {
+/*function fillProductsLastOrder(result) {
     jQuery(".add-order-product").after(jQuery(result.products));
     jQuery(".products-gallery .products-last-order").hide();
-}
+}*/
 
 function plusMinusCountProduct(me){
     var numberInput = jQuery(me).parent().find("input");

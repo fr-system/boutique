@@ -40,7 +40,6 @@ function get_single_view($table_name,$row,$readonly)
                         $sub_columns = BOUTIQUE_TABLES[$sub_table]["columns"];
 
                         foreach ($target_table_rows as $table_row) {
-                            write_log("row".json_encode($table_row));
                             $id = $table_row->id;
                             $results = array();
                             if (isset($row->id)) {
@@ -65,6 +64,7 @@ function get_single_view($table_name,$row,$readonly)
                                 if ($table_name == "agents") {
                                     $table_row->target = $exist_in_sub_table ? ($item->target || "") : "";
                                     $table_row->period_days = $exist_in_sub_table ? ($item->period_days||"") : "";
+                                    $table_row->agent_id = isset($row->id) ? $row->id : null;
                                 }
                                 else if ($table_name == "orders") {
                                     $field_name = $column1["field_name"];
@@ -543,7 +543,6 @@ function get_tr_data($table_name, $data, $key,$attr){
     if($table_name == "clients" && $row->blocked) {
         $backgraund_class.=" blocked";
     }
-
     $html='<tr data-id="'.$row->id.'" class="'.$backgraund_class.'">';
     if(is_manager() && $table_name == "collection" && !isset($_GET["payed"])){
         $html.= '<td>';
@@ -638,43 +637,6 @@ function get_tr_data($table_name, $data, $key,$attr){
     $html .='</tr>';
     return $html;
 }
-
-function get_tr_in_single($row, $key,$page_info)
-{
-    $html="";
-    if (isset($page_info["more_columns_in_table"])) {
-        foreach ($page_info["more_columns_in_table"] as $column) {
-            $column_value = get_column_value1($column, $row, $column["field_name"], null);
-            $html .= '<td>' . $column_value . '</td>';
-        }
-    }
-
-    foreach ($page_info["columns"] as $column) {
-        $field = isset($column['join_table']) && !isset($column['type']) ? substr($column['join_table'], 0, -1) . (isset($column['join_value']) ? "_" . $column['join_value'] : '') : $column["field_name"];
-        $list = isset($column['table_name']) ? constant($column['table_name']) : null;
-        //write_log("row ".json_encode($row));
-        //write_log("field ".json_encode($field));
-        $html .= '<td><input type="hidden" name="rows[' . $key . '][' . $field . ']" value="' . (isset($row->$field) ? $row->$field : "") . '"/></td>';
-
-
-        if ($field != "id" && !isset($column["hide_in_table"]) && isset($column["label"])) {
-            $data_id = "";
-            if ($column["widget"] == "select" && isset($column["options"])) {
-                $data_id = 'data-id="' . $row->$field . '"';
-            }
-            $column_value = get_column_value1($column, $row, $field, $list);
-            $html .= '<td ' . $data_id . ' class="' . $field . '">';
-            $html .= '<input type="text" name="rows[' . $key . '][' . $field . ']" value="' . $column_value . '"/>';
-            $html .= '</td>';
-        }
-    }
-
-    $html .= '<td><input type="hidden" name="rows[' . $key . '][id]" value="' . $row->id . '"/></td>';
-    $html .='</tr>';
-    return $html;
-
-}
-
 function get_archive_table($table_name,$data,$attr)
 {
     $page_info = BOUTIQUE_TABLES[$table_name];
@@ -686,17 +648,17 @@ function get_archive_table($table_name,$data,$attr)
         }
     }
 
-    if (is_manager () && $table_name == "collection" && !isset($_GET["payed"])) {
-        $html .= '<th class="no-sort"></th>';
-    }
-    if (!isset($page_info["update_remove"]) || $page_info["update_remove"] == true) {
-        if (is_manager () || is_agent () && $table_name == "orders") {//update-readonly
-            $html .= '<th class="no-sort" style="width:10px"></th>';
-        }
-        if (is_manager ()) {//remove
-            $html .= '<th class="no-sort" style="width:20px"></th>';
-        }
-    }
+            if(is_manager() && $table_name == "collection" && !isset($_GET["payed"])){
+                echo '<th class="no-sort"></th>';
+            }
+            if(!isset($page_info["update_remove"]) || $page_info["update_remove"] == true) {
+                if (is_manager() || is_agent() && $table_name == "orders") {//update-readonly
+                    echo '<th class="no-sort" style="width:10px"></th>';
+                }
+                if (is_manager()) {//remove
+                    echo '<th class="no-sort" style="width:20px"></th>';
+                }
+            }
 
     foreach ($page_info["columns"] as $column) {
         if (isset($column["create_input"])) {

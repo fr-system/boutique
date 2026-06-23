@@ -31,7 +31,7 @@ function pre_action_query($table_name, $row)
                 $value = (float)$value;
             }
 
-            $apostrophe = is_needed_apostrophe($field["widget"], isset($field["un_apostrophe"]));
+            $apostrophe = is_needed_apostrophe($field["widget"], isset($field["un_apostrophe"]),isset($field["save_as_text"]));
             array_push($fields, $key);
             array_push($values, (empty($value) ? "NULL" : $apostrophe . $value . $apostrophe));
             array_push($update, $key . " = " . (empty($value) ? "NULL" : $apostrophe . $value . $apostrophe));
@@ -233,7 +233,7 @@ function get_data_table($table_name, $filters=null, $orderby = null, $join_filte
                 $filter_field = (isset($filter["filter_table"]) ? $wpdb->prefix . $filter["filter_table"] . "." : "") . $filter["filter_field"];
                 $field = get_field($table_name, $filter["filter_field"]);
                 if ($field != null && isset($filter["filter_value"]) && $filter["filter_value"] != null) {
-                    $apostrophe = is_needed_apostrophe($field["widget"], isset($field["un_apostrophe"]));
+                    $apostrophe = is_needed_apostrophe($field["widget"], isset($field["un_apostrophe"]), isset($field["save_as_text"]));
                 }
             }
 
@@ -272,7 +272,7 @@ function get_data_table($table_name, $filters=null, $orderby = null, $join_filte
     }
 
     //echo $query;
-    //write_log("query ".$query);
+   // write_log("query ".$query);
 //    if($filter_value!= 0){
 //        $query .= " WHERE ".get_id_column_in_page($page_name)." = ".$filter_value;
 //    }
@@ -342,45 +342,40 @@ function new_chat_ajax()
     //write_log ('new chat user id '.get_current_user_id ());
     $query = "INSERT into ".$wpdb->prefix."chat(text,task_id,user_id,date) select '" . $_POST['text'] . "'," . $_POST['task_id'] . "," . get_current_user_id () . ",NOW()";
     run_query ($query,"execute");
-
-    $media_id =9 ;
-    //write_log ("media id new chat " .json_encode ( $media_id));
     $query = "SELECT * FROM ".$wpdb->prefix."chat where task_id = " . $_POST['task_id'] ." ORDER BY id DESC LIMIT 1";
     $rows = run_query ($query);
-
-    $media_url =  wp_get_attachment_url($media_id );
-    echo json_encode (array(
+    foreach ($rows as $row){
+        $row->logo = get_logo_chat($row->user_id);
+    }
+    wp_send_json([
         "rows" => $rows,
         "add_message" => true
-      /*  "id" => $chat_time[0]->id,
-        "time" => date("H:i:s",strtotime( $chat_time[0]->date)),
-        "client_logo" => $media_url*/
-        )
-    );
-    die();
+    ]);
+}
+
+function get_logo_chat($user_id){
+    if(is_manager(get_user_by('ID', $user_id))) {
+        return '<img class="user-logo" src="'.wp_get_attachment_url(9).'"/>';
+    }
+    else{
+        return '<span class="user-logo"></span>';
+    }
 }
 
 add_action('wp_ajax_get_chat_ajax', 'get_chat_ajax');
-//add_action('wp_ajax_nopriv_new_chat_ajax', 'new_chat_ajax');
 function get_chat_ajax()
 {
-    global $wpdb;
-    $user_id = get_current_user_id();
-    $media_id =9 ;
     $filters=array();
     $filters[]=array("filter_field" => "task_id", "filter_value"=>$_POST['task_id']);
     $filters[]=array("filter_field" => "date", "filter_value"=>"NOW() - interval 30 minute","filter_type"=>"date","filter_ratio"=>">");
     $rows = get_data_table("chat",$filters);
-    //write_log("rows ".json_encode($rows));
-    //$query = "SELECT date FROM ".$wpdb->prefix."chat where task_id = " . $_POST['task_id'] ." ORDER BY id DESC LIMIT 1";
-    //$chat_time = run_query ($query);
-    //$media_url =  wp_get_attachment_url($media_id );
-    echo json_encode (array(
+    foreach ($rows as $row){
+        $row->logo = get_logo_chat($row->user_id);
+    }
+    wp_send_json([
         "rows" => $rows,
-        "get_messages" => true
-        )
-    );
-    die();
+        "add_message" => true
+    ]);
 }
 
 ?>

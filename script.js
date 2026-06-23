@@ -16,28 +16,27 @@ jQuery(document).ready(function($){
     }
 
     if(getParameterByName("subject") == "orders" && getParameterByName("action") && getParameterByName("action") != "readonly") {
-        if(getParameterByName("action") == "new" && jQuery(".page.single .grid-display select[name=client_id]").val()){
+       /* if(getParameterByName("action") == "new" && jQuery(".page.single .grid-display select[name=client_id]").val()){
             jQuery(".products-gallery.orders .products-last-order").removeClass("hidden");
-        }
+        }*/
 
-        jQuery(".page.single .grid-display select[name=client_id]").change(function (){
+        /*jQuery(".page.single .grid-display select[name=client_id]").change(function (){
             if(getParameterByName("action") == "new" && jQuery(".products-gallery.orders .product").length == 0){
                 jQuery(".products-gallery.orders .products-last-order").removeClass("hidden");
             }
-        })
+        })*/
 
 
         setInterval(function () {
-            if (jQuery('input[name=dirty]').val() == "1" && jQuery('input[name=order_date]').val()
-                && jQuery('.grid-display select[name=client_id]').val() && jQuery('.grid-display .border-dark-gray.product').length > 0) {
-                jQuery('input[name=dirty]').val("0");
-/*                if (getParameterByName("action") == "new") {//אין לי מושג למה רציתי לשאול אם זה חדש
 
-                }*/
-                automaticOrderSaving();
+                    /*                if (getParameterByName("action") == "new") {//אין לי מושג למה רציתי לשאול אם זה חדש
+
+                                    }*/
+                    automaticOrderSaving();
+
                 //לשאול את פרידי לבדוק אם נגעו ב-2 דקות האלו לשמור ואם לא אז לא לשמור אולי לעשות שרק אם עזבו את המסך ולא נגעו בו כבר יותר מ2 דקות אז ללכת לשמירה
-            }
-        }, 120000); // 120000 מילישניות = 2 דקות
+
+        }, 12000); // 120000 מילישניות = 2 דקות
     }
 
     if(getParameterByName("subject") == "tasks" && getParameterByName("action") == "edit"){
@@ -66,14 +65,22 @@ jQuery(document).ready(function($){
     //צריך לבדוק מתי לא לתת לצאת לפני שאלה האם לצאת בלי שמירה
     //כרגע אני עושה רק על לחצן בטל או logout
     // a, button:not(.save)
-    jQuery('a.cancel , .logout-button ').click(function(e) {
-        if(jQuery('input[name=dirty]').val() == "1"){
-            const confirmation = confirm('הערכים עדיין לא נשמרו. האם אתה בטוח שברצונך לצאת ללא שמירה?');
-            if (!confirmation) {
-                e.preventDefault(); // מניעת לחיצה אם המשתמש לא מאשר
+
+     if (window.location.pathname.includes('single')) {
+        jQuery('a.cancel, .logout-button, ul.menu li a ').click(function (e) {
+            if (jQuery('input[name=dirty]').val() == "1") {
+                if(getParameterByName("subject") == "orders"){
+                    automaticOrderSaving();
+                }
+                else {
+                    const confirmation = confirm('הערכים עדיין לא נשמרו. האם אתה בטוח שברצונך לצאת ללא שמירה?');
+                    if (!confirmation) {
+                        e.preventDefault(); // מניעת לחיצה אם המשתמש לא מאשר
+                    }
+                }
             }
-        }
-    });
+        });
+    }
     // jQuery('input[data-a-sign=₪]').each(function () {
     //
     //     new AutoNumeric(this, {
@@ -512,9 +519,9 @@ function onAddChat(result){
 
         //'+result.client_logo+'
         var message = '<div class="input-label flex-display space-between" data-id="'+row.id+'">'+
-            '<div class="part-20"><img class="user-logo" src=""></div>'+
+            '<div class="part-20">'+row.logo+'</div>'+
             '<div class="text part-50 text-center">'+row.text+'</div>'+
-            '<div class="date text-left part-20 font-12">'+date +'</div></div>';
+            '<div class="date text-left part-20 font-12">'+date+'</div></div>';
 
         if(get_mes){
             var result = jQuery.grep(jQuery(".chat-list .input-label"), function (mess) {
@@ -680,19 +687,31 @@ function fillListTable(result){
 }
 
 function automaticOrderSaving(){
-    var $form = jQuery('form');
-    if (!$form.valid() || jQuery('.products-gallery .product').length ==0) {
-        return;
+
+    if (jQuery('input[name=dirty]').val() == "1" && jQuery('input[name=order_date]').val()
+        && jQuery('.grid-display select[name=client_id]').val()) {
+
+        var inputs = jQuery('.grid-display .input-label table tr td.count input');
+        var count = jQuery.grep(inputs, function (input, k) {
+            return jQuery(input).val() > 0;
+        })
+        if (count.length > 0) {
+            jQuery('input[name=dirty]').val("0");
+            var $form = jQuery('form');
+            if (!$form.valid()) {
+                return;
+            }
+
+            var formData = $form.serializeArray();
+
+            formData.push({
+                name: "action",
+                value: "send_site_forms"
+            });
+
+            call_ajax_function(formData, "fillOrderId");
+        }
     }
-
-    var formData = $form.serializeArray();
-
-    formData.push({
-        name: "action",
-        value: "send_site_forms"
-    });
-
-    call_ajax_function(formData,"fillOrderId");
 }
 function fill_modal_list(result){
     jQuery(".modal-body select").html(result.options);

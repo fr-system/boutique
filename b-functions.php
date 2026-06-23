@@ -152,7 +152,7 @@ function get_column_value($column,$row,$field,$list,$key)
             }
             break;
         case "radio":
-            $column_value = '<div class="flex-display center align-center" style="color: ' . $column["values"][$row->$field]["color"] . '"><div class="dot" style="background-color: ' . $column["values"][$row->$field]["color"] . '"></div>&nbsp;' . $column["values"][$row->$field]["label"] . '</div>';
+            $column_value = '<div class="flex-display align-center" style="color: ' . $column["values"][$row->$field]["color"] . '"><div class="dot" style="background-color: ' . $column["values"][$row->$field]["color"] . '"></div>&nbsp;' . $column["values"][$row->$field]["label"] . '</div>';
 
             break;
         case "status":
@@ -208,6 +208,7 @@ function get_column_value($column,$row,$field,$list,$key)
 
 add_action('wp_ajax_on_order_confirmation', 'on_order_confirmation');
 function on_order_confirmation(){
+
     global  $wpdb;
     if(isset($_POST['order_id'])){
         $order_id = $_POST['order_id'];
@@ -232,44 +233,78 @@ function on_order_confirmation(){
 
         $body = "הזמנה מתאריך ".date('d/m/Y',strtotime ( $order_confirmation->order_date)) ."<br><br>";
 
-        $filters=array(array("filter_field" => "order_id", "filter_value"=>$order_id));
+        $products = get_data_table("order_products",array(array("filter_field" => "order_id", "filter_value"=>$order_id)));
 
-        $products = get_data_table("order_products",$filters);
         $order_supplier = array();
-        //write_log("client ".json_encode($client));
+        write_log("products ".json_encode($products));
         foreach ($products as $product){
-            if(!is_array($order_supplier[$product->supplier_id])){
-                $order_supplier[$product->supplier_id] = array();
+            //write_log("product ".json_encode($product));
+            $p = get_data_table("products",array(array("filter_field" => "id", "filter_value"=>$product->product_id)))[0];
+            //write_log("p ".json_encode($p));
+
+            if(!empty($p->supplier_id)) {
+                //write_log("p!!!! ".$p->supplier_id);
+                if (!is_array($order_supplier[$p->supplier_id])) {
+                    $order_supplier[$p->supplier_id] = array();
+                }
+                $product->name = $p->name;
+                $order_supplier[$p->supplier_id][] = $product;
             }
-            $order_supplier[$product->supplier_id][]=$product;
-            $body .= $product->name." כמות: ".$product->count." מחיר ".$product->price;
+            //write_log("order_supplier ".json_encode($order_supplier));
+
+            if($product->order_individual){
+                $count = "בקבוקים";
+            }
+            else{
+                $count = "ארגזים";
+            }
+            $body .= $p->name." כמות: ".$product->count." ".$count." :מחיר ".$product->price."₪";
             if(!empty($product->bonus)){
-                $body .= " כמות בקבוקים/ארגזים בונוס ".$product->bonus;
+                $body .= " בונוס ".$product->bonus;
             }
             if(!empty($product->discount_percent)){
-                $body .= " קיבלת הנחה של ".$product->discount_percent."%";
+                $body .= " הנחה של ".$product->discount_percent."%";
             }
             $body .= "<br>";
         }
-        $body.= "<br>הערות: ".$order_confirmation->notes;
+        $body .= 'סה"כ לתשלום:'.$order_confirmation->total."₪"."<br>";
+        if(!empty($order_confirmation->notes)) {
+            $body .= "<br>הערות: " . $order_confirmation->notes;
+        }
         //write_log("to ".$client->email." body ".$body);
         //send_mail($client->email,"סיכום הזמנתך מס. ".$order_id,$body);
-
-
+        //write_log("list ".json_encode($order_supplier));
         //שליחת מייל לכל ספק על ההזמנה בשבילו
         foreach ($order_supplier as $key=>$order){
+            //write_log($key. " ".json_encode($order));
+
             $filters=array(array("filter_field" => "id", "filter_value"=>$key));
             $supplier = get_data_table("suppliers",$filters)[0];
 
             $body = "נא לספק ללקוח  ".$client->name." את המוצרים הבאים:<br>";
             foreach ($order as $product){
+                if($product->order_individual){
+                    $count = "בקבוקים";
+                }
+                else{
+                    $count = "ארגזים";
+                }
 
-                $body .= $product->name." כמות: ".$product->count+$product->bonus." מחיר ";
+                $body .= $product->name." כמות: ".$product->count." ".$count;
                 $body .= "<br>";
             }
+            $to = [
+                $supplier->email,
+                $supplier->email2,
+                $supplier->email3,
+                $supplier->email4,
+            ];
+
+            //write_log("body ".$body);
             //write_log("to ".$supplier->email." body ".$body);
-            //send_mail($supplier->email,"סיכום הזמנה מס. ".$order_id,$body);
+            //send_mail($to,"הזמנות מבוטיק כשר",$body);
         }
+
 
         wp_send_json([
             'status' => 'success',
@@ -401,11 +436,11 @@ function get_field($table_name, $field_name)
     });
     return count($field) > 0 ? array_pop($field) : null;
 }
-function is_needed_apostrophe($widget,$un_apostrophe)
+function is_needed_apostrophe($widget,$un_apostrophe,$save_as_text)
 {
     if($un_apostrophe)return "";
     $widgets = array("text","date","datetime-local","textarea","email");
-    if(in_array($widget, $widgets)){
+    if(in_array($widget, $widgets) || $save_as_text){
         return "'";
     }
     return "";

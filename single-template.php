@@ -8,7 +8,7 @@ if(!is_user_logged_in()){
 <?php
 if(!isset($_GET["subject"])) wp_redirect(get_site_url());
 $table_name = $_GET["subject"];
-
+date_default_timezone_set('Asia/Jerusalem');
 $action = $_GET["action"];
 $readonly ="";
 $page_info = BOUTIQUE_TABLES[$table_name];
@@ -20,11 +20,11 @@ if($action == "new") {
     }
 
     if($table_name == "orders"){
-        $row->order_date = date('Y-m-d H:i:s');
+        $row->order_date =date('Y-m-d\TH:i');// date('Y-m-d H:i');
         $row->user_opens = get_current_user_id();// get_id_by_user();
     }
     if($table_name == "tasks"){
-        $row->open_date = date('Y-m-d H:i:s');
+        $row->open_date = date('Y-m-d\TH:i');
         $row->status_id = 3;
         //אולי צריך לשמור מי פתח את המשימה???
     }
@@ -50,7 +50,6 @@ if (isset($_SERVER['HTTP_REFERER'])) {
 }
 
 $obligo = 0;
-$class_form = "border-dark-gray padding-20 flex-display direction-column ";
 if($table_name == "orders"){
     $part_left_side="part-100 ";
 }
@@ -84,7 +83,8 @@ else{
     </div>
     <div class="flex-display space-between grow">
         <input type="hidden" name="dirty" value="" />
-            <form class="site_form <?php echo $class_form . $part_left_side?> " novalidate="" data-success='reload_page' data-failed='show_error_messages'>
+            <form class="site_form border-dark-gray padding-20 flex-display direction-column space-between <?php echo $part_left_side?> " novalidate="" data-success='reload_page' data-failed='show_error_messages'>
+                <div>
                 <div id="form_error_msgs_container" class="margin-bottom-20"></div>
                 <input type="hidden" name="form_func" value="save_single_data" />
                 <input type="hidden" name="table_name" value="<?php echo $table_name ?>" />
@@ -93,7 +93,7 @@ else{
                 <input type="hidden" name="action" value="<?php echo $id ?>" />
 
                 <?php get_single_view($table_name,$row,$readonly); ?>
-
+                </div>
             <div class="buttons flex-display align-self-center">
                 <button type="submit" class="save background-gold flex-display center align-center bold font-18">
                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
@@ -187,10 +187,11 @@ else{
                         foreach($chat_list as $message)
                         {
                             $user_info = get_userdata($message->user_id);
+
                             ?>
                             <div class="input-label flex-display space-between" data-id="<?php echo $message->id ?>">
                                 <div class="part-20">
-                                    <img class="user-logo" src="<?= wp_get_attachment_url(9); ?>"/>
+                                    <?php echo get_logo_chat($message->user_id) ?>
                                 </div>
                                 <div class="text part-50 text-center"><?= $message->text?></div>
                                 <div class="date text-left part-20 font-12">

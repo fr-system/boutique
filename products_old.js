@@ -62,10 +62,10 @@ function openPopupAddOrderProduct(result){
 
 }
 
-function fillProductsLastOrder(result) {
+/*function fillProductsLastOrder(result) {
     jQuery(".add-order-product").after(jQuery(result.products));
     jQuery(".products-gallery .products-last-order").hide();
-}
+}*/
 
 jQuery('.add-order-product svg').click(function () {
     if(jQuery('.grid-display select[name=client_id]').val()) {
@@ -82,7 +82,7 @@ jQuery('.add-order-product svg').click(function () {
     }
 })
 
-jQuery(".products-gallery .products-last-order").click(function (){
+/*jQuery(".products-gallery .products-last-order").click(function (){
     var client_id = jQuery(".page.single select[name=client_id]").val();
     if(client_id) {
         var postData = [
@@ -91,7 +91,7 @@ jQuery(".products-gallery .products-last-order").click(function (){
         ];
         call_ajax_function(postData, "fillProductsLastOrder");
     }
-})
+})*/
 
 
 

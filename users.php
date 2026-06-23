@@ -180,7 +180,7 @@ function send_password_reset_link() {
 
 function send_mail($to,$subject,$message)
 {
-    $to = "rym76843@gmail.com";
+    //$to = "rym76843@gmail.com";
     $headers = 'MIME-Version: 1.0' . "\r\n";
     $headers .= 'Content-type: text/html; charset=utf-8' . "\r\n";
     $headers .= "From: ".get_option("blogname")." <info@kosherboutique.co.il> \r\n";

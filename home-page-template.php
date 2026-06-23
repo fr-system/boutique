@@ -10,7 +10,7 @@ if(is_supplier()){
 <?php get_header();
 ?>
 <section class="page flex-display direction-column">
-    <?php if(is_manager()){?>
+    <?php if(is_manager() && 1==2){?>
     <div class="part-30">
         <div class="font-30 bold margin-bottom-30">פעולות מהירות</div>
         <div class="grid-display cols-4 margin-bottom-20">
@@ -67,20 +67,22 @@ if(is_supplier()){
         </div>
         <div class="part-45">
             <div class="flex-display space-between">
-                <div class="font-20 bold">גרף מכירות</div>
-                <div class="font-15 dark-green" >לפירוט המלא -></div>
+                <?php
+                    $previousMonth = date('m', strtotime('-1 month'));
+                    $previousYear  = date('Y', strtotime('-1 month'));
+                    $firstDayOfMonth = "01/".$previousMonth."/".$previousYear;
+                    $lastDayOfMonth = date('t', strtotime($firstDayOfMonth))."/".$previousMonth."/".$previousYear;
+                    ?>
+                <div><span class="font-20 bold">גרף מכירות  </span><span class="font-17"><?php echo $firstDayOfMonth ." עד ".$lastDayOfMonth ?></span> </div>
+                <div class="font-15 dark-green" ></div>
             </div>
             <div class="graphs-charts quick-action border-dark-gray">
             <?php
 
             $agents = get_data_table("agents");
-            //$agents = array_column($agents, null, 'id');
-            //write_log("orders+agents ".json_encode($agents));
-
+            //לקבל את ההזמנות בין תאריכים
             $filters = array(array("filter_field" => "order_date","filter_type"=>"between","filter_value"=> array('2026-04-01','2026-06-15')));
             $result = get_data_table("orders",$filters);
-                //write_log("orders+agents ".json_encode($result));
-                    //$agents = array();
             foreach ($result as $row) {
                 if (empty($row->agent_id)) continue;
                 $agent_id = $row->agent_id;
@@ -99,6 +101,7 @@ if(is_supplier()){
 
 
             $result = get_data_table("agent_target_supplier");
+            //write_log("agent_target_supplier ".json_encode($result));
 
             foreach ($result as $row) {
                 $index = array_search(
@@ -109,7 +112,7 @@ if(is_supplier()){
                 $agents[$index]->_target += $row->target;
             }
 
-            write_log("orders+agents ".json_encode($agents));
+            //write_log("orders+agents ".json_encode($agents));
 
 
             ?>

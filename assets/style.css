@@ -360,6 +360,12 @@ input[type="radio"] + label:before {
     width: 20px;
     border-radius: 100px;
 }
+.input-label span.user-logo {
+    display: block;
+    background-color: var(--b-global-color-gold);
+    border: none;
+}
+
 .input-label a{
     margin: 0;
     padding: 0;
