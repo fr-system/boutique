@@ -57,7 +57,8 @@ const BOUTIQUE_TABLES = array(
         "male_female" => "female",
         "columns" => array(
             array("field_name" => "client_id", "widget" => "select", "join_table" => "clients", "join_value" => "name", "label" => "שם לקוח"),
-            array("field_name" => "subject", "widget" => "text", "label" => "משימה","required"=>true),
+            array("field_name" => "subject", "widget" => "select", "label" => "נושא המשימה","required"=>true,
+             "join_table" => "subjects", "join_value" => "text","save_as_text"=>true),
             array("field_name" => "open_date", "widget" => "hidden", "label" => "תאריך פתיחה"),
             array("field_name" => "agent_id", "widget" => "select", "label" => "סוכן", "join_table" => "agents", "join_value" => "name","required"=>true,"filter"=>true),
             array("field_name" => "details", "widget" => "textarea", "label" => "פירוט","hide_in_table" => true),
@@ -127,7 +128,10 @@ const BOUTIQUE_TABLES = array(
             array("field_name" => "total", "widget" => "text", "label" => "סה\"כ", "un_apostrophe" => true,"sign"=>"₪"),
             array("field_name" => "id", "widget" => "hidden","create_input"=>true),
             array("field_name" => "order_id", "widget" => "hidden","create_input"=>true),
-            array("field_name" => "product_id", "widget" => "hidden","create_input"=>true)
+            array("field_name" => "product_id", "widget" => "hidden","create_input"=>true),
+            //array("field_name" => "supplier_id", "join_table_from" => "products", "join_table" => "suppliers", "join_value" => "name"),
+            //array("field_name" => "agent_id","widget" => "hidden", "join_table_from" => "clients", "join_table" => "agents", "join_value" => "name", "label" => "סוכן"),
+
         ),
         "more_columns_in_table" => array(
             array("field_name" => "image_id", "widget" => "image"),
@@ -160,7 +164,7 @@ const BOUTIQUE_TABLES = array(
             array("field_name" => "period_days", "widget" => "number", "label" => "תקופה" , "un_apostrophe" => true,"create_input"=>true),
             array("field_name" => "id","widget" => "hidden","create_input"=>true),
             array("field_name" => "supplier_id","widget" => "hidden","create_input"=>true),
-/*            array("field_name" => "agent_id","widget" => "input_hidden"),*/
+            array("field_name" => "agent_id","widget" => "hidden","create_input"=>true),
         ),
         "more_columns_in_table" => array(
             array("field_name" => "name", "widget" => "select","label"=>"ספק"),
@@ -249,20 +253,20 @@ const BOUTIQUE_LISTS = array(
                 array("field_name" => "importance","widget" => "text"),
             )
         ),*/
-    "payment_terms" =>
+   /* "payment_terms" =>
         array(
             "title" => "תנאי תשלום",
             "single" => "תנאי תשלום",
             "columns" => array(
                 array("field_name" => "importance","widget" => "text"),
             )
-        ),
-    "mission_topic" =>
+        ),*/
+    "subjects" =>
         array(
             "title" => "נושא משימה",
-            "single" => "נושא המשימה",
+            "single" => "נושא",
             "columns" => array(
-                array("field_name" => "area","widget" => "text"),
+                array("field_name" => "text","widget" => "text"),
             )
         ),
     /*"specials" =>
