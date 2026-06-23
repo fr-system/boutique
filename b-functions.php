@@ -187,15 +187,16 @@ function get_column_value($column,$row,$field,$list,$key)
                 $column_value = empty($row->$field) ? '' : get_userdata($row->$field)->display_name;
             } else {
                 $column_value = isset($column['list_name']) && isset($list[$row->$field]) ? $list[$row->$field] : $row->$field;
-                if (!empty($column_value) && isset($column["un_apostrophe"])) {
-                    $column_value .= " ₪";
+                if (!empty($column_value) && isset($column["sign"]) && !isset($column["create_input"])) {
+                    $column_value .= " {$column["sign"]}";
                 }
             }
-
+            $readonly = isset($column["widget"]) && $column["widget"]== "readonly"?' readonly ':'';
             if(isset($column["create_input"])){
-                $column_value = '<span class="hidden">'. $column_value .'</span>'.
+                $column_value =($readonly? '': '<span class="hidden">'. $column_value .'</span>').
                     ($column["widget"] == "number" ? '<span class="minus bold font-25  pointer">-</span>' :'' ).
-                    '<input type="text" name="rows[' . $key . '][' . $field . ']" value="' . $column_value . '"/>'.
+                    '<input type="text" class="" name="rows[' . $key . '][' . $field . ']" value="' . $column_value . '" '.$readonly.
+                    (isset($column["un_apostrophe"]) && isset($column["sign"]) ? 'data-a-sign="'.$column["sign"].'"':'').'/>'.
                     ($column["widget"] == "number" ? '<span class="plus bold font-25  pointer">+</span>':'');
             }
             break;

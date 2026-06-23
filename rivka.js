@@ -240,12 +240,9 @@ function plusMinusCountProduct(me){
     calculatePrice(me);
 }
 
-jQuery(".page .products-gallery .product .plus-minus-count span.pointer:not(.readonly)").click(function (e) {
-    plusMinusCountProduct(this)
-})
 
 function registerToCalculatePrice(){
-    jQuery('.products-gallery.orders .product .price-part').on('change', function (e) {
+    jQuery('tr.product td:not(.total) input').on('change', function (e) {
         calculatePrice(this);
     });
     jQuery(".products-gallery.orders .product .calculated-price-input").on("change", function () {
@@ -262,17 +259,18 @@ function registerToCalculatePrice(){
 function calculatePrice(me){
     var product = jQuery(me).closest(".product");
 
-    var count = parseInt(product.find('.count').val());
-    var unitsInBox = parseInt(product.find('.units-in-box').val());
+    var count = parseInt(product.find('.count input').val());
+   /* var unitsInBox = parseInt(product.find('.units-in-box').val());
     var selectIndividually  = product.find("select.price-part.individually")
     if(selectIndividually.length>0 && selectIndividually.val()==0 ||selectIndividually.length ==0) {// אם לא ניתן לבחור בודדים , או שבחור ארגז
         count=count*unitsInBox;
-    }
-    var unitPrice = parseInt(product.find('.unit-price').val().replace('₪',''));
-    var discountPercent = parseInt(product.find('.discount-percent').val()||0);
+    }*/
+    var total_order = parseInt(jQuery(".page.single input[name=total]").autoNumeric('get')||0);
+    var unitPrice = parseInt(product.find('.order_price input').autoNumeric('get'));
+    var discountPercent = parseInt(product.find('.discount_percent input').autoNumeric('get')||0);
     var calculatedPrice = (unitPrice*count) - (unitPrice*count*discountPercent/100);
-    product.find(".calculaded-price").html(calculatedPrice);
-    product.find(".calculated-price-input").val(calculatedPrice).trigger("change");
+    //product.find(".total span").html(calculatedPrice);
+    product.find(".total input").autoNumeric('set',calculatedPrice).trigger("change");
 }
 
 /*

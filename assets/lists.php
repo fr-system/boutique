@@ -123,8 +123,12 @@ const BOUTIQUE_TABLES = array(
             array("field_name" => "count", "widget" => "number", "label" => "כמות","create_input"=>true),
             array("field_name" => "bonus", "widget" => "number", "label" => "בונוס","create_input"=>true),
             array("field_name" => "discount_percent", "widget" => "text", "label" => "אחוזי הנחה", "un_apostrophe" => true,"sign"=>"%","create_input"=>true),
-            array("field_name" => "order_individual", "widget" => "bool"),
-            array("field_name" => "total", "widget" => "text", "label" => "סה\"כ", "un_apostrophe" => true,"sign"=>"₪"),
+            array("field_name" => "order_individual", "widget" => "select", "label" => "בודדים","create_input"=>true,
+                "options"=>array(
+                    array("value"=>"0","text"=>"ארגז"),
+                    array("value"=>"1","text"=>"בודדים"),
+                )),
+            array("field_name" => "total", "widget" => "readonly", "label" => "סה\"כ", "un_apostrophe" => true,"sign"=>"₪","create_input"=>true),
             array("field_name" => "id", "widget" => "hidden","create_input"=>true),
             array("field_name" => "order_id", "widget" => "hidden","create_input"=>true),
             array("field_name" => "product_id", "widget" => "hidden","create_input"=>true)

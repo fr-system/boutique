@@ -85,7 +85,18 @@ jQuery(document).ready(function($){
     //     currencySymbol: '₪ ',
     //     decimalPlaces: 2
     // });
-    jQuery('input[data-a-sign=₪]').autoNumeric('init', { vMin: '-9999999999999' });
+    jQuery('input[data-a-sign=₪]').autoNumeric('init', {
+        vMin: '-9999999999999',
+        mDec: 1,
+        wEmpty: 'empty'
+    });
+    jQuery('input[data-a-sign="%"]').autoNumeric('init', {
+        vMin: '-9999999999999',
+        mDec:0,
+        wEmpty: 'empty',
+        aSign: '%',
+        pSign: 's'
+    });
 
     jQuery("form").validate({
         rules: {

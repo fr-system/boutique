@@ -5,6 +5,10 @@ jQuery(document).ready(function($){
         $('#update_client_price select[name=client_id]').val("");
         $('#update_client_price input[name=client_price]').val("");
     });
+    jQuery(".page tr.product .count span.pointer:not(.readonly)").click(function (e) {
+        plusMinusCountProduct(this)
+    })
+
 
     jQuery('#update_client_price select[id=client_id]').on('change', function (e) {
        var tableName = jQuery('#update_client_price input[name=table_name]').val();

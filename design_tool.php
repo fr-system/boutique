@@ -539,10 +539,11 @@ function get_tr_data($table_name, $data, $key,$attr){
 
     $row = is_array ($data)? $data[0]:$data;
     //echo json_encode ($row);
-    $backgraund_class = ($table_name == "orders" && $row->done ? "order-confirm" : "");
+    $backgraund_class = ($table_name == "orders" && $row->done ? "order-confirm" : "product");
     if($table_name == "clients" && $row->blocked) {
         $backgraund_class.=" blocked";
     }
+
     $html='<tr data-id="'.$row->id.'" class="'.$backgraund_class.'">';
     if(is_manager() && $table_name == "collection" && !isset($_GET["payed"])){
         $html.= '<td>';
@@ -616,8 +617,8 @@ function get_tr_data($table_name, $data, $key,$attr){
         }
         $column_value = get_column_value($column, $row, $field, $list, $key);
         //write_log("value ".$column_value);
-
-        $html .= '<td ' . $data_id . ' class="' . $field . '">' . $column_value . '</td>';
+        $hidden = (isset($column["widget"]) && $column["widget"]== "hidden"?' hidden':'');
+        $html .= '<td ' . $data_id . ' class="' . $field .$hidden .'">' . $column_value . '</td>';
         $columns_counter++;
         //}
     }

@@ -103,43 +103,45 @@ input:not([type=search]):-webkit-autofill {
     width: 80px !important;
     height: 35px !important;
 }
-.plus-minus-count{
+tr.product td.count{
     align-self: center;
+    display: flex;
 }
-.plus-minus-count span, .plus-minus-count input{
+tr.product td.count span,tr.product td.count input{
     border:solid 1px var(--b-global-color-dark-gray);
     height: 30px;
 }
-.product .plus-minus-count input[type=number]{
-    width: 20%;
-    text-align: left;
+.product td.count input{
+    width: 30px;
+    text-align: center;
     moz-appearance: textfield;
     padding: 0;
     border: none;
 }
-.product .plus-minus-count select {
+.product td.count select {
     height: 100%;
     padding: 1px;
 }
-.plus-minus-count .plus:hover, .plus-minus-count .minus:hover{
+tr.product td.count .plus:hover, tr.product td.count .minus:hover{
     background-color: var(--b-global-color-light-gray);
 }
-.plus-minus-count .plus.readonly:hover, .plus-minus-count .minus.readonly:hover{
+tr.product td.count .plus.readonly:hover, tr.product td.count .minus.readonly:hover{
     background-color: var(--b-global-color-dark-gray);
 }
-.plus-minus-count .plus, .plus-minus-count .minus{
+tr.product td.count .plus, tr.product td.count .minus{
     display: flex;
     align-items: center;
     justify-content: center;
+    padding: 0 8px;
 }
-.plus-minus-count .plus.readonly, .plus-minus-count .minus.readonly {
+tr.product td.count .plus.readonly, tr.product td.count .minus.readonly {
     background-color: var(--b-global-color-light-gray);
 }
-.plus-minus-count .minus {
+tr.product td.count .minus {
     border-top-right-radius: 5px;
     border-bottom-right-radius: 5px;
 }
-.plus-minus-count .plus {
+tr.product td.count .plus {
     border-top-left-radius: 5px;
     border-bottom-left-radius: 5px;
 }

@@ -109,6 +109,7 @@ function save_single_data()
         $result = array();
     } else {
         $action = isset($_POST["id"]) && !empty($_POST["id"]) ? "update" : "new";
+        write_log ('tablename '.$table_name. 'post '.json_encode ( $_POST));
         $result = pre_action_query ($table_name, $_POST);
     }
 
@@ -150,7 +151,7 @@ function save_single_data()
             $action_product = (isset($row["id"]) && !empty($row["id"])) ?
                 (isset($row["remove"]) && $row["remove"] ? "remove" : "update") : "new";
 
-            //write_log("row to save" . json_encode($row));
+            write_log("row to save" . json_encode($row));
             $result = pre_action_query($sub_table_name, $row);
             //write_log("result to save" . json_encode($result));
             run_action_query($sub_table_name, $row["id"], $action_product, $result);
