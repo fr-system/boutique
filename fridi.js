@@ -53,7 +53,7 @@ function fillClientPriceModal(result) {
 function import_excel_done(form,data){
     //jQuery(".archive-table").closest(".dt-container ").remove();
     if(data.rows) {
-        jQuery(".page .archive-table tbody").append(data.rows);
+        jQuery(".page .archive-table tbody").prepend(data.rows);
         //setDataTable();
     }
     show_slider_message(data.message);
@@ -69,6 +69,7 @@ function choose_supplier_column_mapping(form, data){
 }
 
 function import_from_xlsx(form, data){
+    closeModal();
     jQuery('#importCollection').submit();
 }
 function setDataTable (){

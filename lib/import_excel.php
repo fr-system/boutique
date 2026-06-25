@@ -77,29 +77,31 @@ function import_from_xlsx()
        // write_log ('sheet '.json_encode ($sheet->toArray()));
         $BnNumber_index = array_search ( "BnNumber",$mapping);
         $doc_number_index = array_search ( "doc_number",$mapping);//מספר חשבונית
+        global $wpdb;
 
         if ($BnNumber_index !==false && $doc_number_index !==false) {//אם בין השדות בקובץ של הספק יש ח.פ. ללקוח
             //write_log("sheets ".json_encode($sheet->toArray()));
+            $has_BnNumber = false;
             foreach ($sheet->toArray() as $key => $row_from_file) {
                 if ($key == 0) continue;
+                //write_log ('row_from_file '.json_encode ($row_from_file));
                 $row_to_table = [];
                 $row_to_table["supplier_id"] = $supplier_id;
-                $row_to_table["imported_at"] = date('Y-m-d',strtotime ('today'));
+                $row_to_table["imported_at"] = date('Y-m-d H:i:s');
                 write_log ('BnNumber '.json_encode ($row_from_file[$BnNumber_index]));
                 if (empty($row_from_file[$BnNumber_index])) {//אם לא הגיע ח.פ. ללקוח בקובץ
                     continue;
                 }
-                global $wpdb;
-                write_log (' query '."SELECT 1 FROM ".$wpdb->prefix."collection WHERE supplier_id = ".$supplier_id." and  doc_number ='".$row_from_file[$doc_number_index]."' LIMIT 1");
+                $has_BnNumber = true;
+                //write_log (' query '."SELECT 1 FROM ".$wpdb->prefix."collection WHERE supplier_id = ".$supplier_id." and  doc_number ='".$row_from_file[$doc_number_index]."' LIMIT 1");
                 $result = run_query ("SELECT 1 FROM ".$wpdb->prefix."collection WHERE supplier_id = ".$supplier_id." and doc_number ='".$row_from_file[$doc_number_index]."' LIMIT 1");
-                write_log ('result '.json_encode ($result));
                  if(!empty($result)) {//this invoise number is exists
                      $count_exists++;
                      continue;
                  }
                 $client = get_data_table("clients", array(array("filter_field" => "BnNumber", "filter_value" => $row_from_file[$BnNumber_index])));
 
-                if(empty($client)){// אם לא נמצא לקוח עם הח.פ. שבשורה זו
+                if(empty($client) || count($client)==0){// אם לא נמצא לקוח עם הח.פ. שבשורה זו
                     continue;
                 }
                 $client=$client[0];
@@ -120,26 +122,37 @@ function import_from_xlsx()
 
                     }
                 }
-                write_log ('row_to_table ' . json_encode ($row_to_table));
+                //write_log ('row_to_table ' . json_encode ($row_to_table));
                 $result = pre_action_query ("collection", $row_to_table);
-                write_log ('pre_action_query ' . json_encode ($result));
-                //$ok = run_action_query ("collection", null, "new", $result);
-                $ok = 1;
+                //write_log ('pre_action_query ' . json_encode ($result));
+                $ok = run_action_query ("collection", null, "new", $result);
+                //$ok = 1;
                 if ($ok) {
-                    $html .= get_tr_data ("collection", $result, null, array());
-                    $count_success++;
+                    $row = get_data_table("collection", array(array("filter_field" => "doc_number", "filter_value" => $row_from_file[$doc_number_index])));
+                    if (count($row) > 0) {
+                        $html .= get_tr_data("collection", $row[0], null, array());
+                        $count_success++;
+                    }
                 }
                 // write_log(json_encode ( $row));
             }
+
+             //write_log("html ".$html);
+
             if($count_exists>0){
-                $msg = "חלק מהחשבוניות כבר קיימות במערכת\n";
+                $msg = "חלק מהחשבוניות כבר קיימות במערכת<br>";
             }
             if ($count_success == 0 && $count_exists ==0) {
-                $msg = "אירעה שגיאה בעת קליטת הקובץ , הרשומות לא נקלטו";
+                if($has_BnNumber) {
+                    $msg = "אירעה שגיאה בעת קליטת הקובץ<br>החשבוניות לא נקלטו";
+                }
+                else{
+                    $msg = "לא היה בקובץ מספר ח''פ של הלקוחות ולכן החשבוניות לא נקלטו";
+                }
             } elseif ($key == $count_success) {
-                $msg .= "הקובץ נקלט בהצלחה, {$count_success}   רשומות עודכנו";
+                $msg .= "הקובץ נקלט בהצלחה<br>{$count_success} רשומות עודכנו";
             } elseif ($count_success < $key) {
-                $msg .= "הקובץ נקלט בהצלחה, עודכנו {$count_success} רשומות, מתוך {$key} רשומות ";
+                $msg .= "הקובץ נקלט בהצלחה<br> נכנסו {$count_success} חשבוניות<br> מתוך {$key} שורות ";
             }
         }
          else {
@@ -150,7 +163,7 @@ function import_from_xlsx()
         write_log ('file no exist');
     }
 
-    write_log ('import collaction '.$msg);
+    //write_log ('import collaction '.$msg);
 
     wp_send_json([
         'status' => 'success',
@@ -172,21 +185,21 @@ function save_list_data(){
     $table_name = $_POST["table_name"];
     $fields=[];
     $fields["supplier_id"]=$_POST["supplier_id"];
-    write_log ('post  field name '.json_encode ($_POST['field_name']));
+   // write_log ('post  field name '.json_encode ($_POST['field_name']));
     foreach ($_POST['field_name'] as $field_name => $column_index){
-        if(empty($column_index)) continue;
+        if($column_index == null || $column_index < 0) continue;
         $fields["field_name"]=$field_name;
         $fields["excel_column_index"]=$column_index;
         $result =pre_action_query ($table_name,$fields);
+        //write_log ('save supp fields '.json_encode ($result));
         $ok = run_action_query ($table_name, null, "new", $result);
     }
 
-    echo json_encode (array(
+    wp_send_json([
         'status' => 'success',
         'message' => 'נשמרו השדות לספק' //'הקובץ נקלט בהצלחה',
         //'redirect' => isset($_POST["previous_page"]) ? $_POST["previous_page"]:'',
-    ));
-    wp_die();
+    ]);
 }
 function supplier_column_mapping_modal(){
     ?>

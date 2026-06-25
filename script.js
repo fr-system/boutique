@@ -616,8 +616,7 @@ jQuery(".slider-message").click(function(){
 function show_slider_message(text) {
     if(text) {
         var messageElement = jQuery(".slider-message");
-        messageElement.find(".text").text(text);
-        var height = messageElement.css("height");
+        messageElement.find(".text").html(text);
         messageElement
             .css({
                 display: "block",
@@ -637,16 +636,6 @@ function show_slider_message(text) {
                 jQuery(this).hide();
             });
         }, 5000);
-        /*messageElement.animate(
-            {display: "block", top: "50%", opacity: "0.95"}
-            , 500
-            , function () {
-                messageElement.fadeOut(5000, function () {
-                    messageElement.css("top", "-200px");
-                    messageElement.css("display", "none");
-                });
-            }
-        );*/
     }
 }
 

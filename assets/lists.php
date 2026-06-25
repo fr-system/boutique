@@ -207,6 +207,7 @@ const BOUTIQUE_TABLES = array(
 
                 )),
             array("field_name" => "check_number", "widget" => "text", "label" => "מספר צ'ק"),
+            array("field_name" => "imported_at", "widget" => "date","hide_in_table"=>true),
 /*            array("field_name" => "agent_id", "widget" => "select", "label" => "סוכן", "join_table" => "agents", "join_value" => "user_id", "user_field" => "display_name"),//להביא מטבלת יוזר*/
 
         ),
