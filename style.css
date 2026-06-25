@@ -647,10 +647,12 @@ label span{
     width: 400px;
     /* height: 400px;*/
     position: fixed;
-    right:-500px;
+    /*right:-500px;*/
     margin: auto;
     /*bottom: 40px;*/
-    top: 100px;
+    top: -200px;
+    left: 50%;
+    transform: translateX(-50%);
     background: #FFFFFF;
     box-shadow: 0px 1px 26px -2px #0000002E;
     border-radius: 12px;

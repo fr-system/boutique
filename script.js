@@ -616,27 +616,40 @@ jQuery(".slider-message").click(function(){
 })
 
 function show_slider_message(text) {
-    var messageElement = jQuery(".slider-message");
-    messageElement.find(".text").text(text);
-    if(jQuery(window).width() < 767 ){
-        messageElement.css("width","80vw");
-    }
-    else {
-        messageElement.css("width", "400px");
-    }
+    if(text) {
+        var messageElement = jQuery(".slider-message");
+        messageElement.find(".text").text(text);
+        var height = messageElement.css("height");
+        messageElement
+            .css({
+                display: "block",
+                top: "-200px",
+                opacity: 0
+            })
+            .animate({
+                top: "45%",
+                opacity: 0.95
+            }, 1000);
 
-    messageElement.show();
-    messageElement.attr("display", "block");
-    messageElement.animate(
-        {display: "block", right: "80px", opacity: "0.95"}
-        , 500
-        ,
-        function () {
-            messageElement.fadeOut(5000, function() {
-                messageElement.css("right", "-500px");
+        setTimeout(function () {
+            messageElement.animate({
+                top: "-200px",
+                opacity: 0
+            }, 500, function () {
+                jQuery(this).hide();
             });
-        }
-    );
+        }, 5000);
+        /*messageElement.animate(
+            {display: "block", top: "50%", opacity: "0.95"}
+            , 500
+            , function () {
+                messageElement.fadeOut(5000, function () {
+                    messageElement.css("top", "-200px");
+                    messageElement.css("display", "none");
+                });
+            }
+        );*/
+    }
 }
 
 function call_ajax_function(postData,func) {

@@ -215,14 +215,12 @@ function on_order_confirmation(){
         $query = "UPDATE ".$wpdb->prefix."orders SET done = 1, user_confirms = ".get_current_user_id()."
                   WHERE id = ".$order_id;
         //run_query ($query);//זה עובד טוב פשוט חבל כל הזמן שיאשר ויפריע לבדיקות!!!!
-        //add_notice( 'order_confirmation' ,"ההזמנה אושרה נשלח מייל ללקוח ולספקים" );
 
         /*echo json_encode(array(
             'status' => 'success',
             'redirect' => $_POST["previous_page"],
         ));
         die();*/
-
         $filters= array(array("filter_field" => "id", "filter_value"=>$order_id));
         $order_confirmation = get_data_table("orders",$filters)[0];
 
@@ -236,21 +234,20 @@ function on_order_confirmation(){
         $products = get_data_table("order_products",array(array("filter_field" => "order_id", "filter_value"=>$order_id)));
 
         $order_supplier = array();
-        write_log("products ".json_encode($products));
+        //write_log("products ".json_encode($products));
         foreach ($products as $product){
             //write_log("product ".json_encode($product));
             $p = get_data_table("products",array(array("filter_field" => "id", "filter_value"=>$product->product_id)))[0];
             //write_log("p ".json_encode($p));
 
             if(!empty($p->supplier_id)) {
-                //write_log("p!!!! ".$p->supplier_id);
+                //write_log("supplier!!!! ".$p->supplier_id);
                 if (!is_array($order_supplier[$p->supplier_id])) {
                     $order_supplier[$p->supplier_id] = array();
                 }
                 $product->name = $p->name;
                 $order_supplier[$p->supplier_id][] = $product;
             }
-            //write_log("order_supplier ".json_encode($order_supplier));
 
             if($product->order_individual){
                 $count = "בקבוקים";
@@ -267,6 +264,9 @@ function on_order_confirmation(){
             }
             $body .= "<br>";
         }
+
+        //write_log("order_supplier ".json_encode($order_supplier));
+
         $body .= 'סה"כ לתשלום:'.$order_confirmation->total."₪"."<br>";
         if(!empty($order_confirmation->notes)) {
             $body .= "<br>הערות: " . $order_confirmation->notes;
@@ -281,7 +281,7 @@ function on_order_confirmation(){
             $filters=array(array("filter_field" => "id", "filter_value"=>$key));
             $supplier = get_data_table("suppliers",$filters)[0];
 
-            $body = "נא לספק ללקוח  ".$client->name." את המוצרים הבאים:<br>";
+            $body = "נא לספק ללקוח  ".$client->name." את המוצרים הבאים:<br><br>";
             foreach ($order as $product){
                 if($product->order_individual){
                     $count = "בקבוקים";
@@ -302,13 +302,13 @@ function on_order_confirmation(){
 
             //write_log("body ".$body);
             //write_log("to ".$supplier->email." body ".$body);
-            //send_mail($to,"הזמנות מבוטיק כשר",$body);
+            //send_mail($to,"הזמנה מס. ".$order_id,$body);
         }
 
 
         wp_send_json([
             'status' => 'success',
-            "message" => "ההזמנה אושרה נשלח מייל ללקוח ולספקים",
+            "message" => "ההזמנה אושרה! נשלחו הודעות במייל ללקוח ולספקים",
             'redirect' => isset($_POST["previous_page"]) ? $_POST["previous_page"]:'',
         ]);
     }

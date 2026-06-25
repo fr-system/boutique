@@ -73,19 +73,12 @@ function register_new_user1($display_name, $email,$role)
         'last_name' => fixXSS($display_name),
         'role' => $role,
     );
-    //write_log("em1 ".$email);
+
     $user_id = wp_insert_user($userdata);
-    //write_log("em3 ".$user_id);
+
     if ($user_id)
         return array("status" => "success", "user_id" => $user_id);
     return null;
-    /*if (!is_wp_error($user_id)) {
-        echo json_encode(array(
-            'status' => 'success',
-        ));
-    }
-
-    die();*/
 }
 
 add_action('wp_ajax_user_logout', 'user_logout');
@@ -314,7 +307,6 @@ function wporg_usermeta_form_field_lang_update( $user_id ) {
 add_action('wp_ajax_update_user_meta_value', 'update_user_meta_value');
 function update_user_meta_value()
 {
-    //write_log("!@#$^%^".$_POST['user_meta ']." dfd ".$_POST['meta_value']);
     update_user_meta( get_current_user_id(),$_POST['meta_key'],$_POST['meta_value']);
     echo json_encode( array(        'status'   => 'success'    ) );
     die();

@@ -51,10 +51,13 @@ function fillClientPriceModal(result) {
 
 
 function import_excel_done(form,data){
-    jQuery(".archive-table").closest(".dt-container ").remove();
-    jQuery(".page").append(data.collection_table);
-    setDataTable();
-    alert(data.msg);
+    //jQuery(".archive-table").closest(".dt-container ").remove();
+    if(data.rows) {
+        jQuery(".page .archive-table tbody").append(data.rows);
+        //setDataTable();
+    }
+    show_slider_message(data.message);
+    //alert(data.msg);
 }
 
 function choose_supplier_column_mapping(form, data){

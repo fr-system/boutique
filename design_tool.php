@@ -596,7 +596,7 @@ function get_tr_data($table_name, $data, $key,$attr){
         if (isset($column["create_input"])) {
         } else {
             if (isset($column["hide_in_table"]) || !isset($column["label"]) ||
-                //isset($attr["add_text"]) && $column["field_name"] == "client_id" ||
+                isset($attr["add_text"]) && !empty($attr["add_text"]) && $column["field_name"] == "client_id" ||
                 is_agent() && $column["field_name"] == "agent_id") {
                 continue;
             }
@@ -616,7 +616,7 @@ function get_tr_data($table_name, $data, $key,$attr){
         }
         $column_value = get_column_value($column, $row, $field, $list, $key);
         //write_log("value ".$column_value);
-        $hidden = (isset($column["widget"]) && $column["widget"]== "hidden"?' hidden':'');
+        $hidden = "";//(isset($column["widget"]) && $column["widget"]== "hidden"?' hidden':'');
         $html .= '<td ' . $data_id . ' class="' . $field .$hidden .'">' . $column_value . '</td>';
         $columns_counter++;
         //}
@@ -642,31 +642,32 @@ function get_archive_table($table_name,$data,$attr)
     $page_info = BOUTIQUE_TABLES[$table_name];
     //'.$table_name.'
     $html = '<table name="" class="archive-table dataTable">
-        <thead><tr class="tr-head gold">';
+                <thead><tr class="tr-head gold">';
     if (isset($page_info["more_columns_in_table"])) {
         foreach ($page_info["more_columns_in_table"] as $column) {
             $html .= '<th class="' . (isset($column["label"]) ? '' : 'no-sort') . '">' . (isset($column["label"]) ? $column["label"] : '') . '</th>';
         }
     }
 
-            if(is_manager() && $table_name == "collection" && !isset($_GET["payed"])){
-                echo '<th class="no-sort"></th>';
-            }
-            if(!isset($page_info["update_remove"]) || $page_info["update_remove"] == true) {
-                if (is_manager() || is_agent() && $table_name == "orders") {//update-readonly
-                    echo '<th class="no-sort" style="width:10px"></th>';
-                }
-                if (is_manager()) {//remove
-                    echo '<th class="no-sort" style="width:20px"></th>';
-                }
-            }
+    if(is_manager() && $table_name == "collection" && !isset($_GET["payed"])){
+        $html .= '<th class="no-sort"></th>';//בשביל עדכון תשלום
+    }
+
+    if(!isset($page_info["update_remove"]) || $page_info["update_remove"] == true) {
+        if (is_manager() || is_agent() && $table_name == "orders") {//update/readonly
+            $html .= '<th class="no-sort" style="width:10px"></th>';
+        }
+        if (is_manager()) {//remove
+            $html .= '<th class="no-sort" style="width:20px"></th>';
+        }
+    }
 
     foreach ($page_info["columns"] as $column) {
         if (isset($column["create_input"])) {
-            //echo '<th class="no-sort"></th>';
+            //$html .= '<th class="no-sort"></th>';
         } else {
             if (isset($column["hide_in_table"]) || !isset($column["label"]) ||
-                //isset($attr["add_text"]) && $column["field_name"] == "client_id" ||
+                isset($attr["add_text"]) && !empty($attr["add_text"]) && $column["field_name"] == "client_id" ||
                 is_agent () && $column["field_name"] == "agent_id") {
                 continue;
             }
