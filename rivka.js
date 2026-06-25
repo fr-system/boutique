@@ -271,6 +271,7 @@ function calculatePrice(me){
     var calculatedPrice = (unitPrice*count) - (unitPrice*count*discountPercent/100);
     //product.find(".total span").html(calculatedPrice);
     product.find(".total input").autoNumeric('set',calculatedPrice).trigger("change");
+    //product.find('td.order_id input').val();
 }
 
 /*

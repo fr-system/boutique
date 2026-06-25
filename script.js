@@ -174,13 +174,11 @@ jQuery(document).ready(function($){
             return;
         }
 
-        if (getParameterByName("subject") == "orders" && jQuery('.page.single').length > 0){
-            $form.find('table[name=order_products] td.count input').filter(function () {
+        if (getParameterByName("subject") == "orders" && jQuery('.page.single').length > 0){//עמוד הזמנה
+            var inputs = $form.find('table td.count input').filter(function () {//אם לא נבחר כמות למוצר לא לשמור בהזמנה
                 return jQuery(this).val() === '';
-            }).prop('disabled', true);
-
-            //&& jQuery('table[name=order_products] td.count input').length == 0) {
-            //return;
+            })
+            inputs.closest('tr').find('input').prop('disabled', true);
         }
 
         $form.addClass('disabled').find('[type="submit"]').prop('disabled', true);

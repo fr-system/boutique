@@ -23,14 +23,15 @@ function get_single_view($table_name,$row,$readonly)
                         //מביא את כל טבלת מוצרים
                         //מביא את טבלת ספקים
                         $target_table_rows = get_data_table($column["target_table"]);
-                        $id_field = substr($column["target_table"], 0, -1) . "_id";
+                        $sub_table_id = substr($column["target_table"], 0, -1) . "_id";
+                        $parent_table_id= $column["field_id"];
                         //עוברים על טבלת מוצרים אם יש את המוצר בהזמנה מכניסים את את הכמות לשורה של המוצר
                         //עוברים על טבלת ספקים ואם יש ספק כזה עם יעד מעודכן לסוכן מעדכנים בליסט
 
                         $filters = array();
                         $sub_table = $column["field_name"];
                     if (isset($row->id)) {
-                        $filters[] = array("filter_field" => $column["field_id"], "filter_value" => $row->id);
+                        $filters[] = array("filter_field" => $parent_table_id, "filter_value" => $row->id);
                         //מביא את המוצרים שרשומים בהזמנה הזו
                         //מביא את היעדים של הספקים לסוכן זה
                         $value = get_data_table($sub_table, $filters);
@@ -43,8 +44,8 @@ function get_single_view($table_name,$row,$readonly)
                             $id = $table_row->id;
                             $results = array();
                             if (isset($row->id)) {
-                                $results = array_filter($value, function ($r) use ($id, $id_field) {
-                                    return $r->$id_field == $id;
+                                $results = array_filter($value, function ($r) use ($id, $sub_table_id) {
+                                    return $r->$sub_table_id == $id;
                                 });
                             }
 
@@ -56,10 +57,10 @@ function get_single_view($table_name,$row,$readonly)
                                 $item = array_pop($results);
                                 $exist_in_sub_table = true;
                             }
-
-                            $table_row->id = $exist_in_sub_table ? $item->id : "";
-                            $table_row->$id_field = $id;
-
+                            $table_row->id = $exist_in_sub_table ? $item->id : "";//ID של טבלת רבים לרבים
+                            $table_row->$sub_table_id = $id; // ID של הפריט (מוצר או יעד)
+                            $table_row->$parent_table_id = $row->id;
+                            write_log ('table row '.json_encode ($table_row));
                             foreach ($sub_columns as $column1) {//מכניסים את שאר השדות בתוך שורה של מוצר
                                 if ($table_name == "agents") {
                                     $table_row->target = $exist_in_sub_table ? ($item->target || "") : "";
@@ -70,8 +71,9 @@ function get_single_view($table_name,$row,$readonly)
                                     $field_name = $column1["field_name"];
                                     if ($field_name == "order_price") {
                                         //$price = $table_row->price;
-                                        $table_row->order_price = 0;
+                                      //  $table_row->order_price = 0;
                                         if ($exist_in_sub_table) {
+                                            $price = $item->order_price;
                                         }
                                         else {
                                             if (!empty($table_row->client_price)) {//מחיר מיוחד ללקוח
@@ -79,19 +81,19 @@ function get_single_view($table_name,$row,$readonly)
                                             }
                                             else {
                                                 $price = empty($table_row->price)? 0 :$table_row->price ;
-
                                             }
-                                            $table_row->order_price = $price;
                                         }
-                                    } else {
+                                        $table_row->order_price = $price;
+                                    }
+                                    elseif ($field_name != $sub_table_id && $field_name != $parent_table_id ){
                                         //write_log("field_name ".$field_name);
-
                                         $table_row->$field_name = isset($item->$field_name) ? $item->$field_name : "";
                                     }
                                 }
                             }
                     }
                     $list = $target_table_rows;
+                        write_log ('list input '.json_encode ($list));
                 }
                 else {
                     $field_name = isset($column["field_name"]) ? $column["field_name"] : null;
