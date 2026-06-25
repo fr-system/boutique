@@ -5,7 +5,7 @@ function run_query($query, $type="")
 {
     //write_log("qu ".$query);
     global $wpdb;
-
+   // write_log ('run query '. $query );
     if ($type == "execute") {
         $result = $wpdb->query($query);
     } else {

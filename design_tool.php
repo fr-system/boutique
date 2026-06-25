@@ -640,6 +640,7 @@ function get_tr_data($table_name, $data, $key,$attr){
 function get_archive_table($table_name,$data,$attr)
 {
     $page_info = BOUTIQUE_TABLES[$table_name];
+    //'.$table_name.'
     $html = '<table name="" class="archive-table dataTable">
         <thead><tr class="tr-head gold">';
     if (isset($page_info["more_columns_in_table"])) {

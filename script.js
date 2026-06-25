@@ -174,8 +174,13 @@ jQuery(document).ready(function($){
             return;
         }
 
-        if (getParameterByName("subject") == "orders" && jQuery('.page.single').length > 0 && jQuery('.products-gallery .product').length == 0) {
-            return;
+        if (getParameterByName("subject") == "orders" && jQuery('.page.single').length > 0){
+            $form.find('table[name=order_products] td.count input').filter(function () {
+                return jQuery(this).val() === '';
+            }).prop('disabled', true);
+
+            //&& jQuery('table[name=order_products] td.count input').length == 0) {
+            //return;
         }
 
         $form.addClass('disabled').find('[type="submit"]').prop('disabled', true);
@@ -183,7 +188,6 @@ jQuery(document).ready(function($){
         //.then(function (token) {
         $form.find('#form_error_msgs_container').html('');
 
-        //var formData = $form.serializeArray();
         if(jQuery(clickedButton).hasClass("block-client")){
             var blocked = "0";
             if(jQuery('input[name=blocked]').val()!="1"){
@@ -192,8 +196,8 @@ jQuery(document).ready(function($){
             jQuery('input[name=blocked]').val(blocked);
         }
 
-            var formData = new FormData($form[0]);
-            formData.append('action', 'send_site_forms');
+        var formData = new FormData($form[0]);
+        formData.append('action', 'send_site_forms');
 
         if (xhr && xhr.readyState != 4)
             xhr.abort();
