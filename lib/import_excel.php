@@ -14,7 +14,7 @@ function import_from_xlsx()
     $count_success=0;
     $count_exists = 0;
     if (empty($_FILES) || ($_FILES["bills"]["size"] == 0)) {
-        write_log("_FILES ".json_encode($_FILES));
+        //write_log("_FILES ".json_encode($_FILES));
         write_log("empty_FILES ");
         die(json_encode(array(
             'status' => 'error',
@@ -43,6 +43,7 @@ function import_from_xlsx()
            // $excel_rows=[];
             $html_rows='';
             $html_options = "<option value=''></option>";
+            $html = "";
             foreach ($rows as $key=>$row){
                 $html_rows.="<tr>";
                 foreach ($row as $c=>$col){
@@ -122,14 +123,16 @@ function import_from_xlsx()
                 write_log ('row_to_table ' . json_encode ($row_to_table));
                 $result = pre_action_query ("collection", $row_to_table);
                 write_log ('pre_action_query ' . json_encode ($result));
-                $ok = run_action_query ("collection", null, "new", $result);
+                //$ok = run_action_query ("collection", null, "new", $result);
+                $ok = 1;
                 if ($ok) {
+                    $html .= get_tr_data ("collection", $result, null, array());
                     $count_success++;
                 }
                 // write_log(json_encode ( $row));
             }
             if($count_exists>0){
-                $msg = "חלק מהחשבוניות כבר קיימות במערכת";
+                $msg = "חלק מהחשבוניות כבר קיימות במערכת\n";
             }
             if ($count_success == 0 && $count_exists ==0) {
                 $msg = "אירעה שגיאה בעת קליטת הקובץ , הרשומות לא נקלטו";
@@ -146,22 +149,15 @@ function import_from_xlsx()
     else{
         write_log ('file no exist');
     }
+
     write_log ('import collaction '.$msg);
-    $table_name="collection";
-    $filters =array( array("filter_field" => "payment_date", "filter_type" => "null"));
-    write_log ('get_data_table');
-    $result = get_data_table($table_name,$filters);
-    write_log ('get_data_table result '.json_encode ($result));
-    $collection_table=  get_archive_table ($table_name,$result,array());
-    write_log ('get_archive_table result '.json_encode ($collection_table));
-    //add_notice( 'import_excel' ,$msg );
-    echo json_encode (array(
+
+    wp_send_json([
         'status' => 'success',
-        'msg' => $msg, //'הקובץ נקלט בהצלחה',
-        'collection_table'=>$collection_table,
+        'message' => $msg, //'הקובץ נקלט בהצלחה',
+        'rows'=>$html,
         //'redirect' => isset($_POST["previous_page"]) ? $_POST["previous_page"]:'',
-    ));
-    wp_die();
+    ]);
 }
 
 function excel_date_to_php_date($excel_date)
@@ -178,7 +174,7 @@ function save_list_data(){
     $fields["supplier_id"]=$_POST["supplier_id"];
     write_log ('post  field name '.json_encode ($_POST['field_name']));
     foreach ($_POST['field_name'] as $field_name => $column_index){
-        if($column_index=="") continue;
+        if(empty($column_index)) continue;
         $fields["field_name"]=$field_name;
         $fields["excel_column_index"]=$column_index;
         $result =pre_action_query ($table_name,$fields);
@@ -187,7 +183,7 @@ function save_list_data(){
 
     echo json_encode (array(
         'status' => 'success',
-        'msg' => 'נשמרו השדות לספק' //'הקובץ נקלט בהצלחה',
+        'message' => 'נשמרו השדות לספק' //'הקובץ נקלט בהצלחה',
         //'redirect' => isset($_POST["previous_page"]) ? $_POST["previous_page"]:'',
     ));
     wp_die();

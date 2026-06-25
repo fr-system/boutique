@@ -12,7 +12,7 @@ $page_info  = BOUTIQUE_TABLES[$table_name];
 <section class="page part-80" data-single="<?php echo $page_info['single']?>">
     <?php
     $filters = array();
-    $add_text = "";
+    $add_text = null;
     $client_id = null;
     $blocked = null;
     $lastKey = array_key_last($_GET);
