@@ -111,8 +111,13 @@ tr.product td.count span,tr.product td.count input{
     border:solid 1px var(--b-global-color-dark-gray);
     height: 30px;
 }
+tr.product td.count span:hover{
+    /*border:solid 2px black /*var(--b-global-color-dark-gray);*/
+    box-shadow: 2px 2px 6px 1px rgba(0, 0, 0, 0.13);
+    background-color: var(--b-global-color-dark-gray);
+}
 .product td.count input{
-    width: 30px;
+    width: 45px;
     text-align: center;
     moz-appearance: textfield;
     padding: 0;
@@ -122,9 +127,10 @@ tr.product td.count span,tr.product td.count input{
     height: 100%;
     padding: 1px;
 }
-tr.product td.count .plus:hover, tr.product td.count .minus:hover{
-    background-color: var(--b-global-color-light-gray);
-}
+/*tr.product td.count .plus:hover, tr.product td.count .minus:hover{*/
+/*    background-color: var(--b-global-color-light-gray);*/
+/*    outline: auto;*/
+/*}*/
 tr.product td.count .plus.readonly:hover, tr.product td.count .minus.readonly:hover{
     background-color: var(--b-global-color-dark-gray);
 }
@@ -365,7 +371,6 @@ input[type="radio"] + label:before {
     background-color: var(--b-global-color-gold);
     border: none;
 }
-
 .input-label a{
     margin: 0;
     padding: 0;
@@ -375,9 +380,19 @@ input[type="radio"] + label:before {
     height: 25px;
 }
 .input-label table tr input{
-    width: 50px;
-    height: 20px;
-    padding: 0;
+    width: 80px;
+    height: 25px;
+    padding: 7px 12px;
+    border: 1px solid transparent;
+}
+.input-label table tr input[readonly]{
+    width: 150px;
+}
+.input-label table tr input:not([readonly]):focus,.input-label table tr input:not([readonly]):hover{
+   /* outline: 0.5px auto /*var(--b-global-color-dark-gray)*/;
+    box-shadow: 2px 2px 6px 1px rgba(0, 0, 0, 0.13);
+    border: 1px solid var(--b-global-color-dark-gray);
+    border-radius: 5px;
 }
 tr.order-confirm{
     background-color: var(--b-global-color-light-gray);
@@ -385,9 +400,6 @@ tr.order-confirm{
 }
 tr.order-confirm td{
     border-color: var(--b-global-color-light-gray)
-}
-td.actions a{
-
 }
 td a.button{
     margin: 0;

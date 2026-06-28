@@ -63,7 +63,6 @@ function get_single_view($table_name,$row,$readonly)
                             $table_row->id = $exist_in_sub_table ? $item->id : "";//ID של טבלת רבים לרבים
                             $table_row->$sub_table_id = $id; // ID של הפריט (מוצר או יעד)
                             $table_row->$parent_table_id = $row->id;
-                            write_log ('table row '.json_encode ($table_row));
                             foreach ($sub_columns as $column1) {//מכניסים את שאר השדות בתוך שורה של מוצר
                                 if ($table_name == "agents") {
                                     $table_row->target = $exist_in_sub_table ? ($item->target || "") : "";
@@ -96,7 +95,7 @@ function get_single_view($table_name,$row,$readonly)
                             }
                     }
                     $list = $target_table_rows;
-                        write_log ('list input '.json_encode ($list));
+
                 }
                 else {
                     $field_name = isset($column["field_name"]) ? $column["field_name"] : null;

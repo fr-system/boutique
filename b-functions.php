@@ -54,7 +54,7 @@ function get_side_menu()
 </div>
 <?php }
 function option_if_set($set,$option){
-    return  (isset($set[$option]) ? "$option=\"".$set[$option]."\"" : "" );
+    return  (isset($set[$option]) ? "$option='".$set[$option]."'" : "" );
 }
 
 add_action('wp_ajax_get_list_ajax', 'get_list_ajax');
@@ -192,12 +192,14 @@ function get_column_value($column,$row,$field,$list,$key)
                 }
             }
             $readonly = isset($column["widget"]) && $column["widget"]== "readonly"?' readonly ':'';
+            $type =  isset($column["widget"]) && $column["widget"]== "hidden" ? 'hidden':'text';
+
             if(isset($column["create_input"])){
-                $column_value =($readonly? '': '<span class="hidden">'. $column_value .'</span>').
-                    ($column["widget"] == "number" ? '<span class="minus bold font-25  pointer">-</span>' :'' ).
-                    '<input type="text" class="" name="rows[' . $key . '][' . $field . ']" value="' . $column_value . '" '.$readonly.
-                    (isset($column["un_apostrophe"]) && isset($column["sign"]) ? 'data-a-sign="'.$column["sign"].'"':'').'/>'.
-                    ($column["widget"] == "number" ? '<span class="plus bold font-25  pointer">+</span>':'');
+                $column_value =($readonly? "": "<span class='hidden'>{$column_value}</span>").
+                    ($column['widget'] == 'number' ? "<span class='minus bold font-25  pointer'>-</span>" :"" ).
+                    "<input type='{$type}' class='' name='rows[{$key}][{$field}]' value='{$column_value}' {$readonly}".
+                    (isset($column['un_apostrophe']) && isset($column['sign']) ? "data-a-sign='".$column['sign']."'":"")."/>".
+                    ($column['widget'] == 'number' ? "<span class='plus bold font-25  pointer'>+</span>":"");
             }
             break;
     }
