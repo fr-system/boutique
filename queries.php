@@ -116,19 +116,18 @@ function save_single_data()
     $id = isset($_POST["id"]) ? $_POST["id"] : null;
     run_action_query ($table_name, $id, $action, $result);
     if (!$_POST["id"]) {
-        $id = $wpdb->get_var ("SELECT MAX(id) FROM {$wpdb->prefix}" . $table_name);
+        $id = $wpdb->insert_id;
+        //$id = $wpdb->get_var ("SELECT MAX(id) FROM {$wpdb->prefix}" . $table_name);
     }
 
     //write_log("save_single_data " .json_encode($_POST));
     if (($table_name == "orders" || $table_name == "agents") && isset($_POST["rows"])) {
         foreach ($_POST["rows"] as $row) {
-
             if ($table_name == "agents") {
-                if (empty($row["target"]) ) {
-                    if($row["id"]) {
+                if (empty($row["target"])) {
+                    if ($row["id"]) {
                         $row["remove"] = true;
-                    }
-                    else{
+                    } else {
                         continue;
                     }
                 }
@@ -137,24 +136,23 @@ function save_single_data()
             }
 
             if ($table_name == "orders") {
-                if (!empty($row["count"])) {
-                    if ($action == "new") {
-                        $row["order_id"] = $id;
-                    }
-
-                    $sub_table_name = "order_products";
-
-                    // write_log("row order product" . json_encode($row));
+                if (empty($row["count"]) && !empty($row["id"])) {
+                    $row["remove"] = true;
                 }
+                if ($action == "new") {
+                    $row["order_id"] = $id;
+                }
+                $sub_table_name = "order_products";
+                // write_log("row order product" . json_encode($row));
             }
 
             $action_product = (isset($row["id"]) && !empty($row["id"])) ?
                 (isset($row["remove"]) && $row["remove"] ? "remove" : "update") : "new";
-
-            //write_log("row to save" . json_encode($row));
-            $result = pre_action_query($sub_table_name, $row);
+            write_log ("action_product " . $action_product);
+            write_log ("row to save" . json_encode ($row));
+            $result = pre_action_query ($sub_table_name, $row);
             //write_log("result to save" . json_encode($result));
-            run_action_query($sub_table_name, $row["id"], $action_product, $result);
+            run_action_query ($sub_table_name, $row["id"], $action_product, $result);
         }
     }
     echo json_encode (array(
