@@ -26,7 +26,7 @@ const BOUTIQUE_TABLES = array(
             array("field_name" => "accounting_phone_number", "widget" => "text", "label" => "טלפון הנה\"ח","hide_in_table"=>true),
             array("field_name" => "obligo", "un_apostrophe" => true, "widget" => "text", "label" => "אובליגו","sign"=>"₪"),
             array("field_name" => "doc_type","widget" => "file", "label" => "שטר חוב","hide_in_table"=>true),
-            array("field_name" => "blocked", "widget" => "hidden"),
+            array("field_name" => "blocked", "widget" => "hidden","create_input"=>true),
 
 
         ),

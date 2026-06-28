@@ -350,10 +350,8 @@ jQuery(document).ready(function($){
         var postData = [
             {name: "action", value: "on_order_confirmation"},
             {name: "order_id", value: getParameterByName("id")},
-            {name: "order_id", value: getParameterByName("id")},
         ];
-        call_ajax_function(postData);
-
+        call_ajax_function(postData,"onOrderConfirmation");
     })
 
     jQuery('#accept_process_modal').on('hide.bs.modal', function (e) {

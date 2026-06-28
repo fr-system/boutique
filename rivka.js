@@ -22,7 +22,7 @@ function fillOrderId(result){
 
     if(!jQuery("input[name=id]").val()) {
         window.history.pushState({}, '', 'single/?subject=orders&action=edit&id='+result.id);
-        jQuery("input[name=id]").val(result.id);
+        jQuery("section form input[name=id]").val(result.id);
         var selectedOption = jQuery("section select[name=client_id]").find('option:selected');
         getObligationClient(selectedOption.val());
     }
@@ -272,6 +272,12 @@ function calculatePrice(me){
     //product.find(".total span").html(calculatedPrice);
     product.find(".total input").autoNumeric('set',calculatedPrice).trigger("change");
     //product.find('td.order_id input').val();
+}
+function onOrderConfirmation(){
+    jQuery(".order-confirmation").hide();
+    setTimeout(function (){
+        window.location.href = '/archive/?subject=orders';
+    },5000)
 }
 
 /*

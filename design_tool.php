@@ -5,13 +5,16 @@ function get_single_view($table_name,$row,$readonly)
     <?php
     $columns = BOUTIQUE_TABLES[$table_name]["columns"];
     foreach($columns as $column){
-        if(!isset($column["widget"]) ||$column["widget"] == "hidden"){continue;}
+        if(!isset($column["widget"]) || $column["widget"] == "hidden" && !isset($column["create_input"])){continue;}
         $add_class = "";
         if($column["widget"] == "table") {
             $add_class = " direction-column ";
         }
+        if($column["widget"] == "hidden"){
+            $add_class.=" hidden ";
+        }
         ?>
-        <div class="input-label flex-display <?php echo $column["widget"] != "textarea" && $column["widget"] != "table"  ? 'align-center' :'stretch' . $add_class?> ">
+        <div class="input-label flex-display <?php echo  $add_class . ($column["widget"] != "textarea" && $column["widget"] != "table"  ? 'align-center' :'stretch') ?> ">
             <?php if (isset($column["label"])){?>
                 <label class="bold <?= $column["widget"]== "textarea"? 'textarea-label':''?>" for="<?php echo $column["field_name"] ?>"><?php echo $column["label"].":"?></label>
             <?php }

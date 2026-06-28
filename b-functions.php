@@ -216,11 +216,6 @@ function on_order_confirmation(){
                   WHERE id = ".$order_id;
         //run_query ($query);//זה עובד טוב פשוט חבל כל הזמן שיאשר ויפריע לבדיקות!!!!
 
-        /*echo json_encode(array(
-            'status' => 'success',
-            'redirect' => $_POST["previous_page"],
-        ));
-        die();*/
         $filters= array(array("filter_field" => "id", "filter_value"=>$order_id));
         $order_confirmation = get_data_table("orders",$filters)[0];
 
@@ -235,9 +230,9 @@ function on_order_confirmation(){
 
         $order_supplier = array();
         //write_log("products ".json_encode($products));
-        foreach ($products as $product){
-            //write_log("product ".json_encode($product));
-            $p = get_data_table("products",array(array("filter_field" => "id", "filter_value"=>$product->product_id)))[0];
+        foreach ($products as $product_in_order){
+            //write_log("product ".json_encode($product_in_order));
+            $p = get_data_table("products",array(array("filter_field" => "id", "filter_value"=>$product_in_order->product_id)))[0];
             //write_log("p ".json_encode($p));
 
             if(!empty($p->supplier_id)) {
@@ -245,34 +240,41 @@ function on_order_confirmation(){
                 if (!is_array($order_supplier[$p->supplier_id])) {
                     $order_supplier[$p->supplier_id] = array();
                 }
-                $product->name = $p->name;
-                $order_supplier[$p->supplier_id][] = $product;
+                $product_in_order->name = $p->name;
+                $order_supplier[$p->supplier_id][] = $product_in_order;
             }
 
-            if($product->order_individual){
+            if($product_in_order->order_individual){
                 $count = "בקבוקים";
             }
             else{
                 $count = "ארגזים";
             }
-            $body .= $p->name." כמות: ".$product->count." ".$count." :מחיר ".$product->price."₪";
-            if(!empty($product->bonus)){
-                $body .= " בונוס ".$product->bonus;
+            $body .= $p->name." כמות: ".$product_in_order->count." ".$count." :מחיר ".$product_in_order->order_price." ₪";
+            if(!empty($product_in_order->bonus)){
+                $body .= " :בונוס ".$product_in_order->bonus;
             }
-            if(!empty($product->discount_percent)){
-                $body .= " הנחה של ".$product->discount_percent."%";
+            if(!empty($product_in_order->discount_percent)){
+                $body .= " :הנחה של ".$product_in_order->discount_percent."%";
             }
             $body .= "<br>";
         }
 
         //write_log("order_supplier ".json_encode($order_supplier));
 
-        $body .= 'סה"כ לתשלום:'.$order_confirmation->total."₪"."<br>";
+        $body .= 'סה"כ לתשלום: '.$order_confirmation->total." ₪"."<br>";
         if(!empty($order_confirmation->notes)) {
             $body .= "<br>הערות: " . $order_confirmation->notes;
         }
         //write_log("to ".$client->email." body ".$body);
         //send_mail($client->email,"סיכום הזמנתך מס. ".$order_id,$body);
+
+        $user = get_user_by('ID', $order_confirmation->user_opens);
+        if($user!=null) {
+            get_user_display_name($user);
+            $body = "הסוכן " .get_user_display_name($user). "<br>" . $body;
+            //send_mail(/*get_option('admin_email')*/"rym76843@gmail.com", "הזמנה מאושרת ללקוח " . $client->name, $body);
+        }
         //write_log("list ".json_encode($order_supplier));
         //שליחת מייל לכל ספק על ההזמנה בשבילו
         foreach ($order_supplier as $key=>$order){
@@ -309,7 +311,7 @@ function on_order_confirmation(){
         wp_send_json([
             'status' => 'success',
             "message" => "ההזמנה אושרה! נשלחו הודעות במייל ללקוח ולספקים",
-            'redirect' => isset($_POST["previous_page"]) ? $_POST["previous_page"]:'',
+            //'redirect' => isset($_POST["previous_page"]) ? $_POST["previous_page"]:'',
         ]);
     }
 }
@@ -450,26 +452,28 @@ function is_needed_apostrophe($widget,$un_apostrophe,$save_as_text)
 add_action('wp_ajax_get_obligation_client', 'get_obligation_client');
 function get_obligation_client()
 {
-    $filters = array();
-    $filters[]=array("filter_field" => "id", "filter_value" => $_POST["client_id"]);
-    $client = get_data_table("clients", $filters)[0];
+    $res = get_obligation_client_id($_POST["client_id"]);
+    echo json_encode ($res);
+    die();
+}
 
+function get_obligation_client_id($client_id)
+{
     $filters = array();
-    $filters[]=array("filter_field" => "client_id", "filter_value" => $_POST["client_id"]);
+    $filters[]=array("filter_field" => "client_id", "filter_value" => $client_id);
     $filters[]=array("filter_field" => "payment_date", "filter_type" => "null");
     $result = get_data_table("collection", $filters);
     //write_log("eres ".json_encode($result));
     $obligo = 0;
     foreach ($result as $row){
-
         $obligo+=$row->obligation;
     }
 
-    //write_log("obligo ".$obligo);
-    echo json_encode (array("obligation" => $obligo > $client->obligo));
-    die();
+    $client = get_data_table("clients", array(array("filter_field" => "id", "filter_value" => $client_id)))[0];
+    return array("obligation" => $obligo,"client_obligo" => $client->obligo);
 
 }
+
 add_action('wp_ajax_sent_to_manager', 'sent_to_manager');
 function sent_to_manager()
 {
