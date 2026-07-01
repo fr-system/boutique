@@ -50,11 +50,6 @@ if (isset($_SERVER['HTTP_REFERER'])) {
 
 if($table_name == "orders"){
     $part_left_side="part-100 ";
-    $obligo = 0;
-    if($row->client_id){
-        $res = get_obligation_client_id($row->client_id);
-        $obligo = $res["obligation"];
-    }
 }
 else{
     $part_left_side="part-65 ";
@@ -142,19 +137,13 @@ else{
                                 <span><?php echo $block_text ?></span>
                             </button>
 
-                 <?php
-                }
-                 if($table_name == "orders" ){
+                <?php }
+                if($table_name == "orders" ){
                      ?>
-                     <input type="hidden" name="obligation" value="<?php echo $obligo ?>" />
+
                      <?php
-                     if(!isset($row->done) || !$row->done){
-                         $_class = "";
-                         if($obligo > 0 && !is_manager()){
-                             $_class = 'hidden';
-                         }
-                         ?>
-                            <button type="button" class="<?php echo $_class ?> order-confirmation flex-display center align-center background-white dark-green bold font-18">
+                     if(!isset($row->done) || !$row->done){?>
+                            <button type="button" class="hidden order-confirmation flex-display center align-center background-white dark-green bold font-18">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 16 16" fill="none">
                                     <path d="M10.8474 7.14639C10.9411 7.24016 10.9937 7.36731 10.9937 7.49989C10.9937 7.63248 10.9411 7.75963 10.8474 7.85339L8.09736 10.6034C8.00359 10.6971 7.87644 10.7498 7.74386 10.7498C7.61127 10.7498 7.48412 10.6971 7.39036 10.6034L6.14036 9.35339C6.04928 9.25909 5.99888 9.13279 6.00002 9.00169C6.00116 8.87059 6.05374 8.74519 6.14645 8.65248C6.23915 8.55978 6.36456 8.50719 6.49566 8.50606C6.62675 8.50492 6.75305 8.55531 6.84736 8.64639L7.74386 9.54289L10.1404 7.14639C10.2341 7.05266 10.3613 7 10.4939 7C10.6264 7 10.7536 7.05266 10.8474 7.14639Z" fill="#1A7870"/>
                                     <circle cx="8.5" cy="8.5" r="6" stroke="#1A7870"/>
@@ -163,10 +152,8 @@ else{
                             </button>
                          <?php
                         if(!is_manager() ){
-                            $_class = '';
-                            if($obligo == 0){ $_class = 'hidden';}
                             ?>
-                            <button type="button" class="manager-approval <?= $_class ?> flex-display center align-center background-white dark-green bold font-18">
+                            <button type="button" class="manager-approval hidden flex-display center align-center background-white dark-green bold font-18">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 16 16" fill="none">
                                     <path d="M10.8474 7.14639C10.9411 7.24016 10.9937 7.36731 10.9937 7.49989C10.9937 7.63248 10.9411 7.75963 10.8474 7.85339L8.09736 10.6034C8.00359 10.6971 7.87644 10.7498 7.74386 10.7498C7.61127 10.7498 7.48412 10.6971 7.39036 10.6034L6.14036 9.35339C6.04928 9.25909 5.99888 9.13279 6.00002 9.00169C6.00116 8.87059 6.05374 8.74519 6.14645 8.65248C6.23915 8.55978 6.36456 8.50719 6.49566 8.50606C6.62675 8.50492 6.75305 8.55531 6.84736 8.64639L7.74386 9.54289L10.1404 7.14639C10.2341 7.05266 10.3613 7 10.4939 7C10.6264 7 10.7536 7.05266 10.8474 7.14639Z" fill="#1A7870"/>
                                     <circle cx="8.5" cy="8.5" r="6" stroke="#1A7870"/>
@@ -175,7 +162,7 @@ else{
                             </button>
                         <?php }
                      }
-                }
+                 }
                 ?>
             </div>
 

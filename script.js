@@ -363,38 +363,59 @@ jQuery(document).ready(function($){
     });
     jQuery('#edit-list').on('show.bs.modal', function (e) {
         var btn = jQuery(e.relatedTarget), comboListName,html='', tr,rowData=[];
-        var listName= jQuery("ul.tables-list li.selected").data("list-name");
-        jQuery("#edit-list input[name=table_name]").val(listName);
-        jQuery("#edit-list .modal-title").text(jQuery("ul.tables-list li.selected").text());
-        if(btn.data("action")=="edit"){
-            tr=btn.parent().parent();
-            rowData= jQuery.map(jQuery(tr).find('td:not(.td-action)'),function(td){
-                return jQuery(td).html();
-            });
-            jQuery('#edit-list input[name=id]').val(tr.data("id"));
+
+        var listName= "",title="";
+        if(window.location.pathname.includes('single')){
+            listName = btn.data("list-name");
+            title = btn.closest("div").find("label").html();
         }
-        jQuery('table.list-table tr:first-child th').each(function(k,th) {
-            th = jQuery(th)
-            var columnName = th.data("column-name");
-            var columnType = th.data("column-type") ?? "text";
-            html += '<span class="input-label flex-display align-center">' +
-                ' <label class="bold" for="' + columnName + '">' + th.text() + ':</label>';
-            if (th.data("column-type") == "select") {
-                html += '<select id="' + columnName + '" name="' + columnName + '"  class="font-17 grow"' +
-                    (rowData.length > 0 ? ' value="' + rowData[k] + '"' : '') + '>';
-                comboListName = th.data("table");
-                var postData = [
-                    {name: "action", value: "get_list_ajax"},
-                    {name: "table_name", value: comboListName},
-                    {name: "selected_value",value:  rowData[k]}
-                ];
-                call_ajax_function(postData,"fill_modal_list")
-            } else {
-                html += '<input type="text" id="' + columnName + '" name="' + columnName + '"  class="font-17 grow"' +
-                    (rowData.length > 0 ? ' value="' + rowData[k] + '"' : '') + '>';
+        else{
+            listName = jQuery("ul.tables-list li.selected").data("list-name");
+            title = jQuery("ul.tables-list li.selected");
+        }
+
+        jQuery("#edit-list input[name=table_name]").val(listName);
+        jQuery("#edit-list .modal-title").text(title);
+        if(window.location.pathname.includes('single')){
+            html = '<span class="input-label flex-display align-center">' +
+                ' <label class="bold" for="text">' + btn.data("single") + ':</label>'+
+                '<input type="text" id="text" name="text"  class="font-17 grow"' +
+                '</span>';
+        }
+        else {
+
+            if (btn.data("action") == "edit") {
+                tr = btn.parent().parent();
+                rowData = jQuery.map(jQuery(tr).find('td:not(.td-action)'), function (td) {
+                    return jQuery(td).html();
+                });
+                jQuery('#edit-list input[name=id]').val(tr.data("id"));
             }
-            html += '</span>';
-        });
+
+
+            jQuery('table.list-table tr:first-child th').each(function (k, th) {
+                th = jQuery(th)
+                var columnName = th.data("column-name");
+                var columnType = th.data("column-type") ?? "text";
+                html += '<span class="input-label flex-display align-center">' +
+                    ' <label class="bold" for="' + columnName + '">' + th.text() + ':</label>';
+                if (th.data("column-type") == "select") {
+                    html += '<select id="' + columnName + '" name="' + columnName + '"  class="font-17 grow"' +
+                        (rowData.length > 0 ? ' value="' + rowData[k] + '"' : '') + '>';
+                    comboListName = th.data("table");
+                    var postData = [
+                        {name: "action", value: "get_list_ajax"},
+                        {name: "table_name", value: comboListName},
+                        {name: "selected_value", value: rowData[k]}
+                    ];
+                    call_ajax_function(postData, "fill_modal_list")
+                } else {
+                    html += '<input type="text" id="' + columnName + '" name="' + columnName + '"  class="font-17 grow"' +
+                        (rowData.length > 0 ? ' value="' + rowData[k] + '"' : '') + '>';
+                }
+                html += '</span>';
+            });
+        }
         jQuery('#edit-list .modal-body').empty();
         jQuery('#edit-list .modal-body').append(html);
 
@@ -406,76 +427,64 @@ jQuery(document).ready(function($){
 
 
     jQuery('#bout-massage').on('hide.bs.modal', function (e,a) {
-        jQuery(this).find('button.remove-product-order').addClass("hidden");
+        jQuery(this).find('button.ajax-button').addClass("hidden");
         jQuery(this).find('button[type=submit]').show();
         jQuery(this).find('[name="remove"]').val(0);
     });
 
-    jQuery("#bout-massage button.remove-product-order").click(function (){
-        var id = jQuery('#bout-massage').find('[name="id"]').val();
-        if(id) {
-            var product = jQuery('.products-gallery .product[data-id=' + id + ']');
-            product.addClass("hidden");
-            product.find("input.input-remove").val("1");
-
-            var total_order = parseInt(jQuery(".page.single input[name=total]").autoNumeric('get')||0);
-            total_order-=parseInt( product.find('.calculaded-price').text()||0);
-            jQuery("input[name=total]").autoNumeric('set', total_order);
-        }
-        else{
-            $.each(jQuery('.products-gallery .product'),function () {
-                var product = jQuery(this);
-                if(product.find(".input-remove").val()=="1"){
-                    product.remove();
-                }
-            });
-        }
+    jQuery("#bout-massage button.ajax-button").click(function (){
+        //לקחת את הפונקציה של האז'אקס
+        var postData = [
+            {name: "action", value: jQuery("#bout-massage").find('[name="form_func"]').val()},
+            {name: "client_id", value: jQuery("#bout-massage").find('[name="id"]').val()},
+        ];
+        call_ajax_function(postData);
         closeModal()
     })
 
     jQuery('#bout-massage').on('show.bs.modal', function (e) {
         //action = remove
+        var title,body;
         var btn = jQuery(e.relatedTarget);
-        var subject = getParameterByName("subject");
-
-        var single = jQuery("body").find("section").data("single");
-        var title = jQuery("body").find(".page-title").html()
-
-        if(subject == "lists"){
-            subject = jQuery("ul.tables-list li.selected").data("list-name");
-            title = jQuery("ul.tables-list li.selected").html();
-            single = jQuery(".list-table .tr-head th:first-child").html();
-        }
-
-        if (getParameterByName("action")=="edit") {
-            id = getParameterByName("id");
-        } else if (btn.is('a')) {
-            id = btn.parent().parent().data("id");
-        }
-
-        if(subject == "orders"/* && getParameterByName("action")=="edit"*/ && btn.parent().parent().hasClass("product")){
-            single = "מוצר מההזמנה";
-            title = "הזמנות";
-            jQuery(this).find('button.remove-product-order').removeClass("hidden");
+        if(btn.data("ajax_func")){
+            title = btn.text().trim();
+            jQuery(this).find('button.ajax-button').removeClass("hidden");
             jQuery(this).find('button[type=submit]').hide();
-            if(getParameterByName("action")=="new"){
-                id="";
-                btn.parent().parent().find(".input-remove").val("1");
+            body = btn.data("text");
+            jQuery(this).find('[name="form_func"]').val(btn.data("ajax_func"));
+            jQuery(this).find('[name="id"]').val(btn.closest("tr").data("id"));
+        }
+        else {
+            var subject = getParameterByName("subject");
+
+            var single = jQuery("body").find("section").data("single");
+            title = jQuery("body").find(".page-title").html()
+
+            if (subject == "lists") {
+                subject = jQuery("ul.tables-list li.selected").data("list-name");
+                title = jQuery("ul.tables-list li.selected").html();
+                single = jQuery(".list-table .tr-head th:first-child").html();
             }
-            else{
+
+            if (getParameterByName("action") == "edit") {
+                id = getParameterByName("id");
+            } else if (btn.is('a')) {
                 id = btn.parent().parent().data("id");
             }
-            //id = btn.parent().parent().data("id");
-        }
-        else{
+
             jQuery(this).find('[name="remove"]').val(1);
             jQuery(this).find('[name="form_func"]').val("save_single_data");
             jQuery(this).find('[name="table_name"]').val(subject);
+
+
+            jQuery(this).find('[name="id"]').val(id);
+            body = "האם אתה מאשר למחוק את ה" + single + "?";
         }
 
-        jQuery(this).find('[name="id"]').val(id);
         jQuery("#bout-massage .modal-title").html(title);
-        jQuery("#bout-massage .modal-body").html("האם אתה מאשר למחוק את ה"+single+"?");
+        jQuery("#bout-massage .modal-body").html(body);
+
+
     });
 
 })
@@ -686,6 +695,11 @@ function fillListTable(result){
         jQuery(".page-title").html(result.options["title"]);
         show_tooltip();
     }
+    else if(result.options){
+        jQuery("select.subject").children().remove();
+        jQuery("select.subject").append(result.options);
+
+    }
     else{
         jQuery(".list-table").html("");
     }
@@ -721,18 +735,27 @@ function automaticOrderSaving(){
 function fill_modal_list(result){
     jQuery(".modal-body select").html(result.options);
 }
-function getTableAjaxData(tableName){
-    if(jQuery(tableName).is("form")){
+function getTableAjaxData(tableName) {
+    format = "table";
+    if (window.location.pathname.includes('single')) {
         closeModal();
-        var selected = jQuery("ul.tables-list li.selected")
-        tableName = selected.data("list-name");
+        tableName="subjects";
+        format = "options";
+        //selected_value =
+    } else {
+        if (jQuery(tableName).is("form")) {
+            closeModal();
+            var selected = jQuery("ul.tables-list li.selected")
+            tableName = selected.data("list-name");
+        }
     }
     var postData = [
-        {name: "format", value: "table"},
+        {name: "format", value: format},
         {name: "action", value: "get_list_ajax"},
         {name: "table_name", value: tableName},
     ];
-    call_ajax_function(postData,"fillListTable");
+    call_ajax_function(postData, "fillListTable");
+
 }
 function openModal(modalId,message){
     jQuery(modalId+'.modal').modal('show');

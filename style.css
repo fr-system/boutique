@@ -252,6 +252,10 @@ input, textarea, select, button{
 .flex-display .part-45{
     flex-basis:45% !important;
 }
+.flex-display .part-49{
+    flex-basis:49% !important;
+}
+
 .flex-display .part-50{
     flex-basis:50% !important;
 }
@@ -332,6 +336,9 @@ input, textarea, select, button{
 }
 .margin-r-30{
     margin-right: 30px;
+}
+.margin-r-10{
+    margin-right: 10px !important;
 }
 .margin-20{
     margin: 20px;
@@ -444,19 +451,7 @@ td {
     border-top: var(--b-global-color-dark-gray) 1px solid !important;
     border-bottom: var(--b-global-color-dark-gray) 1px solid !important;
 }
-/* עיצוב לעמודה הראשונה */
-td:first-child {
-    padding-right: 10px !important;
-   border-top-right-radius: 12px;
-    border-bottom-right-radius: 12px;
-   border-right: var(--b-global-color-dark-gray) 1px solid;
-}
-/* עיצוב לעמודה האחרונה */
-td:last-child {
-    border-top-left-radius: 12px;
-    border-bottom-left-radius: 12px;
-    border-left: var(--b-global-color-dark-gray) 1px solid;
-}
+
 .archive-table thead {
     height: 55px;
 }
@@ -524,6 +519,22 @@ table.dataTable>tbody>tr>td{
 }
 tr.blocked{
     background-image: repeating-linear-gradient(302deg, #ffffff, #f4f4f4 10px);
+}
+/* עיצוב לעמודה הראשונה */
+table.dataTable tbody tr td:first-child{
+    padding-right: 10px !important;
+    border-top-right-radius: 12px;
+    border-bottom-right-radius: 12px;
+    border-right: var(--b-global-color-dark-gray) 1px solid;
+}
+table.dataTable thead tr th:first-child {
+    padding-right: 10px !important;
+}
+/* עיצוב לעמודה האחרונה */
+table.dataTable tbody tr td:last-child{
+    border-top-left-radius: 12px;
+    border-bottom-left-radius: 12px;
+    border-left: var(--b-global-color-dark-gray) 1px solid;
 }
 /* popups */
 

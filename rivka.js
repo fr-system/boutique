@@ -1,8 +1,20 @@
 function fillObligation(results){
-    jQuery("input[name=obligation]").val(results.obligation);
 
-    if(results.obligation){
-        jQuery(".manager-approval").removeClass("hidden");
+    if(jQuery('.page.single form .grid-display .obligation').length == 0) {
+        getSelectClientId().after('<span class="margin-before-10 color-red obligation"></span>');
+    }
+    var spanObligation =jQuery('.page.single form .grid-display .obligation');
+    //spanObligation.html(results.obligation);
+
+    if(results.obligation > results.client_obligo){
+        spanObligation.text('חוב מעבר לאובליגו'+" "+"₪" + (results.obligation - results.client_obligo).toLocaleString() );
+        if(jQuery(".manager-approval").length > 0) {
+            jQuery(".manager-approval").removeClass("hidden");
+        }
+        else{
+            jQuery(".order-confirmation").removeClass("hidden");
+
+        }
     }
     else{
         jQuery(".order-confirmation").removeClass("hidden");
@@ -17,14 +29,18 @@ function getObligationClient(clientId){
     call_ajax_function(postData,"fillObligation");
 }
 
+function getSelectClientId(){
+    return jQuery('.page.single form .grid-display select[name=client_id]');
+}
+
 function fillOrderId(result){
     //צריך לשים למעלה בכתובת של האתר את מספר ההזמנה ולשנות את ה action ל edit
 
     if(!jQuery("input[name=id]").val()) {
         window.history.pushState({}, '', 'single/?subject=orders&action=edit&id='+result.id);
         jQuery("section form input[name=id]").val(result.id);
-        var selectedOption = jQuery("section select[name=client_id]").find('option:selected');
-        getObligationClient(selectedOption.val());
+        getSelectClientId().prop('disabled', true);
+        jQuery("section input[name=order_date]").prop('disabled', true);
     }
 }
 
@@ -52,10 +68,20 @@ jQuery(document).ready(function($) {
         });
     }
 
+    if(getParameterByName("subject") == "orders") {
+        getSelectClientId().change(function () {
+            if (jQuery(this).val()) {
+                getObligationClient(jQuery(this).val());
+
+            }
+        });
 //לדעת אם הלקוח שעכשיו יוצרים לו הזמנה הוא מחאר בתשלום לא לאפשר לאשר הזמנה אלא לשלוח לאישור מנהל
-    if(getParameterByName("subject") == "orders" && getParameterByName("action") == "edit"){
-        var selectedOption = jQuery("section select[name=client_id]").find('option:selected');
-        getObligationClient(selectedOption.val());
+        if (getParameterByName("action") == "edit") {
+            var selectedOption = getSelectClientId().find('option:selected');
+            getObligationClient(selectedOption.val());
+            getSelectClientId().prop('disabled', true);
+            jQuery("section input[name=order_date]").prop('disabled', true);
+        }
     }
 
     jQuery(".manager-approval").click(function (){

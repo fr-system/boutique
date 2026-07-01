@@ -369,9 +369,36 @@ function update_client_price_modal() {
 </form>
 <?php
 }
+function edit_list_modal(){
+    ?>
+    <form class="modal fade site_form" id="edit-list"  tabindex='-1' role="dialog" data-success='getTableAjaxData' data-failed='show_error_messages'>
+        <input type="hidden" name="form_func" value="save_single_data" />
+        <input type="hidden" name="table_name" value="" />
+        <input type="hidden" name="id" value="" />
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title grow" >123</h3>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" data-dismiss="modal" aria-label="סגור">
+                    </button>
+                </div>
+                <div class="modal-body border-dark-gray padding-20 flex-display direction-column margin-20">
 
+                </div>
+                <div class="modal-footer">
+                    <button type="post" class="save background-gold bold font-18">שמור</button>
+                    <button type="button" data-bs-dismiss="modal" class="cancel button background-white gold bold font-18">בטל</button>
+
+                </div>
+            </div>
+        </div>
+    </form>
+
+    <?php
+}
 function payment_modal(){
     ?>
+
     <form class="modal fade site_form" id="payment_modal" data-success="updateRowSuccess"  tabindex='-1' role="dialog">
         <input type="hidden" name="form_func" value="save_single_data">
         <input type="hidden" name="id" value="">
@@ -452,11 +479,21 @@ function is_needed_apostrophe($widget,$un_apostrophe,$save_as_text)
 
 
 add_action('wp_ajax_get_obligation_client', 'get_obligation_client');
-function get_obligation_client()
+function get_obligation_client($client_id)
 {
-    $res = get_obligation_client_id($_POST["client_id"]);
-    echo json_encode ($res);
-    die();
+    $client_id = isset($_POST["client_id"]) ? $_POST["client_id"] : $client_id;
+    $result = get_obligation_client_id($client_id);
+    $obligo = 0;
+    foreach ($result as $row){
+        $obligo+=$row->obligation;
+    }
+
+    $client = get_data_table("clients", array(array("filter_field" => "id", "filter_value" => $client_id)))[0];
+    $res = array("obligation" => $obligo,"client_obligo" => $client->obligo);
+    if(isset($_POST["client_id"])) {
+        wp_send_json([$res]);
+    }
+    return $res;
 }
 
 function get_obligation_client_id($client_id)
@@ -464,16 +501,10 @@ function get_obligation_client_id($client_id)
     $filters = array();
     $filters[]=array("filter_field" => "client_id", "filter_value" => $client_id);
     $filters[]=array("filter_field" => "payment_date", "filter_type" => "null");
+    $filters[]=array("filter_field" => "payment_until", "filter_type" => "date", "filter_ratio" => "<","filter_value"=>"NOW()");
     $result = get_data_table("collection", $filters);
     //write_log("eres ".json_encode($result));
-    $obligo = 0;
-    foreach ($result as $row){
-        $obligo+=$row->obligation;
-    }
-
-    $client = get_data_table("clients", array(array("filter_field" => "id", "filter_value" => $client_id)))[0];
-    return array("obligation" => $obligo,"client_obligo" => $client->obligo);
-
+    return $result;
 }
 
 add_action('wp_ajax_sent_to_manager', 'sent_to_manager');
@@ -481,52 +512,15 @@ function sent_to_manager()
 {
     $filters = array(array("filter_field" => "id", "filter_value"=>$_POST["id"]));
     $order = get_data_table("orders",$filters)[0];
-
+// יש גם את שם הלקוח ואין צורך להביא מטבלת לקוחות$orderלבדוק לדעתי ב
     $filters = array(array("filter_field" => "id", "filter_value"=>$order->client_id));
     $client = get_data_table("clients",$filters)[0];
 
-    $body = "ללקוח " . $client->name."<br>". "יש חריגה מתשלום יש לו חוב בסכום של: "  .  $client->obligo.
+    $body = "ללקוח " . $client->name."<br>". "יש חריגה מתשלום, יש לו חוב בסכום של: "  .  $client->obligo." ₪".
         "<br>"."ותקרת החוב שלו היא:" .  $client->obligo;
     send_mail(get_option('admin_email'),"בקשה לאישור הזמנה חדשה ללקוח: " .$client->name,$body);
-
-    add_notice( 'sent_to_manager' ,"נשלח מייל למנהל לאישור ההזמנה" );
 }
 
-function send_late_bills($attr)
-{
-    write_log("send_who_needs_pay_today");
-    $filters = array();
-    $filters[] = array("filter_field" => "payment_date", "filter_type" => "null");
-    $filters[] = array("filter_field" => "doc_type","filter_value"=>"1");
-    $result = get_data_table("collection", $filters);
-    //write_log("eres ".json_encode($result));
-    $late_pay = "";
-    $count = 0;
-    foreach ($result as $row) {
-        $client = get_data_table("clients", array(array("filter_field" => "client_id", "filter_value" => $row->client_id)));
-
-        if ($attr["type"] == "daily" && $row->payment_until === date('Y-m-d') ||//לבדוק אם היום מוצ"ש ???
-            $attr["type"] == "weekly" && $row->payment_until < date('Y-m-d')) {
-            $late_pay = "חשבונית מספר " . $row->doc_number . " נקלטה בתאריך" . $row->date .
-                " ללקוח " . $client->name . "על סך של " . $row->obligation . "₪ <br>";
-            $count++;
-        }
-    }
-
-    if($count > 0) {
-        if ($attr["type"] == "daily") {
-            $body = "להלן רשימת החשבוניות שהיו צריכים לשלם אותן היום ועדיין לא שולמו  <br>";
-            $subject = "חשבוניות שלא שולמו היום";
-        } else if ($attr["type"] == "weekly") {
-            $body = "להלן רשימת החשבוניות עדיין לא שולמו<br>";
-            $subject = "סיכום שבועי לחשבוניות שלא שולמו";
-        }
-        $body .= $late_pay;
-
-
-        send_mail(get_option('admin_email'), $subject, $body);
-    }
-}
 function get_payment_until($payment_term_id,$date)
 {
     $lastDayOfMonth = date('Y-m-t', strtotime($date));
@@ -641,5 +635,27 @@ function get_value($column,$row,$field)
     }
 
     return $column_value;
+}
+add_action('wp_ajax_client_billing_report', 'client_billing_report');
+
+function client_billing_report()
+{
+    //write_log("client_billing_report ". $_POST["client_id"]);
+    $result = get_obligation_client_id($_POST["client_id"]);
+    $client = get_data_table("clients",array(array("filter_field" => "id", "filter_value" => $_POST["client_id"])))[0];
+
+    $late_pay = "לכבוד ".$client->name.",<br><br>להלן החשבוניות שלא שולמו:<br>";
+    foreach ($result as $row) {
+        $late_pay .= "חשבונית מספר " . $row->doc_number . " בתאריך " . date('d/m/Y', strtotime($row->date)) .
+            " מהספק: ".$row->supplier_name.
+           " על סך של " . $row->obligation . " ₪ ". "לתשלום עד: ".date('d/m/Y', strtotime($row->payment_until))."<br>";
+    }
+
+    /*$client->email.",".$client->email2*/
+    //send_mail("rym76843@gmail.com" ,"דו''ח חיוב",$late_pay);
+
+    //write_log("client_billing_report 2");
+
+    wp_send_json(['status' => 'success','message' => "נשלח דוח חיוב ללקוח"]);
 }
 ?>

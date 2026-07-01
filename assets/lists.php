@@ -25,13 +25,14 @@ const BOUTIQUE_TABLES = array(
             array("field_name" => "email2", "widget" => "text", "label" => "דוא\"ל נוסף","hide_in_table"=>true),
             array("field_name" => "accounting_phone_number", "widget" => "text", "label" => "טלפון הנה\"ח","hide_in_table"=>true),
             array("field_name" => "obligo", "un_apostrophe" => true, "widget" => "text", "label" => "אובליגו","sign"=>"₪"),
-            array("field_name" => "doc_type","widget" => "file", "label" => "שטר חוב","hide_in_table"=>true),
+            array("field_name" => "promissory_note","widget" => "file", "label" => "שטר חוב","hide_in_table"=>true),
             array("field_name" => "blocked", "widget" => "hidden","create_input"=>true),
 
 
         ),
         "filter" => "blocked is null or blocked = 0",
-        "actions" => array("orders","tasks")
+        "actions" => array("orders","tasks",array("title"=>"שליחת דוח חיוב","dialog"=>"bout-massage",
+            "ajax_func"=>"client_billing_report","text"=>"האם לשלוח ללקוח דוח חיוב למייל?"))
     ),
     "products" => array(
         "title" => "קטלוג המוצרים",
@@ -57,8 +58,8 @@ const BOUTIQUE_TABLES = array(
         "male_female" => "female",
         "columns" => array(
             array("field_name" => "client_id", "widget" => "select", "join_table" => "clients", "join_value" => "name", "label" => "שם לקוח"),
-            array("field_name" => "subject", "widget" => "select", "label" => "נושא המשימה","required"=>true,
-             "join_table" => "subjects", "join_value" => "text","save_as_text"=>true),
+            array("field_name" => "subject", "widget" => "select", "label" => "נושא משימה","required"=>true,
+             "join_table" => "subjects", "join_value" => "text","save_as_text"=>true, "add_option"=>true),
             array("field_name" => "open_date", "widget" => "hidden", "label" => "תאריך פתיחה"),
             array("field_name" => "agent_id", "widget" => "select", "label" => "סוכן", "join_table" => "agents", "join_value" => "name","required"=>true,"filter"=>true),
             array("field_name" => "details", "widget" => "textarea", "label" => "פירוט","hide_in_table" => true),

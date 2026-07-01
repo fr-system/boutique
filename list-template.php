@@ -21,28 +21,4 @@ if(!is_user_logged_in()){
 
     </table>
 </section>
-
-
-<form class="modal fade site_form" id="edit-list"  tabindex='-1' role="dialog" data-success='getTableAjaxData' data-failed='show_error_messages'>
-    <input type="hidden" name="form_func" value="save_single_data" />
-    <input type="hidden" name="table_name" value="" />
-    <input type="hidden" name="id" value="" />
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h3 class="modal-title grow" >123</h3>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" data-dismiss="modal" aria-label="סגור">
-                    </button>
-                </div>
-                <div class="modal-body border-dark-gray padding-20 flex-display direction-column margin-20">
-
-                </div>
-                <div class="modal-footer">
-                    <button type="post" class="save background-gold bold font-18">שמור</button>
-                    <button type="button" data-bs-dismiss="modal" class="cancel button background-white gold bold font-18">בטל</button>
-
-                </div>
-            </div>
-        </div>
-</form>
 <?php get_footer();?>

@@ -108,6 +108,7 @@ function get_id_by_user()
     $table_name = is_agent() ? "agents" : (is_supplier() ? "suppliers" : "");
     $filters[] = array("filter_field" => "user_id", "filter_value" => get_current_user_id());
     $users = get_data_table($table_name, $filters);
+    write_log("user ".json_encode($users));
     if (count($users) > 0)
         return $users[0]->id;
     return null;

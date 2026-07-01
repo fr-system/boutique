@@ -5,6 +5,9 @@ if(!is_user_logged_in()){
 if(is_supplier()){
     wp_redirect(get_site_url()."/archive/?subject=collection");
 }
+if(is_agent()) {
+    $agent_id = get_id_by_user();
+}
 ?>
 
 <?php get_header();
@@ -33,7 +36,7 @@ if(is_supplier()){
     </div>
     <?php }?>
     <div class=" part-30 flex-display space-between">
-        <div class="part-45">
+        <div class="part-49">
             <div class="flex-display space-between">
                 <div class="font-20 bold">חובות פתוחים</div>
                 <a class="not-link font-15 dark-green" href="/archive/?subject=collection">לפירוט המלא -></a>
@@ -43,6 +46,9 @@ if(is_supplier()){
                     <?php
                     $filters = array(array("filter_field" => "payment_date","filter_type"=>"null"));
                     $filters[] = array("filter_field" => "test_collection.doc_type","filter_value"=>"1");
+                    if(is_agent()){
+                        $filters[] = array("filter_table"=>"clients", "filter_field" => "agent_id", "filter_value" => $agent_id);
+                    }
                     $result = get_data_table("collection",$filters);
 
                     $agents = array();
@@ -65,23 +71,84 @@ if(is_supplier()){
                 </div>
             </div>
         </div>
-        <div class="part-45">
+        <div class="part-49">
             <div class="flex-display space-between">
-                <?php
-                    $previousMonth = date('m', strtotime('-1 month'));
-                    $previousYear  = date('Y', strtotime('-1 month'));
-                    $firstDayOfMonth = "01/".$previousMonth."/".$previousYear;
-                    $lastDayOfMonth = date('t', strtotime($firstDayOfMonth))."/".$previousMonth."/".$previousYear;
-                    ?>
-                <div><span class="font-20 bold">גרף מכירות  </span><span class="font-17"><?php echo $firstDayOfMonth ." עד ".$lastDayOfMonth ?></span> </div>
-                <div class="font-15 dark-green" ></div>
+                <div class="font-20 bold">משימות פתוחות</div>
+                <a class="not-link font-15 dark-green" href="/archive/?subject=tasks">לפירוט המלא -></a>
+                <!--  צריך להביא פה קישור לעמוד משימות ויראה רק משימות פתוחות -->
             </div>
             <div class="graphs-charts quick-action border-dark-gray">
-            <?php
+                <?php
+                $filters = array();
+                if(is_agent()){
+                    $filters[] = array("filter_field" => "id", "filter_value" => $agent_id);
+                }
+                $agents = get_data_table("agents",$filters);
+                $filters = array(array("filter_field" => "status_id", "filter_value" =>1,"filter_type"=>"!="));
+                if(is_agent()){
+                    $filters[] = array("filter_field" => "test_tasks.agent_id", "filter_value" => $agent_id );                }
 
-            $agents = get_data_table("agents");
+                $result = get_data_table("tasks",$filters);
+                foreach ($result as $task) {
+                    if (empty($task->agent_id)) continue;
+                    $agent_id = $task->agent_id;
+                    $index = array_search(
+                        $agent_id,
+                        array_map(fn($a) => $a->id, $agents)
+                    );
+
+                    if (!isset($agents[$index]->in_treatment)) {
+                        $agents[$index]->in_treatment = 0;
+                        $agents[$index]->not_yet_treated = 0;
+                    }
+
+                    if($task->status_id == 2){
+                        $agents[$index]->in_treatment++;
+                    }
+                    else if($task->status_id == 3){
+                        $agents[$index]->not_yet_treated++;
+                    }
+                }
+
+                foreach ($agents as $agent){
+                    //write_log("row ".json_encode( $task));
+                    ?>
+                    <div class="font-15 flex-display ">
+                        <span class="bold part-30"><?php echo $agent->name ?></span>
+                        <span class="part-30"><?php echo "בטיפול: ".(isset($agent->in_treatment)?$agent->in_treatment:0) ?></span>
+                        <span class="part-30"><?php echo "טרם טופלו: ". (isset($agent->not_yet_treated)?$agent->not_yet_treated:0) ?></span>
+                    </div>
+                    <?php
+                }
+                ?>
+            </div>
+
+        </div>
+    </div>
+    <div class="part-40">
+        <div class="flex-display space-between">
+            <?php
+            $previousMonth = date('m', strtotime('-1 month'));
+            $previousYear  = date('Y', strtotime('-1 month'));
+            $firstDayOfMonth = "01/".$previousMonth."/".$previousYear;
+            $lastDayOfMonth = date('t', strtotime($firstDayOfMonth))."/".$previousMonth."/".$previousYear;
+            ?>
+            <div><span class="font-20 bold">גרף מכירות  </span><span class="font-17"><?php echo $firstDayOfMonth ." עד ".$lastDayOfMonth ?></span> </div>
+            <div class="font-15 dark-green" ></div>
+        </div>
+        <div class="graphs-charts quick-action border-dark-gray">
+            <?php
+            $filters = array();
+            if(is_agent()){
+                $filters[] = array("filter_field" => "id", "filter_value" => $agent_id);
+            }
+
+            $agents = get_data_table("agents",$filters);
             //לקבל את ההזמנות בין תאריכים
             $filters = array(array("filter_field" => "order_date","filter_type"=>"between","filter_value"=> array('2026-04-01','2026-06-15')));
+            if(is_agent()) {
+                $filters[] = array("filter_field" => "user_opens", "filter_value" =>get_current_user_id());
+            }
             $result = get_data_table("orders",$filters);
             foreach ($result as $row) {
                 if (empty($row->agent_id)) continue;
@@ -117,50 +184,31 @@ if(is_supplier()){
 
             ?>
             <canvas id="salesChart"></canvas>
-                <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script>
-        const agents = <?= json_encode($agents, JSON_UNESCAPED_UNICODE) ?>;
-        var chart = new Chart(document.getElementById('salesChart'), {
-            type: 'bar',
-            data: {
-                labels: agents.map(a => a.name),
-                datasets: [
-                    {
-                        label: 'מכר',
-                        data: agents.map(a => Number(a.total || 0))
+            <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+            <script>
+                const agents = <?= json_encode($agents, JSON_UNESCAPED_UNICODE) ?>;
+                var chart = new Chart(document.getElementById('salesChart'), {
+                    type: 'bar',
+                    data: {
+                        labels: agents.map(a => a.name),
+                        datasets: [
+                            {
+                                label: 'מכר',
+                                data: agents.map(a => Number(a.total || 0))
+                            },
+                            {
+                                label: 'יעד',
+                                data: agents.map(a => Number(a._target || 0))
+                            }
+                        ]
                     },
-                    {
-                        label: 'יעד',
-                        data: agents.map(a => Number(a._target || 0))
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false
                     }
-                ]
-            },
-            options: {
-                responsive: true
-            }
-        });
-    </script>
+                });
+            </script>
 
-            </div>
-        </div>
-    </div>
-    <div class="part-30">
-        <div class="flex-display space-between">
-            <div class="font-20 bold">משימות פתוחות</div>
-            <a class="not-link font-15 dark-green" href="/archive/?subject=tasks">לפירוט המלא -></a>
-            <!--  צריך להביא פה קישור לעמוד משימות ויראה רק משימות פתוחות -->
-        </div>
-        <div class="graphs-charts quick-action border-dark-gray">
-            <?php
-            $filters = array(array("filter_field" => "status_id", "filter_value" =>1,"filter_type"=>"!="));
-            $result = get_data_table("tasks",$filters);
-            foreach ($result as $task){
-                //write_log("row ".json_encode( $task));
-                ?>
-                <div class="font-18"><?php echo $task->subject ?><span class="margin-before-10 font-15"><?php echo $task->details ?></span></div>
-                    <?php
-            }
-            ?>
         </div>
     </div>
 </section>
