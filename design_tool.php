@@ -21,11 +21,16 @@ function get_single_view($table_name,$row,$readonly)
             $value = "";
             if(isset($column["field_name"])) {
                 if ($column["widget"] == "table") {
+                    $filters = array();
+
+                    if ($table_name == "orders") {
+                        $filters[] = array("filter_field" => "blocked","filter_value"=>"1", "filter_type"=>"!=");
+                    }
                         //$filters = array();לא להביא בהזמנה מוצרים חסומים
                         //$filters[] = array("filter_field" => "blocked", "filter_value" => " == null ");
                         //מביא את כל טבלת מוצרים
                         //מביא את טבלת ספקים
-                        $target_table_rows = get_data_table($column["target_table"]);
+                        $target_table_rows = get_data_table($column["target_table"],$filters);
                         $sub_table_id = substr($column["target_table"], 0, -1) . "_id";
                         $parent_table_id= $column["field_id"];
                         //עוברים על טבלת מוצרים אם יש את המוצר בהזמנה מכניסים את את הכמות לשורה של המוצר
@@ -62,7 +67,7 @@ function get_single_view($table_name,$row,$readonly)
                             }
                             $table_row->id = $exist_in_sub_table ? $item->id : "";//ID של טבלת רבים לרבים
                             $table_row->$sub_table_id = $id; // ID של הפריט (מוצר או יעד)
-                            $table_row->$parent_table_id = $row->id;
+                            $table_row->$parent_table_id = isset($row->id) ? $row->id: null;
                             foreach ($sub_columns as $column1) {//מכניסים את שאר השדות בתוך שורה של מוצר
                                 if ($table_name == "agents") {
                                     $table_row->target = $exist_in_sub_table ? ($item->target || "") : "";
@@ -274,6 +279,7 @@ function create_popup(){
     </div>
     <?php
 }
+
 function build_select_options($table_name, $value=null,$attr = null)
 {
     $attr = $attr ?? array("filter"=>null);
@@ -392,7 +398,18 @@ function create_input($field,$value = null,$readonly = "")
                 }
                 ?>
             </select>
-            <?php break;
+            <?php
+            if(isset($field["add_option"])){
+            ?>
+                <a  data-single="<?= BOUTIQUE_LISTS[$field["join_table"]]["single"] ?>" data-list-name="<?= $field["join_table"]?>" class="has-tooltip margin-r-10" data-tooltip="הוספת <?= $field["label"]?>" data-bs-toggle="modal" href="#edit-list" role="button" data-action="new">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 60 60" fill="none">
+                        <circle cx="30" cy="30" r="29.5" class="background-dark-green" stroke="white"/>
+                        <line x1="30" y1="20" x2="30" y2="42" stroke="white" stroke-width="2"/>
+                        <line x1="41" y1="31" x2="19" y2="31" stroke="white" stroke-width="2"/>
+                    </svg>
+                </a>
+            <?php }
+            break;
         case "file":
         case "image":
             if(empty($readonly)){
@@ -544,10 +561,10 @@ function get_tr_data($table_name, $data, $key,$attr){
     $row = is_array ($data)? $data[0]:$data;
     //echo json_encode ($row);
     $backgraund_class = ($table_name == "orders" && $row->done ? "order-confirm" : "product");
-    if($table_name == "clients" && $row->blocked) {
+    if(($table_name == "clients" || $table_name == "products") && $row->blocked) {
         $backgraund_class.=" blocked";
     }
-    $html='<tr data-id="'.$row->id.'" class="'.$backgraund_class.'">';
+    $html="<tr data-id='{$row->id}' class='{$backgraund_class}'>";
     if(is_manager() && $table_name == "collection" && !isset($_GET["payed"])){
         $html.= '<td>';
         if($row->doc_type == 1) {
@@ -605,15 +622,9 @@ function get_tr_data($table_name, $data, $key,$attr){
                 continue;
             }
         }
-        /* if (!isset($column['field_name']) ||
-             $column["field_name"] == "client_id" && isset($attr["add_text"]) || is_agent() && $column["field_name"] == "agent_id") {
-             //לא לשים עמודה של שם אם זה הזמנות של לקוח מסוים או שם סוכן אם נכנס עכשיו יוזר סוכן
-             continue;
-         }*/
 
         $field = isset($column['join_table']) && !isset($column['type']) ? substr($column['join_table'], 0, -1) . (isset($column['join_value']) ? "_" . $column['join_value'] : '') : $column["field_name"];
         $list = isset($column['table_name']) ? constant($column['table_name']) : null;
-        //if (isset($column["widget"]) && $column["widget"] =="hidden" ||  $field != "id" && !isset($column["hide_in_table"]) && isset($column["label"])) {
         $data_id = "";
         if ($column["widget"] == "select" && isset($column["options"])) {
             $data_id = 'data-id="' . $row->$field . '"';
@@ -629,9 +640,14 @@ function get_tr_data($table_name, $data, $key,$attr){
     if(isset($page_info["actions"])) {
         foreach ($page_info["actions"] as $action) {
             if(is_array($action) && isset($action["dialog"])) {
-                $html .= '<td ><a class="button background-gold font-17" data-bs-toggle="modal" href="#'.$action["dialog"].'" role="button">
-                '.$action["text"].'
-                    </a></td>';
+                $obligation = 0;
+                if($table_name == "clients" && is_manager()) {
+                    $res = get_obligation_client($row->id);
+                    $obligation = $res["obligation"];
+                }
+                $html .= '<td>'.($table_name != "clients" || $obligation > 0  ?
+                    '<a data-text="'.$action["text"].'" data-ajax_func="'.$action["ajax_func"].'" class="button background-gold font-17" data-bs-toggle="modal" href="#'.$action["dialog"].'" role="button">'.$action["title"].'</a>':'').
+                    '</td>';
             }
             else {
                 $html .= '<td ><a class="button background-gold font-17" href="/archive?subject=' . $action . '&id=' . $row->id . '">' . BOUTIQUE_TABLES[$action]["title"] . '</a></td>';

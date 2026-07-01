@@ -41,15 +41,16 @@ $page_info  = BOUTIQUE_TABLES[$table_name];
     echo archive_header($table_name,false,$attr);
 
     if(is_agent() ){
+        $agent_id = get_id_by_user();
         if($table_name == "clients" ) {
-            $filters[] = array("filter_field" => "agent_id", "filter_value" =>get_id_by_user());
+            $filters[] = array("filter_field" => "agent_id", "filter_value" =>$agent_id);
         }
         if($table_name == "tasks"){
-            $filters[] = array("filter_table"=>"tasks", "filter_field" => "agent_id", "filter_value" => get_id_by_user() );
+            $filters[] = array("filter_table"=>"tasks", "filter_field" => "agent_id", "filter_value" => $agent_id );
         }
 
         if($table_name == "orders" || $table_name == "collection") {
-            $filters[] = array("filter_table"=>"clients", "filter_field" => "agent_id", "filter_value" => get_id_by_user() );
+            $filters[] = array("filter_table"=>"clients", "filter_field" => "agent_id", "filter_value" => $agent_id);
         }
     }
 

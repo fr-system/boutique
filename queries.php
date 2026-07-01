@@ -80,7 +80,7 @@ function run_action_query($table_name, $id, $action, $options)
     return $ok;
 }
 
-add_action('wp_ajax_save_single_data', 'save_single_data');
+add_action('wp_ajax_save_single_data', 'א');
 function save_single_data()
 {
     $table_name = $_POST["table_name"];
@@ -237,7 +237,7 @@ function get_data_table($table_name, $filters=null, $orderby = null, $join_filte
 
             switch ($filter["filter_type"]) {
                 case "date":
-                    $filter_str[] = $filter_field . " " . $filter["filter_ratio"] . " " . $filter["filter_value"];
+                    $filter_str[] ="DATE(" .$filter_field . ") " . $filter["filter_ratio"] . " " . $filter["filter_value"];
                     break;
                 case "null":
                     $filter_str[] = $filter_field . " is null ";

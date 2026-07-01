@@ -87,7 +87,7 @@ if ( ! defined( 'ABSPATH' ) ) {
                 </div>
                 <div class="modal-footer">
                     <button type="submit" class="save background-gold bold font-18">כן</button>
-                    <button type="button" class="remove-product-order background-gold bold font-18 hidden">כן</button>
+                    <button type="button" class="ajax-button background-gold bold font-18 hidden">כן</button>
                     <button type="button" class="background-white gold" data-bs-dismiss="modal" class=" font-18">לא</button>
 
                 </div>
@@ -97,7 +97,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 <?php
 update_client_price_modal();
 payment_modal();
-
+edit_list_modal();
 } ?>
 </header>
 <main id="main" class="site-main flex-display" role="main">
