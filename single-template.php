@@ -49,7 +49,7 @@ if (isset($_SERVER['HTTP_REFERER'])) {
 }
 
 if($table_name == "orders"){
-    $part_left_side="part-100 ";
+    $part_left_side="part-80 ";
     $obligo = 0;
     if($row->client_id){
         $res = get_obligation_client_id($row->client_id);

@@ -130,8 +130,6 @@ function lists_table_rows($list_name)
     return $rows;
 }
 
-
-
 function get_column_value($column,$row,$field,$list,$key)
 {
     //write_log("column ".json_encode($column)." key ".$key);
@@ -194,12 +192,16 @@ function get_column_value($column,$row,$field,$list,$key)
             $readonly = isset($column["widget"]) && $column["widget"]== "readonly"?' readonly ':'';
             $type =  isset($column["widget"]) && $column["widget"]== "hidden" ? 'hidden':'text';
 
-            if(isset($column["create_input"])){
-                $column_value =($readonly? "": "<span class='hidden'>{$column_value}</span>").
-                    ($column['widget'] == 'number' ? "<span class='minus bold font-25  pointer'>-</span>" :"" ).
-                    "<input type='{$type}' class='' name='rows[{$key}][{$field}]' value='{$column_value}' {$readonly}".
-                    (isset($column['un_apostrophe']) && isset($column['sign']) ? "data-a-sign='".$column['sign']."'":"")."/>".
-                    ($column['widget'] == 'number' ? "<span class='plus bold font-25  pointer'>+</span>":"");
+            if(isset($column["create_input"])) {
+                if ($column['widget'] == 'toggle') {
+
+                } else {
+                    $column_value = ($readonly ? "" : "<span class='hidden'>{$column_value}</span>") .
+                        ($column['widget'] == 'number' ? "<span class='minus bold font-25  pointer'>-</span>" : "") .
+                        "<input type='{$type}' class='' name='rows[{$key}][{$field}]' value='{$column_value}' {$readonly}" .
+                        (isset($column['un_apostrophe']) && isset($column['sign']) ? "data-a-sign='" . $column['sign'] . "'" : "") . "/>" .
+                        ($column['widget'] == 'number' ? "<span class='plus bold font-25  pointer'>+</span>" : "");
+                }
             }
             break;
     }

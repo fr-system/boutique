@@ -117,7 +117,7 @@ tr.product td.count span:hover{
     background-color: var(--b-global-color-dark-gray);
 }
 .product td.count input{
-    width: 45px;
+    width: 50px;
     text-align: center;
     moz-appearance: textfield;
     padding: 0;
@@ -382,7 +382,7 @@ input[type="radio"] + label:before {
 .input-label table tr input{
     width: 80px;
     height: 25px;
-    padding: 7px 12px;
+    padding: 5px 0;
     border: 1px solid transparent;
 }
 .input-label table tr input[readonly]{

@@ -95,6 +95,7 @@ jQuery(document).ready(function($){
     jQuery('input[data-a-sign=₪]').autoNumeric('init', {
         vMin: '-9999999999999',
         mDec: 1,
+        aSign: ' ₪',
         wEmpty: 'empty'
     });
     jQuery('input[data-a-sign="%"]').autoNumeric('init', {

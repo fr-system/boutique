@@ -245,10 +245,10 @@ function registerToCalculatePrice(){
     jQuery('tr.product td:not(.total) input').on('change', function (e) {
         calculatePrice(this);
     });
-    jQuery(".products-gallery.orders .product .calculated-price-input").on("change", function () {
+    jQuery("tr.product .total input").on("change", function () {
         var total = 0;
-        jQuery(".products-gallery.orders .product .calculated-price-input").each(function (i,totalProductPrice){
-            total+=parseInt( jQuery(totalProductPrice).val()||0);
+        jQuery("tr.product .total input").each(function (i,totalProductPrice){
+            total+=parseFloat( jQuery(totalProductPrice).autoNumeric('get')||0);
         })
         jQuery("input[name=total]").autoNumeric('set', total);
         //jQuery("input[name=total]").autoNumeric.set("input[name=total]", total);
@@ -266,8 +266,8 @@ function calculatePrice(me){
         count=count*unitsInBox;
     }*/
     var total_order = parseInt(jQuery(".page.single input[name=total]").autoNumeric('get')||0);
-    var unitPrice = parseInt(product.find('.order_price input').autoNumeric('get'));
-    var discountPercent = parseInt(product.find('.discount_percent input').autoNumeric('get')||0);
+    var unitPrice = parseFloat(product.find('.order_price input').autoNumeric('get'));
+    var discountPercent = parseFloat(product.find('.discount_percent input').autoNumeric('get')||0);
     var calculatedPrice = (unitPrice*count) - (unitPrice*count*discountPercent/100);
     //product.find(".total span").html(calculatedPrice);
     product.find(".total input").autoNumeric('set',calculatedPrice).trigger("change");
