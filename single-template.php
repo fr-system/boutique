@@ -139,9 +139,6 @@ else{
 
                 <?php }
                 if($table_name == "orders" ){
-                     ?>
-
-                     <?php
                      if(!isset($row->done) || !$row->done){?>
                             <button type="button" class="hidden order-confirmation flex-display center align-center background-white dark-green bold font-18">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 16 16" fill="none">

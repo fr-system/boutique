@@ -253,15 +253,29 @@ function show_tooltip(){
 
 function plusMinusCountProduct(me){
     var numberInput = jQuery(me).parent().find("input");
+    var product = numberInput.closest("tr.product");
     var currentValue = parseInt(numberInput.val()) || 0;
 
     if(jQuery(me).hasClass("plus")){
-        numberInput.val(currentValue + 1);
+        currentValue++;
     }
     else{
         if(currentValue > 0) {
-            numberInput.val(currentValue - 1);
+            currentValue--;
         }
+    }
+    numberInput.val(currentValue);
+    if(currentValue > 0) {
+        if(product.find(".individually span").text()) {
+            product.find(".order_individual span.readonly").removeClass("readonly");
+        }
+        else{
+            product.find(".order_individual span.readonly.right").removeClass("readonly un-value");
+        }
+    }
+    else{
+        product.find(".order_individual input").val(0);
+        product.find(".order_individual span").addClass("readonly un-value");
     }
     calculatePrice(me);
 }
@@ -286,12 +300,12 @@ function calculatePrice(me){
     var product = jQuery(me).closest(".product");
 
     var count = parseInt(product.find('.count input').val());
-   /* var unitsInBox = parseInt(product.find('.units-in-box').val());
-    var selectIndividually  = product.find("select.price-part.individually")
-    if(selectIndividually.length>0 && selectIndividually.val()==0 ||selectIndividually.length ==0) {// אם לא ניתן לבחור בודדים , או שבחור ארגז
+    var unitsInBox = parseInt(product.find('.units_in_box span').text());
+    var selectIndividually  = product.find(".order_individual input").val();
+    if(selectIndividually ==0) {// אם לא ניתן לבחור בודדים , או שבחור ארגז
         count=count*unitsInBox;
-    }*/
-    var total_order = parseInt(jQuery(".page.single input[name=total]").autoNumeric('get')||0);
+    }
+   // var total_order = parseInt(jQuery(".page.single input[name=total]").autoNumeric('get')||0);
     var unitPrice = parseFloat(product.find('.order_price input').autoNumeric('get'));
     var discountPercent = parseFloat(product.find('.discount_percent input').autoNumeric('get')||0);
     var calculatedPrice = (unitPrice*count) - (unitPrice*count*discountPercent/100);

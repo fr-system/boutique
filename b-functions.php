@@ -130,12 +130,11 @@ function lists_table_rows($list_name)
     return $rows;
 }
 
-function get_column_value($column,$row,$field,$list,$key)
+function get_column_value($column,$row,$field,$list,$key,$is_readonly=false)
 {
     //write_log("column ".json_encode($column)." key ".$key);
     $column_value = "";
     switch ($column["widget"]) {
-
         case "select":
             if (isset($column["options"])) {
                 $field_id = $row->$field;
@@ -151,7 +150,6 @@ function get_column_value($column,$row,$field,$list,$key)
             break;
         case "radio":
             $column_value = '<div class="flex-display align-center" style="color: ' . $column["values"][$row->$field]["color"] . '"><div class="dot" style="background-color: ' . $column["values"][$row->$field]["color"] . '"></div>&nbsp;' . $column["values"][$row->$field]["label"] . '</div>';
-
             break;
         case "status":
             $column_value = '<span class="pointer ellipse ' . $column["values"][$row->$field]["class"] . '">
@@ -180,6 +178,11 @@ function get_column_value($column,$row,$field,$list,$key)
                 $column_value = wp_get_attachment_image($row->$field, 'full');
             }
             break;
+        case "hidden":
+            if ($row->$field){
+                $column_value =isset($column["create_input"])? $row->$field : "<span class='hidden'>{$row->$field}</span>" ;
+            }
+            break;
         default:
             if (isset($column["type"]) && $column["type"] == "user") {
                 $column_value = empty($row->$field) ? '' : get_userdata($row->$field)->display_name;
@@ -189,21 +192,37 @@ function get_column_value($column,$row,$field,$list,$key)
                     $column_value .= " {$column["sign"]}";
                 }
             }
-            $readonly = isset($column["widget"]) && $column["widget"]== "readonly"?' readonly ':'';
-            $type =  isset($column["widget"]) && $column["widget"]== "hidden" ? 'hidden':'text';
+            break;
+    }
+    $type =  isset($column["widget"]) && $column["widget"]== "hidden" ? 'hidden':'text';
+    write_log ('is_readonly '. $is_readonly);
+    if(isset($column["create_input"])) {
+        if ($column['widget'] == 'toggle') {
+            $value = $column_value ?? '';
+            if($field =="order_individual"){
 
-            if(isset($column["create_input"])) {
-                if ($column['widget'] == 'toggle') {
-
-                } else {
-                    $column_value = ($readonly ? "" : "<span class='hidden'>{$column_value}</span>") .
-                        ($column['widget'] == 'number' ? "<span class='minus bold font-25  pointer'>-</span>" : "") .
-                        "<input type='{$type}' class='' name='rows[{$key}][{$field}]' value='{$column_value}' {$readonly}" .
-                        (isset($column['un_apostrophe']) && isset($column['sign']) ? "data-a-sign='" . $column['sign'] . "'" : "") . "/>" .
-                        ($column['widget'] == 'number' ? "<span class='plus bold font-25  pointer'>+</span>" : "");
+                $readonly =$is_readonly || !$row->individually || $row->count == 0 ? ' readonly ' :'';//אם לאפשר בחירת בודדים
+                $value =$row->count>0? $value: 0; //ברירת מחדל תמיד ארגזים אלא אם כן כבר מוזמן ובחרו
+            }
+            $column_value = "<div class='status-options flex-display font-17'>";
+            if(isset($column["values"])){
+                $column_value .= "<input type='hidden' id='' name='rows[{$key}][{$field}]' value='{$value}'>";
+                foreach ($column["values"] as $key=>$option) {
+                    write_log ('key '. $key. ' value '.$value);
+                    $column_value .= "<span data-value='{$key}' class='{$readonly} pointer ellipse " . ($value != null && $value == $key ? "" : "un-value ") . $option["class"] . "'>               
+                                    {$option["label"]}                      
+                                </span>";
                 }
             }
-            break;
+            $column_value .= "</div>";
+        } else {
+            $readonly =$is_readonly || (isset($column["widget"]) && $column["widget"]== "readonly")?' readonly ':'';
+            $column_value = ($readonly ? "" : "<span class='hidden'>{$column_value}</span>") .
+                ($column['widget'] == 'number' ? "<span class='minus bold font-25 pointer {$readonly}'>-</span>" : "") .
+                "<input type='{$type}' class='' name='rows[{$key}][{$field}]' value='{$column_value}' {$readonly}" .
+                (isset($column['un_apostrophe']) && isset($column['sign']) ? "data-a-sign='" . $column['sign'] . "'" : "") . "/>" .
+                ($column['widget'] == 'number' ? "<span class='plus bold font-25 pointer {$readonly}'>+</span>" : "");
+        }
     }
 
     return $column_value;
@@ -335,7 +354,7 @@ function get_favorite_products($client_id)
     return $products;
     //write_log("favorite: ".json_encode($products));
 }
-function update_client_price_modal() {
+/*function update_client_price_modal() {
     ?>
 <form class="modal fade site_form" id="update_client_price"  tabindex='-1' role="dialog" data-success='getTableAjaxData' data-failed='show_error_messages'>
     <input type="hidden" name="form_func" value="save_single_data" />
@@ -370,7 +389,7 @@ function update_client_price_modal() {
         </div>
 </form>
 <?php
-}
+}*/
 function edit_list_modal(){
     ?>
     <form class="modal fade site_form" id="edit-list"  tabindex='-1' role="dialog" data-success='getTableAjaxData' data-failed='show_error_messages'>
