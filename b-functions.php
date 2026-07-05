@@ -519,6 +519,12 @@ function sent_to_manager()
     $body = "ללקוח " . $client->name."<br>". "יש חריגה מתשלום, יש לו חוב בסכום של: "  .  $client->obligo." ₪".
         "<br>"."ותקרת החוב שלו היא:" .  $client->obligo;
     send_mail(get_option('admin_email'),"בקשה לאישור הזמנה חדשה ללקוח: " .$client->name,$body);
+
+    wp_send_json([
+        'status' => 'success',
+        'message' => 'נשלח מייל למנהל לאישור ההזמנה',
+    ]);
+
 }
 
 function get_payment_until($payment_term_id,$date)
@@ -550,7 +556,7 @@ function checking_duplicates()
     if(count($client)>0){
         wp_send_json([
             'status' => 'failed',
-            'msg' => 'קיים לקוח עם מספר ח_פ כזה',
+            'message' => 'קיים לקוח עם מספר ח_פ כזה',
             'dupple' => true
         ]);
     }

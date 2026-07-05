@@ -231,22 +231,12 @@ function archive_header($table_name, $view_only = false,$attr = null)
     return ob_get_clean();
 }
 function catalog_gallery($products, $options = null)
-{
+{/*create_product_view($product,$options);*/
     $class_grid = isset($options['class_grid']) ?  $options['class_grid'] : 'catalog';
     ob_start();?>
     <div class="grid-display products-gallery <?= $class_grid?>">
-        <?php foreach ($products as $product){
-            create_product_view($product,$options);
-        }?>
-    </div>
-    <?php
-    return ob_get_clean();
-}
-
-function create_product_view($product=null,$options=null)
-{
-    ?>
-    <div class="border-dark-gray pointer flex-display direction-column space-between product font-15 padding-15" data-id="<?php echo $product->id?>">
+        <?php foreach ($products as $product){?>
+            <div class="border-dark-gray pointer flex-display direction-column space-between product font-15 padding-15" data-id="<?php echo $product->id?>">
 
         <div class="product-img part-60">
             <?php if($product->image_id){  ?>
@@ -261,8 +251,12 @@ function create_product_view($product=null,$options=null)
             <a href="single?subject=products&action=edit&id=<?php echo $product->id?>" class="part-15 button background-white gold bold font-15 <?php echo $options["table_name"]=="products" ? '':"hidden" ?>">מעבר למוצר</a>
         </div>
     </div>
+       <?php }?>
+    </div>
     <?php
+    return ob_get_clean();
 }
+
 function create_popup(){
     ?>
     <div class="popup_page_overlay">
@@ -560,7 +554,7 @@ function get_tr_data($table_name, $data, $key,$attr){
 
     $row = is_array ($data)? $data[0]:$data;
     //echo json_encode ($row);
-    $backgraund_class = ($table_name == "orders" && $row->done ? "order-confirm" : "product");
+    $backgraund_class = ($table_name == "orders" && $row->done ? "order-confirm" : "");
     if(($table_name == "clients" || $table_name == "products") && $row->blocked) {
         $backgraund_class.=" blocked";
     }

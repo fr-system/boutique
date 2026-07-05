@@ -89,7 +89,7 @@ jQuery(document).ready(function($) {
             {name: "action", value: "sent_to_manager"},
             {name: "id", value: jQuery('input[name=id]').val() },
         ];
-        call_ajax_function(postData,"mail_sent");
+        call_ajax_function(postData);
     })
 
     var aTargets = [];
