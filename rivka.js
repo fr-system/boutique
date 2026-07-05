@@ -6,8 +6,8 @@ function fillObligation(results){
     var spanObligation =jQuery('.page.single form .grid-display .obligation');
     //spanObligation.html(results.obligation);
 
-    if(results.obligation > results.client_obligo){
-        spanObligation.text('חוב מעבר לאובליגו'+" "+"₪" + (results.obligation - results.client_obligo).toLocaleString() );
+    if(results.debts > results.obligo){
+        spanObligation.text('חוב מעבר לאובליגו'+" "+"₪" + (results.debts - results.obligo).toLocaleString() );
         if(jQuery(".manager-approval").length > 0) {
             jQuery(".manager-approval").removeClass("hidden");
         }
@@ -36,9 +36,9 @@ function getSelectClientId(){
 function fillOrderId(result){
     //צריך לשים למעלה בכתובת של האתר את מספר ההזמנה ולשנות את ה action ל edit
 
-    if(!jQuery("input[name=id]").val()) {
+    if(!jQuery("input.orders_id[name=id]").val()) {
         window.history.pushState({}, '', 'single/?subject=orders&action=edit&id='+result.id);
-        jQuery("section form input[name=id]").val(result.id);
+        jQuery("section form input.orders_id[name=id]").val(result.id);
         getSelectClientId().prop('disabled', true);
         jQuery("section input[name=order_date]").prop('disabled', true);
     }
@@ -60,7 +60,7 @@ jQuery(document).ready(function($) {
                 var postData = [
                     {name: "action", value: "checking_duplicates"},
                     {name: "BnNumber", value: jQuery(this).val()},
-                    {name: "client_id", value: jQuery('.page.single form input[name=id]').val() },
+                    {name: "client_id", value: jQuery('.page.single form input.clients_id[name=id]').val() },
                 ];
 
                 call_ajax_function(postData,"onCheckingDuplicates");
@@ -87,7 +87,7 @@ jQuery(document).ready(function($) {
     jQuery(".manager-approval").click(function (){
         var postData = [
             {name: "action", value: "sent_to_manager"},
-            {name: "id", value: jQuery('input[name=id]').val() },
+            {name: "id", value: jQuery('input.orders_id[name=id]').val() },
         ];
         call_ajax_function(postData);
     })
@@ -253,15 +253,29 @@ function show_tooltip(){
 
 function plusMinusCountProduct(me){
     var numberInput = jQuery(me).parent().find("input");
+    var product = numberInput.closest("tr.product");
     var currentValue = parseInt(numberInput.val()) || 0;
 
     if(jQuery(me).hasClass("plus")){
-        numberInput.val(currentValue + 1);
+        currentValue++;
     }
     else{
         if(currentValue > 0) {
-            numberInput.val(currentValue - 1);
+            currentValue--;
         }
+    }
+    numberInput.val(currentValue);
+    if(currentValue > 0) {
+        if(product.find(".individually span").text()) {
+            product.find(".order_individual span.readonly").removeClass("readonly");
+        }
+        else{
+            product.find(".order_individual span.readonly.right").removeClass("readonly un-value");
+        }
+    }
+    else{
+        product.find(".order_individual input").val(0);
+        product.find(".order_individual span").addClass("readonly un-value");
     }
     calculatePrice(me);
 }
@@ -271,10 +285,10 @@ function registerToCalculatePrice(){
     jQuery('tr.product td:not(.total) input').on('change', function (e) {
         calculatePrice(this);
     });
-    jQuery(".products-gallery.orders .product .calculated-price-input").on("change", function () {
+    jQuery("tr.product .total input").on("change", function () {
         var total = 0;
-        jQuery(".products-gallery.orders .product .calculated-price-input").each(function (i,totalProductPrice){
-            total+=parseInt( jQuery(totalProductPrice).val()||0);
+        jQuery("tr.product .total input").each(function (i,totalProductPrice){
+            total+=parseFloat( jQuery(totalProductPrice).autoNumeric('get')||0);
         })
         jQuery("input[name=total]").autoNumeric('set', total);
         //jQuery("input[name=total]").autoNumeric.set("input[name=total]", total);
@@ -286,14 +300,14 @@ function calculatePrice(me){
     var product = jQuery(me).closest(".product");
 
     var count = parseInt(product.find('.count input').val());
-   /* var unitsInBox = parseInt(product.find('.units-in-box').val());
-    var selectIndividually  = product.find("select.price-part.individually")
-    if(selectIndividually.length>0 && selectIndividually.val()==0 ||selectIndividually.length ==0) {// אם לא ניתן לבחור בודדים , או שבחור ארגז
+    var unitsInBox = parseInt(product.find('.units_in_box span').text());
+    var selectIndividually  = product.find(".order_individual input").val();
+    if(selectIndividually ==0) {// אם לא ניתן לבחור בודדים , או שבחור ארגז
         count=count*unitsInBox;
-    }*/
-    var total_order = parseInt(jQuery(".page.single input[name=total]").autoNumeric('get')||0);
-    var unitPrice = parseInt(product.find('.order_price input').autoNumeric('get'));
-    var discountPercent = parseInt(product.find('.discount_percent input').autoNumeric('get')||0);
+    }
+   // var total_order = parseInt(jQuery(".page.single input[name=total]").autoNumeric('get')||0);
+    var unitPrice = parseFloat(product.find('.order_price input').autoNumeric('get'));
+    var discountPercent = parseFloat(product.find('.discount_percent input').autoNumeric('get')||0);
     var calculatedPrice = (unitPrice*count) - (unitPrice*count*discountPercent/100);
     //product.find(".total span").html(calculatedPrice);
     product.find(".total input").autoNumeric('set',calculatedPrice).trigger("change");

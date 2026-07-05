@@ -111,13 +111,13 @@ tr.product td.count span,tr.product td.count input{
     border:solid 1px var(--b-global-color-dark-gray);
     height: 30px;
 }
-tr.product td.count span:hover{
+tr.product:not(.readonly) td.count span:hover{
     /*border:solid 2px black /*var(--b-global-color-dark-gray);*/
     box-shadow: 2px 2px 6px 1px rgba(0, 0, 0, 0.13);
-    background-color: var(--b-global-color-dark-gray);
+    background-color: var(--b-global-color-gold-hover);
 }
 .product td.count input{
-    width: 45px;
+    width: 50px;
     text-align: center;
     moz-appearance: textfield;
     padding: 0;
@@ -330,10 +330,28 @@ input[type="radio"] + label:before {
     width: 30%;
     box-sizing: border-box;
 }
-.ellipse.un-value:not(.un-value-over){
+tr .status-options .ellipse {
+    width: 70px;
+    padding: 0 3px;
+}
+tr .status-options .ellipse.left {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+}
+tr .status-options .ellipse.right {
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+}
+.ellipse.un-value:not(.un-value-over,.readonly){
     border: 1px solid #000 !important;
     background-color: var(--b-global-color-light-gray)!important;
     color: black!important;
+}
+.ellipse.readonly.un-value{
+    background-color: var(--b-global-color-light-gray);
+    color: var(--b-global-color-dark-gray);
+    cursor: default;
+    border-color:var(--b-global-color-dark-gray) ;
 }
 /*.ellipse.done {
     background-color: #D9F5F3;
@@ -383,13 +401,16 @@ input[type="radio"] + label:before {
 .input-label table tr input{
     width: 80px;
     height: 25px;
-    padding: 7px 12px;
+    padding: 5px 0;
     border: 1px solid transparent;
 }
-.input-label table tr input[readonly]{
+tr.readonly input,tr.readonly span {
+    cursor: default;
+}
+.input-label table tr .total input{
     width: 150px;
 }
-.input-label table tr input:not([readonly]):focus,.input-label table tr input:not([readonly]):hover{
+.input-label table tr:not(.readonly) input:not([readonly]):focus,.input-label table tr:not(.readonly) input:not([readonly]):hover{
    /* outline: 0.5px auto /*var(--b-global-color-dark-gray)*/;
     box-shadow: 2px 2px 6px 1px rgba(0, 0, 0, 0.13);
     border: 1px solid var(--b-global-color-dark-gray);

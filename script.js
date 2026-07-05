@@ -95,6 +95,7 @@ jQuery(document).ready(function($){
     jQuery('input[data-a-sign=₪]').autoNumeric('init', {
         vMin: '-9999999999999',
         mDec: 1,
+        aSign: ' ₪',
         wEmpty: 'empty'
     });
     jQuery('input[data-a-sign="%"]').autoNumeric('init', {
@@ -311,17 +312,17 @@ jQuery(document).ready(function($){
 
     jQuery(".status-options .ellipse:not(.readonly)").click(function () {
         var ellipse = jQuery(this);
-        var input = jQuery(".status-options input");
+        var currentChooser = ellipse.closest(".status-options");
+        var input = currentChooser.find("input");
 
         if(!ellipse.hasClass("un-value")){//היה בחור ורצים לבטל הבחירה
-            ellipse.addClass("un-value ");
-            input.val("");
-
+            ellipse.addClass("un-value");
+            input.val("").trigger("change");
         }
         else{//רוצים לבחור את מי שלחצתי עכשיו
-            jQuery(".status-options .ellipse").addClass("un-value ");
+            currentChooser.find(".ellipse").addClass("un-value");
             ellipse.removeClass("un-value");
-            input.val(ellipse.data("value"));
+            input.val(ellipse.data("value")).trigger("change");
         }
         jQuery(".status-options .ellipse.un-value").on("mouseover",function (){
             jQuery(this).addClass("un-value-over");

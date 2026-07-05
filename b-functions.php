@@ -130,14 +130,11 @@ function lists_table_rows($list_name)
     return $rows;
 }
 
-
-
-function get_column_value($column,$row,$field,$list,$key)
+function get_column_value($column,$row,$field,$list,$key,$is_readonly=false)
 {
     //write_log("column ".json_encode($column)." key ".$key);
     $column_value = "";
     switch ($column["widget"]) {
-
         case "select":
             if (isset($column["options"])) {
                 $field_id = $row->$field;
@@ -153,7 +150,6 @@ function get_column_value($column,$row,$field,$list,$key)
             break;
         case "radio":
             $column_value = '<div class="flex-display align-center" style="color: ' . $column["values"][$row->$field]["color"] . '"><div class="dot" style="background-color: ' . $column["values"][$row->$field]["color"] . '"></div>&nbsp;' . $column["values"][$row->$field]["label"] . '</div>';
-
             break;
         case "status":
             $column_value = '<span class="pointer ellipse ' . $column["values"][$row->$field]["class"] . '">
@@ -182,6 +178,11 @@ function get_column_value($column,$row,$field,$list,$key)
                 $column_value = wp_get_attachment_image($row->$field, 'full');
             }
             break;
+        case "hidden":
+            if ($row->$field){
+                $column_value =isset($column["create_input"])? $row->$field : "<span class='hidden'>{$row->$field}</span>" ;
+            }
+            break;
         default:
             if (isset($column["type"]) && $column["type"] == "user") {
                 $column_value = empty($row->$field) ? '' : get_userdata($row->$field)->display_name;
@@ -191,17 +192,36 @@ function get_column_value($column,$row,$field,$list,$key)
                     $column_value .= " {$column["sign"]}";
                 }
             }
-            $readonly = isset($column["widget"]) && $column["widget"]== "readonly"?' readonly ':'';
-            $type =  isset($column["widget"]) && $column["widget"]== "hidden" ? 'hidden':'text';
-
-            if(isset($column["create_input"])){
-                $column_value =($readonly? "": "<span class='hidden'>{$column_value}</span>").
-                    ($column['widget'] == 'number' ? "<span class='minus bold font-25  pointer'>-</span>" :"" ).
-                    "<input type='{$type}' class='' name='rows[{$key}][{$field}]' value='{$column_value}' {$readonly}".
-                    (isset($column['un_apostrophe']) && isset($column['sign']) ? "data-a-sign='".$column['sign']."'":"")."/>".
-                    ($column['widget'] == 'number' ? "<span class='plus bold font-25  pointer'>+</span>":"");
-            }
             break;
+    }
+    $type =  isset($column["widget"]) && $column["widget"]== "hidden" ? 'hidden':'text';
+    //write_log ('is_readonly '. $is_readonly);
+    if(isset($column["create_input"])) {
+        if ($column['widget'] == 'toggle') {
+            $value = $column_value ?? '';
+            if($field =="order_individual"){
+
+                $readonly =$is_readonly || !$row->individually || $row->count == 0 ? ' readonly ' :'';//אם לאפשר בחירת בודדים
+                $value =$row->count>0? $value: 0; //ברירת מחדל תמיד ארגזים אלא אם כן כבר מוזמן ובחרו
+            }
+            $column_value = "<div class='status-options flex-display font-17'>";
+            if(isset($column["values"])){
+                $column_value .= "<input type='hidden' id='' name='rows[{$key}][{$field}]' value='{$value}'>";
+                foreach ($column["values"] as $key=>$option) {
+                    $column_value .= "<span data-value='{$key}' class='{$readonly} pointer ellipse " . ($value != null && $value == $key ? "" : "un-value ") . $option["class"] . "'>               
+                                    {$option["label"]}                      
+                                </span>";
+                }
+            }
+            $column_value .= "</div>";
+        } else {
+            $readonly =$is_readonly || (isset($column["widget"]) && $column["widget"]== "readonly")?' readonly ':'';
+            $column_value = ($readonly ? "" : "<span class='hidden'>{$column_value}</span>") .
+                ($column['widget'] == 'number' ? "<span class='minus bold font-25 pointer {$readonly}'>-</span>" : "") .
+                "<input type='{$type}' class='' name='rows[{$key}][{$field}]' value='{$column_value}' {$readonly}" .
+                (isset($column['un_apostrophe']) && isset($column['sign']) ? "data-a-sign='" . $column['sign'] . "'" : "") . "/>" .
+                ($column['widget'] == 'number' ? "<span class='plus bold font-25 pointer {$readonly}'>+</span>" : "");
+        }
     }
 
     return $column_value;
@@ -225,8 +245,8 @@ function on_order_confirmation(){
 
         //שליחת מייל ללקוח על ההזמנה שאושרה
         $client = get_data_table("clients",$filters)[0];
-
-        $body = "הזמנה מתאריך ".date('d/m/Y',strtotime ( $order_confirmation->order_date)) ."<br><br>";
+        $body = "שלום ל {$client->name},<br>";
+        $body .= "הזמנה מתאריך ".date('d/m/Y',strtotime ( $order_confirmation->order_date)) ."<br><br>";
 
         $products = get_data_table("order_products",array(array("filter_field" => "order_id", "filter_value"=>$order_id)));
 
@@ -252,7 +272,7 @@ function on_order_confirmation(){
             else{
                 $count = "ארגזים";
             }
-            $body .= $p->name." כמות: ".$product_in_order->count." ".$count." :מחיר ".$product_in_order->order_price." ₪";
+            $body .= $p->name.", כמות: ".$product_in_order->count." ".$count.", :מחיר ".$product_in_order->order_price." ₪";
             if(!empty($product_in_order->bonus)){
                 $body .= " :בונוס ".$product_in_order->bonus;
             }
@@ -268,14 +288,15 @@ function on_order_confirmation(){
         if(!empty($order_confirmation->notes)) {
             $body .= "<br>הערות: " . $order_confirmation->notes;
         }
+        $body .= "<br><br>בברכה, בוטיק כשר ";
         //write_log("to ".$client->email." body ".$body);
-        //send_mail($client->email,"סיכום הזמנתך מס. ".$order_id,$body);
+        send_mail($client->email,"סיכום הזמנתך מס. ".$order_id,$body);
 
         $user = get_user_by('ID', $order_confirmation->user_opens);
         if($user!=null) {
             get_user_display_name($user);
             $body = "הסוכן " .get_user_display_name($user). "<br>" . $body;
-            //send_mail(/*get_option('admin_email')*/"rym76843@gmail.com", "הזמנה מאושרת ללקוח " . $client->name, $body);
+            send_mail(/*get_option('admin_email')*/"rym76843@gmail.com", "הזמנה מאושרת ללקוח " . $client->name, $body);
         }
         //write_log("list ".json_encode($order_supplier));
         //שליחת מייל לכל ספק על ההזמנה בשבילו
@@ -285,7 +306,8 @@ function on_order_confirmation(){
             $filters=array(array("filter_field" => "id", "filter_value"=>$key));
             $supplier = get_data_table("suppliers",$filters)[0];
 
-            $body = "נא לספק ללקוח  ".$client->name." את המוצרים הבאים:<br><br>";
+            $body = " לכבוד {$supplier->name}<br>
+                    נא לספק ללקוח {$client->name}  את המוצרים הבאים:<br><br>";
             foreach ($order as $product){
                 if($product->order_individual){
                     $count = "בקבוקים";
@@ -294,9 +316,10 @@ function on_order_confirmation(){
                     $count = "ארגזים";
                 }
 
-                $body .= $product->name." כמות: ".$product->count." ".$count;
+                $body .= $product->name.", כמות: ".$product->count." ".$count;
                 $body .= "<br>";
             }
+            $body .= "<br> בברכה, בוטיק כשר  ";
             $to = [
                 $supplier->email,
                 $supplier->email2,
@@ -306,7 +329,7 @@ function on_order_confirmation(){
 
             //write_log("body ".$body);
             //write_log("to ".$supplier->email." body ".$body);
-            //send_mail($to,"הזמנה מס. ".$order_id,$body);
+            send_mail($to,"הזמנה חדשה מבוטיק כשר",$body);
         }
 
 
@@ -333,7 +356,7 @@ function get_favorite_products($client_id)
     return $products;
     //write_log("favorite: ".json_encode($products));
 }
-function update_client_price_modal() {
+/*function update_client_price_modal() {
     ?>
 <form class="modal fade site_form" id="update_client_price"  tabindex='-1' role="dialog" data-success='getTableAjaxData' data-failed='show_error_messages'>
     <input type="hidden" name="form_func" value="save_single_data" />
@@ -368,7 +391,7 @@ function update_client_price_modal() {
         </div>
 </form>
 <?php
-}
+}*/
 function edit_list_modal(){
     ?>
     <form class="modal fade site_form" id="edit-list"  tabindex='-1' role="dialog" data-success='getTableAjaxData' data-failed='show_error_messages'>
@@ -489,9 +512,9 @@ function get_obligation_client($client_id)
     }
 
     $client = get_data_table("clients", array(array("filter_field" => "id", "filter_value" => $client_id)))[0];
-    $res = array("obligation" => $obligo,"client_obligo" => $client->obligo);
+    $res = array("debts" => $obligo,"obligo" => $client->obligo);
     if(isset($_POST["client_id"])) {
-        wp_send_json([$res]);
+        wp_send_json($res);
     }
     return $res;
 }
@@ -512,19 +535,14 @@ function sent_to_manager()
 {
     $filters = array(array("filter_field" => "id", "filter_value"=>$_POST["id"]));
     $order = get_data_table("orders",$filters)[0];
-// יש גם את שם הלקוח ואין צורך להביא מטבלת לקוחות$orderלבדוק לדעתי ב
-    $filters = array(array("filter_field" => "id", "filter_value"=>$order->client_id));
-    $client = get_data_table("clients",$filters)[0];
 
-    $body = "ללקוח " . $client->name."<br>". "יש חריגה מתשלום, יש לו חוב בסכום של: "  .  $client->obligo." ₪".
-        "<br>"."ותקרת החוב שלו היא:" .  $client->obligo;
-    send_mail(get_option('admin_email'),"בקשה לאישור הזמנה חדשה ללקוח: " .$client->name,$body);
+    $client = get_obligation_client($order->client_id);
+    $body = " ללקוח {$order->client_name} יש חריגה מתשלום<br>
+  יש לו חוב בסכום של:   {$client["debts"]} ₪
+ <br> ותקרת החוב שלו היא: {$client["obligo"]}<br>
+ <a href='https://kosherboutique.co.il/single/?subject=orders&action=edit&id={$_POST["id"]}'>לאישור ההזמנה</a>" ;
 
-    wp_send_json([
-        'status' => 'success',
-        'message' => 'נשלח מייל למנהל לאישור ההזמנה',
-    ]);
-
+    send_mail(get_option('admin_email'),"בקשה לאישור הזמנה חדשה ללקוח " .$order->client_name,$body);
 }
 
 function get_payment_until($payment_term_id,$date)

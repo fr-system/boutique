@@ -27,7 +27,7 @@ function openPopupAddOrderProduct(result){
             }
         })
 
-        var order_id = jQuery(".page.single input[name=id]").val();
+        var order_id = jQuery(".page.single input.orders_id[name=id]").val();
         key++;
         element.prepend(
             '<input type="hidden" name="products['+key+'][id]" value="">'+//id של השורה של מוצר_הזמנה

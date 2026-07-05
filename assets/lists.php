@@ -123,10 +123,10 @@ const BOUTIQUE_TABLES = array(
         "columns" => array(
             array("field_name" => "order_price", "widget" => "text", "label" => "מחיר", "un_apostrophe" => true,"sign"=>"₪","create_input"=>true),
             array("field_name" => "count", "widget" => "number", "label" => "כמות","create_input"=>true),
-            array("field_name" => "order_individual", "widget" => "select", "label" => "בודדים","create_input"=>true,
-                "options"=>array(
-                    array("value"=>"0","text"=>"ארגז"),
-                    array("value"=>"1","text"=>"בודדים"),
+            array("field_name" => "order_individual", "widget" => "toggle", "label" => "בודדים","create_input"=>true,
+                "values"=>array(
+                    0=>array("class"=>"background-light-light-blue right","label"=> "ארגזים"),
+                    1=>array("class"=>"background-dark-green left","label"=> "בודדים"),
                 )),
            // array("field_name" => "bonus", "widget" => "number", "label" => "בונוס","create_input"=>true),
             array("field_name" => "discount_percent", "widget" => "text", "label" => "אחוזי הנחה", "un_apostrophe" => true,"sign"=>"%","create_input"=>true),
@@ -141,6 +141,9 @@ const BOUTIQUE_TABLES = array(
         "more_columns_in_table" => array(
             array("field_name" => "image_id", "widget" => "image"),
             array("field_name" => "name", "widget" => "text","label"=>"שם המוצר"/*,"width"=>"1000px"*/),
+            array("field_name" => "individually", "widget" => "hidden","hide_in_table"=>true),
+            array("field_name" => "units_in_box", "widget" => "hidden","hide_in_table"=>true),
+
         ),
         "update_remove"=>false
     ),

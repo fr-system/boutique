@@ -462,7 +462,7 @@ function create_input($field,$value = null,$readonly = "")
             <?php
             break;
         case "table":
-            echo get_archive_table ($field["field_name"],$value,array("input_table"=>"true"));
+            echo get_archive_table ($field["field_name"],$value,array("input_table"=>"true","readonly"=>$readonly));
             break;
         default:
             break;
@@ -554,11 +554,27 @@ function get_tr_data($table_name, $data, $key,$attr){
 
     $row = is_array ($data)? $data[0]:$data;
     //echo json_encode ($row);
+    $tr_class ="";
+    switch ($table_name) {
+        case "orders":
+            if ($row->done) $tr_class = " order-confirm";
+            break;
+        case "clients":
+        case "products":
+            if ($row->blocked) $tr_class = " blocked";
+            break;
+        case "order_products":
+            $tr_class = " product ";
+            if(isset($attr["readonly"]))$tr_class .= $attr["readonly"];
+        case "agent_target_supplier":
+            $tr_class .= " sub-table";
+            break;
     $backgraund_class = ($table_name == "orders" && $row->done ? "order-confirm" : "");
     if(($table_name == "clients" || $table_name == "products") && $row->blocked) {
         $backgraund_class.=" blocked";
     }
-    $html="<tr data-id='{$row->id}' class='{$backgraund_class}'>";
+
+    $html="<tr data-id='{$row->id}' class='{$tr_class}'>";
     if(is_manager() && $table_name == "collection" && !isset($_GET["payed"])){
         $html.= '<td>';
         if($row->doc_type == 1) {
@@ -600,7 +616,7 @@ function get_tr_data($table_name, $data, $key,$attr){
     if (isset($page_info["more_columns_in_table"])) {
         foreach ($page_info["more_columns_in_table"] as $column) {
             $column_value = get_column_value($column, $row, $column["field_name"], null,$key);
-            $html .= '<td>' . $column_value . '</td>';
+            $html .= '<td class="' . $column["field_name"] .'">' . $column_value . '</td>';
             $columns_counter++;
         }
     }
@@ -617,13 +633,16 @@ function get_tr_data($table_name, $data, $key,$attr){
             }
         }
 
-        $field = isset($column['join_table']) && !isset($column['type']) ? substr($column['join_table'], 0, -1) . (isset($column['join_value']) ? "_" . $column['join_value'] : '') : $column["field_name"];
+        $field = isset($column['join_table']) && !isset($column['type']) ?
+            substr($column['join_table'], 0, -1) . (isset($column['join_value']) ? "_" . $column['join_value'] : '') :
+            $column["field_name"];
+
         $list = isset($column['table_name']) ? constant($column['table_name']) : null;
         $data_id = "";
         if ($column["widget"] == "select" && isset($column["options"])) {
             $data_id = 'data-id="' . $row->$field . '"';
         }
-        $column_value = get_column_value($column, $row, $field, $list, $key);
+        $column_value = get_column_value($column, $row, $field, $list, $key,isset($attr["readonly"])&& !empty($attr["readonly"]));
         //write_log("value ".$column_value);
         $hidden = "";//(isset($column["widget"]) && $column["widget"]== "hidden"?' hidden':'');
         $html .= '<td ' . $data_id . ' class="' . $field .$hidden .'">' . $column_value . '</td>';
@@ -637,7 +656,7 @@ function get_tr_data($table_name, $data, $key,$attr){
                 $obligation = 0;
                 if($table_name == "clients" && is_manager()) {
                     $res = get_obligation_client($row->id);
-                    $obligation = $res["obligation"];
+                    $obligation = $res["debts"];
                 }
                 $html .= '<td>'.($table_name != "clients" || $obligation > 0  ?
                     '<a data-text="'.$action["text"].'" data-ajax_func="'.$action["ajax_func"].'" class="button background-gold font-17" data-bs-toggle="modal" href="#'.$action["dialog"].'" role="button">'.$action["title"].'</a>':'').

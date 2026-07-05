@@ -95,7 +95,7 @@ if ( ! defined( 'ABSPATH' ) ) {
         </div>
     </form>
 <?php
-update_client_price_modal();
+//update_client_price_modal();
 payment_modal();
 edit_list_modal();
 } ?>
