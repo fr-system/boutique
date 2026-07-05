@@ -659,7 +659,7 @@ function get_tr_data($table_name, $data, $key,$attr){
                 $obligation = 0;
                 if($table_name == "clients" && is_manager()) {
                     $res = get_obligation_client($row->id);
-                    $obligation = $res["obligation"];
+                    $obligation = $res["debts"];
                 }
                 $html .= '<td>'.($table_name != "clients" || $obligation > 0  ?
                     '<a data-text="'.$action["text"].'" data-ajax_func="'.$action["ajax_func"].'" class="button background-gold font-17" data-bs-toggle="modal" href="#'.$action["dialog"].'" role="button">'.$action["title"].'</a>':'').

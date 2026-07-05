@@ -85,8 +85,8 @@ else{
                 <div>
                 <div id="form_error_msgs_container" class="margin-bottom-20"></div>
                 <input type="hidden" name="form_func" value="save_single_data" />
-                <input type="hidden" name="table_name" value="<?php echo $table_name ?>" />
-                <input type="hidden" name="id" value="<?php echo $id ?>" />
+                <input type="hidden" name="table_name" value="<?= $table_name ?>" />
+                <input type="hidden" class="<?= $table_name.'_id'?>" name="id" value="<?php echo $id ?>" />
                 <input type="hidden" name="previous_page" value="<?php echo $previous_page ?>" />
                 <input type="hidden" name="action" value="<?php echo $id ?>" />
 

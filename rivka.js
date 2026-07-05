@@ -6,8 +6,8 @@ function fillObligation(results){
     var spanObligation =jQuery('.page.single form .grid-display .obligation');
     //spanObligation.html(results.obligation);
 
-    if(results.obligation > results.client_obligo){
-        spanObligation.text('חוב מעבר לאובליגו'+" "+"₪" + (results.obligation - results.client_obligo).toLocaleString() );
+    if(results.debts > results.obligo){
+        spanObligation.text('חוב מעבר לאובליגו'+" "+"₪" + (results.debts - results.obligo).toLocaleString() );
         if(jQuery(".manager-approval").length > 0) {
             jQuery(".manager-approval").removeClass("hidden");
         }
@@ -36,9 +36,9 @@ function getSelectClientId(){
 function fillOrderId(result){
     //צריך לשים למעלה בכתובת של האתר את מספר ההזמנה ולשנות את ה action ל edit
 
-    if(!jQuery("input[name=id]").val()) {
+    if(!jQuery("input.orders_id[name=id]").val()) {
         window.history.pushState({}, '', 'single/?subject=orders&action=edit&id='+result.id);
-        jQuery("section form input[name=id]").val(result.id);
+        jQuery("section form input.orders_id[name=id]").val(result.id);
         getSelectClientId().prop('disabled', true);
         jQuery("section input[name=order_date]").prop('disabled', true);
     }
@@ -60,7 +60,7 @@ jQuery(document).ready(function($) {
                 var postData = [
                     {name: "action", value: "checking_duplicates"},
                     {name: "BnNumber", value: jQuery(this).val()},
-                    {name: "client_id", value: jQuery('.page.single form input[name=id]').val() },
+                    {name: "client_id", value: jQuery('.page.single form input.clients_id[name=id]').val() },
                 ];
 
                 call_ajax_function(postData,"onCheckingDuplicates");
@@ -87,7 +87,7 @@ jQuery(document).ready(function($) {
     jQuery(".manager-approval").click(function (){
         var postData = [
             {name: "action", value: "sent_to_manager"},
-            {name: "id", value: jQuery('input[name=id]').val() },
+            {name: "id", value: jQuery('input.orders_id[name=id]').val() },
         ];
         call_ajax_function(postData,"mail_sent");
     })

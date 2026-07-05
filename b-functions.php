@@ -195,7 +195,7 @@ function get_column_value($column,$row,$field,$list,$key,$is_readonly=false)
             break;
     }
     $type =  isset($column["widget"]) && $column["widget"]== "hidden" ? 'hidden':'text';
-    write_log ('is_readonly '. $is_readonly);
+    //write_log ('is_readonly '. $is_readonly);
     if(isset($column["create_input"])) {
         if ($column['widget'] == 'toggle') {
             $value = $column_value ?? '';
@@ -208,7 +208,6 @@ function get_column_value($column,$row,$field,$list,$key,$is_readonly=false)
             if(isset($column["values"])){
                 $column_value .= "<input type='hidden' id='' name='rows[{$key}][{$field}]' value='{$value}'>";
                 foreach ($column["values"] as $key=>$option) {
-                    write_log ('key '. $key. ' value '.$value);
                     $column_value .= "<span data-value='{$key}' class='{$readonly} pointer ellipse " . ($value != null && $value == $key ? "" : "un-value ") . $option["class"] . "'>               
                                     {$option["label"]}                      
                                 </span>";
@@ -246,8 +245,8 @@ function on_order_confirmation(){
 
         //שליחת מייל ללקוח על ההזמנה שאושרה
         $client = get_data_table("clients",$filters)[0];
-
-        $body = "הזמנה מתאריך ".date('d/m/Y',strtotime ( $order_confirmation->order_date)) ."<br><br>";
+        $body = "שלום ל {$client->name},<br>";
+        $body .= "הזמנה מתאריך ".date('d/m/Y',strtotime ( $order_confirmation->order_date)) ."<br><br>";
 
         $products = get_data_table("order_products",array(array("filter_field" => "order_id", "filter_value"=>$order_id)));
 
@@ -273,7 +272,7 @@ function on_order_confirmation(){
             else{
                 $count = "ארגזים";
             }
-            $body .= $p->name." כמות: ".$product_in_order->count." ".$count." :מחיר ".$product_in_order->order_price." ₪";
+            $body .= $p->name.", כמות: ".$product_in_order->count." ".$count.", :מחיר ".$product_in_order->order_price." ₪";
             if(!empty($product_in_order->bonus)){
                 $body .= " :בונוס ".$product_in_order->bonus;
             }
@@ -289,14 +288,15 @@ function on_order_confirmation(){
         if(!empty($order_confirmation->notes)) {
             $body .= "<br>הערות: " . $order_confirmation->notes;
         }
+        $body .= "<br><br>בברכה, בוטיק כשר ";
         //write_log("to ".$client->email." body ".$body);
-        //send_mail($client->email,"סיכום הזמנתך מס. ".$order_id,$body);
+        send_mail($client->email,"סיכום הזמנתך מס. ".$order_id,$body);
 
         $user = get_user_by('ID', $order_confirmation->user_opens);
         if($user!=null) {
             get_user_display_name($user);
             $body = "הסוכן " .get_user_display_name($user). "<br>" . $body;
-            //send_mail(/*get_option('admin_email')*/"rym76843@gmail.com", "הזמנה מאושרת ללקוח " . $client->name, $body);
+            send_mail(/*get_option('admin_email')*/"rym76843@gmail.com", "הזמנה מאושרת ללקוח " . $client->name, $body);
         }
         //write_log("list ".json_encode($order_supplier));
         //שליחת מייל לכל ספק על ההזמנה בשבילו
@@ -306,7 +306,8 @@ function on_order_confirmation(){
             $filters=array(array("filter_field" => "id", "filter_value"=>$key));
             $supplier = get_data_table("suppliers",$filters)[0];
 
-            $body = "נא לספק ללקוח  ".$client->name." את המוצרים הבאים:<br><br>";
+            $body = " לכבוד {$supplier->name}<br>
+                    נא לספק ללקוח {$client->name}  את המוצרים הבאים:<br><br>";
             foreach ($order as $product){
                 if($product->order_individual){
                     $count = "בקבוקים";
@@ -315,9 +316,10 @@ function on_order_confirmation(){
                     $count = "ארגזים";
                 }
 
-                $body .= $product->name." כמות: ".$product->count." ".$count;
+                $body .= $product->name.", כמות: ".$product->count." ".$count;
                 $body .= "<br>";
             }
+            $body .= "<br> בברכה, בוטיק כשר  ";
             $to = [
                 $supplier->email,
                 $supplier->email2,
@@ -327,7 +329,7 @@ function on_order_confirmation(){
 
             //write_log("body ".$body);
             //write_log("to ".$supplier->email." body ".$body);
-            //send_mail($to,"הזמנה מס. ".$order_id,$body);
+            send_mail($to,"הזמנה חדשה מבוטיק כשר",$body);
         }
 
 
@@ -510,9 +512,9 @@ function get_obligation_client($client_id)
     }
 
     $client = get_data_table("clients", array(array("filter_field" => "id", "filter_value" => $client_id)))[0];
-    $res = array("obligation" => $obligo,"client_obligo" => $client->obligo);
+    $res = array("debts" => $obligo,"obligo" => $client->obligo);
     if(isset($_POST["client_id"])) {
-        wp_send_json([$res]);
+        wp_send_json($res);
     }
     return $res;
 }
@@ -533,13 +535,14 @@ function sent_to_manager()
 {
     $filters = array(array("filter_field" => "id", "filter_value"=>$_POST["id"]));
     $order = get_data_table("orders",$filters)[0];
-// יש גם את שם הלקוח ואין צורך להביא מטבלת לקוחות$orderלבדוק לדעתי ב
-    $filters = array(array("filter_field" => "id", "filter_value"=>$order->client_id));
-    $client = get_data_table("clients",$filters)[0];
 
-    $body = "ללקוח " . $client->name."<br>". "יש חריגה מתשלום, יש לו חוב בסכום של: "  .  $client->obligo." ₪".
-        "<br>"."ותקרת החוב שלו היא:" .  $client->obligo;
-    send_mail(get_option('admin_email'),"בקשה לאישור הזמנה חדשה ללקוח: " .$client->name,$body);
+    $client = get_obligation_client($order->client_id);
+    $body = " ללקוח {$order->client_name} יש חריגה מתשלום<br>
+  יש לו חוב בסכום של:   {$client["debts"]} ₪
+ <br> ותקרת החוב שלו היא: {$client["obligo"]}<br>
+ <a href='https://kosherboutique.co.il/single/?subject=orders&action=edit&id={$_POST["id"]}'>לאישור ההזמנה</a>" ;
+
+    send_mail(get_option('admin_email'),"בקשה לאישור הזמנה חדשה ללקוח " .$order->client_name,$body);
 }
 
 function get_payment_until($payment_term_id,$date)
@@ -673,7 +676,7 @@ function client_billing_report()
     }
 
     /*$client->email.",".$client->email2*/
-    //send_mail("rym76843@gmail.com" ,"דו''ח חיוב",$late_pay);
+    send_mail("rym76843@gmail.com" ,"דו''ח חיוב",$late_pay);
 
     //write_log("client_billing_report 2");
 

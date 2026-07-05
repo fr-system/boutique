@@ -331,8 +331,8 @@ input[type="radio"] + label:before {
     box-sizing: border-box;
 }
 tr .status-options .ellipse {
-    width: 100px;
-    padding: 0 5px;
+    width: 70px;
+    padding: 0 3px;
 }
 tr .status-options .ellipse.left {
     border-top-right-radius: 0;
