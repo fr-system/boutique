@@ -569,9 +569,6 @@ function get_tr_data($table_name, $data, $key,$attr){
         case "agent_target_supplier":
             $tr_class .= " sub-table";
             break;
-    $backgraund_class = ($table_name == "orders" && $row->done ? "order-confirm" : "");
-    if(($table_name == "clients" || $table_name == "products") && $row->blocked) {
-        $backgraund_class.=" blocked";
     }
 
     $html="<tr data-id='{$row->id}' class='{$tr_class}'>";
