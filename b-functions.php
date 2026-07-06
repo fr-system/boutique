@@ -221,20 +221,25 @@ function get_column_value($column,$row,$field,$list,$key,$is_readonly=false)
         }
         else {
             $column_value = ($readonly ? "" : "<span class='hidden'>{$value}</span>");
-            if ($column['widget'] == 'number') {
-                $column_value .= "<span class='minus bold font-25 pointer {$readonly}'>-</span>";
+            if($column['widget'] == 'select') {
+
             }
+            else {
+                if ($column['widget'] == 'number') {
+                    $column_value .= "<span class='minus bold font-25 pointer {$readonly}'>-</span>";
+                }
 
-            if($column["widget"] == "date" && !empty($value)) {
-                $date = DateTime::createFromFormat('d/m/Y', $value);
-                $value = $date ? $date->format('Y-m-d') : '';
-            }
+                if ($column["widget"] == "date" && !empty($value)) {
+                    $date = DateTime::createFromFormat('d/m/Y', $value);
+                    $value = $date ? $date->format('Y-m-d') : '';
+                }
 
-            $column_value .= "<input type='{$type}' class='' name='rows[{$key}][{$field}]' value='{$value}' {$readonly}" .
-                (isset($column['un_apostrophe']) && isset($column['sign']) ? "data-a-sign='" . $column['sign'] . "'" : "") . "/>";
+                $column_value .= "<input type='{$type}' class='' name='rows[{$key}][{$field}]' value='{$value}' {$readonly}" .
+                    (isset($column['un_apostrophe']) && isset($column['sign']) ? "data-a-sign='" . $column['sign'] . "'" : "") . "/>";
 
-            if ($column['widget'] == 'number') {
-                $column_value .= ($column['widget'] == 'number' ? "<span class='plus bold font-25 pointer {$readonly}'>+</span>" : "");
+                if ($column['widget'] == 'number') {
+                    $column_value .= "<span class='plus bold font-25 pointer {$readonly}'>+</span>";
+                }
             }
         }
     }

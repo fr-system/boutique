@@ -27,6 +27,7 @@ const BOUTIQUE_TABLES = array(
             array("field_name" => "obligo", "un_apostrophe" => true, "widget" => "text", "label" => "אובליגו","sign"=>"₪"),
             array("field_name" => "promissory_note","widget" => "file", "label" => "שטר חוב","hide_in_table"=>true),
             array("field_name" => "blocked", "widget" => "hidden","create_input"=>true),
+            array("field_name" => "clients_branches" ,"widget" => "table" ,"field_id"=>"main_client_id","hide_in_table"=>true,"new_row"=>true),
 
 
         ),
@@ -34,6 +35,21 @@ const BOUTIQUE_TABLES = array(
         "actions" => array("orders","tasks",array("title"=>"שליחת דוח חיוב","dialog"=>"bout-massage",
             "ajax_func"=>"client_billing_report","text"=>"האם לשלוח ללקוח דוח חיוב למייל?"))
     ),
+    //id	name	main_client_id	city_id	address	phone	email
+    "clients_branches" => array(
+        "title" => "סניפים",
+        "columns" => array(
+            array("field_name" => "name", "widget" => "text", "label" => "שם הסניף","create_input"=>true),
+            array("field_name" => "address", "widget" => "text", "label" => "כתובת","hide_in_table"=>true,"create_input"=>true),
+/*            array("field_name" => "city_id", "widget" => "select", "join_table" => "cities", "join_value" => "name", "label" => "עיר","create_input"=>true),*/
+            array("field_name" => "mobile", "widget" => "text", "label" => "נייד","required"=>true,"create_input"=>true),
+            array("field_name" => "email", "widget" => "text", "label" => "דוא\"ל","required"=>true,"create_input"=>true),
+            array("field_name" => "id", "widget" => "hidden","create_input"=>true),
+            array("field_name" => "main_client_id", "widget" => "hidden","create_input"=>true),
+        ),
+        "update_remove"=>false
+    ),
+
     "products" => array(
         "title" => "קטלוג המוצרים",
         "single" => "מוצר",

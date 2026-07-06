@@ -11,6 +11,7 @@ require_once dirname(__FILE__) . "/assets/lists.php";
 require_once dirname(__FILE__) . "/users.php";
 require_once dirname(__FILE__) . "/queries.php";
 require_once dirname(__FILE__) . "/b-functions.php";
+require_once dirname(__FILE__) . "/table_functions.php";
 require_once dirname(__FILE__) . "/design_tool.php";
 require_once dirname(__FILE__) . "/rivka.php";
 require_once dirname(__FILE__) . "/lib/import_excel.php";

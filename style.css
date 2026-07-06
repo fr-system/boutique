@@ -406,6 +406,9 @@ section.page .dt-layout-table .dt-layout-cell{
 section.page.single .dt-layout-table .dt-layout-cell{
     height: 40vh;
 }
+section.page.single .dt-layout-table .dt-layout-cell:has(.clients_branches){
+     height: 20vh;
+ }
 .dt-layout-row{
     margin: 0 !important;
 }
