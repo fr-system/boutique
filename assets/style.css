@@ -399,10 +399,15 @@ tr .status-options .ellipse.right {
     height: 25px;
 }
 .input-label table tr input{
-    width: 80px;
+    width: 100px;
     height: 25px;
     padding: 5px 0;
     border: 1px solid transparent;
+}
+.input-label table tr input[type=date]{
+    width: 130px;
+    height: 30px;
+    padding: 3px;
 }
 tr.readonly input,tr.readonly span {
     cursor: default;

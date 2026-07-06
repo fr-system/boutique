@@ -77,6 +77,7 @@ const BOUTIQUE_TABLES = array(
                     3=>array("class"=>"not-yet-treated background-light-orange","label"=> "טרם טופל")
                 )),
             array("field_name" => "target_date", "widget" => "date", "label" => "תאריך יעד"),
+            array("field_name" => "sending_reminder", "widget" => "date", "label" => "שליחת תזכורת"),
         )),
     "suppliers" => array(
         "title" => "ספקים",
@@ -111,11 +112,11 @@ const BOUTIQUE_TABLES = array(
         "columns" => array(
             array("field_name" => "client_id","widget" => "select", "join_table" => "clients", "join_value" => "name", "label" => "שם הלקוח","required"=>true),
             array("field_name" => "order_date", "widget" => "datetime-local", "label" => "תאריך הזמנה","required"=>true),
-            array("field_name" => "user_opens","widget" => "hidden", "label" => "מקים ההזמנה", "type" => "user","join_table" => "agents"/*, "join_value" => "id"*/,"join_field"=>"user_id","join_values_select"=>array("id","name")),//
+            array("field_name" => "user_opens","widget" => "", "label" => "מקים ההזמנה", "type" => "user","join_table" => "agents"/*, "join_value" => "id"*/,"join_field"=>"user_id","join_values_select"=>array("id","name")),//
             array("field_name" => "order_products" ,"widget" => "table" ,"field_id"=>"order_id","hide_in_table"=>true,"target_table"=>"products"),
             array("field_name" => "total","widget" => "text", "label" => "סה\"כ", "un_apostrophe" => true,"sign"=>"₪"),
             array("field_name" => "notes","widget" => "textarea", "label" => "הערות","hide_in_table"=>true),
-            array("field_name" => "user_confirms","widget" => "hidden", "label" => "מאשר ההזמנה", "type" => "user"),//"join_table" => "agents", "join_value" => "name","join_field"=>"user_id"),
+            array("field_name" => "user_confirms","widget" => "", "label" => "מאשר ההזמנה", "type" => "user"),//"join_table" => "agents", "join_value" => "name","join_field"=>"user_id"),
             array("field_name" => "done"/*,"widget" => "bool"*/),
         )),
     "order_products" => array(
@@ -169,10 +170,12 @@ const BOUTIQUE_TABLES = array(
         "title" => "יעד לסוכן לכל ספק",
         "columns" => array(
             array("field_name" => "target", "widget" => "text", "label" => "יעד", "un_apostrophe" => true,"sign"=>"₪","create_input"=>true),
-            array("field_name" => "period_days", "widget" => "number", "label" => "תקופה" , "un_apostrophe" => true,"create_input"=>true),
+            array("field_name" => "date_from", "widget" => "date", "label" => "מתאריך","create_input"=>true),
+            array("field_name" => "date_to", "widget" => "date", "label" => "עד תאריך","create_input"=>true),
             array("field_name" => "id","widget" => "hidden","create_input"=>true),
             array("field_name" => "supplier_id","widget" => "hidden","create_input"=>true),
             array("field_name" => "agent_id","widget" => "hidden","create_input"=>true),
+            array("field_name" => "total", "widget" => "אקסא","label"=>"הזמין בפועל","not_in_query"=>true),
         ),
         "more_columns_in_table" => array(
             array("field_name" => "name", "widget" => "select","label"=>"ספק"),

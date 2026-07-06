@@ -131,7 +131,10 @@ if(is_agent()) {
             $previousMonth = date('m', strtotime('-1 month'));
             $previousYear  = date('Y', strtotime('-1 month'));
             $firstDayOfMonth = "01/".$previousMonth."/".$previousYear;
+             $from = $previousYear."-".$previousMonth."-01";
             $lastDayOfMonth = date('t', strtotime($firstDayOfMonth))."/".$previousMonth."/".$previousYear;
+            $to = $previousYear."-".$previousMonth."-".date('t', strtotime($firstDayOfMonth));
+
             ?>
             <div><span class="font-20 bold">גרף מכירות  </span><span class="font-17"><?php echo $firstDayOfMonth ." עד ".$lastDayOfMonth ?></span> </div>
             <div class="font-15 dark-green" ></div>
@@ -145,7 +148,7 @@ if(is_agent()) {
 
             $agents = get_data_table("agents",$filters);
             //לקבל את ההזמנות בין תאריכים
-            $filters = array(array("filter_field" => "order_date","filter_type"=>"between","filter_value"=> array('2026-04-01','2026-06-15')));
+            $filters = array(array("filter_field" => "order_date","filter_type"=>"between","filter_value"=> array($from,$to)));
             if(is_agent()) {
                 $filters[] = array("filter_field" => "user_opens", "filter_value" =>get_current_user_id());
             }
@@ -176,7 +179,7 @@ if(is_agent()) {
                     array_map(fn($a) => $a->id, $agents)
                 );
 
-                $agents[$index]->_target += $row->target;
+                //$agents[$index]->_target += $row->target;
             }
 
             //write_log("orders+agents ".json_encode($agents));

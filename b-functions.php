@@ -194,13 +194,17 @@ function get_column_value($column,$row,$field,$list,$key,$is_readonly=false)
             }
             break;
     }
-    $type =  isset($column["widget"]) && $column["widget"]== "hidden" ? 'hidden':'text';
+
+    $type =  isset($column["widget"]) && $column["widget"]== "hidden" ? 'hidden':
+        (isset($column["widget"]) && $column["widget"]== "date"? 'date':'text');
+    $readonly =$is_readonly || (isset($column["widget"]) && $column["widget"]== "readonly")?' readonly ':'';
+
     //write_log ('is_readonly '. $is_readonly);
     if(isset($column["create_input"])) {
-        if ($column['widget'] == 'toggle') {
-            $value = $column_value ?? '';
-            if($field =="order_individual"){
+        $value = $column_value ?? '';
 
+        if ($column['widget'] == 'toggle') {//בודדים או ארגזים
+            if($field =="order_individual"){
                 $readonly =$is_readonly || !$row->individually || $row->count == 0 ? ' readonly ' :'';//אם לאפשר בחירת בודדים
                 $value =$row->count>0? $value: 0; //ברירת מחדל תמיד ארגזים אלא אם כן כבר מוזמן ובחרו
             }
@@ -214,13 +218,24 @@ function get_column_value($column,$row,$field,$list,$key,$is_readonly=false)
                 }
             }
             $column_value .= "</div>";
-        } else {
-            $readonly =$is_readonly || (isset($column["widget"]) && $column["widget"]== "readonly")?' readonly ':'';
-            $column_value = ($readonly ? "" : "<span class='hidden'>{$column_value}</span>") .
-                ($column['widget'] == 'number' ? "<span class='minus bold font-25 pointer {$readonly}'>-</span>" : "") .
-                "<input type='{$type}' class='' name='rows[{$key}][{$field}]' value='{$column_value}' {$readonly}" .
-                (isset($column['un_apostrophe']) && isset($column['sign']) ? "data-a-sign='" . $column['sign'] . "'" : "") . "/>" .
-                ($column['widget'] == 'number' ? "<span class='plus bold font-25 pointer {$readonly}'>+</span>" : "");
+        }
+        else {
+            $column_value = ($readonly ? "" : "<span class='hidden'>{$value}</span>");
+            if ($column['widget'] == 'number') {
+                $column_value .= "<span class='minus bold font-25 pointer {$readonly}'>-</span>";
+            }
+
+            if($column["widget"] == "date" && !empty($value)) {
+                $date = DateTime::createFromFormat('d/m/Y', $value);
+                $value = $date ? $date->format('Y-m-d') : '';
+            }
+
+            $column_value .= "<input type='{$type}' class='' name='rows[{$key}][{$field}]' value='{$value}' {$readonly}" .
+                (isset($column['un_apostrophe']) && isset($column['sign']) ? "data-a-sign='" . $column['sign'] . "'" : "") . "/>";
+
+            if ($column['widget'] == 'number') {
+                $column_value .= ($column['widget'] == 'number' ? "<span class='plus bold font-25 pointer {$readonly}'>+</span>" : "");
+            }
         }
     }
 
@@ -244,12 +259,10 @@ function on_order_confirmation(){
         $filters=array(array("filter_field" => "id", "filter_value"=>$order_confirmation->client_id));
 
         //שליחת מייל ללקוח על ההזמנה שאושרה
-        $client = get_data_table("clients",$filters)[0];
-        $body = "שלום ל {$client->name},<br>";
-        $body .= "הזמנה מתאריך ".date('d/m/Y',strtotime ( $order_confirmation->order_date)) ."<br><br>";
+
+        $body = "הזמנה מתאריך ".date('d/m/Y',strtotime ( $order_confirmation->order_date)) ."<br><br>";
 
         $products = get_data_table("order_products",array(array("filter_field" => "order_id", "filter_value"=>$order_id)));
-
         $order_supplier = array();
         //write_log("products ".json_encode($products));
         foreach ($products as $product_in_order){
@@ -290,9 +303,9 @@ function on_order_confirmation(){
         }
         $body .= "<br><br>בברכה, בוטיק כשר ";
         //write_log("to ".$client->email." body ".$body);
-        send_mail($client->email,"סיכום הזמנתך מס. ".$order_id,$body);
-
         $user = get_user_by('ID', $order_confirmation->user_opens);
+        send_mail($user->mail,"סיכום הזמנת לקוח. ".$order_id,$body);
+
         if($user!=null) {
             get_user_display_name($user);
             $body = "הסוכן " .get_user_display_name($user). "<br>" . $body;
@@ -681,5 +694,21 @@ function client_billing_report()
     //write_log("client_billing_report 2");
 
     wp_send_json(['status' => 'success','message' => "נשלח דוח חיוב ללקוח"]);
+}
+
+function get_tasks_not_done()
+{
+    $filters = array(array("filter_field" => "status_id", "filter_value" =>1,"filter_type"=>"!="));
+    $filters[] = array("filter_field" => "target_date", "filter_ratio" =>"<","filter_type"=>"date","filter_value"=>"CURDATE()");
+    $filters[] = array("filter_type"=>"filter","filter_value"=>"(sending_reminder is null OR sending_reminder < CURDATE() - INTERVAL 7 DAY)");
+
+    $result = get_data_table("tasks",$filters);
+    foreach ($result as $task) {
+        $body="לכבוד הסוכן {$task->name}  {$task->subject} 
+        {$task->details} ";
+//לשלוח גם לסוכן וגם לבוטיק
+        //send_mail("" ,"משימה שעדיין לא בוצעה",$body);
+
+    }
 }
 ?>

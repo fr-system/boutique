@@ -23,6 +23,7 @@ function pre_action_query($table_name, $row)
     $values = array();
 
     foreach ($row as $key => $value) {
+        if($key == "id") continue;
         $field = get_field($table_name, $key);
         if ($field != null) {
             if (!empty($value) && (isset($field["un_apostrophe"]) || $field["widget"] == "file" || $field["widget"] == "image")) {
@@ -122,6 +123,7 @@ function save_single_data()
 
     //write_log("save_single_data " .json_encode($_POST));
     if (($table_name == "orders" || $table_name == "agents") && isset($_POST["rows"])) {
+        write_log("rows ".json_encode($_POST["rows"]));
         foreach ($_POST["rows"] as $row) {
             if ($table_name == "agents") {
                 if (empty($row["target"])) {
@@ -151,7 +153,7 @@ function save_single_data()
            // write_log ("action_product " . $action_product);
             //write_log ("row to save" . json_encode ($row));
             $result = pre_action_query ($sub_table_name, $row);
-            //write_log("result to save" . json_encode($result));
+            write_log("result to save" . json_encode($result));
             run_action_query ($sub_table_name, $row["id"], $action_product, $result);
         }
     }
@@ -176,7 +178,8 @@ function get_data_table($table_name, $filters=null, $orderby = null, $join_filte
     $i = 0;
     foreach ($columns as $column) {
 
-        if(!isset($column["field_name"]) || isset($column["widget"]) && $column["widget"] == "table")continue;
+        if(!isset($column["field_name"]) || isset($column["widget"]) && $column["widget"] == "table" ||
+            isset($column["not_in_query"]))continue;
 
         if(isset($column['join_table_from'])) {
             //קישור של טבלה אחרת עם טבלה אחרת
@@ -255,6 +258,9 @@ function get_data_table($table_name, $filters=null, $orderby = null, $join_filte
                     break;
                 case "between":
                     $filter_str[] = $filter_field . " between " .$apostrophe . $filter["filter_value"][0] .$apostrophe ." AND ".$apostrophe .$filter["filter_value"][1].$apostrophe;
+                    break;
+                case "filter":
+                    $filter_str[] = $filter["filter_value"];
                     break;
                 default:
                     $filter_str[] = $filter_field . " = " . $apostrophe . $filter["filter_value"] . $apostrophe;

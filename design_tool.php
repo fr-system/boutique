@@ -24,85 +24,104 @@ function get_single_view($table_name,$row,$readonly)
                     $filters = array();
 
                     if ($table_name == "orders") {
-                        $filters[] = array("filter_field" => "blocked","filter_value"=>"1", "filter_type"=>"!=");
+                        $filters[] = array("filter_field" => "blocked", "filter_value" => "1", "filter_type" => "!=");
                     }
-                        //$filters = array();לא להביא בהזמנה מוצרים חסומים
-                        //$filters[] = array("filter_field" => "blocked", "filter_value" => " == null ");
-                        //מביא את כל טבלת מוצרים
-                        //מביא את טבלת ספקים
-                        $target_table_rows = get_data_table($column["target_table"],$filters);
-                        $sub_table_id = substr($column["target_table"], 0, -1) . "_id";
-                        $parent_table_id= $column["field_id"];
-                        //עוברים על טבלת מוצרים אם יש את המוצר בהזמנה מכניסים את את הכמות לשורה של המוצר
-                        //עוברים על טבלת ספקים ואם יש ספק כזה עם יעד מעודכן לסוכן מעדכנים בליסט
 
-                        $filters = array();
-                        $sub_table = $column["field_name"];
+                    //$filters = array();לא להביא בהזמנה מוצרים חסומים
+                    //$filters[] = array("filter_field" => "blocked", "filter_value" => " == null ");
+                    //מביא את כל טבלת מוצרים
+                    //מביא את טבלת ספקים
+                    $target_table_rows = get_data_table($column["target_table"], $filters);
+                    $sub_table_id = substr($column["target_table"], 0, -1) . "_id";
+                    $parent_table_id = $column["field_id"];
+                    //עוברים על טבלת מוצרים אם יש את המוצר בהזמנה מכניסים את את הכמות לשורה של המוצר
+                    //עוברים על טבלת ספקים ואם יש ספק כזה עם יעד מעודכן לסוכן מעדכנים בליסט
+
+                    $filters = array();
+                    $sub_table = $column["field_name"];
                     if (isset($row->id)) {
                         $filters[] = array("filter_field" => $parent_table_id, "filter_value" => $row->id);
                         //מביא את המוצרים שרשומים בהזמנה הזו
                         //מביא את היעדים של הספקים לסוכן זה
                         $value = get_data_table($sub_table, $filters);
                     }
-                        //מביא את השדות של מוצרים בהזמנה
-                        //מביא שדות של סוכן+ספק+יעד
-                        $sub_columns = BOUTIQUE_TABLES[$sub_table]["columns"];
 
-                        foreach ($target_table_rows as $table_row) {
-                            $id = $table_row->id;
-                            $results = array();
-                            if (isset($row->id)) {
-                                $results = array_filter($value, function ($r) use ($id, $sub_table_id) {
-                                    return $r->$sub_table_id == $id;
-                                });
-                            }
+                    //מביא את השדות של מוצרים בהזמנה
+                    //מביא שדות של סוכן+ספק+יעד
+                    $sub_columns = BOUTIQUE_TABLES[$sub_table]["columns"];
 
-                            if (count($results) == 0) {
-                                $item = (object)array();
-                                $exist_in_sub_table = false;
+                    foreach ($target_table_rows as $table_row) {
+                        $id = $table_row->id;
+                        $results = array();
+                        if (isset($row->id)) {
+                            $results = array_filter($value, function ($r) use ($id, $sub_table_id) {
+                                return $r->$sub_table_id == $id;
+                            });
+                        }
 
-                            } else {
-                                $item = array_pop($results);
-                                $exist_in_sub_table = true;
-                            }
-                            $table_row->id = $exist_in_sub_table ? $item->id : "";//ID של טבלת רבים לרבים
-                            $table_row->$sub_table_id = $id; // ID של הפריט (מוצר או יעד)
-                            $table_row->$parent_table_id = isset($row->id) ? $row->id: null;
-                            foreach ($sub_columns as $column1) {//מכניסים את שאר השדות בתוך שורה של מוצר
-                                if ($table_name == "agents") {
-                                    $table_row->target = $exist_in_sub_table ? ($item->target || "") : "";
-                                    $table_row->period_days = $exist_in_sub_table ? ($item->period_days||"") : "";
-                                    $table_row->agent_id = isset($row->id) ? $row->id : null;
-                                }
-                                else if ($table_name == "orders") {
-                                    $field_name = $column1["field_name"];
-                                    if ($field_name == "order_price") {
-                                        //$price = $table_row->price;
-                                      //  $table_row->order_price = 0;
-                                        if ($exist_in_sub_table) {
-                                            $price = $item->order_price;
-                                        }
-                                        else {
-                                            if (!empty($table_row->client_price)) {//מחיר מיוחד ללקוח
-                                                $price = $table_row->client_price;
-                                            }
-                                            else {
-                                                $price = empty($table_row->price)? 0 :$table_row->price ;
-                                            }
-                                        }
-                                        $table_row->order_price = $price;
+                        if (count($results) == 0) {
+                            $item = (object)array();
+                            $exist_in_sub_table = false;
+
+                        } else {
+                            $item = array_pop($results);
+                            $exist_in_sub_table = true;
+                        }
+                        $table_row->id = $exist_in_sub_table ? $item->id : "";//ID של טבלת רבים לרבים
+                        $table_row->$sub_table_id = $id; // ID של הפריט (מוצר או יעד)
+                        $table_row->$parent_table_id = isset($row->id) ? $row->id : null;
+
+                        foreach ($sub_columns as $column1) {//מכניסים את שאר השדות בתוך שורה של מוצר
+                            if ($table_name == "agents") {
+                                $table_row->target = $exist_in_sub_table ? ($item->target) : "";
+                                $table_row->date_from = $exist_in_sub_table ? ($item->date_from) : "";
+                                $table_row->date_to = $exist_in_sub_table ? ($item->date_to) : "";
+                                $table_row->agent_id = isset($row->id) ? $row->id : null;
+                                $total = "";
+                                if($exist_in_sub_table && !empty($table_row->date_from) && !empty($table_row->date_to)) {
+                                    $query = "SELECT sum(op.total) as total
+                                            from test_agents
+                                            join test_orders on test_agents.id = test_orders.user_opens
+                                            join test_order_products as op on op.order_id = test_orders.id
+                                            join test_products on test_products.id = op.product_id
+                                            where test_agents.id = {$table_row->agent_id} 
+                                              and test_products.supplier_id = {$table_row->$sub_table_id} 
+                                              and op.total > 0 
+                                              and test_orders.order_date BETWEEN '{$table_row->date_from}' and  '{$table_row->date_to}'
+                                            ";
+                                    //write_log("q ".$query);
+                                    $res_total = run_query($query);
+                                    if(count($res_total) > 0 && !empty($res_total[0]->total)){
+                                        $total = $res_total[0]->total."  ₪";
                                     }
-                                    elseif ($field_name != $sub_table_id && $field_name != $parent_table_id ){
-                                        //write_log("field_name ".$field_name);
-                                        $table_row->$field_name = isset($item->$field_name) ? $item->$field_name : "";
+                                    //write_log("sapak ".$table_row->$sub_table_id." total ". json_encode($total));
+                                }
+                                $table_row->total = $total;
+                            } else if ($table_name == "orders") {
+                                $field_name = $column1["field_name"];
+                                if ($field_name == "order_price") {
+                                    //$price = $table_row->price;
+                                    //  $table_row->order_price = 0;
+                                    if ($exist_in_sub_table) {
+                                        $price = $item->order_price;
+                                    } else {
+                                        if (!empty($table_row->client_price)) {//מחיר מיוחד ללקוח
+                                            $price = $table_row->client_price;
+                                        } else {
+                                            $price = empty($table_row->price) ? 0 : $table_row->price;
+                                        }
                                     }
+                                    $table_row->order_price = $price;
+                                } elseif ($field_name != $sub_table_id && $field_name != $parent_table_id) {
+                                    //write_log("field_name ".$field_name);
+                                    $table_row->$field_name = isset($item->$field_name) ? $item->$field_name : "";
                                 }
                             }
+                        }
                     }
                     $list = $target_table_rows;
 
-                }
-                else {
+                } else {
                     $field_name = isset($column["field_name"]) ? $column["field_name"] : null;
                     $list = isset($row->$field_name) ? $row->$field_name : "";
                 }
@@ -337,11 +356,11 @@ function create_input($field,$value = null,$readonly = "")
             if($field["widget"] == "datetime-local" && !empty($value)) {
                 $value = date('Y-m-d H:i:s', strtotime($value));
             }
-            if($field["widget"] == "email"){
-                $autocomplete = ' autocomplete="email"';
-            } else {
+            //if($field["widget"] == "email"){
+                //$autocomplete = ' autocomplete="email"';
+            //} else {
                 $autocomplete = ' autocomplete="off"';
-            }
+            //}
             $button="";
             if(isset($field["popup_button"])){
                 $button = "<a data-tooltip='{$field["popup_button"]["tooltip"]}' class='has-tooltip button' data-bs-toggle='modal' href='#{$field["popup_button"]["target_modal"]}' role='button' >
@@ -619,7 +638,6 @@ function get_tr_data($table_name, $data, $key,$attr){
     }
 
     foreach($page_info["columns"] as $column) {
-
         //איזה שדות שמראים בכותרת(גם אם אין כיתוב של כותרת) אותו דבר להראות בשורה בטבלה והפוך שדות שמסתירים בכותרת להסתיר גם בשורה בטבלה
         if (isset($column["create_input"])) {
         } else {
@@ -639,6 +657,7 @@ function get_tr_data($table_name, $data, $key,$attr){
         if ($column["widget"] == "select" && isset($column["options"])) {
             $data_id = 'data-id="' . $row->$field . '"';
         }
+        //write_log("row->field" .$field." ". $row->$field);
         $column_value = get_column_value($column, $row, $field, $list, $key,isset($attr["readonly"])&& !empty($attr["readonly"]));
         //write_log("value ".$column_value);
         $hidden = "";//(isset($column["widget"]) && $column["widget"]== "hidden"?' hidden':'');
