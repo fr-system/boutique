@@ -17,6 +17,7 @@ function fillObligation(results){
         }
     }
     else{
+        spanObligation.text("");
         jQuery(".order-confirmation").removeClass("hidden");
     }
 }
@@ -102,9 +103,6 @@ jQuery(document).ready(function($) {
     var tableName = getParameterByName("subject");
     var currentUrl = window.location.pathname;
     var single = currentUrl.includes('single');
-    if(tableName == "orders"){
-
-    }
 
         var table = jQuery('.dataTable').DataTable({
             //bFilter: true,
@@ -156,10 +154,8 @@ jQuery(document).ready(function($) {
         jQuery('.dt-layout-cell.dt-layout-end').removeClass('dt-layout-end');
     //}, 500);
 
-    if(tableName == "orders" && currentUrl.includes('single')){
-    }
-    else
-    {
+    if(tableName == "orders" && currentUrl.includes('single')){}
+    else {
         jQuery('.dataTables_filter').hide();
     }
 

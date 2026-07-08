@@ -5,7 +5,7 @@ function get_single_view($table_name,$row,$readonly)
     <?php
     $columns = BOUTIQUE_TABLES[$table_name]["columns"];
     foreach($columns as $column){
-        if(!isset($column["widget"]) || $column["widget"] == "hidden" && !isset($column["create_input"])){continue;}
+        if(!isset($column["widget"])||$column["widget"] == "not" || $column["widget"] == "hidden" && !isset($column["create_input"])){continue;}
         $add_class = "";
         if($column["widget"] == "table") {
             $add_class = " direction-column ";

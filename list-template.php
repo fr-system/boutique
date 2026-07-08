@@ -10,15 +10,17 @@ if(!is_user_logged_in()){
     echo $archive_actions;
     ?>
         <ul id="list" class="tables-list font-17 grow"><?php
-            //echo "<option value=''></option>";
             foreach (BOUTIQUE_LISTS as $list_name => $B_LIST){
-               echo "<li class='pointer' data-list-name='{$list_name}'>".$B_LIST["title"]."</li>";
+               echo "<li class='pointer' data-list-name='{$list_name}'>{$B_LIST["title"]}</li>";
             }
             ?>
         </ul>
-
-    <table name="" class="list-table">
-
-    </table>
+    <div class="flex-display">
+        <div class="part-80">
+            <table name="" class="list-table dataTable ">
+                <?php //כאן הולך לפונקציה הזו  lists_table_rows ?>
+            </table>
+        </div>
+    </div>
 </section>
 <?php get_footer();?>

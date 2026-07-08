@@ -123,7 +123,7 @@ function save_single_data()
 
     //write_log("save_single_data " .json_encode($_POST));
     if (isset($_POST["rows"])) {
-        write_log("rows ".json_encode($_POST["rows"]));
+        //write_log("rows ".json_encode($_POST["rows"]));
         foreach ($_POST["rows"] as $row) {
             if ($table_name == "agents") {
                 if (empty($row["target"])) {

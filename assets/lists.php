@@ -128,11 +128,11 @@ const BOUTIQUE_TABLES = array(
         "columns" => array(
             array("field_name" => "client_id","widget" => "select", "join_table" => "clients", "join_value" => "name", "label" => "שם הלקוח","required"=>true),
             array("field_name" => "order_date", "widget" => "datetime-local", "label" => "תאריך הזמנה","required"=>true),
-            array("field_name" => "user_opens","widget" => "", "label" => "מקים ההזמנה", "type" => "user","join_table" => "agents"/*, "join_value" => "id"*/,"join_field"=>"user_id","join_values_select"=>array("id","name")),//
+            array("field_name" => "user_opens","widget" => "not", "label" => "מקים ההזמנה", "type" => "user","join_table" => "agents"/*, "join_value" => "id"*/,"join_field"=>"user_id","join_values_select"=>array("id","name")),//
             array("field_name" => "order_products" ,"widget" => "table" ,"field_id"=>"order_id","hide_in_table"=>true,"target_table"=>"products"),
             array("field_name" => "total","widget" => "text", "label" => "סה\"כ", "un_apostrophe" => true,"sign"=>"₪"),
             array("field_name" => "notes","widget" => "textarea", "label" => "הערות","hide_in_table"=>true),
-            array("field_name" => "user_confirms","widget" => "", "label" => "מאשר ההזמנה", "type" => "user"),//"join_table" => "agents", "join_value" => "name","join_field"=>"user_id"),
+            array("field_name" => "user_confirms","widget" => "not", "label" => "מאשר ההזמנה", "type" => "user"),//"join_table" => "agents", "join_value" => "name","join_field"=>"user_id"),
             array("field_name" => "done"/*,"widget" => "bool"*/),
         )),
     "order_products" => array(
@@ -297,14 +297,25 @@ const BOUTIQUE_LISTS = array(
                 array("field_name" => "text","widget" => "text"),
             )
         ),
-    /*"specials" =>
+    "specials" =>
         array(
-            "title" => "הטבות ומבצעים",
+            "title" => "מבצעים",
             "single" => "מבצע",
             "columns" => array(
-                array("field_name" => "descript","widget" => "text"),
-                array("field_name" => "discount","widget" => "text","un_apostrophe" => true),
+                array("field_name" => "descript","label"=>"תיאור המבצע","widget" => "text"),
+                array("field_name" => "supplier_id", "widget" => "select","label"=>"ספק", "join_table" => "suppliers", "join_value" => "name"),
+                array("field_name" => "date_end", "widget" => "date", "label" => "תאריך סיום"),
+
+                array("field_name" => "type", "widget" => "select", "label" => "סוג מבצע",
+                    "options"=>array(
+                        array("value"=>"1","text"=>"קנה קבל"),
+                        array("value"=>"2","text"=>"קנה מעל"),
+                    )
+                ),
+                array("field_name" => "price_more","widget" => "text","label"=>"קנה מעל סכום","un_apostrophe" => true,"sign"=>"₪"),
+                array("field_name" => "buy", "widget" => "number", "label" => "קנה כמות"),
+                array("field_name" => "get", "widget" => "number", "label" => "קבל"),
             )
-        ),*/
+        ),
     );
 ?>

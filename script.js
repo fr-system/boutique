@@ -372,19 +372,20 @@ jQuery(document).ready(function($){
         }
         else{
             listName = jQuery("ul.tables-list li.selected").data("list-name");
-            title = jQuery("ul.tables-list li.selected");
+            title = jQuery("ul.tables-list li.selected").html();
         }
+
+        jQuery('#edit-list .modal-body').addClass(listName)
 
         jQuery("#edit-list input[name=table_name]").val(listName);
         jQuery("#edit-list .modal-title").text(title);
-        if(window.location.pathname.includes('single')){
+        if(window.location.pathname.includes('single')){//הוספת עיר בתוך עמוד לקוח
             html = '<span class="input-label flex-display align-center">' +
                 ' <label class="bold" for="text">' + btn.data("single") + ':</label>'+
                 '<input type="text" id="text" name="text"  class="font-17 grow"' +
                 '</span>';
         }
         else {
-
             if (btn.data("action") == "edit") {
                 tr = btn.parent().parent();
                 rowData = jQuery.map(jQuery(tr).find('td:not(.td-action)'), function (td) {
@@ -393,34 +394,63 @@ jQuery(document).ready(function($){
                 jQuery('#edit-list input[name=id]').val(tr.data("id"));
             }
 
-
-            jQuery('table.list-table tr:first-child th').each(function (k, th) {
+            jQuery('table.list-table tr:first-child th:not(.no-sort)').each(function (k, th) {
                 th = jQuery(th)
                 var columnName = th.data("column-name");
                 var columnType = th.data("column-type") ?? "text";
-                html += '<span class="input-label flex-display align-center">' +
+                html += '<div class="input-label flex-display align-center">' +
                     ' <label class="bold" for="' + columnName + '">' + th.text() + ':</label>';
                 if (th.data("column-type") == "select") {
                     html += '<select id="' + columnName + '" name="' + columnName + '"  class="font-17 grow"' +
                         (rowData.length > 0 ? ' value="' + rowData[k] + '"' : '') + '>';
-                    comboListName = th.data("table");
-                    var postData = [
-                        {name: "action", value: "get_list_ajax"},
-                        {name: "table_name", value: comboListName},
-                        {name: "selected_value", value: rowData[k]}
-                    ];
-                    call_ajax_function(postData, "fill_modal_list")
-                } else {
-                    html += '<input type="text" id="' + columnName + '" name="' + columnName + '"  class="font-17 grow"' +
+                    if(th.data("table")) {
+                        comboListName = th.data("table");
+                        var postData = [
+                            {name: "action", value: "get_list_ajax"},
+                            {name: "table_name", value: comboListName},
+                            {name: "selected_value", value: rowData[k]}
+                        ];
+                        call_ajax_function(postData, "fill_modal_list");
+                    }
+                    else if (th.data("column-options")){
+                        //var jsonOptions = th.data("options").replaceAll('"', "'");
+                        //console.log("aaaa  " + th.data("column-options"));
+                        var options = th.data("column-options");
+                        jQuery.each(options,function (){
+                            var option = this;
+                            html += '<option value="'+option.value+'" '+(rowData[k] ==  option.value ?  "selected" : "") +'>'+option.text+'</option>';
+                        })
+                    }
+                    html += '</select>';
+                }
+                else {
+                    html += '<input type="'+columnType+'" id="' + columnName + '" name="' + columnName + '"  class="font-17 grow"' +
                         (rowData.length > 0 ? ' value="' + rowData[k] + '"' : '') + '>';
                 }
-                html += '</span>';
+                html += '</div>';
             });
+
+
         }
         jQuery('#edit-list .modal-body').empty();
         jQuery('#edit-list .modal-body').append(html);
 
+        if(listName == "specials"){
+            jQuery('#edit-list .modal-body input[name=price_more]').closest("div").addClass("hidden");
+            jQuery('#edit-list .modal-body select[name=type]').on("change",function (){
+                /*var selectedOption = getSelectClientId().find('option:selected');
+                getObligationClient(selectedOption.val());*/
+                if(jQuery(this).val()==1){
+                    jQuery('#edit-list .modal-body input[name=price_more]').closest("div").addClass("hidden");
+                    jQuery('#edit-list .modal-body input[name=buy]').closest("div").removeClass("hidden");
 
+                }
+                else{
+                    jQuery('#edit-list .modal-body input[name=price_more]').closest("div").removeClass("hidden");
+                    jQuery('#edit-list .modal-body input[name=buy]').closest("div").addClass("hidden");
+                }
+            })
+        }
     });
     jQuery('#edit-list').on('shown.bs.modal', function () {
         jQuery('#edit-list .modal-body input:first-child').focus();
@@ -734,7 +764,7 @@ function automaticOrderSaving(){
     }
 }
 function fill_modal_list(result){
-    jQuery(".modal-body select").html(result.options);
+    jQuery(".modal-body select[name="+result.tableName.slice(0, -1)+"_id]").eq(0).html(result.options);
 }
 function getTableAjaxData(tableName) {
     format = "table";
