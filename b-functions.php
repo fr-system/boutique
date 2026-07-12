@@ -232,8 +232,9 @@ function get_column_value($column,$row,$field,$list,$key,$is_readonly=false)
 
         if ($column['widget'] == 'toggle') {//בודדים או ארגזים
             if($field =="order_individual"){
-                $readonly =$is_readonly || !$row->individually || $row->count == 0 ? ' readonly ' :'';//אם לאפשר בחירת בודדים
-                $value =$row->count>0? $value: 0; //ברירת מחדל תמיד ארגזים אלא אם כן כבר מוזמן ובחרו
+                //write_log ('count in order '.json_encode ( $row->count));
+                $readonly =$is_readonly || !$row->individually || empty($row->count) ? ' readonly ' :'';//אם לאפשר בחירת בודדים
+                $value =!empty($row->count)? $value: 0; //ברירת מחדל תמיד ארגזים אלא אם כן כבר מוזמן ובחרו
             }
             $column_value = "<div class='status-options flex-display font-17'>";
             if(isset($column["values"])){

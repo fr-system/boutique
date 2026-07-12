@@ -103,9 +103,36 @@ jQuery(document).ready(function($) {
     var tableName = getParameterByName("subject");
     var currentUrl = window.location.pathname;
     var single = currentUrl.includes('single');
+    let cartMode = false;
+
+    $.fn.dataTable.ext.search.push(function (settings, data, dataIndex) {
+        if (!cartMode) {
+            return true;
+        }
+        // דוגמה: הצג רק שורות שבהן הערך בעמודה הראשונה גדול מ-100
+        return parseInt(data[5], 10) > 0;
+    });
 
         var table = jQuery('.dataTable').DataTable({
             //bFilter: true,
+            layout: {
+                topStart: {
+                    buttons: [tableName == "orders" && currentUrl.includes('single')?
+                        {
+                            text: 'הצגת עגלה <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="currentColor" class="bi bi-bag-check" viewBox="0 0 16 16">\n' +
+                                '  <path fill-rule="evenodd" d="M10.854 8.146a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708 0l-1.5-1.5a.5.5 0 0 1 .708-.708L7.5 10.793l2.646-2.647a.5.5 0 0 1 .708 0"/>\n' +
+                                '  <path d="M8 1a2.5 2.5 0 0 1 2.5 2.5V4h-5v-.5A2.5 2.5 0 0 1 8 1m3.5 3v-.5a3.5 3.5 0 1 0-7 0V4H1v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V4zM2 5h12v9a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1z"/>\n' +
+                                '</svg>',
+                            className: 'show-cart background-gold flex-display center align-center bold ',
+                            action: function (e,t,sender,sProp) {
+                                jQuery(sender).toggleClass("cart-mode");
+                                cartMode = !cartMode;
+                                table.draw();
+                            }
+                        }:null
+                    ]
+                }
+            },
             searching: (tableName == "orders" && currentUrl.includes('single')),
             paging: false,
             info: false,
@@ -152,6 +179,9 @@ jQuery(document).ready(function($) {
         });
         jQuery('.dt-layout-cell.dt-layout-start').removeClass('dt-layout-start');
         jQuery('.dt-layout-cell.dt-layout-end').removeClass('dt-layout-end');
+        jQuery('.dt-button.show-cart').removeClass('dt-button');
+
+
     //}, 500);
 
     if(tableName == "orders" && currentUrl.includes('single')){}
@@ -262,14 +292,18 @@ function plusMinusCountProduct(me){
     }
     numberInput.val(currentValue);
     if(currentValue > 0) {
+        product.addClass('in-cart');
         if(product.find(".individually span").text()) {
+            product.find(".order_individual span.readonly.right").removeClass("un-value");
             product.find(".order_individual span.readonly").removeClass("readonly");
+
         }
         else{
             product.find(".order_individual span.readonly.right").removeClass("readonly un-value");
         }
     }
     else{
+        product.removeClass('in-cart');
         product.find(".order_individual input").val(0);
         product.find(".order_individual span").addClass("readonly un-value");
     }
