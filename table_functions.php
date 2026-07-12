@@ -165,7 +165,7 @@ function get_tr_data($table_name, $data, $key,$attr){
             if(is_array($action) && isset($action["dialog"])) {
                 $obligation = 0;
                 if($table_name == "clients" && is_manager()) {
-                    $res = get_obligation_client($row->id);
+                    $res = get_client_details($row->id);
                     $obligation = $res["debts"];
                 }
                 $html .= '<td>'.($table_name != "clients" || $obligation > 0  ?

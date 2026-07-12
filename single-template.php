@@ -59,8 +59,12 @@ else{
 <section class="page single flex-display direction-column" data-single="<?php echo $page_info['single']?>">
     <div class="flex-display ">
         <div class="flex-display space-between margin-bottom-20 <?php echo $part_left_side ?> align-center ">
-            <div class="font-30 bold "><?php echo $title_page ?><span class="font-18"><?php echo $id ?  "  מס. ".$id : "" ?></span></div>
-            <?php $text_left_side="";
+            <div class="font-30 bold title-page">
+                <?php echo $title_page ?><span class="font-18"><?php echo $id ?  "  מס. ".$id : "" ?></span>
+            </div>
+
+            <?php
+            $text_left_side="";
             if($table_name == "clients" && $action != "new" && $row->blocked == 1) {
                 $text_left_side = '<span class="color-red">הלקוח חסום</span>';
             }
@@ -88,8 +92,10 @@ else{
                 <input type="hidden" name="table_name" value="<?= $table_name ?>" />
                 <input type="hidden" class="<?= $table_name.'_id'?>" name="id" value="<?php echo $id ?>" />
                 <input type="hidden" name="previous_page" value="<?php echo $previous_page ?>" />
-                <input type="hidden" name="action" value="<?php echo $id ?>" />
-
+                <?php if($table_name == "orders" || $table_name == "tasks") {?>
+                    <input type="hidden" class="branch-client" value="<?=$row->branch ?? ''?>"/>
+                    <input type="hidden" name='user_opens' value="<?= $row->user_opens ?? ''?>"/>
+                 <?php  }?>
                 <?php get_single_view($table_name,$row,$readonly); ?>
                 </div>
             <div class="buttons flex-display align-self-center">
