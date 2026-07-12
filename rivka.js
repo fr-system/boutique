@@ -1,33 +1,49 @@
-function fillObligation(results){
+function fillClientDetails(results){
+    if(results.branches){
+        var disabled = jQuery("input.orders_id[name=id]").val() ?" disabled ":"";
+        var required = disabled==""?" required ":"";
+        var html ='<div class="branch-area margin-r-10">' +
+                '<label class="bold" for="branch">סניף:</label>' +
+                '<select class="font-17" id="branch" name="branch" '+disabled + required+'>'+results.branches+'</select>' +
+            '</div>';
+        //getSelectClientId().removeClass("grow");
+        getSelectClientId().after(html);
 
-    if(jQuery('.page.single form .grid-display .obligation').length == 0) {
-        getSelectClientId().after('<span class="margin-before-10 color-red obligation"></span>');
-    }
-    var spanObligation =jQuery('.page.single form .grid-display .obligation');
-    //spanObligation.html(results.obligation);
-
-    if(results.debts > results.obligo){
-        spanObligation.text('חוב מעבר לאובליגו'+" "+"₪" + (results.debts - results.obligo).toLocaleString() );
-        if(jQuery(".manager-approval").length > 0) {
-            jQuery(".manager-approval").removeClass("hidden");
-        }
-        else{
-            jQuery(".order-confirmation").removeClass("hidden");
-
-        }
     }
     else{
-        spanObligation.text("");
-        jQuery(".order-confirmation").removeClass("hidden");
+        jQuery('.page.single form .branch-area').remove();
+        //getSelectClientId().addClass("grow");
+    }
+
+    if(getParameterByName("subject") == "orders")
+    {
+        if (jQuery('.page.single .obligation-msg').length == 0) {
+            jQuery('.page.single .title-page').after('<span class="margin-before-10 color-red obligation-msg"></span>');
+        }
+        var spanObligation = jQuery('.page.single .obligation-msg');
+
+        if (results.debts > results.obligo) {
+            spanObligation.text('חוב מעבר לאובליגו' + " " + "₪" + (results.debts - results.obligo).toLocaleString());
+            if (jQuery(".manager-approval").length > 0) {
+                jQuery(".manager-approval").removeClass("hidden");
+            } else {
+                jQuery(".order-confirmation").removeClass("hidden");
+
+            }
+        } else {
+            spanObligation.text("");
+            jQuery(".order-confirmation").removeClass("hidden");
+        }
     }
 }
 
-function getObligationClient(clientId){
+function onSelectClient(clientId){
     var postData = [
-        {name: "action", value: "get_obligation_client"},
-        {name: "client_id", value: clientId }
+        {name: "action", value: "get_client_details"},
+        {name: "client_id", value: clientId },
+        {name: "selected_value", value: jQuery('.page.single input.branch-client').val()}
     ];
-    call_ajax_function(postData,"fillObligation");
+    call_ajax_function(postData,"fillClientDetails");
 }
 
 function getSelectClientId(){
@@ -41,6 +57,7 @@ function fillOrderId(result){
         window.history.pushState({}, '', 'single/?subject=orders&action=edit&id='+result.id);
         jQuery("section form input.orders_id[name=id]").val(result.id);
         getSelectClientId().prop('disabled', true);
+        jQuery("section form input[name=branch]").prop('disabled', true);
         jQuery("section input[name=order_date]").prop('disabled', true);
     }
 }
@@ -69,18 +86,20 @@ jQuery(document).ready(function($) {
         });
     }
 
-    if(getParameterByName("subject") == "orders") {
+    if(getParameterByName("subject") == "orders" || getParameterByName("subject") == "tasks") {
         getSelectClientId().change(function () {
             if (jQuery(this).val()) {
-                getObligationClient(jQuery(this).val());
+                onSelectClient(jQuery(this).val());
 
             }
         });
-//לדעת אם הלקוח שעכשיו יוצרים לו הזמנה הוא מחאר בתשלום לא לאפשר לאשר הזמנה אלא לשלוח לאישור מנהל
+
+        //לדעת אם הלקוח שעכשיו יוצרים לו הזמנה הוא מחאר בתשלום לא לאפשר לאשר הזמנה אלא לשלוח לאישור מנהל
         if (getParameterByName("action") == "edit") {
             var selectedOption = getSelectClientId().find('option:selected');
-            getObligationClient(selectedOption.val());
+            onSelectClient(selectedOption.val());
             getSelectClientId().prop('disabled', true);
+            jQuery("section form input[name=branch]").prop('disabled', true);
             jQuery("section input[name=order_date]").prop('disabled', true);
         }
     }

@@ -5,7 +5,7 @@ function get_single_view($table_name,$row,$readonly)
     <?php
     $columns = BOUTIQUE_TABLES[$table_name]["columns"];
     foreach($columns as $column){
-        if(!isset($column["widget"])||$column["widget"] == "not" || $column["widget"] == "hidden" && !isset($column["create_input"])){continue;}
+        if(!isset($column["widget"])||$column["widget"] == "none" || $column["widget"] == "hidden" && !isset($column["create_input"])){continue;}
         $add_class = "";
         if($column["widget"] == "table") {
             $add_class = " direction-column ";
@@ -336,7 +336,9 @@ function build_select_options($table_name, $value=null,$attr = null)
             $field = $fields_list["data-field"];
         }*/
         $list = get_list($table_name, $attr["filter"]);
-        $options = '<option value=""></option>';
+        if(count($list)>0) {
+            $options = '<option value=""></option>';
+        }
     }
 
     foreach ($list as $row) {
@@ -344,10 +346,42 @@ function build_select_options($table_name, $value=null,$attr = null)
         if(isset($fields_list["data-field"])){
             $data_field =' data-field="'.$row->$field.'"';
         }'.$data_field.'*/
-        $options .= '<option  value="' . $row->value . '"' . (!empty($value)&& (is_array($value) && in_array($row->value, $value) || (!is_array($value) && $row->value == $value || $row->text == $value)) ? 'selected' : '') . '>' . $row->text . '</option>';
+        $value_text="";
+        if($value) {
+            $row_text = str_replace('\\', '', str_replace('"', '', $row->text));
+            $value_text = str_replace('\\', '', str_replace('"', '', $value));
+        }
+        $options .= '<option  value="' . $row->value . '"' . (!empty($value)&& (is_array($value) && in_array($row->value, $value) || (!is_array($value) && ($row->value == $value ||  $row_text  == $value_text))) ? 'selected' : '') . '>' . $row->text . '</option>';
     }
     return $options;
 }
+
+/*function build_checkboxes_options($table_name, $value=null,$attr = null)
+{
+    $attr = $attr ?? array("filter"=>null);
+    //write_log("list name " .$table_name);
+    if (array_key_exists($table_name, BOUTIQUE_LISTS)) {
+        $fields_list = BOUTIQUE_LISTS[$table_name];
+    }
+    else if (array_key_exists($table_name, BOUTIQUE_TABLES)) {
+        $fields_list = BOUTIQUE_TABLES[$table_name];
+    }
+
+    $list = get_list($table_name, $attr["filter"]);
+
+    $html ="";
+
+    foreach ($list as $row) {
+        $checked ="";
+        $value_text="";
+        if($value) {
+            $checked = (!empty($value)&& (is_array($value) && in_array($row->value, $value) || (!is_array($value) && ($row->value == $value))) ? ' checked="checked"' : '');
+        }
+        $html.='<input type="checkbox" id="" name="blocked" value="1" '.$checked.'>';
+        $options .= '<option  value="' . $row->value . '"' .  . '>' . $row->text . '</option>';
+    }
+    return $options;
+}*/
 
 function create_input($field,$value = null,$readonly = "")
 {

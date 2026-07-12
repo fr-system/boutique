@@ -400,10 +400,11 @@ jQuery(document).ready(function($){
                 var columnType = th.data("column-type") ?? "text";
                 html += '<div class="input-label flex-display align-center">' +
                     ' <label class="bold" for="' + columnName + '">' + th.text() + ':</label>';
+                var multiple = "";
                 if (th.data("column-type") == "select") {
-                    html += '<select id="' + columnName + '" name="' + columnName + '"  class="font-17 grow"' +
+                    html += '<select id="' + columnName + '" name="' + columnName+multiple + '"  class="font-17 grow"' +
                         (rowData.length > 0 ? ' value="' + rowData[k] + '"' : '') + '>';
-                    if(th.data("table")) {
+                    if(th.data("table") ) {
                         comboListName = th.data("table");
                         var postData = [
                             {name: "action", value: "get_list_ajax"},
@@ -412,7 +413,7 @@ jQuery(document).ready(function($){
                         ];
                         call_ajax_function(postData, "fill_modal_list");
                     }
-                    else if (th.data("column-options")){
+                    else if (th.data("column-options")){//הליסט לא מטבלה אלא מרשימה בקוד
                         //var jsonOptions = th.data("options").replaceAll('"', "'");
                         //console.log("aaaa  " + th.data("column-options"));
                         var options = th.data("column-options");
@@ -422,6 +423,14 @@ jQuery(document).ready(function($){
                         })
                     }
                     html += '</select>';
+                }
+                else if (th.data("column-type") == "special") {
+                    var postData = [
+                        {name: "action", value: "get_list_ajax"},
+                        {name: "table_name", value: "products"},
+                        {name: "selected_value", value: rowData[k]}
+                    ];
+                    call_ajax_function(postData, "fill_modal_list");
                 }
                 else {
                     html += '<input type="'+columnType+'" id="' + columnName + '" name="' + columnName + '"  class="font-17 grow"' +
@@ -438,8 +447,6 @@ jQuery(document).ready(function($){
         if(listName == "specials"){
             jQuery('#edit-list .modal-body input[name=price_more]').closest("div").addClass("hidden");
             jQuery('#edit-list .modal-body select[name=type]').on("change",function (){
-                /*var selectedOption = getSelectClientId().find('option:selected');
-                getObligationClient(selectedOption.val());*/
                 if(jQuery(this).val()==1){
                     jQuery('#edit-list .modal-body input[name=price_more]').closest("div").addClass("hidden");
                     jQuery('#edit-list .modal-body input[name=buy]').closest("div").removeClass("hidden");
@@ -539,6 +546,7 @@ function removeRowSuccess(form,result){
 function onAddChat(result){
     var chatList = jQuery(".chat-list");
     var get_mes = result.get_messages;
+
     jQuery.each(result.rows,function (){
         var row = this;
 
@@ -765,7 +773,21 @@ function automaticOrderSaving(){
 }
 function fill_modal_list(result){
     jQuery(".modal-body select[name="+result.tableName.slice(0, -1)+"_id]").eq(0).html(result.options);
+    if(result.tableName == "suppliers" && result.options && result.options.contains("selected")){
+        onSelectSupplier();
+    }
 }
+function onSelectSupplier(supplier_id){
+    var postData = [
+        {name: "action", value: "get_list_ajax"},
+        {name: "table_name", value: "products"},
+        {name: "filter", value: "supplier_id = "+supplier_id}
+    ];
+    call_ajax_function(postData, "fill_modal_list");
+
+}
+
+
 function getTableAjaxData(tableName) {
     format = "table";
     if (window.location.pathname.includes('single')) {

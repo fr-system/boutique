@@ -61,12 +61,12 @@ add_action('wp_ajax_get_list_ajax', 'get_list_ajax');
 function get_list_ajax(){
     //write_log ("get_list_ajax " );
     $table_name = $_POST['table_name'];
-    $selected_value = isset($_POST['selected_value'])?$_POST['selected_value']:null;
+    $selected_value = isset($_POST['selected_value'])?trim($_POST['selected_value']):null;
     $filter="";
     if(isset($_POST['filter'])){
         $filter = $_POST['filter'];
     }
-   $options=$table=null;
+   $options=$table=$result=null;
     $format =  isset($_POST["format"])? $_POST["format"] :"options";
     switch ($format) {
         case  'table':
@@ -132,7 +132,7 @@ function lists_table_rows($list_name)
                 $field = $column['join_value'];
                 $column_value = $row->$field;
             }
-            else if($column["options"]) {
+            else if($column["options"] ?? false) {
                 $field_id = $row->$field;
                 $results = array_filter($column["options"], function ($option) use ($field_id) {
                     return $option["value"] == $field_id;
@@ -546,8 +546,8 @@ function is_needed_apostrophe($widget,$un_apostrophe,$save_as_text)
 }
 
 
-add_action('wp_ajax_get_obligation_client', 'get_obligation_client');
-function get_obligation_client($client_id)
+add_action('wp_ajax_get_client_details', 'get_client_details');
+function get_client_details($client_id)
 {
     $client_id = isset($_POST["client_id"]) ? $_POST["client_id"] : $client_id;
     $result = get_obligation_client_id($client_id);
@@ -557,7 +557,11 @@ function get_obligation_client($client_id)
     }
 
     $client = get_data_table("clients", array(array("filter_field" => "id", "filter_value" => $client_id)))[0];
-    $res = array("debts" => $obligo,"obligo" => $client->obligo);
+
+    //$branches = get_data_table("clients_branches", array(array("filter_field" => "main_client_id", "filter_value" => $client_id)));
+    $options = build_select_options("clients_branches",$_POST["selected_value"], array("filter"=>" main_client_id = ".$client_id));
+
+    $res = array("debts" => $obligo,"obligo" => $client->obligo,"branches"=>$options);
     if(isset($_POST["client_id"])) {
         wp_send_json($res);
     }
@@ -581,7 +585,7 @@ function sent_to_manager()
     $filters = array(array("filter_field" => "id", "filter_value"=>$_POST["id"]));
     $order = get_data_table("orders",$filters)[0];
 
-    $client = get_obligation_client($order->client_id);
+    $client = get_client_details($order->client_id);
     $body = " ללקוח {$order->client_name} יש חריגה מתשלום<br>
   יש לו חוב בסכום של:   {$client["debts"]} ₪
  <br> ותקרת החוב שלו היא: {$client["obligo"]}<br>
