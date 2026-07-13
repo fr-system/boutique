@@ -24,6 +24,11 @@ function get_single_view($table_name,$row,$readonly)
                     $filters = array();
 
                     if ($table_name == "orders") {
+                        $filters[] = array("filter_field" => "date_end", "filter_ratio" =>">","filter_type"=>"date","filter_value"=>"CURDATE()");
+                        //$filters[] = array("filter_field" => "date_end", "filter_value" => "1", "filter_type" => ">");
+                        $specials_list= get_data_table ("specials",$filters);
+                        write_log ('specials '.json_encode ($specials_list));
+                        $filters = array();
                         $filters[] = array("filter_field" => "blocked", "filter_value" => "1", "filter_type" => "!=");
                     }
 
@@ -135,7 +140,7 @@ function get_single_view($table_name,$row,$readonly)
                             }
                         }
                     }
-                    $list = $target_table_rows;
+                    $list =array_merge ($specials_list, $target_table_rows);
                 }
                 else {
                     $field_name = isset($column["field_name"]) ? $column["field_name"] : null;

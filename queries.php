@@ -180,8 +180,13 @@ function get_data_table($table_name, $filters=null, $orderby = null, $join_filte
     global $wpdb;
     $wpdb->prefix = 'test_';
     $apostrophe = "";
-
-    $columns = BOUTIQUE_TABLES[$table_name]["columns"];
+    if (array_key_exists($table_name, BOUTIQUE_TABLES)) {
+        $columns = BOUTIQUE_TABLES[$table_name]["columns"];
+    }
+    else if (array_key_exists($table_name, BOUTIQUE_LISTS)) {
+        $columns = BOUTIQUE_LISTS[$table_name]["columns"];
+    }
+    //$columns = BOUTIQUE_TABLES[$table_name]["columns"];
     $join = "";
 
     $query = "SELECT ".$wpdb->prefix.$table_name.".id, ";

@@ -128,6 +128,7 @@ jQuery(document).ready(function($) {
         if (!cartMode) {
             return true;
         }
+        //jQuery(this).find('svg').html('');
         // דוגמה: הצג רק שורות שבהן הערך בעמודה הראשונה גדול מ-100
         return parseInt(data[5], 10) > 0;
     });

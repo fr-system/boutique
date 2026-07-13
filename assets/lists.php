@@ -130,6 +130,7 @@ const BOUTIQUE_TABLES = array(
             array("field_name" => "branch", "widget" => "none", "label" => "סניף"),
             array("field_name" => "order_date", "widget" => "datetime-local", "label" => "תאריך הזמנה","required"=>true),
             array("field_name" => "user_opens","widget" => "none", "label" => "מקים ההזמנה", "type" => "user","join_table" => "agents"/*, "join_value" => "id"*/,"join_field"=>"user_id","join_values_select"=>array("id","name")),//
+          //  array("field_name" => "order_products" ,"widget" => "table" ,"field_id"=>"order_id","hide_in_table"=>true,"target_table"=>"specials"),
             array("field_name" => "order_products" ,"widget" => "table" ,"field_id"=>"order_id","hide_in_table"=>true,"target_table"=>"products"),
             array("field_name" => "total","widget" => "text", "label" => "סה\"כ", "un_apostrophe" => true,"sign"=>"₪"),
             array("field_name" => "notes","widget" => "textarea", "label" => "הערות","hide_in_table"=>true),
