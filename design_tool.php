@@ -356,32 +356,25 @@ function build_select_options($table_name, $value=null,$attr = null)
     return $options;
 }
 
-/*function build_checkboxes_options($table_name, $value=null,$attr = null)
+function build_checkboxes($table_name, $value=null,$attr = null)
 {
     $attr = $attr ?? array("filter"=>null);
-    //write_log("list name " .$table_name);
-    if (array_key_exists($table_name, BOUTIQUE_LISTS)) {
-        $fields_list = BOUTIQUE_LISTS[$table_name];
-    }
-    else if (array_key_exists($table_name, BOUTIQUE_TABLES)) {
-        $fields_list = BOUTIQUE_TABLES[$table_name];
-    }
-
     $list = get_list($table_name, $attr["filter"]);
-
-    $html ="";
+    $html ='<div class="checkboxes flex-display direction-column">';
 
     foreach ($list as $row) {
         $checked ="";
-        $value_text="";
         if($value) {
             $checked = (!empty($value)&& (is_array($value) && in_array($row->value, $value) || (!is_array($value) && ($row->value == $value))) ? ' checked="checked"' : '');
         }
-        $html.='<input type="checkbox" id="" name="blocked" value="1" '.$checked.'>';
-        $options .= '<option  value="' . $row->value . '"' .  . '>' . $row->text . '</option>';
+        $html.='<div class="flex-display align-center pointer">
+                    <input type="checkbox" id="'.$row->value.'" name="'.$table_name.'[]" value="'.$row->value.'" '.$checked.'>
+                    <label for="'.$row->value.'">'.$row->text.'</label>
+               </div>';
     }
-    return $options;
-}*/
+    $html.='</div>';
+    return $html;
+}
 
 function create_input($field,$value = null,$readonly = "")
 {

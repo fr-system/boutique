@@ -398,7 +398,7 @@ jQuery(document).ready(function($){
                 th = jQuery(th)
                 var columnName = th.data("column-name");
                 var columnType = th.data("column-type") ?? "text";
-                html += '<div class="input-label flex-display align-center">' +
+                html += '<div class="input-label flex-display align-center '+columnName+'">' +
                     ' <label class="bold" for="' + columnName + '">' + th.text() + ':</label>';
                 var multiple = "";
                 if (th.data("column-type") == "select") {
@@ -425,12 +425,7 @@ jQuery(document).ready(function($){
                     html += '</select>';
                 }
                 else if (th.data("column-type") == "special") {
-                    var postData = [
-                        {name: "action", value: "get_list_ajax"},
-                        {name: "table_name", value: "products"},
-                        {name: "selected_value", value: rowData[k]}
-                    ];
-                    call_ajax_function(postData, "fill_modal_list");
+
                 }
                 else {
                     html += '<input type="'+columnType+'" id="' + columnName + '" name="' + columnName + '"  class="font-17 grow"' +
@@ -772,19 +767,26 @@ function automaticOrderSaving(){
     }
 }
 function fill_modal_list(result){
-    jQuery(".modal-body select[name="+result.tableName.slice(0, -1)+"_id]").eq(0).html(result.options);
-    if(result.tableName == "suppliers" && result.options && result.options.contains("selected")){
-        onSelectSupplier();
+    if(result.options) {
+        jQuery(".modal-body select[name=" + result.tableName.slice(0, -1) + "_id]").eq(0).html(result.options);
+        if (result.tableName == "suppliers" && result.options && result.options.includes("selected")) {
+            onSelectSupplier(5);
+        }
+    }
+    else if(result.checkboxes){
+        jQuery(".modal-body ."+result.tableName).eq(0).append(result.checkboxes);
     }
 }
 function onSelectSupplier(supplier_id){
+
     var postData = [
         {name: "action", value: "get_list_ajax"},
         {name: "table_name", value: "products"},
+        {name: "format", value: "checkboxes"},
+        {name: "selected_value", value: /*rowData[k]*/""},
         {name: "filter", value: "supplier_id = "+supplier_id}
     ];
     call_ajax_function(postData, "fill_modal_list");
-
 }
 
 
