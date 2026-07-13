@@ -66,26 +66,29 @@ function get_list_ajax(){
     if(isset($_POST['filter'])){
         $filter = $_POST['filter'];
     }
-   $options=$table=$result=null;
+   $options=$table=$result=$checkboxes=null;
     $format =  isset($_POST["format"])? $_POST["format"] :"options";
     switch ($format) {
         case  'table':
             //write_log ("table_display ");
-            $table = lists_table_rows ($table_name, '');
+            $table = lists_table_rows($table_name, '');
             $title = BOUTIQUE_LISTS[$table_name]["title"];
             $options = array();
             $options["title"] = $title;
             //write_log ("rows " . $table);
             break;
         case 'array':
-            $result = get_list($table_name,$filter,true);
+            $result = get_list($table_name, $filter, true);
             break;
         case 'options':
-            $options = build_select_options($table_name, $selected_value, array("filter"=>$filter));
+            $options = build_select_options($table_name, $selected_value, array("filter" => $filter));
             //write_log ("options" . $options);
             break;
+        case "checkboxes":
+            $checkboxes = build_checkboxes($table_name, $selected_value, array("filter" => $filter));
+            break;
     }
-    echo json_encode (array("options" => $options ,"tableData"=>$table,"array"=>$result,"tableName"=>$table_name));
+    echo json_encode (array("options" => $options ,"tableData"=>$table,"array"=>$result,"tableName"=>$table_name,"checkboxes"=>$checkboxes));
     die();
 }
 
@@ -142,7 +145,7 @@ function lists_table_rows($list_name)
                 }
             }
             else if($column["widget"]=="date"){
-                $column_value = date('d/m/Y', strtotime($row->$field));
+                if($row->$field)$column_value = date('d/m/Y', strtotime($row->$field));
             }
             else{
                 $column_value = $row->$field;

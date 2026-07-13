@@ -314,7 +314,7 @@ const BOUTIQUE_LISTS = array(
                         array("value"=>"2","text"=>"קנה מעל"),
                     )
                 ),
-                array("field_name" => "products" ,"widget" => "special" ,"field_id"=>"product_id"),
+                array("field_name" => "products" ,"widget" => "special","label"=>"מוצרים","save_as_text"=> true ,"field_id"=>"product_id"),
 
                 //array("field_name" => "products", "widget" => "none","multiple"=>true,"label"=>"מוצרים"/*, "join_table" => "products", "join_value" => "name"*/),
                 array("field_name" => "price_more","widget" => "text","label"=>"קנה מעל סכום","un_apostrophe" => true,"sign"=>"₪"),

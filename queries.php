@@ -104,6 +104,11 @@ function save_single_data()
         }
     }
 
+/*    write_log("post: ".json_encode($_POST));*/
+    if($table_name == "specials"){
+        $_POST["products"] = json_encode($_POST["products"]);
+    }
+
     global $wpdb;
     if (isset($_POST["remove"]) && $_POST["remove"]) {
         $action = "remove";
@@ -115,6 +120,7 @@ function save_single_data()
     }
 
     $id = isset($_POST["id"]) ? $_POST["id"] : null;
+    write_log("r ".json_encode($result));
     run_action_query ($table_name, $id, $action, $result);
     if (!$_POST["id"]) {
         $id = $wpdb->insert_id;
