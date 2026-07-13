@@ -80,6 +80,7 @@ function get_tr_data($table_name, $data, $key,$attr){
         case "order_products":
             $tr_class = " product ";
             if(isset($attr["readonly"]))$tr_class .= $attr["readonly"];
+            if(!empty($row->count))$tr_class .= " in-cart ";
         case "agent_target_supplier":
             $tr_class .= " sub-table";
             break;
