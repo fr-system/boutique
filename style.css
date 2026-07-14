@@ -474,7 +474,7 @@ table thead tr th{
     padding-right: 5px;
     height: 40px
 }
-.archive-table tr:hover{
+.archive-table tbody tr:hover{
     box-shadow: 2px 2px 6px 1px rgba(0, 0, 0, 0.13);
 }
 .archive-table tr td:has(img, a) {

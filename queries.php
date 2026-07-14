@@ -233,12 +233,20 @@ function get_data_table($table_name, $filters=null, $orderby = null, $join_filte
             }
         }
     }
-    if($table_name=="products") {
+
+    if($table_name=="order_products") {
+        $query .= " {$wpdb->prefix}products.name, ";
+        $join .= " LEFT JOIN {$wpdb->prefix}products  
+                    ON {$wpdb->prefix}order_products.product_id = {$wpdb->prefix}products.id " .
+            (empty($join_filter) ? '' : "AND " . $join_filter);
+    }
+
+    /*if($table_name=="products") {
         $query .= " pc.client_price, " ;
         $join .= " LEFT JOIN " .$wpdb->prefix . "products_clients as pc 
         ON {$wpdb->prefix}products.id = pc.product_id ".
             (empty($join_filter)?'':"AND ".$join_filter);
-    }
+    }*/
     $query = substr($query,0,-2);
     $query .= " FROM ".$wpdb->prefix.$table_name. $join;
     if($filters!=null) {

@@ -142,7 +142,7 @@ const BOUTIQUE_TABLES = array(
         "columns" => array(
             array("field_name" => "order_price", "widget" => "readonly", "label" => "מחיר", "un_apostrophe" => true,"sign"=>"₪","create_input"=>true),
             array("field_name" => "count", "widget" => "number", "label" => "כמות","create_input"=>true),
-            array("field_name" => "order_individual", "widget" => "toggle", "label" => "בודדים","create_input"=>true,
+            array("field_name" => "order_individual", "widget" => "toggle", "label" => "ארגזים/בודדים","create_input"=>true,
                 "values"=>array(
                     0=>array("class"=>"background-light-light-blue right","label"=> "ארגזים"),
                     1=>array("class"=>"background-dark-green left","label"=> "בודדים"),
