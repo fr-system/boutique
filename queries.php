@@ -34,8 +34,8 @@ function pre_action_query($table_name, $row)
 
             $apostrophe = is_needed_apostrophe($field["widget"], isset($field["un_apostrophe"]),isset($field["save_as_text"]));
             array_push($fields, $key);
-            array_push($values, (empty($value) ? "NULL" : $apostrophe . $value . $apostrophe));
-            array_push($update, $key . " = " . (empty($value) ? "NULL" : $apostrophe . $value . $apostrophe));
+            array_push($values, ($value === null || $value === '' ? "NULL" : $apostrophe . $value . $apostrophe));
+            array_push($update, $key . " = " . ($value === null || $value === '' ? "NULL" : $apostrophe . $value . $apostrophe));
         }
     }
 
@@ -129,7 +129,7 @@ function save_single_data()
 
     //write_log("save_single_data " .json_encode($_POST));
     if (isset($_POST["rows"])) {
-        //write_log("rows ".json_encode($_POST["rows"]));
+        write_log("rows ".json_encode($_POST["rows"]));
         foreach ($_POST["rows"] as $row) {
             if ($table_name == "agents") {
                 if (empty($row["target"])) {
@@ -167,9 +167,9 @@ function save_single_data()
             $action_product = (isset($row["id"]) && !empty($row["id"])) ?
                 (isset($row["remove"]) && $row["remove"] ? "remove" : "update") : "new";
            // write_log ("action_product " . $action_product);
-            //write_log ("row to save" . json_encode ($row));
+            write_log ("row to save" . json_encode ($row));
             $result = pre_action_query ($sub_table_name, $row);
-            //write_log("result to save" . json_encode($result));
+            write_log("result to save" . json_encode($result));
             run_action_query ($sub_table_name, $row["id"], $action_product, $result);
         }
     }

@@ -162,7 +162,7 @@ const BOUTIQUE_TABLES = array(
             array("field_name" => "name", "widget" => "text","label"=>"שם המוצר"/*,"width"=>"1000px"*/),
             array("field_name" => "individually", "widget" => "hidden","hide_in_table"=>true),
             array("field_name" => "units_in_box", "widget" => "hidden","hide_in_table"=>true),
-
+            array("field_name" => "supplier_id",  "widget" => "hidden","hide_in_table"=>true),
         ),
         "update_remove"=>false
     ),

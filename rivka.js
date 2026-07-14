@@ -1,3 +1,5 @@
+var table;
+
 function fillClientDetails(results){
     if(results.branches){
         var disabled = jQuery("input.orders_id[name=id]").val() ?" disabled ":"";
@@ -130,14 +132,15 @@ jQuery(document).ready(function($) {
         }
         //jQuery(this).find('svg').html('');
         // דוגמה: הצג רק שורות שבהן הערך בעמודה הראשונה גדול מ-100
-        return parseInt(data[5], 10) > 0;
+       // return parseInt(data[6], 10) > 0;
+        return $(settings.aoData[dataIndex].nTr).hasClass('in-cart');
     });
 
-        var table = jQuery('.dataTable').DataTable({
+    table = jQuery('.dataTable').DataTable({
             //bFilter: true,
             layout: {
                 topStart: {
-                    buttons: [tableName == "orders" && currentUrl.includes('single')?
+                    buttons: tableName == "orders" && currentUrl.includes('single') ?[
                         {
                             text: 'הצגת עגלה <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="currentColor" class="bi bi-bag-check" viewBox="0 0 16 16">\n' +
                                 '  <path fill-rule="evenodd" d="M10.854 8.146a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708 0l-1.5-1.5a.5.5 0 0 1 .708-.708L7.5 10.793l2.646-2.647a.5.5 0 0 1 .708 0"/>\n' +
@@ -149,8 +152,8 @@ jQuery(document).ready(function($) {
                                 cartMode = !cartMode;
                                 table.draw();
                             }
-                        }:null
-                    ]
+                        }]:[]
+
                 }
             },
             searching: (tableName == "orders" && currentUrl.includes('single')),
@@ -312,11 +315,34 @@ function plusMinusCountProduct(me){
     }
     numberInput.val(currentValue);
     if(currentValue > 0) {
+        var supplier_id=parseInt(product.find(".supplier_id span").text()|| 0);
+        var special_supplier_id = jQuery("ul.specials li[data-supplier-id="+supplier_id+"]");
+        var countRows =  table.rows().count();
+        jQuery.each(special_supplier_id,function (k,special){
+            special =jQuery(special);
+            if(currentValue == special.data("buy")){
+                var pBonus =  product.clone(true);
+                pBonus.find(".count input").val(special.data("get"))
+                var rowIndex = pBonus.find(".count input").attr("name").replace("rows[","").replace("][count]","");
+                jQuery.each(  pBonus.find("input"),function (k,input){
+                    var name =  jQuery(input).attr("name");
+                    name = name.replace("rows["+rowIndex+"]", "rows["+countRows+"]");
+                    jQuery(input).attr("name",name);
+                })
+                pBonus.find(".discount_percent input").autoNumeric('set', 100);
+                pBonus.find(".total input").autoNumeric('set', 0);
+                pBonus.find(".id input").val("");
+                product.after(pBonus);
+                pBonus.find(".count span.pointer").addClass("readonly");
+
+                //addProdoctBonus();
+            }
+        })
+
         product.addClass('in-cart');
         if(product.find(".individually span").text()) {
             product.find(".order_individual span.readonly.right").removeClass("un-value");
             product.find(".order_individual span.readonly").removeClass("readonly");
-
         }
         else{
             product.find(".order_individual span.readonly.right").removeClass("readonly un-value");

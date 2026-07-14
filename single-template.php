@@ -14,18 +14,18 @@ $readonly ="";
 $page_info = BOUTIQUE_TABLES[$table_name];
 if($action == "new") {
     $title_page = "הוספת " . $page_info["single"] . " חדש" . ($page_info["male_female"] == "female" ? "ה" : "");
-    $row = (object)array();
+    $single = (object)array();
     if(isset($_GET["client_id"])){
-        $row->client_id = $_GET["client_id"];
+        $single->client_id = $_GET["client_id"];
     }
 
     if($table_name == "orders"){
-        $row->order_date =date('Y-m-d\TH:i');// date('Y-m-d H:i');
-        $row->user_opens = get_current_user_id();// get_id_by_user();
+        $single->order_date =date('Y-m-d\TH:i');// date('Y-m-d H:i');
+        $single->user_opens = get_current_user_id();// get_id_by_user();
     }
     if($table_name == "tasks"){
-        $row->open_date = date('Y-m-d\TH:i');
-        $row->status_id = 3;
+        $single->open_date = date('Y-m-d\TH:i');
+        $single->status_id = 3;
         //אולי צריך לשמור מי פתח את המשימה???
     }
 }
@@ -34,7 +34,7 @@ else{//edit || readonly
     $title_page = "עדכון ". $page_info["single"];
     $result = get_data_table($table_name,array(array("filter_field" => "id", "filter_value"=>$id)));
     if(count($result)>0){
-        $row = $result[0];
+        $single = $result[0];
     }
 
     if($action == "edit") {    }
@@ -65,16 +65,16 @@ else{
 
             <?php
             $text_left_side="";
-            if($table_name == "clients" && $action != "new" && $row->blocked == 1) {
+            if($table_name == "clients" && $action != "new" && $single->blocked == 1) {
                 $text_left_side = '<span class="color-red">הלקוח חסום</span>';
             }
 
-            if($table_name == "orders" && $row->user_opens) {
-                $text_left_side = '<span class="bold">מקים ההזמנה: </span>'.get_userdata($row->user_opens)->display_name;
+            if($table_name == "orders" && $single->user_opens) {
+                $text_left_side = '<span class="bold">מקים ההזמנה: </span>'.get_userdata($single->user_opens)->display_name;
             }
 
             if($table_name == "tasks") {
-                $timestamp = strtotime($row->open_date); // המרת התאריך לאטימות זמן
+                $timestamp = strtotime($single->open_date); // המרת התאריך לאטימות זמן
                 $text_left_side = '<span class="bold">תאריך פתיחה: </span>'.date('d/m/Y בשעה H:i', $timestamp);
             }
 
@@ -93,10 +93,10 @@ else{
                 <input type="hidden" class="<?= $table_name.'_id'?>" name="id" value="<?php echo $id ?>" />
                 <input type="hidden" name="previous_page" value="<?php echo $previous_page ?>" />
                 <?php if($table_name == "orders" || $table_name == "tasks") {?>
-                    <input type="hidden" class="branch-client" value="<?=$row->branch ?? ''?>"/>
-                    <input type="hidden" name='user_opens' value="<?= $row->user_opens ?? ''?>"/>
+                    <input type="hidden" class="branch-client" value="<?=$single->branch ?? ''?>"/>
+                    <input type="hidden" name='user_opens' value="<?= $single->user_opens ?? ''?>"/>
                  <?php  }?>
-                <?php get_single_view($table_name,$row,$readonly); ?>
+                <?php get_single_view($table_name,$single,$readonly); ?>
                 </div>
             <div class="buttons flex-display align-self-center">
                 <button type="submit" class="save background-gold flex-display center align-center bold font-18">
@@ -132,7 +132,7 @@ else{
                 <?php }
                 if($table_name == "clients" && $action != "new"){
                     $block_text = "חסום לקוח";
-                    if($row->blocked == 1){
+                    if($single->blocked == 1){
                         $block_text = "בטל חסימת לקוח";
                     }?>
                         <button type="submit" class="block-client flex-display center align-center background-white dark-green bold font-18">
@@ -145,7 +145,7 @@ else{
 
                 <?php }
                 if($table_name == "orders" ){
-                     if(!isset($row->done) || !$row->done){?>
+                     if(!isset($single->done) || !$single->done){?>
                             <button type="button" class="hidden order-confirmation flex-display center align-center background-white dark-green bold font-18">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 16 16" fill="none">
                                     <path d="M10.8474 7.14639C10.9411 7.24016 10.9937 7.36731 10.9937 7.49989C10.9937 7.63248 10.9411 7.75963 10.8474 7.85339L8.09736 10.6034C8.00359 10.6971 7.87644 10.7498 7.74386 10.7498C7.61127 10.7498 7.48412 10.6971 7.39036 10.6034L6.14036 9.35339C6.04928 9.25909 5.99888 9.13279 6.00002 9.00169C6.00116 8.87059 6.05374 8.74519 6.14645 8.65248C6.23915 8.55978 6.36456 8.50719 6.49566 8.50606C6.62675 8.50492 6.75305 8.55531 6.84736 8.64639L7.74386 9.54289L10.1404 7.14639C10.2341 7.05266 10.3613 7 10.4939 7C10.6264 7 10.7536 7.05266 10.8474 7.14639Z" fill="#1A7870"/>
@@ -171,9 +171,9 @@ else{
 
         </form>
          <?php if($table_name == "products"){
-                 $class=(!isset($row->image_id) || empty($row->image_id)) ? "hidden": "";
+                 $class=(!isset($single->image_id) || empty($single->image_id)) ? "hidden": "";
                  ?>
-                <img class="part-30 protuct-image <?php echo $class?>"   src="<?php echo wp_get_attachment_url($row->image_id)?>"/>
+                <img class="part-30 protuct-image <?php echo $class?>"   src="<?php echo wp_get_attachment_url($single->image_id)?>"/>
          <?php }
          else if($table_name == "tasks" && $action == "edit") {?>
              <div class="chat-area border-dark-gray padding-20 part-30">
@@ -208,7 +208,25 @@ else{
                         <div class="date text-left part-20"></div>
                     </div>
             </div>
-         <?php } ?>
+         <?php }
+         else if($table_name == "orders"){ //מבצעים
+
+             $filters=array( array("filter_field" => "date_end", "filter_ratio" =>">=","filter_type"=>"date","filter_value"=>"CURDATE()"));
+             $specials_list= get_data_table ("specials",$filters);
+             write_log ('specials '.json_encode ($specials_list));
+             $html="";
+             ?>
+            <div class="specials-area border-dark-gray padding-20 part-20"><ul class="specials">
+                <?php foreach ($specials_list as $special){
+                    echo "<li data-supplier-id='{$special->supplier_id}' data-buy='{$special->buy}' 
+data-get='{$special->get}'>{$special->descript} // {$special->supplier_name}  
+</li>";
+                 }?>
+                </ul></div>
+            <?php
+         }
+
+             ?>
     </div>
 </section>
 <?php get_footer();?>

@@ -563,7 +563,7 @@ function get_client_details($client_id)
     $client = get_data_table("clients", array(array("filter_field" => "id", "filter_value" => $client_id)))[0];
 
     //$branches = get_data_table("clients_branches", array(array("filter_field" => "main_client_id", "filter_value" => $client_id)));
-    $options = build_select_options("clients_branches",$_POST["selected_value"], array("filter"=>" main_client_id = ".$client_id));
+    $options = build_select_options("clients_branches",($_POST["selected_value"]??null), array("filter"=>" main_client_id = ".$client_id));
 
     $res = array("debts" => $obligo,"obligo" => $client->obligo,"branches"=>$options);
     if(isset($_POST["client_id"])) {

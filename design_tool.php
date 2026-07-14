@@ -1,5 +1,5 @@
 <?php
-function get_single_view($table_name,$row,$readonly)
+function get_single_view($table_name, $single, $readonly)
 {?>
     <div class="grid-display cols-2 margin-bottom-20">
     <?php
@@ -18,17 +18,13 @@ function get_single_view($table_name,$row,$readonly)
             <?php if (isset($column["label"])){?>
                 <label class="bold <?= $column["widget"]== "textarea"? 'textarea-label':''?>" for="<?php echo $column["field_name"] ?>"><?php echo $column["label"].":"?></label>
             <?php }
-            $value = "";
+            $single_sub_data = "";
             if(isset($column["field_name"])) {
                 if ($column["widget"] == "table") {
                     $filters = array();
 
                     if ($table_name == "orders") {
-                        $filters[] = array("filter_field" => "date_end", "filter_ratio" =>">","filter_type"=>"date","filter_value"=>"CURDATE()");
-                        //$filters[] = array("filter_field" => "date_end", "filter_value" => "1", "filter_type" => ">");
-                        $specials_list= get_data_table ("specials",$filters);
-                        write_log ('specials '.json_encode ($specials_list));
-                        $filters = array();
+
                         $filters[] = array("filter_field" => "blocked", "filter_value" => "1", "filter_type" => "!=");
                     }
 
@@ -49,102 +45,71 @@ function get_single_view($table_name,$row,$readonly)
 
                     $filters = array();
                     $sub_table = $column["field_name"];
-                    if (isset($row->id)) {
-                        $filters[] = array("filter_field" => $parent_table_id, "filter_value" => $row->id);
+                    if (isset($single->id)) {
+                        $filters[] = array("filter_field" => $parent_table_id, "filter_value" => $single->id);
                         //מביא את המוצרים שרשומים בהזמנה הזו
                         //מביא את היעדים של הספקים לסוכן זה
                         //מביא את הסניפים ללקוח זה
-                        $value = get_data_table($sub_table, $filters);
-
+                        $single_sub_data = get_data_table($sub_table, $filters);
+                        //write_log ('order producrs '.$row->id.' '.json_encode ($value));
                         if(!isset($column["target_table"])) {
-                            $target_table_rows = $value;
+                            $target_table_rows = $single_sub_data;
                             if(isset($column["new_row"])) {
                                 $item1 = (object)array();
                                 array_unshift($target_table_rows, $item1);
                             }
                         }
+                        else{
+                            foreach ($single_sub_data as $sub_row) {//קבץ את שורות ההזמנה לפי product_id
+                                $grouped_list[$sub_row->$sub_table_id][] = $sub_row;
+                            }
+                        }
                     }
 
-                    //מביא את השדות של מוצרים בהזמנה
-                    //מביא שדות של סוכן+ספק+יעד
-                    $sub_columns = BOUTIQUE_TABLES[$sub_table]["columns"];
-
-                    foreach ($target_table_rows as $table_row) {
+                   // write_log ('product rows '.json_encode ($target_table_rows));
+                    foreach ($target_table_rows as $table_row) { //
                         if (isset($column["target_table"])) {
-                            $id = $table_row->id;
-
-                            $results = array();
-                            if (isset($row->id)) {
-                                $results = array_filter($value, function ($r) use ($id, $sub_table_id) {
-                                    return $r->$sub_table_id == $id;
-                                });
-                            }
-
-                            if (count($results) == 0) {
-                                $item = (object)array();
-                                $exist_in_sub_table = false;
-
+                            if (empty($grouped_list[$table_row->id])) {
+                                // הצגת שורה ריקה
+                                render_row($table_row, null,
+                                    array("sub_table_id"=> $sub_table_id,"parent_table_id"=>$parent_table_id
+                                    ,"single_id"=>(isset($single->id) ? $single->id : null)
+                                    ,"table_name"=>$table_name,"sub_table"=>$sub_table));
                             } else {
-                                $item = array_pop($results);
-                                $exist_in_sub_table = true;
+                                foreach ($grouped_list[$table_row->id] as $single_sub_row) {
+                                    // הצגת שורת מוצר עם נתוני ההזמנה
+                                    render_row($table_row, $single_sub_row,
+                                        array("sub_table_id"=> $sub_table_id,"parent_table_id"=>$parent_table_id
+                                        ,"single_id"=>(isset($single->id) ? $single->id : null)
+                                        ,"table_name"=>$table_name,"sub_table"=>$sub_table));
+                                }
                             }
-                            $table_row->id = $exist_in_sub_table ? $item->id : "";//ID של טבלת רבים לרבים
-                            $table_row->$sub_table_id = $id; // ID של הפריט (מוצר או יעד)
+                            //$id = $table_row->id;
+                           // $results = array();
+//                            if (isset($single->id)) {
+//                                $results = array_filter($single_sub_data, function ($r) use ($id, $sub_table_id) {
+//                                    return $r->$sub_table_id == $id;
+//                                });
+//                            }//
+//                            if (count($results) == 0) {
+//                                $item = (object)array();
+//                                $exist_in_sub_table = false;//
+//                            } else {
+//                                $item = array_pop($results);
+//                                $exist_in_sub_table = true;
+//                            }
+//                            $table_row->id = $exist_in_sub_table ? $item->id : "";//ID של טבלת רבים לרבים
+//                            $table_row->$sub_table_id = $id; // ID של הפריט (מוצר או יעד)
                         }
                         else{
                             $item = $table_row;
                         }
-
-                        $table_row->$parent_table_id = isset($row->id) ? $row->id : null;
-
-                        foreach ($sub_columns as $column1) {//מכניסים את שאר השדות בתוך שורה של מוצר
-                            $field_name = $column1["field_name"];
-
-                            if ($table_name == "agents" && $field_name == "total") {
-                                    $total = "";
-                                    if ($exist_in_sub_table && !empty($table_row->date_from) && !empty($table_row->date_to)) {
-                                        $query = "SELECT sum(op.total) as total
-                                            from test_agents
-                                            join test_orders on test_agents.id = test_orders.user_opens
-                                            join test_order_products as op on op.order_id = test_orders.id
-                                            join test_products on test_products.id = op.product_id
-                                            where test_agents.id = {$table_row->agent_id} 
-                                              and test_products.supplier_id = {$table_row->$sub_table_id} 
-                                              and op.total > 0 
-                                              and test_orders.order_date BETWEEN '{$table_row->date_from}' and  '{$table_row->date_to}'
-                                            ";
-                                       // write_log("q ".$query);
-                                        $res_total = run_query($query);
-                                        if (count($res_total) > 0 && !empty($res_total[0]->total)) {
-                                            $total = $res_total[0]->total . "  ₪";
-                                        }
-                                        //write_log("sapak ".$table_row->$sub_table_id." total ". json_encode($total));
-                                    }
-                                    //write_log("total " . $total);
-                                    $table_row->total = $total;
-                            }
-                            else if ($table_name == "orders" && $field_name == "order_price") {
-                                if ($exist_in_sub_table) {
-                                    $price = $item->order_price;
-                                } else {
-                                    if (!empty($table_row->client_price)) {//מחיר מיוחד ללקוח
-                                        $price = $table_row->client_price;
-                                    } else {
-                                        $price = empty($table_row->price) ? 0 : $table_row->price;
-                                    }
-                                }
-                                $table_row->order_price = $price;
-                            }
-                            else if ($field_name != $sub_table_id && $field_name != $parent_table_id) {
-                                $table_row->$field_name = isset($item->$field_name) ? $item->$field_name : "";
-                            }
-                        }
                     }
-                    $list =array_merge ($specials_list, $target_table_rows);
+                    $list =$target_table_rows;
                 }
                 else {
                     $field_name = isset($column["field_name"]) ? $column["field_name"] : null;
-                    $list = isset($row->$field_name) ? $row->$field_name : "";
+                    $list = isset($single->$field_name) ? $single->$field_name : "";
                 }
                 echo create_input($column, $list, $readonly);
             }
@@ -153,6 +118,56 @@ function get_single_view($table_name,$row,$readonly)
     <?php } ?>
 
     </div><?php
+}
+function render_row($external_item,$sub_row,$options ){
+    $sub_table_id =$options["sub_table_id"];
+    $parent_table_id = $options["parent_table_id"];
+    $external_item->$sub_table_id = $external_item->id; // ID של הפריט (מוצר או יעד)
+    $external_item->id =!empty($sub_row) ?$sub_row->id:null;//ID של טבלת רבים לרבים
+    $external_item->$parent_table_id = $options["single_id"];
+
+    //מביא את השדות של מוצרים בהזמנה
+    //מביא שדות של סוכן+ספק+יעד
+    $sub_columns = BOUTIQUE_TABLES[$options["sub_table"]]["columns"];
+    foreach ($sub_columns as $column1) {//מכניסים את שאר השדות בתוך שורה של מוצר
+        $field_name = $column1["field_name"];
+
+        if ($options["table_name"] == "agents" && $field_name == "total") {
+            $total = "";
+            if (!empty($external_item->date_from) && !empty($external_item->date_to)) {
+                $query = "SELECT sum(op.total) as total
+                                            from test_agents
+                                            join test_orders on test_agents.id = test_orders.user_opens
+                                            join test_order_products as op on op.order_id = test_orders.id
+                                            join test_products on test_products.id = op.product_id
+                                            where test_agents.id = {$external_item->agent_id} 
+                                              and test_products.supplier_id = {$external_item->$sub_table_id} 
+                                              and op.total > 0 
+                                              and test_orders.order_date BETWEEN '{$external_item->date_from}' and  '{$external_item->date_to}'
+                                            ";
+                // write_log("q ".$query);
+                $res_total = run_query($query);
+                if (count($res_total) > 0 && !empty($res_total[0]->total)) {
+                    $total = $res_total[0]->total . "  ₪";
+                }
+                //write_log("sapak ".$table_row->$sub_table_id." total ". json_encode($total));
+            }
+            //write_log("total " . $total);
+            $external_item->total = $total;
+        }
+        else if ($options["table_name"] == "orders" && $field_name == "order_price") {
+            if (empty( $sub_row)) {
+                $external_item->order_price  =empty($external_item->price) ? 0 : $external_item->price;
+            } else {
+                $external_item->order_price = $sub_row->order_price;
+            }
+            //$external_item->order_price = $sub_row->order_price;
+        }
+        else if ($field_name != $sub_table_id && $field_name != $parent_table_id) {
+            $external_item->$field_name = isset($sub_row->$field_name) ? $sub_row->$field_name : "";
+        }
+    }
+    return $external_item;
 }
 
 function archive_header($table_name, $view_only = false,$attr = null)
@@ -324,7 +339,7 @@ function build_select_options($table_name, $value=null,$attr = null)
     else if (array_key_exists($table_name, BOUTIQUE_TABLES)) {
         $fields_list = BOUTIQUE_TABLES[$table_name];
     }
-
+    $options='';
     if(isset($attr["options"]) && isset($attr["field_name"])){
         $field_name = $attr["field_name"];
         $results = array_filter($fields_list["columns"], function ($field_obj) use ($field_name) {
@@ -334,7 +349,7 @@ function build_select_options($table_name, $value=null,$attr = null)
         $list = array_map(function ($item) {
             return (object) $item;
         }, $list);
-        $options='';
+
     }
     else {
         /*if(isset($fields_list["data-field"])) {
