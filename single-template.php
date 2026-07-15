@@ -213,7 +213,7 @@ else{
 
              $filters=array( array("filter_field" => "date_end", "filter_ratio" =>">=","filter_type"=>"date","filter_value"=>"CURDATE()"));
              $specials_list= get_data_table ("specials",$filters);
-             write_log ('specials '.json_encode ($specials_list));
+             //write_log ('specials '.json_encode ($specials_list));
              $html="";
              ?>
             <div class="specials-area border-dark-gray padding-20 part-20"><ul class="specials">

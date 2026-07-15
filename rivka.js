@@ -130,9 +130,6 @@ jQuery(document).ready(function($) {
         if (!cartMode) {
             return true;
         }
-        //jQuery(this).find('svg').html('');
-        // דוגמה: הצג רק שורות שבהן הערך בעמודה הראשונה גדול מ-100
-       // return parseInt(data[6], 10) > 0;
         return $(settings.aoData[dataIndex].nTr).hasClass('in-cart');
     });
 
@@ -140,31 +137,56 @@ jQuery(document).ready(function($) {
             //bFilter: true,
             layout: {
                 topStart: {
-                    buttons: tableName == "orders" && currentUrl.includes('single') ?[
+                    buttons: tableName == "orders" && currentUrl.includes('single') ? [
                         {
                             text: 'הצגת עגלה <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="currentColor" class="bi bi-bag-check" viewBox="0 0 16 16">\n' +
                                 '  <path fill-rule="evenodd" d="M10.854 8.146a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708 0l-1.5-1.5a.5.5 0 0 1 .708-.708L7.5 10.793l2.646-2.647a.5.5 0 0 1 .708 0"/>\n' +
                                 '  <path d="M8 1a2.5 2.5 0 0 1 2.5 2.5V4h-5v-.5A2.5 2.5 0 0 1 8 1m3.5 3v-.5a3.5 3.5 0 1 0-7 0V4H1v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V4zM2 5h12v9a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1z"/>\n' +
                                 '</svg>',
-                            className: 'show-cart background-gold flex-display center align-center bold ',
-                            action: function (e,t,sender,sProp) {
-                                jQuery(sender).toggleClass("cart-mode");
-                                cartMode = !cartMode;
-                                table.draw();
-                            }
-                        }]:[]
-
+                        // <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                        //      className="bi bi-bag-check" viewBox="0 0 16 16">
+                        //     <path fill-rule="evenodd"
+                        //           d="M10.854 8.146a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708 0l-1.5-1.5a.5.5 0 0 1 .708-.708L7.5 10.793l2.646-2.647a.5.5 0 0 1 .708 0"/>
+                        //     <path
+                        //         d="M8 1a2.5 2.5 0 0 1 2.5 2.5V4h-5v-.5A2.5 2.5 0 0 1 8 1m3.5 3v-.5a3.5 3.5 0 1 0-7 0V4H1v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V4zM2 5h12v9a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1z"/>
+                        // </svg>
+                        className : 'show-cart background-gold flex-display center align-center bold ',
+                    action: function (e, t, sender, sProp) {
+                        jQuery(sender).toggleClass("cart-mode");
+                        cartMode = !cartMode;
+                        table.draw();
+                    }
                 }
-            },
-            searching: (tableName == "orders" && currentUrl.includes('single')),
-            paging: false,
-            info: false,
-            "language": {
-                "lengthMenu": "מציג  _MENU_  שורות",
-                "zeroRecords": "לא נמצאו שורות מתאימות",
-                "info": "מציג עמוד _PAGE_ מתוך _PAGES_",
-                "infoEmpty": "לא נמצאו שורות מתאימות",
-                "emptyTable": "לא נמצאו שורות בטבלה",
+]:
+    []
+
+}
+},
+    searching: (tableName == "orders" && currentUrl.includes('single')),
+        paging
+:
+    false,
+        info
+:
+    false,
+        "language"
+:
+    {
+        "lengthMenu"
+    :
+        "מציג  _MENU_  שורות",
+            "zeroRecords"
+    :
+        "לא נמצאו שורות מתאימות",
+            "info"
+    :
+        "מציג עמוד _PAGE_ מתוך _PAGES_",
+            "infoEmpty"
+    :
+        "לא נמצאו שורות מתאימות",
+            "emptyTable"
+    :
+        "לא נמצאו שורות בטבלה",
                 "infoFiltered": "(מתוך _MAX_ שורות סך הכל)",
                 "infoPostFix": "",
                 "thousands": ",",
