@@ -16,7 +16,7 @@ require_once dirname(__FILE__) . "/design_tool.php";
 require_once dirname(__FILE__) . "/rivka.php";
 require_once dirname(__FILE__) . "/lib/import_excel.php";
 require_once dirname(__FILE__) . "/lib/export_pdf.php";
-
+require_once dirname(__FILE__) . "/task_scheduling.php";
 
 function boutique_enqueue_scripts()
 {
@@ -81,13 +81,8 @@ add_action('wp_ajax_nopriv_send_site_forms', 'send_site_forms');
 
 function send_site_forms()
 {
-    $func_name = /*'function_' .*/ $_POST['form_func'];
+    $func_name = $_POST['form_func'];
     $func_name($_POST);
-    /*echo json_encode(array(
-        'status' => 'success',
-    ));
-
-    die();*/
 }
 
 function fixXSS($str)

@@ -1,12 +1,15 @@
 <?php
+require_once(dirname(dirname(dirname(dirname(dirname(__FILE__))))) . '/wp-load.php');
+
 //export_pdf.php?file=pdf&export=single&subject='.$table_name.'&id=' . $row->id
 if(isset($_GET['export']) && isset($_GET['file']) && $_GET['file'] == "pdf") {
-    create_pdf($_GET["subject"], fixXSS($_GET['export']),$_GET['id']);
+    //write_log("!!!!");
+    create_pdf($_GET);
 }
 
-function create_pdf($table_name,$export,$id,$print = true,$filters = array())
+function create_pdf($attr)
 {
-    require_once(dirname(dirname(dirname(dirname(dirname(__FILE__))))) . '/wp-load.php');
+    $table_name = $attr["subject"] ?? "";
 
     $mpdf = new \Mpdf\Mpdf([
         'mode' => 'utf-8',
@@ -56,38 +59,31 @@ function create_pdf($table_name,$export,$id,$print = true,$filters = array())
                 <div  style="text-align: center;"><img src="https://kosherboutique.co.il/wp-content/themes/boutique/assets/images/logo_header.png"/>
                 </div>';
 
-    switch ($export) {
+    switch ($attr["export"]) {
         case "single":
             //$mpdf->SetHTMLHeader('<img  src="https://kosherboutique.co.il/wp-content/themes/boutique/assets/images/logo_header.png">');
             //$mpdf->SetHTMLHeader('<div>'.BOUTIQUE_TABLES[$table_name]["single"].'</div>');
-            $result = get_data_table($table_name,array(array("filter_field" => "id", "filter_value"=>$id)))[0];
+            if(isset($attr["packet"])){
+                $packet =$attr["packet"];
+            }
 
-            if($table_name=="orders"){
-                $client = get_data_table("clients",array(array("filter_field" => "id", "filter_value"=>$result->client_id)))[0];
+            if($table_name=="orders") {
+                $packet = ["client", "order", "order_products"];
+            }
+
+            foreach ($packet as $func) {
+                $func_name = "drow_html_" . $func;
+                write_log("func_name ".$func_name);
+                $html .= $func_name($attr);
+            }
+
                 //write_log("r ".json_encode($client));
                 /*$branch = "";
                 if(!empty($result->branch)){
                     $branch = "סניף";
                 }*/
+                //$html .= "<div style='text-align: left;'><strong>סה''כ לתשלום: </strong>{$result->total} ₪</div>";
 
-                $html.="<div class='section'>
-                            <div class='title'>פרטי הלקוח</div><br>
-                            <strong>שם הלקוח: </strong><span>".$client->name."</span><br>
-                            <strong>כתובת: </strong><span>".$client->address."</span><br>
-                            <strong>נייד: </strong><span>".$client->mobile."</span><br>
-                            <strong>דוא''ל: </strong><span>".$client->email."</span>   <br>                         
-                        </div>";
-
-                $html.="<br><div class='section' >
-                            <div class='title'>הזמנה מס. {$result->id}</div><br>
-                            <strong>תאריך הזמנה: </strong><span>".date('d/m/Y',strtotime ($result->order_date))."</span><br>
-                            <strong>סוכן: </strong><span>{$result->user_opens}</span><br>
-                            <strong>הערות: </strong><span>{$result->notes}</span><br>
-                        </div>";
-
-                $html .= draw_table_pdf("order_products",$filters);
-                $html .= "<div style='text-align: left;'><strong>סה''כ לתשלום: </strong>{$result->total}</div>";
-            }
             break;
         case 'archive':
             $filters = array();
@@ -107,16 +103,21 @@ function create_pdf($table_name,$export,$id,$print = true,$filters = array())
 
 
     //$html = "akuo kfuko!!";
-    //write_log("html ". $html);
     //echo mb_detect_encoding($html);
     $mpdf->WriteHTML($html);
-    if($print) {
-        $mpdf->Output();
-    }
-    else {
+    //write_log("html ". $html);
+
+    if(isset($attr["send_mail"])) {
+        if(isset($attr["create_only_fill"]) && !preg_match('/<tbody[^>]*>.*?<tr\b/is', $html)){
+            return null;
+        }
         $file = 'report_' . time() . '.pdf';
         $mpdf->Output($file, \Mpdf\Output\Destination::FILE);
         return $file;
+    }
+    else {
+        $mpdf->Output();
+        exit();
     }
 }
 
@@ -142,6 +143,67 @@ function draw_table_pdf($table_name, $filters)
     }
     $html.="</tbody></table>";
 
+    return $html;
+}
+
+function drow_html_order($attr){
+    $result = get_data_table("orders",array(array("filter_field" => "id", "filter_value"=>$attr["order_id"])))[0];
+
+    $html="<br><div class='section' >
+                            <div class='title'>הזמנה מס. {$result->id}</div><br>
+                            <strong>תאריך הזמנה: </strong><span>".date('d/m/Y',strtotime ($result->order_date))."</span><br>
+                            <strong>סוכן: </strong><span>{$result->user_opens}</span><br>
+                            <strong>הערות: </strong><span>{$result->notes}</span><br>
+                        </div>";
+    return $html;
+
+}
+
+function drow_html_client($attr){
+    $client = get_data_table("clients",array(array("filter_field" => "id", "filter_value"=>$attr["client_id"])))[0];
+    $html="<div class='section'>
+                            <div class='title'>פרטי הלקוח</div><br>
+                            <strong>שם הלקוח: </strong><span>".$client->name."</span><br>
+                            <strong>כתובת: </strong><span>".$client->address."</span><br>
+                            <strong>נייד: </strong><span>".$client->mobile."</span><br>
+                            <strong>דוא''ל: </strong><span>".$client->email."</span>   <br>                         
+                        </div>";
+    return $html;
+
+}
+function drow_html_order_products($attr)
+{
+    $filters = array(array("filter_field" => "order_id", "filter_value" => $attr["order_id"]));
+    if(isset($attr["supplier_id"])){
+        $filters[] = array("filter_field" => "supplier_id", "filter_value" => $attr["supplier_id"]);
+    }
+    $html = draw_table_pdf("order_products", $filters);
+    return $html;
+}
+
+function drow_html_obligation_client($attr)
+{
+    $filters = array();
+    $filters[]=array("filter_field" => "client_id", "filter_value" => $attr["client_id"]);
+    $filters[]=array("filter_field" => "payment_date", "filter_type" => "null");
+    $filters[]=array("filter_field" => "payment_until", "filter_type" => "date", "filter_ratio" => "<","filter_value"=>"NOW()");
+    $html = draw_table_pdf("collection", $filters);
+    return $html;
+}
+function drow_html_obligations($attr)
+{
+    $filters = array();
+    $filters[] = array("filter_field" => "payment_date", "filter_type" => "null");
+    $filters[] = array("filter_field" => "doc_type", "filter_value" => "1");
+    if ($attr["type"] == "daily") {
+        $filters[] = array("filter_field" => "payment_until", "filter_type" => "date", "filter_ratio" => "=", "filter_value" => "CURDATE()");
+
+    }
+
+    if ($attr["type"] == "weekly") {
+        $filters[] = array("filter_field" => "payment_until", "filter_type" => "date", "filter_ratio" => "<", "filter_value" => "CURDATE()");
+    }
+    $html = draw_table_pdf("collection", $filters);
     return $html;
 }
 ?>

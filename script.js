@@ -354,6 +354,7 @@ jQuery(document).ready(function($){
         var postData = [
             {name: "action", value: "on_order_confirmation"},
             {name: "order_id", value: getParameterByName("id")},
+            {name: "client_id", value: getSelectClientId().val()},
         ];
         call_ajax_function(postData,"onOrderConfirmation");
     })
@@ -388,6 +389,8 @@ jQuery(document).ready(function($){
         else {
             if (btn.data("action") == "edit") {
                 tr = btn.parent().parent();
+                jQuery('.list-table tbody tr').removeClass("current");
+                tr.addClass("current");
                 rowData = jQuery.map(jQuery(tr).find('td:not(.td-action)'), function (td) {
                     return jQuery(td).html();
                 });
@@ -400,9 +403,9 @@ jQuery(document).ready(function($){
                 var columnType = th.data("column-type") ?? "text";
                 html += '<div class="input-label flex-display align-center '+columnName+'">' +
                     ' <label class="bold" for="' + columnName + '">' + th.text() + ':</label>';
-                var multiple = "";
+
                 if (th.data("column-type") == "select") {
-                    html += '<select id="' + columnName + '" name="' + columnName+multiple + '"  class="font-17 grow"' +
+                    html += '<select id="' + columnName + '" name="' + columnName + '"  class="font-17 grow"' +
                         (rowData.length > 0 ? ' value="' + rowData[k] + '"' : '') + '>';
                     if(th.data("table") ) {
                         comboListName = th.data("table");
@@ -469,7 +472,7 @@ jQuery(document).ready(function($){
         //לקחת את הפונקציה של האז'אקס
         var postData = [
             {name: "action", value: jQuery("#bout-massage").find('[name="form_func"]').val()},
-            {name: "client_id", value: jQuery("#bout-massage").find('[name="id"]').val()},
+            {name: "id", value: jQuery("#bout-massage").find('[name="id"]').val()},
         ];
         call_ajax_function(postData);
         closeModal()
@@ -492,17 +495,26 @@ jQuery(document).ready(function($){
 
             var single = jQuery("body").find("section").data("single");
             title = jQuery("body").find(".page-title").html()
+            var class_table = subject == "lists" ? "list-table" : "archive-table";
 
             if (subject == "lists") {
                 subject = jQuery("ul.tables-list li.selected").data("list-name");
                 title = jQuery("ul.tables-list li.selected").html();
-                single = jQuery(".list-table .tr-head th:first-child").html();
+                //single = jQuery(".list-table .tr-head th:first-child").html();
             }
 
             if (getParameterByName("action") == "edit") {
                 id = getParameterByName("id");
             } else if (btn.is('a')) {
-                id = btn.parent().parent().data("id");
+                var tr = btn.parent().parent();
+                id = tr.data("id");
+                jQuery('.' + class_table + ' tbody tr').removeClass("current");
+                //".list-table .tr-head th:first-child"
+            //.children("td").not(".myClass").first();
+                single = single +" "+ tr.children("td").not(".td-action").first().html();
+
+               // single = single +" "+ jQuery('.' + class_table + ' tbody tr td:not(.td-action):first-child').html();
+                tr.addClass("current");
             }
 
             jQuery(this).find('[name="remove"]').val(1);
@@ -725,8 +737,9 @@ function fillAgentsSelect(result){
 
 function fillListTable(result){
     if(result.tableData) {
-        jQuery(".list-table").html(result.tableData);
-        jQuery(".page-title").html(result.options["title"]);
+        jQuery(".list-area").html(result.tableData);
+        jQuery(".page-title").html(result.options.title);
+        jQuery("section.page").attr("data-single", result.options.single);
         show_tooltip();
     }
     else if(result.options){

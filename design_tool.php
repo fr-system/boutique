@@ -290,27 +290,23 @@ function archive_header($table_name, $view_only = false,$attr = null)
     <?php
     return ob_get_clean();
 }
-function catalog_gallery($products, $options = null)
-{/*create_product_view($product,$options);*/
-    $class_grid = isset($options['class_grid']) ?  $options['class_grid'] : 'catalog';
+function catalog_gallery($products)
+{
     ob_start();?>
-    <div class="grid-display products-gallery <?= $class_grid?>">
+    <div class="grid-display products-gallery">
         <?php foreach ($products as $product){?>
-            <div class="border-dark-gray pointer flex-display direction-column space-between product font-15 padding-15" data-id="<?php echo $product->id?>">
-
-        <div class="product-img part-60">
-            <?php if($product->image_id){  ?>
-                <img class="" src="<?php echo wp_get_attachment_url($product->image_id) ?>" />
-            <?php } ?>
-        </div>
-        <div class="flex-display space-between bold part-20">
-            <div class="product-name bold"><?= $product->name ?></div>
-        </div>
-        <div class="part-10 d-not-order"><?= (!empty($product->price) ? $product->price . " ₪" : "") ?></div>
-        <div class="flex-display space-around part-15 buttons">
-            <a href="single?subject=products&action=edit&id=<?php echo $product->id?>" class="part-15 button background-white gold bold font-15 <?php echo $options["table_name"]=="products" ? '':"hidden" ?>">מעבר למוצר</a>
-        </div>
-    </div>
+            <a href="single?subject=products&action=edit&id=<?= $product->id?>" class="border-dark-gray pointer flex-display direction-column space-between product font-15 padding-15" data-id="<?php echo $product->id?>">
+                <div class="product-img part-60">
+                        <?php if($product->image_id){  ?>
+                            <img class="" src="<?php echo wp_get_attachment_url($product->image_id) ?>" />
+                        <?php } ?>
+                    </div>
+                    <div class="flex-display space-between bold part-20">
+                        <div class="font-17 product-name bold"><?= $product->name ?></div>
+                    </div>
+                <div class="part-10"><?= (!empty($product->supplier_name) ? "<strong>ספק: </strong>". $product->supplier_name : "") ?></div>
+                <div class="part-10"><?= (!empty($product->price) ?"<strong>מחיר: </strong>". $product->price . " ₪" : "") ?></div>
+            </a>
        <?php }?>
     </div>
     <?php
@@ -446,6 +442,7 @@ function create_input($field,$value = null,$readonly = "")
                 ($field["widget"] == "number" ? option_if_set($field,"step").option_if_set($field,"min"). option_if_set($field,"max")."style=\"width: 70px\"" : "" ).'/>'.$button;
         case "checkbox":
             ?>
+            <input type="hidden" name="<?= $field["field_name"]?>" value="0">
             <input type="checkbox" id="<?php echo $field["field_name"]?>" name="<?php echo $field["field_name"]?>" id="<?php echo $field["field_name"]?>" value="1" <?php echo $required ?> <?php echo  checked($value == "1") ?> <?php echo $readonly ?>/>
             <?php
             break;
