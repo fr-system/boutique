@@ -160,9 +160,9 @@ const BOUTIQUE_TABLES = array(
         "more_columns_in_table" => array(
             array("field_name" => "image_id", "widget" => "image"),
             array("field_name" => "name", "widget" => "text","label"=>"שם המוצר"/*,"width"=>"1000px"*/),
-            array("field_name" => "individually", "widget" => "hidden","hide_in_table"=>true),
-            array("field_name" => "units_in_box", "widget" => "hidden","hide_in_table"=>true),
-            array("field_name" => "supplier_id",  "widget" => "hidden","hide_in_table"=>true),
+            array("field_name" => "individually", "widget" => "hidden","hide_in_table"=>true,"hide_in_pdf"=>true),
+            array("field_name" => "units_in_box", "widget" => "hidden","hide_in_table"=>true,"hide_in_pdf"=>true),
+            array("field_name" => "supplier_id",  "widget" => "hidden","hide_in_table"=>true,"hide_in_pdf"=>true),
         ),
         "update_remove"=>false
     ),
@@ -208,7 +208,7 @@ const BOUTIQUE_TABLES = array(
             array("field_name" => "supplier_id","widget" => "select", "join_table" => "suppliers", "join_value" => "name", "label" => "שם הספק"),
             array("field_name" => "client_id","widget" => "select", "join_table" => "clients", "join_value" => "name", "label" => "שם הלקוח"),
             array("field_name" => "obligation", "widget" => "text","un_apostrophe" => true, "label" => "חיוב","sign"=>"₪"),
-            array("field_name" => "agent_id","widget" => "select", "join_table_from" => "clients", "join_table" => "agents", "join_value" => "name", "label" => "סוכן"),
+            array("field_name" => "agent_id","widget" => "select", "join_table_from" => "clients", "join_table" => "agents", "join_value" => "name", "label" => "סוכן","hide_in_pdf"=>true),
 
             array("field_name" => "doc_number", "widget" => "text", "label" => "מס' חשבונית"),
             array("field_name" => "date", "widget" => "date", "label" => "תאריך"),
@@ -220,7 +220,7 @@ const BOUTIQUE_TABLES = array(
                     2=>array("class"=>"in-treatment background-dark-green","label"=> "זיכוי"),
                 )),
 
-            array("field_name" => "payment_date", "widget" => "date", "label" => "תאריך תשלום"),
+            array("field_name" => "payment_date", "widget" => "date", "label" => "תאריך תשלום","hide_in_pdf"=>true),
             //array("field_name" => "credit_number", "widget" => "text", "label" => "מספר כרטיס אשראי"),
             array("field_name" => "payment_type", "widget" => "select", "label" => "אופן תשלום",
                 "options"=>array(
@@ -230,9 +230,9 @@ const BOUTIQUE_TABLES = array(
                     array("value"=>"4","text"=>"העברה בנקאית"),
                     array("value"=>"5","text"=>"ביט"),
 
-                )),
-            array("field_name" => "check_number", "widget" => "text", "label" => "מספר צ'ק"),
-            array("field_name" => "imported_at", "widget" => "date","hide_in_table"=>true),
+                ),"hide_in_pdf"=>true),
+            array("field_name" => "check_number", "widget" => "text", "label" => "מספר צ'ק","hide_in_pdf"=>true),
+            array("field_name" => "imported_at", "widget" => "date","hide_in_table"=>true,"hide_in_pdf"=>true),
 /*            array("field_name" => "agent_id", "widget" => "select", "label" => "סוכן", "join_table" => "agents", "join_value" => "user_id", "user_field" => "display_name"),//להביא מטבלת יוזר*/
 
         ),
@@ -263,7 +263,7 @@ const BOUTIQUE_LISTS = array(
             "single" => "עיר",
             "male_female" => "female",
             "columns" => array(
-                array("field_name" => "name","widget" => "text"),
+                array("field_name" => "name","widget" => "text","label"=>"עיר"),
                 array("field_name" => "area_id","widget" => "select", "join_table" => "areas", "join_value" => "area", "label" => "איזור"),
             ),
         ),

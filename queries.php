@@ -120,7 +120,7 @@ function save_single_data()
     }
 
     $id = isset($_POST["id"]) ? $_POST["id"] : null;
-    write_log("r ".json_encode($result));
+    //write_log("r ".json_encode($result));
     run_action_query ($table_name, $id, $action, $result);
     if (!$_POST["id"]) {
         $id = $wpdb->insert_id;
@@ -305,10 +305,7 @@ function get_data_table($table_name, $filters=null, $orderby = null, $join_filte
     }
 
     //echo $query;
-   // write_log("query ".$query);
-//    if($filter_value!= 0){
-//        $query .= " WHERE ".get_id_column_in_page($page_name)." = ".$filter_value;
-//    }
+    //write_log("query ".$query);
     $result = run_query ($query);
    //write_log("res ".json_encode($result));
     return $result ;

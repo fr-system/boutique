@@ -71,10 +71,11 @@ function get_list_ajax(){
     switch ($format) {
         case  'table':
             //write_log ("table_display ");
-            $table = lists_table_rows($table_name, '');
-            $title = BOUTIQUE_LISTS[$table_name]["title"];
+            $table = lists_table_rows($table_name);
+            $page_info = BOUTIQUE_LISTS[$table_name];
             $options = array();
-            $options["title"] = $title;
+            $options["title"] = $page_info["title"];
+            $options["single"] = $page_info["single"];
             //write_log ("rows " . $table);
             break;
         case 'array':
@@ -96,7 +97,13 @@ function lists_table_rows($list_name)
 {
     $fields_list = BOUTIQUE_LISTS[$list_name];
     //write_log("build_table_rows list name " .$list_name);
-    $list = get_list($list_name,'',true);
+    /*$list = get_list($list_name,'',true);*/
+    $result = get_data_table($list_name);
+    //write_log("result " .json_encode( $result));
+
+    $html = get_archive_table($list_name,$result,array("class_table"=>"list-table"));
+    return $html;
+
    // write_log("list " .json_encode($list));
     $column_name =  $fields_list["columns"][0]["field_name"];
     $rows = '<thead>
@@ -114,7 +121,10 @@ function lists_table_rows($list_name)
             .$column['label'].'</th>';
     }
     $rows .= '</tr></thead>';
-    foreach ($list as $row) {
+    foreach ($list as $key=>$row) {
+        $rows .= get_tr_data ($list_name, $row, $key, array("type"=>"list"));
+        continue;
+
         $rows .= "<tr data-id='{$row->id}'>";
         $rows .= '<td class="td-action"><a class="has-tooltip" data-tooltip="עדכון ' . $fields_list['single'] . '" data-bs-toggle="modal" href="#edit-list" role="button" data-action="edit"> 
                         <svg class="edit-row" xmlns="http://www.w3.org/2000/svg" width="24" height="23" viewBox="0 0 24 23" fill="none">
@@ -280,72 +290,24 @@ function get_column_value($column,$row,$field,$list,$key,$is_readonly=false)
 }
 
 add_action('wp_ajax_on_order_confirmation', 'on_order_confirmation');
-function on_order_confirmation(){
+function on_order_confirmation()
+{
 
-    global  $wpdb;
-    if(isset($_POST['order_id'])) {
+    global $wpdb;
+    if (isset($_POST['order_id'])) {
         $order_id = $_POST['order_id'];
         $query = "UPDATE " . $wpdb->prefix . "orders SET done = 1, user_confirms = " . get_current_user_id() . "
                   WHERE id = " . $order_id;
         //run_query ($query);//זה עובד טוב פשוט חבל כל הזמן שיאשר ויפריע לבדיקות!!!!
-        $filters = array(array("filter_field" => "id", "filter_value" => $order_id));
-        //$order_confirmation = get_data_table("orders",$filters)[0];
-
 
         //שליחת מייל לסוכן -למנהל בוטיק על ההזמנה שאושרה
-
-        /*
-         *         $filters=array(array("filter_field" => "id", "filter_value"=>$order_confirmation->client_id));
-
-
-                $products = get_data_table("order_products",array(array("filter_field" => "order_id", "filter_value"=>$order_id)));
-                $order_supplier = array();
-                //write_log("products ".json_encode($products));
-                foreach ($products as $product_in_order){
-                    //write_log("product ".json_encode($product_in_order));
-                    $p = get_data_table("products",array(array("filter_field" => "id", "filter_value"=>$product_in_order->product_id)))[0];
-                    //write_log("p ".json_encode($p));
-
-                    if(!empty($p->supplier_id)) {
-                        //write_log("supplier!!!! ".$p->supplier_id);
-                        if (!is_array($order_supplier[$p->supplier_id])) {
-                            $order_supplier[$p->supplier_id] = array();
-                        }
-                        $product_in_order->name = $p->name;
-                        $order_supplier[$p->supplier_id][] = $product_in_order;
-                    }
-
-                    if($product_in_order->order_individual){
-                        $count = "בקבוקים";
-                    }
-                    else{
-                        $count = "ארגזים";
-                    }
-                    $body .= $p->name.", כמות: ".$product_in_order->count." ".$count.", :מחיר ".$product_in_order->order_price." ₪";
-                    if(!empty($product_in_order->bonus)){
-                        $body .= " :בונוס ".$product_in_order->bonus;
-                    }
-                    if(!empty($product_in_order->discount_percent)){
-                        $body .= " :הנחה של ".$product_in_order->discount_percent."%";
-                    }
-                    $body .= "<br>";
-                }
-
-        //write_log("order_supplier ".json_encode($order_supplier));
-
-        $body .= 'סה"כ לתשלום: '.$order_confirmation->total." ₪"."<br>";
-        if(!empty($order_confirmation->notes)) {
-            $body .= "<br>הערות: " . $order_confirmation->notes;
-        }
-        $body .= "<br><br>בברכה, בוטיק כשר ";
-        //write_log("to ".$client->email." body ".$body);
-        */
         //$user = get_user_by('ID', $order_confirmation->user_opens);
-        //ליצור קובץ זמני כדי לשלוח במייל
-        $filters = array(array("filter_field"=>"order_id","filter_value"=>$_POST['order_id']));
-        $file = create_pdf("orders", "single",$_POST['order_id'], false,$filters);
-        if(!empty($file)) {
-            send_mail(/*$user->mail*/ "rym76843@gmail.com", "אישור הזמנה מס. " . $order_id, "מצורף קובץ", [$file]);
+        $attr=["subject"=>"orders","export"=>"single","order_id"=>$_POST['order_id'],
+            "send_mail"=>true,"client_id"=>$_POST['client_id']];
+
+        $file = create_pdf($attr);
+        if (!empty($file)) {
+            send_mail("rym76843@gmail.com", "אישור הזמנה מס. " . $order_id, "מצורף קובץ", [$file]);
             if (file_exists($file)) {
                 unlink($file);
             }
@@ -354,61 +316,30 @@ function on_order_confirmation(){
         $query = "SELECT s.* FROM {$wpdb->prefix}order_products  as op            
                   JOIN {$wpdb->prefix}products as p ON p.id = op.product_id
                   JOIN {$wpdb->prefix}suppliers as s ON p.supplier_id = s.id
-                  WHERE op.order_id = ".$_POST['order_id'];
+                  WHERE op.order_id = " . $_POST['order_id'] .
+            " GROUP BY s.id";
 
-
-        /*$file = create_pdf("order_supplier", "single",$_POST['order_id'], false);
-        if(!empty($file)) {
-            send_mail($user->mail "rym76843@gmail.com", "אישור הזמנה מס. " . $order_id, "מצורף קובץ", [$file]);
-            if (file_exists($file)) {
-                unlink($file);
-            }
-        }*/
-
-        /*if($user!=null) {
-            get_user_display_name($user);
-            $body = "הסוכן " .get_user_display_name($user). "<br>" . $body;
-            send_mail(get_option('admin_email'), "הזמנה מאושרת ללקוח " . $client->name, $body);
-        }
-        //write_log("list ".json_encode($order_supplier));
-        //שליחת מייל לכל ספק על ההזמנה בשבילו
-        foreach ($order_supplier as $key=>$order){
-            //write_log($key. " ".json_encode($order));
-
-            $filters=array(array("filter_field" => "id", "filter_value"=>$key));
-            $supplier = get_data_table("suppliers",$filters)[0];
-
-            $body = " לכבוד {$supplier->name}<br>
-                    נא לספק ללקוח {$client->name}  את המוצרים הבאים:<br><br>";
-            foreach ($order as $product){
-                if($product->order_individual){
-                    $count = "בקבוקים";
+        $suppliers = run_query($query);
+        foreach ($suppliers as $supplier) {
+            $attr["supplier_id"] = $supplier->id;
+            $file = create_pdf($attr);
+            if (!empty($file)) {
+                $to = [
+                    $supplier->email,
+                    $supplier->email2,
+                    $supplier->email3,
+                    $supplier->email4,
+                ];
+                send_mail($to, "הזמנה מס. " . $order_id, "מצורף קובץ<br>בברכה, בוטיק כשר", [$file]);
+                if (file_exists($file)) {
+                    unlink($file);
                 }
-                else{
-                    $count = "ארגזים";
-                }
-
-                $body .= $product->name.", כמות: ".$product->count." ".$count;
-                $body .= "<br>";
             }
-            $body .= "<br> בברכה, בוטיק כשר  ";
-            $to = [
-                $supplier->email,
-                $supplier->email2,
-                $supplier->email3,
-                $supplier->email4,
-            ];
-
-            //write_log("body ".$body);
-            //write_log("to ".$supplier->email." body ".$body);
-            send_mail($to,"הזמנה חדשה מבוטיק כשר",$body);
         }
-    */
 
         wp_send_json([
             'status' => 'success',
-            "message" => "ההזמנה אושרה! נשלחו הודעות במייל ללקוח ולספקים",
-            //'redirect' => isset($_POST["previous_page"]) ? $_POST["previous_page"]:'',
+            "message" => "ההזמנה אושרה! נשלחו הודעות במייל ללקוח ולספקים"
         ]);
     }
 }
@@ -663,34 +594,43 @@ function get_data_to_export($table_name,$file_type,$filters)
 {
     $page_info = BOUTIQUE_TABLES[$table_name];
     $list = get_data_table ($table_name,$filters);
+    $exist_client_filter = !empty(array_filter($filters, function($item) {
+        return isset($item['filter_field']) && $item['filter_field'] === 'client_id';
+    }));
 
-    $fname = $page_info["title"];
+    //$fname = $page_info["title"];
     $headers = [];
-    foreach ($page_info["more_columns_in_table"] as $column) {
-        if (!isset($column['field_name']) || !isset($column["label"]) || $file_type == "pdf" && (isset($column["hide_in_table"]) || $column["widget"]=="image")) { continue; }
+    if(isset($page_info["more_columns_in_table"])) {
+        foreach ($page_info["more_columns_in_table"] as $column) {
+            if (!isset($column['field_name']) || !isset($column["label"]) || $file_type == "pdf" && (isset($column["hide_in_pdf"]) || $column["widget"] == "image")) {
+                continue;
+            }
 
-        $headers[$column["label"]] = get_column_type ($column["widget"]);
+            $headers[$column["label"]] = get_column_type($column["widget"]);
+        }
     }
 
     foreach ($page_info["columns"] as $column) {
-        if (!isset($column['field_name']) || !isset($column["label"]) || $file_type == "pdf" && isset($column["hide_in_table"])) { continue; }
-
+        if (!isset($column['field_name']) || !isset($column["label"]) || $file_type == "pdf" && (isset($column["hide_in_pdf"])|| $column["widget"] == "image")) { continue; }
+        if($column['field_name'] == "client_id" && $exist_client_filter)continue;
         $headers[$column["label"]] = get_column_type ($column["widget"]);
     }
 
     $data = [];
     foreach ($list as $item) {
         $row = [];
-        foreach ($page_info["more_columns_in_table"] as $column) {
-            if (!isset($column['field_name']) || !isset($column["label"]) || $file_type == "pdf" && (isset($column["hide_in_table"])|| $column["widget"]=="image") ) continue;
-            $field = isset($column['join_table']) ? substr($column['join_table'], 0, -1) . "_" . $column['join_value'] : $column["field_name"];
-            $column_value = get_value($column, $item, $field);
-            $row[] = $column_value;
-
+        if(isset($page_info["more_columns_in_table"])) {
+            foreach ($page_info["more_columns_in_table"] as $column) {
+                if (!isset($column['field_name']) || !isset($column["label"]) || $file_type == "pdf" && (isset($column["hide_in_pdf"]) || $column["widget"] == "image")) continue;
+                $field = isset($column['join_table']) ? substr($column['join_table'], 0, -1) . "_" . $column['join_value'] : $column["field_name"];
+                $column_value = get_value($column, $item, $field);
+                $row[] = $column_value;
+            }
         }
 
         foreach ($page_info["columns"] as $column) {
-            if (!isset($column['field_name']) || !isset($column["label"]) || $file_type == "pdf" && isset($column["hide_in_table"]) ) continue;
+            if (!isset($column['field_name']) || !isset($column["label"]) || $file_type == "pdf" && (isset($column["hide_in_pdf"])|| $column["widget"] == "image" )) continue;
+            if($column['field_name'] == "client_id" && $exist_client_filter)continue;
             $field = isset($column['join_table']) ? substr($column['join_table'], 0, -1) . "_" . $column['join_value'] : $column["field_name"];
 
             $column_value = get_value($column, $item, $field);
@@ -752,22 +692,15 @@ add_action('wp_ajax_client_billing_report', 'client_billing_report');
 
 function client_billing_report()
 {
-    //write_log("client_billing_report ". $_POST["client_id"]);
-    $result = get_obligation_client_id($_POST["client_id"]);
-    $client = get_data_table("clients",array(array("filter_field" => "id", "filter_value" => $_POST["client_id"])))[0];
-
-    $late_pay = "לכבוד ".$client->name.",<br><br>להלן החשבוניות שלא שולמו:<br>";
-    foreach ($result as $row) {
-        $late_pay .= "חשבונית מספר " . $row->doc_number . " בתאריך " . date('d/m/Y', strtotime($row->date)) .
-            " מהספק: ".$row->supplier_name.
-           " על סך של " . $row->obligation . " ₪ ". "לתשלום עד: ".date('d/m/Y', strtotime($row->payment_until))."<br>";
-    }
-
-    /*$client->email.",".$client->email2*/
-    //send_mail("rym76843@gmail.com" ,"דו''ח חיוב",$late_pay);
-
-    //write_log("client_billing_report 2");
-
+    /*send_who_needs_pay_today();
+    wp_send_json(['status' => 'success','message' => "נשלח דוח חיובים של השבוע"]);
+    exit;*/
+    $attr=["client_id"=>$_POST["id"],"export"=>"single", "packet"=>["client", "obligation_client"],"send_mail"=>true];
+    $file = create_pdf($attr);
+    $client = get_data_table("clients",array(array("filter_field" => "id", "filter_value" => $_POST["id"])))[0];
+    $body = "לכבוד ".$client->name.",<br><br>מצורף החשבוניות שלא שולמו<br><br>בברכה, בוטיק כשר";
+    $to = $client->email.",".$client->email2;
+    send_mail($to ,"דו''ח חיוב",$body,[$file]);
     wp_send_json(['status' => 'success','message' => "נשלח דוח חיוב ללקוח"]);
 }
 

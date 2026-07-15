@@ -42,6 +42,10 @@ input:not([type=search]):-webkit-autofill {
     width: 200px;
     background-color: white;
 }
+a.product{
+    color: inherit;
+    text-decoration: none;
+}
 .product:hover{
     border-color: var(--b-global-color-gold-hover);
     border-width: 2px;
@@ -68,12 +72,6 @@ input:not([type=search]):-webkit-autofill {
     position: absolute;
     top: 0;
     left: 0;
-}
-.products-gallery.orders .product .d-not-order{
-    display: none;
-}
-.products-gallery.catalog .product .d-order,.products-gallery.favorite .product .d-order{
-    display: none;
 }
 .product .button, .product button{
     height: 30px;

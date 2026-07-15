@@ -67,20 +67,6 @@ function openPopupAddOrderProduct(result){
     jQuery(".products-gallery .products-last-order").hide();
 }*/
 
-jQuery('.add-order-product svg').click(function () {
-    if(jQuery('.grid-display select[name=client_id]').val()) {
-
-        var postData = [
-            {name: "action", value: "view_catalog_gallery_ajax"},
-            {name: "client_id", value: jQuery('.grid-display select[name=client_id]').val()},
-        ];
-        call_ajax_function(postData, "openPopupAddOrderProduct");
-    }
-    else{
-        var $form = jQuery('.page.single form.site_form');
-        $form.valid();
-    }
-})
 
 /*jQuery(".products-gallery .products-last-order").click(function (){
     var client_id = jQuery(".page.single select[name=client_id]").val();
