@@ -85,7 +85,9 @@ function get_list_ajax(){
             $options = build_select_options($table_name, $selected_value, array("filter" => $filter));
             //write_log ("options" . $options);
             break;
-        case "checkboxes":
+        case "checkboxes"://כרגע שימושים רק בבחירת מוצרים במצע
+            $array = json_decode(stripslashes($selected_value), true);
+            $selected_value = array_map('intval', $array);
             $checkboxes = build_checkboxes($table_name, $selected_value, array("filter" => $filter));
             break;
     }
@@ -102,6 +104,7 @@ function lists_table_rows($list_name)
     //write_log("result " .json_encode( $result));
 
     $html = get_archive_table($list_name,$result,array("class_table"=>"list-table"));
+    //write_log("html ".$html);
     return $html;
 
    // write_log("list " .json_encode($list));

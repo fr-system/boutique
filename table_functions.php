@@ -2,21 +2,23 @@
 
 function get_archive_table($table_name,$data,$attr)
 {
+    $is_list = false;
     if (array_key_exists($table_name, BOUTIQUE_TABLES)) {
         $page_info = BOUTIQUE_TABLES[$table_name];
     }
     else if (array_key_exists($table_name, BOUTIQUE_LISTS)) {
         $page_info = BOUTIQUE_LISTS[$table_name];
+        $is_list = true;
     }
 
     //$page_info = BOUTIQUE_TABLES[$table_name];
 
-    $class_table = "archive-table";
+    $class_table = "";
     if(isset($attr["class_table"])){
         $class_table = $attr["class_table"];
     }
     //'.$table_name.'
-    $html = "<table name='' class='{$class_table} dataTable {$table_name}'>
+    $html = "<table name='' class='archive-table {$class_table} dataTable {$table_name}'>
                 <thead><tr class='tr-head gold'>";
 
 
@@ -56,7 +58,7 @@ function get_archive_table($table_name,$data,$attr)
         if (isset($column["create_input"])) {
             //$html .= '<th class="no-sort"></th>';
         } else {
-            if (isset($column["hide_in_table"]) || !isset($column["label"]) ||
+            if (isset($column["hide_in_table"]) && !$is_list || !isset($column["label"]) ||
                 isset($attr["add_text"]) && !empty($attr["add_text"]) && $column["field_name"] == "client_id" ||
                 is_agent () && $column["field_name"] == "agent_id") {
                 continue;
@@ -68,16 +70,20 @@ function get_archive_table($table_name,$data,$attr)
         } else if ($column["widget"] == "image") {
             $width = '20px';
         }
-        $class_ = "";
+        $class_td = "";
         if ($column["widget"] == "hidden") {
-            $class_ = "no-sort";
+            $class_td .= " no-sort ";
         }
+        if(isset($column["hide_in_table"])) {
+            $class_td .= " hidden-col ";
+        }
+
         $dataOptions="";
         if(isset($column["options"])) {
             $dataOptions = htmlspecialchars(json_encode($column["options"]), ENT_QUOTES, 'UTF-8');
         }
 
-        $html .= '<th  class="' . $class_ . '" ' . (empty($width) ? '' : 'style="width:' . $width . '"') . ' data-column-name ="'.$column["field_name"].'"  data-column-type ="'.$column["widget"].'" 
+        $html .= '<th  class="' . $class_td . '" ' . (empty($width) ? '' : 'style="width:' . $width . '"') . ' data-column-name ="'.$column["field_name"].'"  data-column-type ="'.$column["widget"].'" 
                         data-table ="'.($column["join_table"]??"").'" data-column-options="'.$dataOptions.'">' . ($column["label"] ?? '') . '</th>';
     }
 
@@ -97,9 +103,9 @@ function get_archive_table($table_name,$data,$attr)
 
 function get_tr_data($table_name, $data, $key,$attr){
 
+    $is_list = false;
     if (array_key_exists($table_name, BOUTIQUE_TABLES)) {
         $page_info = BOUTIQUE_TABLES[$table_name];
-        $is_list = false;
     }
     else if (array_key_exists($table_name, BOUTIQUE_LISTS)) {
         $page_info = BOUTIQUE_LISTS[$table_name];
@@ -197,7 +203,7 @@ function get_tr_data($table_name, $data, $key,$attr){
         //איזה שדות שמראים בכותרת(גם אם אין כיתוב של כותרת) אותו דבר להראות בשורה בטבלה והפוך שדות שמסתירים בכותרת להסתיר גם בשורה בטבלה
         if (isset($column["create_input"])) {
         } else {
-            if (isset($column["hide_in_table"]) || !isset($column["label"]) ||
+            if (isset($column["hide_in_table"]) && !$is_list  || !isset($column["label"]) ||
                 isset($attr["add_text"]) && !empty($attr["add_text"]) && $column["field_name"] == "client_id" ||
                 is_agent() && $column["field_name"] == "agent_id") {
                 continue;
@@ -216,8 +222,12 @@ function get_tr_data($table_name, $data, $key,$attr){
         //write_log("row->field" .$field." row ". json_encode( $row));
         $column_value = get_column_value($column, $row, $field, $list, $key,isset($attr["readonly"])&& !empty($attr["readonly"]));
         //write_log("value ".$column_value);
+        $class_td = "";
+        if(isset($column["hide_in_table"])){
+            $class_td = " hidden-col ";
+        }
         $hidden = "";//(isset($column["widget"]) && $column["widget"]== "hidden"?' hidden':'');
-        $html .= '<td ' . $data_id . ' class="' . $field .$hidden .'">' . $column_value . '</td>';
+        $html .= '<td ' . $data_id . ' class="' . $field .$class_td .'">' . $column_value . '</td>';
     }
 
     if(isset($page_info["actions"])) {

@@ -388,9 +388,9 @@ function build_checkboxes($table_name, $value=null,$attr = null)
         if($value) {
             $checked = (!empty($value)&& (is_array($value) && in_array($row->value, $value) || (!is_array($value) && ($row->value == $value))) ? ' checked="checked"' : '');
         }
-        $html.='<div class="flex-display align-center pointer">
-                    <input type="checkbox" id="'.$row->value.'" name="'.$table_name.'[]" value="'.$row->value.'" '.$checked.'>
-                    <label for="'.$row->value.'">'.$row->text.'</label>
+        $html.='<div class="flex-display align-center ">
+                    <input class="pointer" type="checkbox" id="'.$row->value.'" name="'.$table_name.'[]" value="'.$row->value.'" '.$checked.'>
+                    <label class="pointer margin-before-10" for="'.$row->value.'">'.$row->text.'</label>
                </div>';
     }
     $html.='</div>';

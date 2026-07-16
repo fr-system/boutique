@@ -441,6 +441,16 @@ jQuery(document).ready(function($){
         }
         jQuery('#edit-list .modal-body').empty();
         jQuery('#edit-list .modal-body').append(html);
+        $.each(jQuery('#edit-list .modal-body').find("select"),function (){
+            var select = jQuery(this)
+            select.on("change",function () {
+                var selectName = select.attr("name").replace("_id","");
+                var onSelect_func_name = "onSelect" +  selectName[0].toUpperCase() + selectName.slice(1);
+                if (typeof window[onSelect_func_name] === "function") {
+                    window[onSelect_func_name](select.val());
+                }
+            })
+        })
 
         if(listName == "specials"){
             jQuery('#edit-list .modal-body input[name=price_more]').closest("div").addClass("hidden");
@@ -741,6 +751,7 @@ function fillListTable(result){
         jQuery(".page-title").html(result.options.title);
         jQuery("section.page").attr("data-single", result.options.single);
         show_tooltip();
+        startingDataTable();
     }
     else if(result.options){
         jQuery("select.subject").children().remove();
@@ -781,9 +792,10 @@ function automaticOrderSaving(){
 }
 function fill_modal_list(result){
     if(result.options) {
-        jQuery(".modal-body select[name=" + result.tableName.slice(0, -1) + "_id]").eq(0).html(result.options);
+        jQuery("#edit-list .modal-body select[name=" + result.tableName.slice(0, -1) + "_id]").eq(0).html(result.options);
         if (result.tableName == "suppliers" && result.options && result.options.includes("selected")) {
-            onSelectSupplier(5);
+            var selectedOption = jQuery("#edit-list .modal-body select[name=supplier_id]").find('option:selected');
+            onSelectSupplier(selectedOption.val());
         }
     }
     else if(result.checkboxes){
@@ -791,12 +803,17 @@ function fill_modal_list(result){
     }
 }
 function onSelectSupplier(supplier_id){
+    var products = null;
+    var rowData = jQuery(".list-table tbody tr.current td.products");
+    if(rowData.length>0){
+        products = rowData.html();
+    }
 
     var postData = [
         {name: "action", value: "get_list_ajax"},
         {name: "table_name", value: "products"},
         {name: "format", value: "checkboxes"},
-        {name: "selected_value", value: /*rowData[k]*/""},
+        {name: "selected_value", value: products},
         {name: "filter", value: "supplier_id = "+supplier_id}
     ];
     call_ajax_function(postData, "fill_modal_list");
