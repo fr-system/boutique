@@ -127,6 +127,7 @@ function get_tr_data($table_name, $data, $key,$attr){
             $tr_class = " product ";
             if(isset($attr["readonly"]))$tr_class .= $attr["readonly"];
             if(!empty($row->count))$tr_class .= " in-cart ";
+            if(!empty($row->discount_percent) && $row->discount_percent ==100)$tr_class .= " bonus ";
         case "agent_target_supplier":
             $tr_class .= " sub-table";
             break;

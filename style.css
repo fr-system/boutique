@@ -458,6 +458,11 @@ td {
     border-top: var(--b-global-color-gold) 1px solid !important;
     border-bottom: var(--b-global-color-gold) 1px solid !important;
 }
+.in-cart.bonus td {
+    background-color: var(--b-global-color-light-orange) ;
+    border-top: var(--b-global-color-light-orange) 1px solid !important;
+    border-bottom: var(--b-global-color-light-orange) 1px solid !important;
+ }
 .archive-table thead {
     height: 55px;
 }
@@ -541,6 +546,12 @@ table.dataTable tbody tr td:first-child{
     border-bottom-right-radius: 12px;
     border-right: var(--b-global-color-dark-gray) 1px solid;
 }
+table.dataTable tbody tr.in-cart td:first-child{
+border-right: var(--b-global-color-gold) 1px solid;
+}
+table.dataTable tbody tr.in-cart.bonus td:first-child{
+    border-right: var(--b-global-color-light-orange) 1px solid;
+}
 table.dataTable thead tr th:first-child {
     padding-right: 10px !important;
 }
@@ -549,6 +560,12 @@ table.dataTable tbody tr td:last-child{
     border-top-left-radius: 12px;
     border-bottom-left-radius: 12px;
     border-left: var(--b-global-color-dark-gray) 1px solid;
+}
+table.dataTable tbody tr.in-cart td:last-child{
+    border-left: var(--b-global-color-gold) 1px solid;
+}
+table.dataTable tbody tr.in-cart.bonus td:last-child{
+    border-right: var(--b-global-color-light-orange) 1px solid;
 }
 /* popups */
 
