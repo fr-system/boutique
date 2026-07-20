@@ -221,25 +221,17 @@ function plusMinusCountProduct(me){
     if(currentValue > 0) {
         var supplier_id=parseInt(product.find(".supplier_id span").text()|| 0);
         var special_supplier_id = jQuery("ul.specials li[data-supplier-id="+supplier_id+"]");
-        var countRows =  table.rows().count();
+        var unitsInBox = parseInt(product.find('.units_in_box span').text());
+        var selectIndividually  = product.find(".order_individual input").val();
+       // if(selectIndividually ==0) {// אם לא ניתן לבחור בודדים , או שבחור ארגז
+            var currentCount=selectIndividually =="0"?currentValue*unitsInBox: currentValue;
+        //}
+
+
         jQuery.each(special_supplier_id,function (k,special){
             special =jQuery(special);
-            if(currentValue == special.data("buy")){
-                var pBonus =  product.clone(true);
-                pBonus.find(".count input").val(special.data("get"))
-                var rowIndex = pBonus.find(".count input").attr("name").replace("rows[","").replace("][count]","");
-                jQuery.each(  pBonus.find("input"),function (k,input){
-                    var name =  jQuery(input).attr("name");
-                    name = name.replace("rows["+rowIndex+"]", "rows["+countRows+"]");
-                    jQuery(input).attr("name",name);
-                })
-                pBonus.find(".discount_percent input").autoNumeric('set', 100);
-                pBonus.find(".total input").autoNumeric('set', 0);
-                pBonus.find(".id input").val("");
-                product.after(pBonus);
-                pBonus.find(".count span.pointer").addClass("readonly");
-
-                //addProdoctBonus();
+            if(currentCount == special.data("buy")){
+                addProdoctBonus(product,special.data("get"));
             }
         })
 
@@ -259,7 +251,32 @@ function plusMinusCountProduct(me){
     }
     calculatePrice(me);
 }
+function addProdoctBonus(product,countBonus = 0){
+    var countRows =  table.rows().count();
+    var pBonus =  product.clone(true);
+    pBonus.find(".count input").val(countBonus || 1);
+    var rowIndex = pBonus.find(".count input").attr("name").replace("rows[","").replace("][count]","");
+    jQuery.each(  pBonus.find("input"),function (k,input){
+        var name =  jQuery(input).attr("name");
+        name = name.replace("rows["+rowIndex+"]", "rows["+countRows+"]");
+        jQuery(input).attr("name",name);
+    })
 
+    pBonus.find(".name").text(pBonus.find(".name").text() + (countBonus == 0 ? ' - בונוס' :' - מבצע'));
+    pBonus.find(".discount_percent input").autoNumeric('set', 100);
+    pBonus.find(".total input").autoNumeric('set', 0);
+    pBonus.find(".id input").val("");
+    pBonus.find(".order_individual input").val("1");
+    pBonus.find(".order_individual span.right").addClass("un-value");
+    pBonus.find(".order_individual span.left").removeClass("un-value");
+    pBonus.find(".dupl-action").html('');
+    pBonus.addClass("bonus");
+    product.after(pBonus);
+    if(countBonus != 0)
+    pBonus.find(".count span.pointer").off();
+
+    //pBonus.find(".count span.pointer").addClass("readonly").removeClass("pointer");
+}
 
 function registerToCalculatePrice(){
     jQuery('tr.product td:not(.total) input').on('change', function (e) {
@@ -345,45 +362,34 @@ function startingDataTable(){
                                 jQuery(sender).toggleClass("cart-mode");
                                 cartMode = !cartMode;
                                 if (cartMode) {
+                                    table.column(".dupl-action").visible(true);
+                                    show_tooltip();
                                     jQuery(sender).find("svg")[0].prepend(checkPath[0]);
                                     //jQuery(sender).find("svg").prepend("<path fill-rule=\"evenodd\" d=\"M10.854 8.146a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708 0l-1.5-1.5a.5.5 0 0 1 .708-.708L7.5 10.793l2.646-2.647a.5.5 0 0 1 .708 0\"/>");
                                 } else {
+                                    table.column(".dupl-action").visible(false);
                                     checkPath = jQuery(sender).find("svg path").first().detach();
                                     // jQuery(sender).find("svg path[fill-rule=\"evenodd\"]").remove();
                                 }
 
                                 table.draw();
-                            }}
-                    ]:
+                            }
+                        }
+                    ] :
                     []
 
             }
         },
         searching: (tableName == "orders" && currentUrl.includes('single')),
-        paging
-            :
-            false,
-        info
-            :
-            false,
-        "language"
-            :
+        paging: false,
+        info: false,
+        "language":
             {
-                "lengthMenu"
-                    :
-                    "מציג  _MENU_  שורות",
-                "zeroRecords"
-                    :
-                    "לא נמצאו שורות מתאימות",
-                "info"
-                    :
-                    "מציג עמוד _PAGE_ מתוך _PAGES_",
-                "infoEmpty"
-                    :
-                    "לא נמצאו שורות מתאימות",
-                "emptyTable"
-                    :
-                    "לא נמצאו שורות בטבלה",
+                "lengthMenu": "מציג  _MENU_  שורות",
+                "zeroRecords": "לא נמצאו שורות מתאימות",
+                "info": "מציג עמוד _PAGE_ מתוך _PAGES_",
+                "infoEmpty": "לא נמצאו שורות מתאימות",
+                "emptyTable": "לא נמצאו שורות בטבלה",
                 "infoFiltered": "(מתוך _MAX_ שורות סך הכל)",
                 "infoPostFix": "",
                 "thousands": ",",
@@ -400,22 +406,13 @@ function startingDataTable(){
                     "sortAscending": ": activate to sort column ascending",
                     "sortDescending": ": activate to sort column descending"
                 },
-
             },
         "ordering": true,
         order: [],
-
-        /*  "columnDefs": [{
-              orderable: false,
-              targets: "no-sort"
-          }],*/
-        "aoColumnDefs": [
-            { "bSortable": false, "aTargets": aTargets }//[ 4, 5, 6 ]
+        "columnDefs": [
+            {"orderable": false, "targets": aTargets},//[ 4, 5, 6 ]
+            (tableName == "orders" && currentUrl.includes('single') ? {"visible":false, "targets":0}:{})
         ],
-        /*   "columnDefs": [
-               {"type": "date", "targets": [3, 4]}, // החל על העמודה הראשונה
-               {"type": "num", "targets": [6]} // החל על העמודה השנייה
-           ],*/
         // "order": []
         // "order": [[ 3, "desc" ]]
     });

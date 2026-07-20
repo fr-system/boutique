@@ -167,6 +167,11 @@ function render_row($external_item, $sub_row, $options ){
             }
             //$external_item->order_price = $sub_row->order_price;
         }
+//        else if ($options["table_name"] == "orders" && $field_name == "name") {
+//            write_log ('product_ name '.json_encode ($sub_row));
+//            $item->$field_name = isset($sub_row->$field_name) ? $sub_row->$field_name .
+//                (!empty($sub_row->discount_percent) && $sub_row->discount_percent==100 ?" - מבצע":""): "" ;
+//        }
         else if ($field_name != $sub_table_id && $field_name != $parent_table_id) {
             $item->$field_name = isset($sub_row->$field_name) ? $sub_row->$field_name : "";
         }

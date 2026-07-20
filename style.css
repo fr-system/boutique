@@ -463,6 +463,9 @@ td {
     border-top: var(--b-global-color-light-orange) 1px solid !important;
     border-bottom: var(--b-global-color-light-orange) 1px solid !important;
  }
+tr:not(.in-cart) .action-bonus{
+    display: none;
+}
 .archive-table thead {
     height: 55px;
 }
@@ -565,7 +568,7 @@ table.dataTable tbody tr.in-cart td:last-child{
     border-left: var(--b-global-color-gold) 1px solid;
 }
 table.dataTable tbody tr.in-cart.bonus td:last-child{
-    border-right: var(--b-global-color-light-orange) 1px solid;
+    border-left: var(--b-global-color-light-orange) 1px solid;
 }
 /* popups */
 

@@ -138,9 +138,9 @@ tr.product td.count .plus, tr.product td.count .minus{
     justify-content: center;
     padding: 0 8px;
 }
-tr.product td.count .plus.readonly, tr.product td.count .minus.readonly {
-    background-color: var(--b-global-color-light-gray);
-}
+/*tr.product td.count .plus.readonly, tr.product td.count .minus.readonly {*/
+/*    background-color: var(--b-global-color-light-gray);*/
+/*}*/
 tr.product td.count .minus {
     border-top-right-radius: 5px;
     border-bottom-right-radius: 5px;

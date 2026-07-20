@@ -26,7 +26,9 @@ function get_archive_table($table_name,$data,$attr)
                         data-table ="'.$column["join_table"].'" data-column-options="'.$dataOptions.'">'
         .$column['label'].'</th>';*/
 
-
+    if($table_name == "order_products"){
+        $html .= '<th class="no-sort dupl-action" style="width:10px"></th>';//לחצן בונוס בעגלה
+    }
     if (isset($page_info["more_columns_in_table"])) {
         foreach ($page_info["more_columns_in_table"] as $column) {
             $dataOptions="";
@@ -41,6 +43,7 @@ function get_archive_table($table_name,$data,$attr)
     if(is_manager() && $table_name == "collection" && !isset($_GET["payed"])){
         $html .= '<th class="no-sort"></th>';//בשביל עדכון תשלום
     }
+
 
     if(!isset($page_info["update_remove"]) || $page_info["update_remove"] == true) {
         if (is_manager() || is_agent() && $table_name == "orders") {//update/readonly
@@ -127,7 +130,10 @@ function get_tr_data($table_name, $data, $key,$attr){
             $tr_class = " product ";
             if(isset($attr["readonly"]))$tr_class .= $attr["readonly"];
             if(!empty($row->count))$tr_class .= " in-cart ";
-            if(!empty($row->discount_percent) && $row->discount_percent ==100)$tr_class .= " bonus ";
+            if(!empty($row->discount_percent) && $row->discount_percent ==100){
+                $tr_class .= " bonus ";
+                $bonus_row=true;
+            }
         case "agent_target_supplier":
             $tr_class .= " sub-table";
             break;
@@ -140,6 +146,18 @@ function get_tr_data($table_name, $data, $key,$attr){
             $html .= '<input class="pointer" type="checkbox"/>';
         }
         $html.= '</td>';
+    }
+    if($table_name == "order_products") { // שכפול מוצר - בונוס
+        $html .= '<td class="td-action dupl-action">';
+        write_log ('bonus '.isset($bonus_row).' empty '.empty($bonus_row));
+        if (!isset($bonus_row) || empty($bonus_row)) {
+            $html .= '<a class="has-tooltip" data-tooltip="הוספת מוצר בונוס" onclick="addProdoctBonus(jQuery(this).closest(\'tr\'))">
+                      <svg width="24" height="23" viewBox="0 0 10 10" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M2.375 3.7085C2.375 3.35483 2.51549 3.01565 2.76557 2.76557C3.01565 2.51549 3.35483 2.375 3.7085 2.375H8.0415C8.21662 2.375 8.39002 2.40949 8.55181 2.47651C8.7136 2.54352 8.8606 2.64175 8.98443 2.76557C9.10825 2.8894 9.20648 3.0364 9.27349 3.19819C9.34051 3.35998 9.375 3.53338 9.375 3.7085V8.0415C9.375 8.21662 9.34051 8.39002 9.27349 8.55181C9.20648 8.7136 9.10825 8.8606 8.98443 8.98443C8.8606 9.10825 8.7136 9.20648 8.55181 9.27349C8.39002 9.34051 8.21662 9.375 8.0415 9.375H3.7085C3.53338 9.375 3.35998 9.34051 3.19819 9.27349C3.0364 9.20648 2.8894 9.10825 2.76557 8.98443C2.64175 8.8606 2.54352 8.7136 2.47651 8.55181C2.40949 8.39002 2.375 8.21662 2.375 8.0415V3.7085Z" class="stroke-background-gold" stroke-width="0.75" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M0.881 7.2435C0.7275 7.15629 0.599825 7.02999 0.51095 6.87745C0.422076 6.7249 0.37517 6.55155 0.375 6.375V1.375C0.375 0.825 0.825 0.375 1.375 0.375H6.375C6.75 0.375 6.954 0.5675 7.125 0.875M4.375 5.875H7.375M5.875 4.375V7.375" class="stroke-background-gold" stroke-width="0.75" stroke-linecap="round" stroke-linejoin="round"/>
+                      </svg></a>';
+        }
+        $html .= '</td>';
     }
     if(!isset($page_info["update_remove"]) || $page_info["update_remove"] == true) {
         if($is_list){
@@ -195,7 +213,10 @@ function get_tr_data($table_name, $data, $key,$attr){
     if (isset($page_info["more_columns_in_table"])) {
         foreach ($page_info["more_columns_in_table"] as $column) {
             $column_value = get_column_value($column, $row, $column["field_name"], null,$key);
-            $html .= '<td class="' . $column["field_name"] .'">' . $column_value . '</td>';
+            if(isset( $bonus_row) && !empty($bonus_row) && $column["field_name"] =="name"){
+                $column_value .= ' - מבצע';
+            }
+            $html .= '<td class="' . $column["field_name"] .'">' . $column_value. '</td>';
             $columns_counter++;
         }
     }
@@ -221,7 +242,7 @@ function get_tr_data($table_name, $data, $key,$attr){
             $data_id = 'data-id="' . $row->$field . '"';
         }
         //write_log("row->field" .$field." row ". json_encode( $row));
-        $column_value = get_column_value($column, $row, $field, $list, $key,isset($attr["readonly"])&& !empty($attr["readonly"]));
+        $column_value = get_column_value($column, $row, $field, $list, $key,isset($attr["readonly"])&& !empty($attr["readonly"]) || isset( $bonus_row) && !empty($bonus_row));
         //write_log("value ".$column_value);
         $class_td = "";
         if(isset($column["hide_in_table"])){
