@@ -323,6 +323,28 @@ const BOUTIQUE_LISTS = array(
                 array("field_name" => "text","widget" => "text","label"=>"נושא"),
             )
         ),
+    "specials" =>
+        array(
+            "title" => "מבצעים",
+            "single" => "מבצע",
+            "columns" => array(
+                array("field_name" => "descript","label"=>"תיאור המבצע","widget" => "text"),
+                array("field_name" => "supplier_id", "widget" => "select","label"=>"ספק", "join_table" => "suppliers", "join_value" => "name"),
+                array("field_name" => "date_end", "widget" => "date", "label" => "תאריך סיום"),
 
+                array("field_name" => "type", "widget" => "select", "label" => "סוג מבצע",
+                    "options"=>array(
+                        array("value"=>"1","text"=>"קנה קבל"),
+                        array("value"=>"2","text"=>"קנה מעל"),
+                    )
+                ),
+                array("field_name" => "products" ,"widget" => "special","label"=>"מוצרים","save_as_text"=> true ,"field_id"=>"product_id","hide_in_table"=>true),
+
+                //array("field_name" => "products", "widget" => "none","multiple"=>true,"label"=>"מוצרים"/*, "join_table" => "products", "join_value" => "name"*/),
+                array("field_name" => "price_more","widget" => "text","label"=>"קנה מעל סכום","un_apostrophe" => true,"sign"=>"₪"),
+                array("field_name" => "buy", "widget" => "number", "label" => "קנה כמות"),
+                array("field_name" => "get", "widget" => "number", "label" => "קבל"),
+            )
+        ),
     );
 ?>

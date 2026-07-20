@@ -1,7 +1,7 @@
 
 jQuery(document).ready(function($){
 
-    jQuery(".page tr.product:not(.readonly) .count span.pointer:not(.readonly)").click(function (e) {
+    jQuery(".page tr.product:not(.bonus) .count span.pointer:not(.readonly)").click(function (e) {
         plusMinusCountProduct(this)
     })
     jQuery('form input').on('keydown', function (e) {

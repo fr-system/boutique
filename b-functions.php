@@ -515,6 +515,13 @@ add_action('wp_ajax_get_client_details', 'get_client_details');
 function get_client_details($client_id)
 {
     $client_id = isset($_POST["client_id"]) ? $_POST["client_id"] : $client_id;
+    //צריך להביא את כל החשבוניות של הלקוח ולחשב את הסכום הכולל
+    //ולהביא את כל החשבוניות שהלקוח שילם , ולחשב , אם סכום החשבוניות פחות סכום כל התשלומים קטן מהאובליגו = החוב שמותר ללקוח
+
+
+    //לצורך חישוב תאריך - צריך להביא את כל החשבוניות של הלקוח שעדיין לא שולמו ותאריך התשלום שלהן כבר עבר
+    //אם יש חשבונית כזו , להודיע על איחור בתשלום
+
     $result = get_obligation_client_id($client_id);
     $obligo = 0;
     foreach ($result as $row){
@@ -526,7 +533,10 @@ function get_client_details($client_id)
     //$branches = get_data_table("clients_branches", array(array("filter_field" => "main_client_id", "filter_value" => $client_id)));
     $options = build_select_options("clients_branches",($_POST["selected_value"]??null), array("filter"=>" main_client_id = ".$client_id));
 
-    $res = array("debts" => $obligo,"obligo" => $client->obligo,"branches"=>$options);
+    $res = array("debts" => $obligo,
+        "obligo" => $client->obligo,
+        //"late_payment" =>
+        "branches"=>$options);
     if(isset($_POST["client_id"])) {
         wp_send_json($res);
     }
