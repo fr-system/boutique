@@ -775,8 +775,11 @@ function fill_modal_list(result){
     }
 }
 
-function singleSpecialsPage(){
-    //מבצעים
+function singleSpecialsPage(){    //מבצעים
+
+    jQuery('.page.single .grid-display ').append('<div class="type-3 hidden" >קבל בקבוק מתנה</div>');
+    jQuery('.page.single input[name=discount]').closest("div").after('<div class="type-2 hidden stretch" >או</div>')
+
     var selectedOption = jQuery(".page.single select[name=supplier_id]").find('option:selected');
     onSelectSupplier(selectedOption.val());
     selectedOption = jQuery(".page.single select[name=type]").find('option:selected');
@@ -793,8 +796,6 @@ function singleSpecialsPage(){
         })
     })
 
-    jQuery('.page.single .grid-display ').append('<div class="type-3 hidden" >קבל בקבוק מתנה</div>');
-    jQuery('.page.single input[name=discount]').closest("div").after('<div class="type-2 hidden stretch" >או</div>')
 }
 
 function onSelectSupplier(supplier_id){

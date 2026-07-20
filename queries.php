@@ -107,7 +107,7 @@ function save_single_data()
 
 /*    write_log("post: ".json_encode($_POST));*/
     if($table_name == "specials"){
-        $_POST["products"] = json_encode($_POST["products"]);
+        $_POST["products_buy"] = json_encode($_POST["products_buy"]);
     }
 
     global $wpdb;
@@ -121,7 +121,7 @@ function save_single_data()
     }
 
     $id = isset($_POST["id"]) ? $_POST["id"] : null;
-    //write_log("r ".json_encode($result));
+    write_log("r ".json_encode($result));
     run_action_query ($table_name, $id, $action, $result);
     if (!$_POST["id"]) {
         $id = $wpdb->insert_id;

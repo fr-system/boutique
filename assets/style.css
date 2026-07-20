@@ -504,3 +504,10 @@ td.dt-type-numeric{
     width: 100% !important;
     height: 100% !important;
 }
+
+.specials-corner{
+    padding: 5px 0;
+    border-radius: 12px;
+   /* border-top-left-radius: 12px;*/
+
+}

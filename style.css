@@ -268,6 +268,9 @@ input, textarea, select, button{
 .flex-display .part-70{
     flex-basis:70% !important;
 }
+.flex-display .part-75{
+     flex-basis:75% !important;
+ }
 .flex-display .part-80{
     flex-basis:80% !important;
 }

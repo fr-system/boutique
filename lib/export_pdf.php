@@ -42,68 +42,61 @@ function create_pdf($attr)
                     padding: 5px;
                     text-align: right;
                 }
-                .section{
-                    /*border:1px solid #000;*/
-                    margin-bottom:10px;
-                    width: 8cm;
-                }
-                .section .details{
+                .details{
                     padding: 10px;
+                    margin-bottom:10px;
+
                 }
                 .strong{
                     font-weight:bold;
                 }
                 
                 .title{
-                    width:8cm; 
-                    /*background-color: black;
+                    text-underline: black;                    
+                    /*width:8cm; 
+                    background-color: black;
                     color: white;*/
                     font-size:12pt;
-                    font-weight:bold;
                 }
                 </style>
                 ';
 
     $mpdf->SetHTMLHeader('<div style="margin:0;padding:0;background-color: black;width: 100%; text-align: center; margin-bottom: 10px"><img src="https://kosherboutique.co.il/wp-content/themes/boutique/assets/images/logo_header.png"/></div>');
+    $packet = array();
+    if(isset($attr["packet"])){
+        $packet = $attr["packet"];
+    }
+
+    if($table_name=="orders") {
+        $packet = ["client", "order", "order_products"];
+    }
+    foreach ($packet as $func) {
+        $func_name = "drow_html_" . $func;
+        //write_log("func_name ".$func_name);
+        $html .= $func_name($attr);
+    }
 
     switch ($attr["export"]) {
         case "single":
-            //$mpdf->SetHTMLHeader('<div>'.BOUTIQUE_TABLES[$table_name]["single"].'</div>');
-            if(isset($attr["packet"])){
-                $packet = $attr["packet"];
-            }
-
-            if($table_name=="orders") {
-                $packet = ["client", "order", "order_products"];
-            }
-
-            foreach ($packet as $func) {
-                $func_name = "drow_html_" . $func;
-                //write_log("func_name ".$func_name);
-                $html .= $func_name($attr);
-            }
-
-                //write_log("r ".json_encode($client));
-                /*$branch = "";
-                if(!empty($result->branch)){
-                    $branch = "סניף";
-                }*/
-                //$html .= "<div style='text-align: left;'><strong>סה''כ לתשלום: </strong>{$result->total} ₪</div>";
-
             break;
         case 'archive':
             $filters = array();
-            $mpdf->SetHTMLHeader('<div>'.BOUTIQUE_TABLES[$table_name]["title"].'</div>');
-            if(isset($_GET["ids"])){
+            $report_title = "";
+            if($table_name){
+                $report_title = BOUTIQUE_TABLES[$table_name]["title"];
+            }
+            else if(isset($attr["report_title"])){
+                $report_title = $attr["report_title"];
+            }
+
+            $mpdf->SetHTMLHeader('<div>'.$report_title.'</div>');
+            /*if(isset($_GET["ids"])){
                 $filters[]=array("filter_field"=>"id","filter_value"=>$_GET["ids"],"filter_type" => "array");
             }
             else if(isset($_GET["id"])){
                 $filters[]=array("filter_field"=>"order_id","filter_value"=>$_GET["id"]);
-            }
-
-            $html .= draw_table_pdf($table_name,$filters);
-
-
+            }*/
+            //$html .= draw_table_pdf($table_name,$filters);
             break;
     }
 
@@ -117,7 +110,7 @@ function create_pdf($attr)
         if(isset($attr["create_only_fill"]) && !preg_match('/<tbody[^>]*>.*?<tr\b/is', $html)){
             return null;
         }
-        $file = 'report_' . time() . '.pdf';
+        $file = $table_name.'_rpt_' . time() . '.pdf';
         $mpdf->Output($file, \Mpdf\Output\Destination::FILE);
         return $file;
     }
@@ -160,29 +153,25 @@ function drow_html_order($attr){
     $result = get_data_table("orders",array(array("filter_field" => "id", "filter_value"=>$attr["order_id"])))[0];
 
 
-    $html="<div class='section'  >
-              <div class='title'>הזמנה מס. {$result->id}</div><br>
-                <div class='details'>
-                            <strong>תאריך הזמנה: </strong><span>".date('d/m/Y בשעה H:i',strtotime ($result->order_date))."</span><br>
-                            <strong>סוכן: </strong><span>".get_userdata($result->user_opens)->display_name."</span><br>
-                            <strong>הערות: </strong><span>{$result->notes}</span>
-                </div>
-              </div>";
+    $html="<div class='details'>
+              <strong class='title'>הזמנה מס. {$result->id}</strong><br>
+              <strong>תאריך הזמנה: </strong><span>".date('d/m/Y בשעה H:i',strtotime ($result->order_date))."</span><br>
+              <strong>סוכן: </strong><span>".get_userdata($result->user_opens)->display_name."</span><br>
+              <strong>הערות: </strong><span>{$result->notes}</span>
+           </div>";
     return $html;
 
 }
 
 function drow_html_client($attr){
     $client = get_data_table("clients",array(array("filter_field" => "id", "filter_value"=>$attr["client_id"])))[0];
-    $html="<div class='section'>
-<div class='details'>
-                            <div class='title'>פרטי לקוח</div><br>
-                            <strong>שם הלקוח: </strong><span>".$client->name."</span><br>
-                            <strong>כתובת: </strong><span>".$client->address."</span><br>
-                            <strong>נייד: </strong><span>".$client->mobile."</span><br>
-                            <strong>דוא''ל: </strong><span>".$client->email."</span>
-                            </div>                   
-                        </div>";
+    $html="<div class='details'>
+                <strong class='title'>פרטי לקוח</strong><br>
+                <strong>שם הלקוח: </strong><span>".$client->name."</span><br>
+                <strong>כתובת: </strong><span>".$client->address."</span><br>
+                <strong>נייד: </strong><span>".$client->mobile."</span><br>
+                <strong>דוא''ל: </strong><span>".$client->email."</span>                  
+           </div>";
     return $html;
 
 }
@@ -211,14 +200,32 @@ function drow_html_obligations($attr)
     $filters[] = array("filter_field" => "payment_date", "filter_type" => "null");
     $filters[] = array("filter_field" => "doc_type", "filter_value" => "1");
     if ($attr["type"] == "daily") {
-        $filters[] = array("filter_field" => "payment_until", "filter_type" => "date", "filter_ratio" => "=", "filter_value" => "CURDATE()");
+        if(date('w') == 6){
+            $filters[] = array("filter_field" => "payment_until", "filter_type" => "date", "filter_ratio" => ">=", "filter_value" => "CURDATE() - INTERVAL 1 DAY");
 
+        }else {
+            $filters[] = array("filter_field" => "payment_until", "filter_type" => "date", "filter_ratio" => "=", "filter_value" => "CURDATE()");
+        }
     }
 
     if ($attr["type"] == "weekly") {
         $filters[] = array("filter_field" => "payment_until", "filter_type" => "date", "filter_ratio" => "<", "filter_value" => "CURDATE()");
     }
     $html = draw_table_pdf("collection", $filters);
+    return $html;
+}
+
+function drow_html_tasks($attr)
+{
+    $filters = array();
+    if(($attr["agent_id"]??null)!= null){
+        $filters[]=array("filter_field" => "test_tasks.agent_id", "filter_value" => $attr["agent_id"]);
+    }
+
+    $filters[]=array("filter_field" => "status_id", "filter_type" => "!=", "filter_value" => "1");
+    $filters[]=array("filter_field" => "target_date", "filter_type" => "date", "filter_ratio" => "<","filter_value"=>"CURDATE()");
+    $html = draw_table_pdf("tasks", $filters);
+    write_log("html ".$html);
     return $html;
 }
 ?>

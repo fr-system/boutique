@@ -91,7 +91,7 @@ function get_list_ajax(){
                 $array = json_decode(stripslashes($selected_value), true);
                 $selected_value = array_map('intval', $array);
             }
-            $checkboxes = build_checkboxes($table_name, $selected_value, array("filter" => $filter));
+            $checkboxes = build_checkboxes($table_name, $selected_value, array("filter" => $filter,"selector"=>$selector));
             //$checkboxes = array();
             break;
     }
@@ -611,10 +611,13 @@ function get_data_to_export($table_name,$file_type,$filters)
 {
     $page_info = BOUTIQUE_TABLES[$table_name];
     $list = get_data_table ($table_name,$filters);
-    $exist_client_filter = !empty(array_filter($filters, function($item) {
-        return isset($item['filter_field']) && $item['filter_field'] === 'client_id';
+    $exist_client_filter = !empty(array_filter($filters, function($filter) {
+        return isset($filter['filter_field']) && $filter['filter_field'] === 'client_id';
     }));
 
+    $exist_agent_filter = !empty(array_filter($filters, function($filter) {
+        return isset($filter['filter_field']) && str_contains($filter['filter_field'],"agent_id");
+    }));
     //$fname = $page_info["title"];
     $headers = [];
     if(isset($page_info["more_columns_in_table"])) {
@@ -630,6 +633,7 @@ function get_data_to_export($table_name,$file_type,$filters)
     foreach ($page_info["columns"] as $column) {
         if (!isset($column['field_name']) || !isset($column["label"]) || $file_type == "pdf" && (isset($column["hide_in_pdf"])|| $column["widget"] == "image")) { continue; }
         if($column['field_name'] == "client_id" && $exist_client_filter)continue;
+        if($column['field_name'] == "agent_id" && $exist_agent_filter)continue;
         $headers[$column["label"]] = get_column_type ($column["widget"]);
     }
 
@@ -648,6 +652,8 @@ function get_data_to_export($table_name,$file_type,$filters)
         foreach ($page_info["columns"] as $column) {
             if (!isset($column['field_name']) || !isset($column["label"]) || $file_type == "pdf" && (isset($column["hide_in_pdf"])|| $column["widget"] == "image" )) continue;
             if($column['field_name'] == "client_id" && $exist_client_filter)continue;
+            if($column['field_name'] == "agent_id"  && $exist_agent_filter)continue;
+
             $field = isset($column['join_table']) ? substr($column['join_table'], 0, -1) . "_" . $column['join_value'] : $column["field_name"];
 
             $column_value = get_value($column, $item, $field);
@@ -709,9 +715,8 @@ add_action('wp_ajax_client_billing_report', 'client_billing_report');
 
 function client_billing_report()
 {
-    /*send_who_needs_pay_today();
-    wp_send_json(['status' => 'success','message' => "נשלח דוח חיובים של השבוע"]);
-    exit;*/
+    send_unclosed_tasks("");
+    return;
     $attr=["client_id"=>$_POST["id"],"export"=>"single", "packet"=>["client", "obligation_client"],"send_mail"=>true];
     $file = create_pdf($attr);
     $client = get_data_table("clients",array(array("filter_field" => "id", "filter_value" => $_POST["id"])))[0];

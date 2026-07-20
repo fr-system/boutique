@@ -49,7 +49,7 @@ if (isset($_SERVER['HTTP_REFERER'])) {
 }
 
 if($table_name == "orders"){
-    $part_left_side="part-80 ";
+    $part_left_side="part-75 ";
 }
 else{
     $part_left_side="part-65 ";
@@ -60,7 +60,10 @@ else{
     <div class="flex-display ">
         <div class="flex-display space-between margin-bottom-20 <?php echo $part_left_side ?> align-center ">
             <div class="font-30 bold title-page">
-                <?php echo $title_page ?><span class="font-18"><?php echo $id ?  "  מס. ".$id : "" ?></span>
+                <?php echo $title_page ?>
+                <?php if($table_name != "specials"){?>
+                    <span class="font-18"><?php echo $id ?  "  מס. ".$id : "" ?></span>
+                <?php } ?>
             </div>
 
             <?php
@@ -210,23 +213,14 @@ else{
             </div>
          <?php }
          else if($table_name == "orders"){ //מבצעים
-
-             $filters=array( array("filter_field" => "date_end", "filter_ratio" =>">=","filter_type"=>"date","filter_value"=>"CURDATE()"));
-             $specials_list= get_data_table ("specials",$filters);
-             //write_log ('specials '.json_encode ($specials_list));
-             $html="";
+             $filters=array( array("filter_type"=>"filter","filter_field"=>"date_end", "filter_value"=>"date_end >= CURDATE() || date_end is null"));
+             $result= get_data_table ("specials",$filters);
              ?>
-            <div class="specials-area border-dark-gray padding-20 part-20"><ul class="specials">
-                <?php foreach ($specials_list as $special){
-                    echo "<li data-supplier-id='{$special->supplier_id}' data-buy='{$special->buy}' 
-data-get='{$special->get}'>{$special->descript} // {$special->supplier_name}  
-</li>";
-                 }?>
-                </ul></div>
-            <?php
-         }
-
-             ?>
+            <div class="specials-area border-dark-gray padding-20" style="flex-basis:23%">
+                <div class="specials-corner text-center background-dark-green bold margin-bottom-10">פינת מבצעים</div>
+                <?php specials_gallery($result,array("target"=>"orders")); ?>
+            </div>
+         <?php } ?>
     </div>
 </section>
 <?php get_footer();?>

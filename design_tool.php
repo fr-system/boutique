@@ -315,46 +315,57 @@ function products_gallery($products)
     </div>
     <?php
 }
-function specials_gallery($list){ ?>
+function specials_gallery($list,$attr = array()){ ?>
 
     <div class="grid-display archive-gallery">
         <?php foreach ($list as $single){
-            write_log("special ".json_encode($single));
             $type = $single->type;
             $results = array_filter(SPECIAL_TYPE, function ($option) use ($type) {
                 return $option["value"] == $type;
             });
+
+            if(($attr["target"]?? "") == "orders" ){
+                $href = "javascript:void(0)";
+            }
+            else{
+                $href = "single?subject=specials&action=edit&id=". $single->id;
+            }
             ?>
-            <a href="single?subject=specials&action=edit&id=<?= $single->id?>" class="border-dark-gray single pointer flex-display direction-column start font-15 padding-15" data-id="<?php echo $single->id?>">
+            <a href="<?=$href?>" class="border-dark-gray single pointer flex-display direction-column start font-15 padding-15" data-id="<?php echo $single->id?>">
                 <div class="flex-display space-between bold part-20">
-                    <div class="font-17 text-center bold"><?= $single->descript ?></div>
+                    <div class="font-17 text-center bold gold"><?= $single->descript ?></div>
                 </div>
                 <div class="part-10"><?= (!empty($single->date_end) ? "<strong>תאריך סיום: </strong>".date('d/m/Y', strtotime($single->date_end))  : "") ?></div>
                 <div class="part-10"><?= (!empty($single->supplier_name) ? "<strong>ספק: </strong>". $single->supplier_name : "") ?></div>
                 <div class="part-10"><?= "<strong>סוג מבצע: </strong>".array_pop($results)["text"]?></div>
                 <?php
-                    switch ($type) {
+                $html = "";
+                if(!empty($single->buy) && !empty($single->products_buy)) {
+                    $html .= '<div class="part-10">' . (!empty($single->buy) ? "<strong>קנה כמות: </strong>" . $single->buy : "") . '</div>';
+
+                    $products = json_decode($single->products_buy);
+                    $products_res = run_query("SELECT name FROM test_products WHERE id in(" . implode(',', $products) . ")");
+                    $products_str = implode(', ', array_column($products_res, 'name'));
+                    $html .= '<div class="part-10"><strong>מהמוצרים: </strong>' . $products_str . '</div>';
+                }
+
+                switch ($type) {
                         case "1":
-                            $html = '<div class="part-10">'.(!empty($single->buy) ? "<strong>קנה כמות: </strong>". $single->buy : "") .'</div>';
-                             if(!empty($single->products_buy)){
-                                $products = json_decode($single->products_buy);
-                                $products_res = run_query("SELECT name FROM test_products WHERE id in(".implode(',', $products).")");
-                                $products_str = implode(', ', array_column($products_res, 'name'));
-                                $html.='<div class="part-10"><strong>מהמוצרים: </strong>'. $products_str .'</div>';
-                             }
                              if(!empty($single->get) && !empty($single->product_name)) {
                                  $html .= '<div class="part-10"><strong>קבל: </strong>' . $single->get . ' בקבוקי ' . $single->product_name . '</div>';
                              }
-
                             break;
                         case "2":
-                            $html = '<div class="part-10">'.(!empty($single->price_more) ? "<strong>קנה מעל: </strong>". $single->price_more." ₪" : "") .'</div>';
+                            $html .= '<div class="part-10">'.(!empty($single->price_more) ? "<strong>קנה מעל: </strong>". $single->price_more." ₪" : "") .'</div>';
                             if(!empty($single->discount)){
                                 $html.='<div class="part-10"><strong>קבל הנחה של: </strong>'. $single->discount." %" .'</div>';
                             }
                             else if(!empty($single->get) && !empty($single->product_name)) {
                                 $html .= '<div class="part-10"><strong>קבל: </strong>' . $single->get . ' בקבוקי ' . $single->product_name . '</div>';
                             }
+                            break;
+                        case "3":
+                            $html .= "קבל בקבוק מתנה";
                             break;
                     }
                 echo $html;
@@ -423,7 +434,7 @@ function build_select_options($table_name, $value=null,$attr = null)
 
 function build_checkboxes($table_name, $value=null,$attr = null)
 {
-    $attr = $attr ?? array("filter"=>null);
+    $attr = $attr ?? array("filter"=>null,"selector"=>null);
     $list = get_list($table_name, $attr["filter"]);
     $html ='<div class="checkboxes flex-display direction-column">';
 
@@ -433,7 +444,7 @@ function build_checkboxes($table_name, $value=null,$attr = null)
             $checked = (!empty($value)&& (is_array($value) && in_array($row->value, $value) || (!is_array($value) && ($row->value == $value))) ? ' checked="checked"' : '');
         }
         $html.='<div class="flex-display align-center ">
-                    <input class="pointer" type="checkbox" id="'.$row->value.'" name="'.$table_name.'[]" value="'.$row->value.'" '.$checked.'>
+                    <input class="pointer" type="checkbox" id="'.$row->value.'" name="'.$attr["selector"].'[]" value="'.$row->value.'" '.$checked.'>
                     <label class="pointer margin-before-10" for="'.$row->value.'">'.$row->text.'</label>
                </div>';
     }
