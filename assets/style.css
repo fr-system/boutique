@@ -25,39 +25,33 @@ input:not([type=search]):-webkit-autofill {
     height: 100%;
 }
 
-.products-gallery{
+.archive-gallery{
     grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
     grid-auto-rows: 270px;
     overflow-x: auto;
-    /* overflow-y: hidden; */
     max-height: 75vh;
-    /* grid-template-columns: repeat(5, 1fr); */
-}
-.products-gallery.one-row {
-    grid-auto-flow: column;
-    /*max-height: 290px;*/
 }
 
-.product{
+.archive-gallery .single{
     width: 200px;
     background-color: white;
 }
-a.product{
+.archive-gallery a.single{
     color: inherit;
     text-decoration: none;
 }
-.product:hover{
+.archive-gallery  .single:hover{
     border-color: var(--b-global-color-gold-hover);
     border-width: 2px;
     box-shadow: 2px 2px 6px 1px rgba(0, 0, 0, 0.13);
 }
-.product .product-img{
+.archive-gallery .single .product-img{
     height: 100%;
     overflow: hidden;
     text-align: center;
 }
 
-.product img{
+.archive-gallery .single img{
     max-height: 100%;
     max-width: 100%;
     object-fit: cover;
@@ -65,18 +59,10 @@ a.product{
     height: auto;
     border-radius: 10px;
 }
-.product-img{
+.archive-gallery .product-img{
     position: relative;
 }
-.remove-product {
-    position: absolute;
-    top: 0;
-    left: 0;
-}
-.product .button, .product button{
-    height: 30px;
-    margin: 0;
-}
+
 .product input[type=number]::-webkit-inner-spin-button,
 .product input[type=number]::-webkit-outer-spin-button {
     -webkit-appearance: none; /* Chrome, Safari, Edge */

@@ -290,12 +290,11 @@ function archive_header($table_name, $view_only = false,$attr = null)
     <?php
     return ob_get_clean();
 }
-function catalog_gallery($products)
-{
-    ob_start();?>
-    <div class="grid-display products-gallery">
+function products_gallery($products)
+{?>
+    <div class="grid-display archive-gallery">
         <?php foreach ($products as $product){?>
-            <a href="single?subject=products&action=edit&id=<?= $product->id?>" class="border-dark-gray pointer flex-display direction-column space-between product font-15 padding-15" data-id="<?php echo $product->id?>">
+            <a href="single?subject=products&action=edit&id=<?= $product->id?>" class="border-dark-gray pointer single flex-display direction-column space-between product font-15 padding-15" data-id="<?php echo $product->id?>">
                 <div class="product-img part-60">
                         <?php if($product->image_id){  ?>
                             <img class="" src="<?php echo wp_get_attachment_url($product->image_id) ?>" />
@@ -310,7 +309,55 @@ function catalog_gallery($products)
        <?php }?>
     </div>
     <?php
-    return ob_get_clean();
+}
+function specials_gallery($list){ ?>
+
+    <div class="grid-display archive-gallery">
+        <?php foreach ($list as $single){
+            write_log("special ".json_encode($single));
+            $type = $single->type;
+            $results = array_filter(SPECIAL_TYPE, function ($option) use ($type) {
+                return $option["value"] == $type;
+            });
+            ?>
+            <a href="single?subject=specials&action=edit&id=<?= $single->id?>" class="border-dark-gray single pointer flex-display direction-column start font-15 padding-15" data-id="<?php echo $single->id?>">
+                <div class="flex-display space-between bold part-20">
+                    <div class="font-17 text-center bold"><?= $single->descript ?></div>
+                </div>
+                <div class="part-10"><?= (!empty($single->date_end) ? "<strong>תאריך סיום: </strong>".date('d/m/Y', strtotime($single->date_end))  : "") ?></div>
+                <div class="part-10"><?= (!empty($single->supplier_name) ? "<strong>ספק: </strong>". $single->supplier_name : "") ?></div>
+                <div class="part-10"><?= "<strong>סוג מבצע: </strong>".array_pop($results)["text"]?></div>
+                <?php
+                    switch ($type) {
+                        case "1":
+                            $html = '<div class="part-10">'.(!empty($single->buy) ? "<strong>קנה כמות: </strong>". $single->buy : "") .'</div>';
+                             if(!empty($single->products_buy)){
+                                $products = json_decode($single->products_buy);
+                                $products_res = run_query("SELECT name FROM test_products WHERE id in(".implode(',', $products).")");
+                                $products_str = implode(', ', array_column($products_res, 'name'));
+                                $html.='<div class="part-10"><strong>מהמוצרים: </strong>'. $products_str .'</div>';
+                             }
+                             if(!empty($single->get) && !empty($single->product_name)) {
+                                 $html .= '<div class="part-10"><strong>קבל: </strong>' . $single->get . ' בקבוקי ' . $single->product_name . '</div>';
+                             }
+
+                            break;
+                        case "2":
+                            $html = '<div class="part-10">'.(!empty($single->price_more) ? "<strong>קנה מעל: </strong>". $single->price_more." ₪" : "") .'</div>';
+                            if(!empty($single->discount)){
+                                $html.='<div class="part-10"><strong>קבל הנחה של: </strong>'. $single->discount." %" .'</div>';
+                            }
+                            else if(!empty($single->get) && !empty($single->product_name)) {
+                                $html .= '<div class="part-10"><strong>קבל: </strong>' . $single->get . ' בקבוקי ' . $single->product_name . '</div>';
+                            }
+                            break;
+                    }
+                echo $html;
+                    ?>
+            </a>
+        <?php } ?>
+    </div>
+    <?php
 }
 
 function create_popup(){
@@ -350,12 +397,8 @@ function build_select_options($table_name, $value=null,$attr = null)
         $list = array_map(function ($item) {
             return (object) $item;
         }, $list);
-
     }
     else {
-        /*if(isset($fields_list["data-field"])) {
-            $field = $fields_list["data-field"];
-        }*/
         $list = get_list($table_name, $attr["filter"]);
         if(count($list)>0) {
             $options = '<option value=""></option>';
@@ -363,10 +406,6 @@ function build_select_options($table_name, $value=null,$attr = null)
     }
 
     foreach ($list as $row) {
-        /*$data_field = "";
-        if(isset($fields_list["data-field"])){
-            $data_field =' data-field="'.$row->$field.'"';
-        }'.$data_field.'*/
         $value_text="";
         if($value) {
             $row_text = str_replace('\\', '', str_replace('"', '', $row->text));
@@ -439,12 +478,15 @@ function create_input($field,$value = null,$readonly = "")
                 .($field["widget"]=="text" && isset($field["un_apostrophe"]) && isset($field["sign"]) ? 'data-a-sign="'.$field["sign"].'"':'').  'value="'.esc_attr($value).'" '.
                 option_if_set($field,"class").
                 $required.$autocomplete.$readonly.
-                ($field["widget"] == "number" ? option_if_set($field,"step").option_if_set($field,"min"). option_if_set($field,"max")."style=\"width: 70px\"" : "" ).'/>'.$button;
+                ($field["widget"] == "number" ? option_if_set($field,"step"). option_if_set($field,"max")." min=\"1\" style=\"width: 70px\"" : "" ).'/>'.$button;
         case "checkbox":
             ?>
             <input type="hidden" name="<?= $field["field_name"]?>" value="0">
             <input type="checkbox" id="<?php echo $field["field_name"]?>" name="<?php echo $field["field_name"]?>" id="<?php echo $field["field_name"]?>" value="1" <?php echo $required ?> <?php echo  checked($value == "1") ?> <?php echo $readonly ?>/>
             <?php
+            break;
+        case "special":
+            ?><input type="hidden" name="<?= $field["field_name"]?>" value="<?= esc_attr($value)?>"><?php
             break;
         case "textarea":
             return '<textarea rows ="2" class="font-17 grow" id="'.$field["field_name"].'" name="'.$field["field_name"].'" '. $required.' '.$readonly .'>'.esc_attr( $value).'</textarea>';

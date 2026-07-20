@@ -8,6 +8,8 @@ function getParameterByName(name){
 }
 jQuery(document).ready(function($){
     var currentUrl = window.location.pathname;
+    var subjectPage = getParameterByName("subject")
+
     if (currentUrl.includes('manage-lists'))
     {
         var selected = jQuery("ul.tables-list li:first-child")
@@ -15,38 +17,15 @@ jQuery(document).ready(function($){
         getTableAjaxData(selected.data("list-name"));
     }
 
-    if(getParameterByName("subject") == "orders" && getParameterByName("action") && getParameterByName("action") != "readonly") {
-       /* if(getParameterByName("action") == "new" && jQuery(".page.single .grid-display select[name=client_id]").val()){
-            jQuery(".products-gallery.orders .products-last-order").removeClass("hidden");
-        }*/
-
-        /*jQuery(".page.single .grid-display select[name=client_id]").change(function (){
-            if(getParameterByName("action") == "new" && jQuery(".products-gallery.orders .product").length == 0){
-                jQuery(".products-gallery.orders .products-last-order").removeClass("hidden");
-            }
-        })*/
-
+    if(subjectPage == "orders" && getParameterByName("action") && getParameterByName("action") != "readonly") {
 
         setInterval(function () {
-
-                    /*                if (getParameterByName("action") == "new") {//אין לי מושג למה רציתי לשאול אם זה חדש
-
-                                    }*/
                     automaticOrderSaving();
-
                 //לשאול את פרידי לבדוק אם נגעו ב-2 דקות האלו לשמור ואם לא אז לא לשמור אולי לעשות שרק אם עזבו את המסך ולא נגעו בו כבר יותר מ2 דקות אז ללכת לשמירה
-
         }, 12000); // 120000 מילישניות = 2 דקות
     }
 
-    if(getParameterByName("subject") == "tasks" && getParameterByName("action") == "edit"){
-        /*var postData = [
-            {name: "action", value: "get_chat_ajax"},
-            {name: "task_id", value: getParameterByName("id")},
-        ];
-
-        call_ajax_function(postData,"onAddChat");*/
-
+    if(subjectPage == "tasks" && getParameterByName("action") == "edit"){
            setInterval(function () {
             var postData = [
                 {name: "action", value: "get_chat_ajax"},
@@ -69,7 +48,7 @@ jQuery(document).ready(function($){
      if (window.location.pathname.includes('single')) {
         jQuery('a.cancel, .logout-button, ul.menu li a ').click(function (e) {
             if (jQuery('input[name=dirty]').val() == "1") {
-                if(getParameterByName("subject") == "orders"){
+                if(subjectPage == "orders"){
                     automaticOrderSaving();
                 }
                 else {
@@ -102,8 +81,8 @@ jQuery(document).ready(function($){
         vMin: '-9999999999999',
         mDec:0,
         wEmpty: 'empty',
-        aSign: '%',
-        pSign: 's'
+        aSign: ' %',
+        //pSign: 's'
     });
 
     jQuery("form").validate({
@@ -175,7 +154,7 @@ jQuery(document).ready(function($){
             return;
         }
 
-        if (getParameterByName("subject") == "orders" && jQuery('.page.single').length > 0){//עמוד הזמנה
+        if (subjectPage == "orders" && jQuery('.page.single').length > 0){//עמוד הזמנה
             var rows = jQuery('tr').filter(function () {
                 var $row = jQuery(this);
 
@@ -411,6 +390,7 @@ jQuery(document).ready(function($){
                         comboListName = th.data("table");
                         var postData = [
                             {name: "action", value: "get_list_ajax"},
+                            {name: "selector", value: columnName},
                             {name: "table_name", value: comboListName},
                             {name: "selected_value", value: rowData[k]}
                         ];
@@ -427,12 +407,14 @@ jQuery(document).ready(function($){
                     }
                     html += '</select>';
                 }
-                else if (th.data("column-type") == "special") {
-
-                }
                 else {
+                    var value = rowData.length > 0 ?  rowData[k] : null;
+                    if(columnType == "date" && value){
+                        const [day, month, year] = value.split('/');
+                        value = `${year}-${month}-${day}`;
+                    }
                     html += '<input type="'+columnType+'" id="' + columnName + '" name="' + columnName + '"  class="font-17 grow"' +
-                        (rowData.length > 0 ? ' value="' + rowData[k] + '"' : '') + '>';
+                        (value!= null ? ' value="' + value + '"' : '') + '>';
                 }
                 html += '</div>';
             });
@@ -451,21 +433,6 @@ jQuery(document).ready(function($){
                 }
             })
         })
-
-        if(listName == "specials"){
-            jQuery('#edit-list .modal-body input[name=price_more]').closest("div").addClass("hidden");
-            jQuery('#edit-list .modal-body select[name=type]').on("change",function (){
-                if(jQuery(this).val()==1){
-                    jQuery('#edit-list .modal-body input[name=price_more]').closest("div").addClass("hidden");
-                    jQuery('#edit-list .modal-body input[name=buy]').closest("div").removeClass("hidden");
-
-                }
-                else{
-                    jQuery('#edit-list .modal-body input[name=price_more]').closest("div").removeClass("hidden");
-                    jQuery('#edit-list .modal-body input[name=buy]').closest("div").addClass("hidden");
-                }
-            })
-        }
     });
     jQuery('#edit-list').on('shown.bs.modal', function () {
         jQuery('#edit-list .modal-body input:first-child').focus();
@@ -542,6 +509,9 @@ jQuery(document).ready(function($){
 
     });
 
+    if(currentUrl.includes('single') && subjectPage == "specials"){
+        singleSpecialsPage();
+    }
 })
 
 function removeRowSuccess(form,result){
@@ -720,7 +690,15 @@ function call_ajax_function(postData,func) {
         if(func) {
             window[func](result);
         }
-    })
+    }).fail(function (data) {
+    if(data.responseText){
+        alert(data.responseText)
+    }
+    else{
+        alert('השליחה נכשלה!');
+    }
+
+});
 }
 
 function onchangeSelect(e,element,value){
@@ -791,32 +769,107 @@ function automaticOrderSaving(){
     }
 }
 function fill_modal_list(result){
+    var selector =result.selector || result.tableName.slice(0, -1)+ "_id";
     if(result.options) {
-        jQuery("#edit-list .modal-body select[name=" + result.tableName.slice(0, -1) + "_id]").eq(0).html(result.options);
-        if (result.tableName == "suppliers" && result.options && result.options.includes("selected")) {
-            var selectedOption = jQuery("#edit-list .modal-body select[name=supplier_id]").find('option:selected');
-            onSelectSupplier(selectedOption.val());
-        }
-    }
-    else if(result.checkboxes){
-        jQuery(".modal-body ."+result.tableName).eq(0).append(result.checkboxes);
+        jQuery("#edit-list .modal-body select[name=" + selector +"]").eq(0).html(result.options);
     }
 }
-function onSelectSupplier(supplier_id){
-    var products = null;
-    var rowData = jQuery(".list-table tbody tr.current td.products");
-    if(rowData.length>0){
-        products = rowData.html();
-    }
 
-    var postData = [
-        {name: "action", value: "get_list_ajax"},
-        {name: "table_name", value: "products"},
-        {name: "format", value: "checkboxes"},
-        {name: "selected_value", value: products},
-        {name: "filter", value: "supplier_id = "+supplier_id}
-    ];
-    call_ajax_function(postData, "fill_modal_list");
+function singleSpecialsPage(){
+    //מבצעים
+    var selectedOption = jQuery(".page.single select[name=supplier_id]").find('option:selected');
+    onSelectSupplier(selectedOption.val());
+    selectedOption = jQuery(".page.single select[name=type]").find('option:selected');
+    onSelectType(selectedOption.val());
+
+    $.each(jQuery('.page.single').find("select"),function (){
+        var select = jQuery(this)
+        select.on("change",function () {
+            var selectName = select.attr("name").replace("_id","");
+            var onSelect_func_name = "onSelect" +  selectName[0].toUpperCase() + selectName.slice(1);
+            if (typeof window[onSelect_func_name] === "function") {
+                window[onSelect_func_name](select.val());
+            }
+        })
+    })
+
+    jQuery('.page.single .grid-display ').append('<div class="type-3 hidden" >קבל בקבוק מתנה</div>');
+    jQuery('.page.single input[name=discount]').closest("div").after('<div class="type-2 hidden stretch" >או</div>')
+}
+
+function onSelectSupplier(supplier_id){
+    if(supplier_id) {
+        var products = jQuery("input[name=products_buy]").val();
+
+        var postData = [
+            {name: "action", value: "get_list_ajax"},
+            {name: "table_name", value: "products"},
+            {name: "selector", value: "products_buy"},
+            {name: "format", value: "checkboxes"},
+            {name: "selected_value", value: products},
+            {name: "filter", value: "supplier_id = " + supplier_id}
+        ];
+        call_ajax_function(postData, "fill_special_products");
+
+        var postData = [
+            {name: "action", value: "get_list_ajax"},
+            {name: "table_name", value: "products"},
+            {name: "selector", value: "product_get"},
+            {name: "selected_value", value: jQuery("select[name=product_get]").val()},
+            {name: "filter", value: "supplier_id = " + supplier_id}
+        ];
+        call_ajax_function(postData, "fill_special_products");
+    }
+}
+
+function fill_special_products(result){
+    if(result.options) {
+        jQuery(".page.single select[name=" + result.selector +"]").eq(0).html(result.options);
+    }
+    else if(result.checkboxes){
+        jQuery(".page.single [name="+result.selector+"]").closest('div').append(result.checkboxes);
+    }
+}
+
+function onSelectType(type_id){
+    jQuery('.page.single input[name=price_more]').closest("div").addClass("hidden");
+    jQuery('.page.single input[name=discount]').closest("div").addClass("hidden");
+    jQuery('.page.single input[name=buy]').closest("div").addClass("hidden");
+    jQuery('.page.single input[name=products_buy]').closest("div").addClass("hidden");
+    jQuery('.page.single input[name=get]').closest("div").addClass("hidden");
+    jQuery('.page.single select[name=product_get]').closest("div").addClass("hidden");
+    jQuery('.page.single .type-3').addClass("hidden");
+    jQuery('.page.single .type-2').addClass("hidden");
+
+    switch (type_id){
+        case "1":
+            jQuery('.page.single input[name=price_more]').closest("div").addClass("hidden");
+            jQuery('.page.single input[name=discount]').closest("div").addClass("hidden");
+            jQuery('.page.single input[name=buy]').closest("div").removeClass("hidden");
+            jQuery('.page.single input[name=products_buy]').closest("div").removeClass("hidden");
+            jQuery('.page.single input[name=get]').closest("div").removeClass("hidden");
+            jQuery('.page.single select[name=product_get]').closest("div").removeClass("hidden");
+
+            break;
+        case "2":
+            jQuery('.page.single input[name=price_more]').closest("div").removeClass("hidden");
+            jQuery('.page.single input[name=discount]').closest("div").removeClass("hidden");
+            jQuery('.page.single input[name=buy]').closest("div").addClass("hidden");
+            jQuery('.page.single input[name=products_buy]').closest("div").addClass("hidden");
+            jQuery('.page.single input[name=get]').closest("div").removeClass("hidden");
+            jQuery('.page.single select[name=product_get]').closest("div").removeClass("hidden");
+            jQuery('.page.single .type-2').removeClass("hidden");
+            break;
+        case "3":
+            jQuery('.page.single input[name=price_more]').closest("div").addClass("hidden");
+            jQuery('.page.single input[name=discount]').closest("div").addClass("hidden");
+            jQuery('.page.single input[name=buy]').closest("div").removeClass("hidden");
+            jQuery('.page.single input[name=products_buy]').closest("div").removeClass("hidden");
+            jQuery('.page.single input[name=get]').closest("div").addClass("hidden");
+            jQuery('.page.single select[name=product_get]').closest("div").addClass("hidden");
+            jQuery('.page.single .type-3').removeClass("hidden");
+            break;
+    }
 }
 
 

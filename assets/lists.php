@@ -1,4 +1,9 @@
 <?php
+const SPECIAL_TYPE = array(
+    array("value"=>"1","text"=>"קנה קבל"),
+    array("value"=>"2","text"=>"קנה מעל"),
+    array("value"=>"3","text"=>"קנה X + 1")
+);
 //"widget" => "hidden" - בעמוד של סינגל לא להכין לו ווידגט
 //"hide_in_table"=>true - בעמוד ארכיב לא להכין לו עמודה בטבלה
 const BOUTIQUE_TABLES = array(
@@ -66,7 +71,7 @@ const BOUTIQUE_TABLES = array(
             array("field_name" => "blocked", "widget" => "checkbox","label"=>"מוצר חסום","hide_in_table"=>true),
             /*array("field_name" => "factor_of_friction", "widget" => "select","label"=>"גורם אירוז","hide_in_table"=>true),*/
             array("field_name" => "individually", "widget" => "checkbox","label"=>"ניתן למכירה בבודדים","hide_in_table"=>true),
-            array("field_name" => "units_in_box", "widget" => "number","label"=>"כמות יחידות בארגז","required"=>true,"hide_in_table"=>true,"min"=>1,"max"=>49),
+            array("field_name" => "units_in_box", "widget" => "number","label"=>"כמות יחידות בארגז","required"=>true,"hide_in_table"=>true,"max"=>49),
         )),
     "tasks" => array(
         "title" => "משימות",
@@ -254,8 +259,27 @@ const BOUTIQUE_TABLES = array(
             array("field_name" => "date", "widget" => "datetime-local", ),
             array("field_name" => "text", "widget" => "text"),
 
-        ))
+        )),
+    "specials" =>
+        array(
+            "title" => "מבצעים",
+            "male_female" => "male",
+            "single" => "מבצע",
+            "columns" => array(
+                array("field_name" => "descript","label"=>"תיאור המבצע","widget" => "text"),
+                array("field_name" => "date_end", "widget" => "date", "label" => "תאריך סיום"),
+                array("field_name" => "type", "widget" => "select", "label" => "סוג מבצע","required"=>true,"options"=>SPECIAL_TYPE),
+                array("field_name" => "supplier_id", "widget" => "select","label"=>"ספק", "join_table" => "suppliers", "join_value" => "name","required"=>true),
+                array("field_name" => "price_more","widget" => "text","label"=>"קנה מעל סכום","un_apostrophe" => true,"sign"=>"₪"),
+                array("field_name" => "discount","widget" => "text","label"=>"קבל הנחה של","un_apostrophe" => true,"sign"=>"%"),
+                array("field_name" => "buy", "widget" => "number", "label" => "קנה כמות"),
+                array("field_name" => "products_buy" ,"widget" => "special","label"=>"מהמוצרים","save_as_text"=> true ,"field_id"=>"product_id","hide_in_table"=>true),
+                array("field_name" => "get", "widget" => "number", "label" => "קבל כמות"),
+                array("field_name" => "product_get" ,"widget" => "select","label"=>"ממוצר","save_as_text"=> true ,"field_id"=>"product_id"/*,"hide_in_table"=>true*/, "join_table" => "products", "join_value" => "name"),
+            )
+        ),
 );
+
 const BOUTIQUE_LISTS = array(
     "cities" =>
         array(
@@ -299,28 +323,6 @@ const BOUTIQUE_LISTS = array(
                 array("field_name" => "text","widget" => "text","label"=>"נושא"),
             )
         ),
-    "specials" =>
-        array(
-            "title" => "מבצעים",
-            "single" => "מבצע",
-            "columns" => array(
-                array("field_name" => "descript","label"=>"תיאור המבצע","widget" => "text"),
-                array("field_name" => "supplier_id", "widget" => "select","label"=>"ספק", "join_table" => "suppliers", "join_value" => "name"),
-                array("field_name" => "date_end", "widget" => "date", "label" => "תאריך סיום"),
 
-                array("field_name" => "type", "widget" => "select", "label" => "סוג מבצע",
-                    "options"=>array(
-                        array("value"=>"1","text"=>"קנה קבל"),
-                        array("value"=>"2","text"=>"קנה מעל"),
-                    )
-                ),
-                array("field_name" => "products" ,"widget" => "special","label"=>"מוצרים","save_as_text"=> true ,"field_id"=>"product_id","hide_in_table"=>true),
-
-                //array("field_name" => "products", "widget" => "none","multiple"=>true,"label"=>"מוצרים"/*, "join_table" => "products", "join_value" => "name"*/),
-                array("field_name" => "price_more","widget" => "text","label"=>"קנה מעל סכום","un_apostrophe" => true,"sign"=>"₪"),
-                array("field_name" => "buy", "widget" => "number", "label" => "קנה כמות"),
-                array("field_name" => "get", "widget" => "number", "label" => "קבל"),
-            )
-        ),
     );
 ?>

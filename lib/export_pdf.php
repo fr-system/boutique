@@ -14,7 +14,8 @@ function create_pdf($attr)
     $mpdf = new \Mpdf\Mpdf([
         'mode' => 'utf-8',
         'format' => 'A4',
-        'default_font' => 'dejavusans'
+        'default_font' => 'Heebo',//'dejavusans'
+        'margin_top' => 30
     ]);
 
     $mpdf->SetDirectionality('rtl');
@@ -23,7 +24,8 @@ function create_pdf($attr)
                 body {
                     direction: rtl;
                     text-align: right;
-                    font-family: dejavusans;
+                    font-size:12pt;
+                    /*font-family: dejavusans;*/
                 }
                 
                 table {
@@ -41,30 +43,34 @@ function create_pdf($attr)
                     text-align: right;
                 }
                 .section{
-                    border:1px solid #000;
-                    padding:10px;
+                    /*border:1px solid #000;*/
                     margin-bottom:10px;
+                    width: 8cm;
+                }
+                .section .details{
+                    padding: 10px;
                 }
                 .strong{
                     font-weight:bold;
                 }
                 
                 .title{
-                    font-size:16pt;
+                    width:8cm; 
+                    /*background-color: black;
+                    color: white;*/
+                    font-size:12pt;
                     font-weight:bold;
-                    text-align:center;
-                    margin-bottom:15px;
                 }
                 </style>
-                <div  style="text-align: center;"><img src="https://kosherboutique.co.il/wp-content/themes/boutique/assets/images/logo_header.png"/>
-                </div>';
+                ';
+
+    $mpdf->SetHTMLHeader('<div style="margin:0;padding:0;background-color: black;width: 100%; text-align: center; margin-bottom: 10px"><img src="https://kosherboutique.co.il/wp-content/themes/boutique/assets/images/logo_header.png"/></div>');
 
     switch ($attr["export"]) {
         case "single":
-            //$mpdf->SetHTMLHeader('<img  src="https://kosherboutique.co.il/wp-content/themes/boutique/assets/images/logo_header.png">');
             //$mpdf->SetHTMLHeader('<div>'.BOUTIQUE_TABLES[$table_name]["single"].'</div>');
             if(isset($attr["packet"])){
-                $packet =$attr["packet"];
+                $packet = $attr["packet"];
             }
 
             if($table_name=="orders") {
@@ -73,7 +79,7 @@ function create_pdf($attr)
 
             foreach ($packet as $func) {
                 $func_name = "drow_html_" . $func;
-                write_log("func_name ".$func_name);
+                //write_log("func_name ".$func_name);
                 $html .= $func_name($attr);
             }
 
@@ -127,17 +133,21 @@ function draw_table_pdf($table_name, $filters)
     $headers = $packet["headers"];
     $data = $packet["data"];
 
-    $html='<table style="width: 100%">
+    $html='<div style="clear:both;"></div><table style="table-layout: fixed; width: 100%">
                 <thead><tr>';
 
     foreach($headers as $key=>$header) {
-        $html .= '<th>' . $key . '</th>';
+        $width = "100px";
+        if($key == "שם המוצר"){
+            $width = "150px";
+        }
+        $html .= "<th style='width: {$width}'>{$key}</th>";
     }
     $html.='</tr></thead><tbody>';
     foreach($data as $row){
-        $html .= '<tr>';
+        $html .= "<tr>";
         foreach($row as $td) {
-            $html .= '<td>' . $td . '</td>';
+            $html .= "<td >{$td}</td>";
         }
         $html .= '</tr>';
     }
@@ -149,12 +159,15 @@ function draw_table_pdf($table_name, $filters)
 function drow_html_order($attr){
     $result = get_data_table("orders",array(array("filter_field" => "id", "filter_value"=>$attr["order_id"])))[0];
 
-    $html="<br><div class='section' >
-                            <div class='title'>הזמנה מס. {$result->id}</div><br>
-                            <strong>תאריך הזמנה: </strong><span>".date('d/m/Y',strtotime ($result->order_date))."</span><br>
-                            <strong>סוכן: </strong><span>{$result->user_opens}</span><br>
-                            <strong>הערות: </strong><span>{$result->notes}</span><br>
-                        </div>";
+
+    $html="<div class='section'  >
+              <div class='title'>הזמנה מס. {$result->id}</div><br>
+                <div class='details'>
+                            <strong>תאריך הזמנה: </strong><span>".date('d/m/Y בשעה H:i',strtotime ($result->order_date))."</span><br>
+                            <strong>סוכן: </strong><span>".get_userdata($result->user_opens)->display_name."</span><br>
+                            <strong>הערות: </strong><span>{$result->notes}</span>
+                </div>
+              </div>";
     return $html;
 
 }
@@ -162,11 +175,13 @@ function drow_html_order($attr){
 function drow_html_client($attr){
     $client = get_data_table("clients",array(array("filter_field" => "id", "filter_value"=>$attr["client_id"])))[0];
     $html="<div class='section'>
-                            <div class='title'>פרטי הלקוח</div><br>
+<div class='details'>
+                            <div class='title'>פרטי לקוח</div><br>
                             <strong>שם הלקוח: </strong><span>".$client->name."</span><br>
                             <strong>כתובת: </strong><span>".$client->address."</span><br>
                             <strong>נייד: </strong><span>".$client->mobile."</span><br>
-                            <strong>דוא''ל: </strong><span>".$client->email."</span>   <br>                         
+                            <strong>דוא''ל: </strong><span>".$client->email."</span>
+                            </div>                   
                         </div>";
     return $html;
 

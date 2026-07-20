@@ -28,6 +28,7 @@ function pre_action_query($table_name, $row)
         if ($field != null) {
             if (!empty($value) && (isset($field["un_apostrophe"]) || $field["widget"] == "file" || $field["widget"] == "image")) {
                 $value = str_replace("₪", "", $value);
+                $value = str_replace("%", "", $value);
                 $value = str_replace(",", "", $value);
                 $value = (float)$value;
             }

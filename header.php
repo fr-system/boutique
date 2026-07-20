@@ -98,6 +98,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 //update_client_price_modal();
 payment_modal();
 edit_list_modal();
+
 } ?>
 </header>
 <main id="main" class="site-main flex-display" role="main">

@@ -59,7 +59,8 @@ function option_if_set($set,$option){
 
 add_action('wp_ajax_get_list_ajax', 'get_list_ajax');
 function get_list_ajax(){
-    //write_log ("get_list_ajax " );
+    //write_log ("get_list_ajax " .json_encode($_POST));
+    $selector = $_POST['selector'] ?? null;
     $table_name = $_POST['table_name'];
     $selected_value = isset($_POST['selected_value'])?trim($_POST['selected_value']):null;
     $filter="";
@@ -85,13 +86,16 @@ function get_list_ajax(){
             $options = build_select_options($table_name, $selected_value, array("filter" => $filter));
             //write_log ("options" . $options);
             break;
-        case "checkboxes"://כרגע שימושים רק בבחירת מוצרים במצע
-            $array = json_decode(stripslashes($selected_value), true);
-            $selected_value = array_map('intval', $array);
+        case "checkboxes"://כרגע שימושים רק בבחירת מוצרים במבצע
+            if($selected_value) {
+                $array = json_decode(stripslashes($selected_value), true);
+                $selected_value = array_map('intval', $array);
+            }
             $checkboxes = build_checkboxes($table_name, $selected_value, array("filter" => $filter));
+            //$checkboxes = array();
             break;
     }
-    echo json_encode (array("options" => $options ,"tableData"=>$table,"array"=>$result,"tableName"=>$table_name,"checkboxes"=>$checkboxes));
+    echo json_encode (array("options" => $options ,"tableData"=>$table,"array"=>$result,"tableName"=>$table_name,"checkboxes"=>$checkboxes,"selector"=>$selector));
     die();
 }
 
