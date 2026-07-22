@@ -152,7 +152,7 @@ const BOUTIQUE_TABLES = array(
                     0=>array("class"=>"background-light-light-blue right","label"=> "ארגזים"),
                     1=>array("class"=>"background-dark-green left","label"=> "בודדים"),
                 )),
-           // array("field_name" => "bonus", "widget" => "number", "label" => "בונוס","create_input"=>true),
+            array("field_name" => "bonus", "widget" => "hidden","create_input"=>true,"save_as_text"=> true),
             array("field_name" => "discount_percent", "widget" => "text", "label" => "אחוזי הנחה", "un_apostrophe" => true,"sign"=>"%","create_input"=>true),
             array("field_name" => "total", "widget" => "readonly", "label" => "סה\"כ", "un_apostrophe" => true,"sign"=>"₪","create_input"=>true),
             array("field_name" => "id", "widget" => "hidden","create_input"=>true),

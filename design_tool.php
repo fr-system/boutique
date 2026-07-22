@@ -79,7 +79,7 @@ function get_single_view($table_name, $single, $readonly)
                             } else {
                                 foreach ($grouped_list[$table_row->id] as $single_sub_row) {
                                     // הצגת שורת מוצר עם נתוני ההזמנה
-                                    write_log ('single_sub_row '.json_encode ($single_sub_row));
+                                    //write_log ('single_sub_row '.json_encode ($single_sub_row));
                                     $result_list[] = render_row($table_row, $single_sub_row,
                                         array("sub_table_id"=> $sub_table_id,"parent_table_id"=>$parent_table_id
                                         ,"single_id"=>(isset($single->id) ? $single->id : null)
@@ -107,7 +107,7 @@ function get_single_view($table_name, $single, $readonly)
                             $item = $table_row;
                         }
                     }
-                    write_log ('result list '.json_encode ( $result_list  ));
+                    //write_log ('result list '.json_encode ( $result_list  ));
                     $list =$result_list;
                 }
                 else {
@@ -176,7 +176,7 @@ function render_row($external_item, $sub_row, $options ){
             $item->$field_name = isset($sub_row->$field_name) ? $sub_row->$field_name : "";
         }
     }
-    write_log ('external_item '.json_encode ($item));
+    //write_log ('external_item '.json_encode ($item));
     return $item;
 }
 
@@ -335,15 +335,21 @@ function specials_gallery($list,$attr = array()){ ?>
                 <div class="flex-display space-between bold part-20">
                     <div class="font-17 text-center bold gold"><?= $single->descript ?></div>
                 </div>
-                <div class="part-10"><?= (!empty($single->date_end) ? "<strong>תאריך סיום: </strong>".date('d/m/Y', strtotime($single->date_end))  : "") ?></div>
-                <div class="part-10"><?= (!empty($single->supplier_name) ? "<strong>ספק: </strong>". $single->supplier_name : "") ?></div>
+                <span class="hidden supplier_id"><?= $single->supplier_id ?></span>
+                <span class="hidden type"><?= $type ?></span>
+                <?= (!empty($single->date_end) ? "<div class=\"part-10\">
+                    <strong>תאריך סיום: </strong>
+                    <span class='date_end'>".date('d/m/Y', strtotime($single->date_end)) . "</span>
+                    </div>": "") ?>
+                <?= (!empty($single->supplier_name) ? "<div class=\"part-10\"><strong>ספק: </strong>
+<span>". $single->supplier_name ."</span></div>": "") ?>
                 <div class="part-10"><?= "<strong>סוג מבצע: </strong>".array_pop($results)["text"]?></div>
                 <?php
                 $html = "";
-                if(!empty($single->buy) && !empty($single->products_buy)) {
+                $products = json_decode($single->products_buy);
+                if(!empty($single->buy) && is_array($products)) {
                     $html .= '<div class="part-10">' . (!empty($single->buy) ? "<strong>קנה כמות: </strong>" . $single->buy : "") . '</div>';
 
-                    $products = json_decode($single->products_buy);
                     $products_res = run_query("SELECT name FROM test_products WHERE id in(" . implode(',', $products) . ")");
                     $products_str = implode(', ', array_column($products_res, 'name'));
                     $html .= '<div class="part-10"><strong>מהמוצרים: </strong>' . $products_str . '</div>';
