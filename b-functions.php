@@ -242,18 +242,17 @@ function get_column_value($column,$row,$field,$list,$key,$is_readonly=false)
             break;
     }
 
-    $type =  isset($column["widget"]) && $column["widget"]== "hidden" ? 'hidden':
-        (isset($column["widget"]) && $column["widget"]== "date"? 'date':'text');
-    $readonly =$is_readonly || (isset($column["widget"]) && $column["widget"]== "readonly")?' readonly ':'';
-
-    //write_log ('is_readonly '. $is_readonly);
     if(isset($column["create_input"])) {
+        $type =  isset($column["widget"]) && $column["widget"]== "hidden" ? 'hidden':
+            (isset($column["widget"]) && $column["widget"]== "date"? 'date':'text');
+        $readonly = $is_readonly || $row->bonus == "promo" || (isset($column["widget"]) && $column["widget"]== "readonly")?' readonly ':'';
+
         $value = $column_value ?? '';
 
         if ($column['widget'] == 'toggle') {//בודדים או ארגזים
             if($field =="order_individual"){
                 //write_log ('count in order '.json_encode ( $row->count));
-                $readonly =$is_readonly || !$row->individually || empty($row->count) ? ' readonly ' :'';//אם לאפשר בחירת בודדים
+                $readonly =$is_readonly || !$row->individually || empty($row->count) || $row->bonus == "promo" ? ' readonly ' :'';//אם לאפשר בחירת בודדים
                 $value =!empty($row->count)? $value: 0; //ברירת מחדל תמיד ארגזים אלא אם כן כבר מוזמן ובחרו
             }
             $column_value = "<div class='status-options flex-display font-17'>";

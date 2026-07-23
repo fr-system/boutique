@@ -155,13 +155,7 @@ jQuery(document).ready(function($){
         }
 
         if (subjectPage == "orders" && jQuery('.page.single').length > 0){//עמוד הזמנה
-            var rows = jQuery('tr').filter(function () {
-                var $row = jQuery(this);
-
-                return jQuery.trim($row.find('td.count input').val() || '') === '' &&
-                    jQuery.trim($row.find('td.id input').val() || '') === '';
-            });
-            rows.find('td input').prop('disabled', true);
+            filterOrderProdoctsRowsToSave();
         }
 
         $form.addClass('disabled').find('[type="submit"]').prop('disabled', true);
@@ -756,6 +750,7 @@ function automaticOrderSaving(){
             if (!$form.valid()) {
                 return;
             }
+            filterOrderProdoctsRowsToSave();
 
             var formData = $form.serializeArray();
 

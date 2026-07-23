@@ -214,29 +214,15 @@ function plusMinusCountProduct(me){
     }
     numberInput.val(currentValue);
     if(currentValue > 0) {
-        var supplier_id=parseInt(product.find(".supplier_id span").text()|| 0);
-        var special_supplier_id = jQuery("ul.specials li[data-supplier-id="+supplier_id+"]");
-        var unitsInBox = parseInt(product.find('.units_in_box span').text());
-        var selectIndividually  = product.find(".order_individual input").val();
-       // if(selectIndividually ==0) {// אם לא ניתן לבחור בודדים , או שבחור ארגז
-            var currentCount=selectIndividually =="0"?currentValue*unitsInBox: currentValue;
-        //}
-
-
-        jQuery.each(special_supplier_id,function (k,special){
-            special =jQuery(special);
-            if(currentCount == special.data("buy")){
-                addProdoctBonus(product,special.data("get"));
-            }
-        })
-
         product.addClass('in-cart');
-        if(product.find(".individually span").text()) {
+        if (product.find(".individually span").text()) {
             product.find(".order_individual span.readonly.right").removeClass("un-value");
             product.find(".order_individual span.readonly").removeClass("readonly");
-        }
-        else{
+        } else {
             product.find(".order_individual span.readonly.right").removeClass("readonly un-value");
+        }
+        if(!product.hasClass("bonus")) {
+            checkPromotions(product, currentValue);
         }
     }
     else{
@@ -245,6 +231,23 @@ function plusMinusCountProduct(me){
         product.find(".order_individual span").addClass("readonly un-value");
     }
     calculatePrice(me);
+}
+function countUnitsForProduct(product,count) {
+    product = jQuery(product);
+    var countOrdered = count ??= parseInt( product.find('.count input').val());
+    var unitsInBox = parseInt(product.find('.units_in_box span').text());
+    var selectIndividually = product.find(".order_individual input").val();
+    return  selectIndividually == "0" ? countOrdered * unitsInBox : countOrdered;
+}
+function getProductsThisOrder(productId,className){
+
+}
+function getCountPromotions(productId,className){
+    var countPromotions =0;
+    jQuery("tr.promo:has(.product_id input[type=hidden][value="+productId+"])").each(function(k,p){
+        countPromotions += countUnitsForProduct(p);
+    });
+    return countPromotions;
 }
 function addProdoctBonus(product,countBonus = 0){
     var countRows =  table.rows().count();
@@ -261,11 +264,12 @@ function addProdoctBonus(product,countBonus = 0){
     pBonus.find(".discount_percent input").autoNumeric('set', 100);
     pBonus.find(".total input").autoNumeric('set', 0);
     pBonus.find(".id input").val("");
+    pBonus.find(".bonus input").val((countBonus == 0 ? 'bonus' :'promo'));
     pBonus.find(".order_individual input").val("1");
     pBonus.find(".order_individual span.right").addClass("un-value");
     pBonus.find(".order_individual span.left").removeClass("un-value");
     pBonus.find(".dupl-action").html('');
-    pBonus.addClass("bonus");
+    pBonus.addClass((countBonus == 0 ? 'bonus' :'promo'));
     product.after(pBonus);
     if(countBonus != 0)
     pBonus.find(".count span.pointer").off();

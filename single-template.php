@@ -214,14 +214,32 @@ else{
          <?php }
          else if($table_name == "orders"){ //מבצעים
              $filters=array( array("filter_type"=>"filter","filter_field"=>"date_end", "filter_value"=>"date_end >= CURDATE() || date_end is null"));
-             $result= get_data_table ("specials",$filters);
+             $promotions= get_data_table ("specials",$filters);
              ?>
             <div class="specials-area border-dark-gray padding-20" style="flex-basis:23%">
                 <div class="specials-corner text-center background-dark-green bold margin-bottom-10">פינת מבצעים</div>
-                <?php specials_gallery($result,array("target"=>"orders")); ?>
+                <?php specials_gallery($promotions,array("target"=>"orders")); ?>
             </div>
          <?php } ?>
     </div>
+    <script>
+        const promotions = <?= json_encode($promotions, JSON_UNESCAPED_UNICODE) ?>;
+        const promotionsByProduct = {};
+        const promotionsBySupplier = {};
+
+        promotions.forEach(p => {
+            if (p.products_buy && p.products_buy!='""' && p.products_buy.trim()!='') {
+                const products = JSON.parse(p.products_buy);
+                if (Array.isArray(products)) {
+                    products.forEach(productId => {
+                        (promotionsByProduct[productId] ??= []).push(p);
+                    });
+                }
+            } else if (p.supplier_id) {
+                (promotionsBySupplier[p.supplier_id] ??= []).push(p);
+            }
+        });
+    </script>
 </section>
 <?php get_footer();?>
 

@@ -1,7 +1,7 @@
 
 jQuery(document).ready(function($){
 
-    jQuery(".page tr.product:not(.bonus) .count span.pointer:not(.readonly)").click(function (e) {
+    jQuery(".page tr.product:not(.promo) .count span.pointer:not(.readonly)").click(function (e) {
         plusMinusCountProduct(this)
     })
     jQuery('form input').on('keydown', function (e) {
@@ -111,6 +111,103 @@ function setDataTable (){
     jQuery('.dt-layout-cell.dt-layout-start').removeClass('dt-layout-start');
     jQuery('.dt-layout-cell.dt-layout-end').removeClass('dt-layout-end');
 }
+function filterOrderProdoctsRowsToSave() {
+    var rows = jQuery('tr').filter(function () {
+        var $row = jQuery(this);
+
+        return jQuery.trim($row.find('td.count input').val() || '') === '' &&
+            jQuery.trim($row.find('td.id input').val() || '') === '';
+    });
+    rows.find('td input').prop('disabled', true);
+}
+function checkPromotions(product, currentValue){
+    var supplier_id = parseInt(product.find(".supplier_id span").text() || 0);
+    var product_id = parseInt(product.find(".product_id span").text() || 0);
+    var relevant_promotions = promotionsByProduct[product_id] ??= [];
+    if (promotionsBySupplier[supplier_id]) {
+        relevant_promotions.push(promotionsBySupplier[supplier_id] ??= []);
+    }
+    var currentCount = countUnitsForProduct(product, currentValue);
+
+    relevant_promotions.forEach(pro => {
+        var needToBuy = parseInt(pro.buy);
+        var countToGet = parseInt(pro.get);
+        switch (pro.type) {
+            case "1": //  קנה קבל
+                var countProductsInOrder = 0;
+                if (pro.products_buy) {
+                    var productsInSpecial = JSON.parse(pro.products_buy);
+                    productsInSpecial.forEach(productId => {
+                        jQuery("tr.in-cart:not(.bonus,.promo):has(.product_id input[type=hidden][value=" + productId + "])").each(function (k, p) {
+                            countProductsInOrder += countUnitsForProduct(p);
+                            //countProductsInOrder += parseInt(jQuery(p).find(".count input").val());
+                        });
+                    });
+                } else {
+                    jQuery("tr.in-cart:not(.bonus,.promo)").each(function () {
+                        const row = jQuery(this);
+
+                        if (row.find("td.supplier_id span").text().trim() !== pro.supplier_id) {
+                            return;
+                        }
+                        countProductsInOrder += countUnitsForProduct(row);//parseInt(p.find(".count input").val());
+                    });
+                }
+                var countPromotions = getCountPromotions(pro.product_get);
+                var productToGet = jQuery("tr:not(.bonus,.promo):has(.product_id input[type=hidden][value=" + pro.product_get + "])");
+                // if (countProductsInOrder == needToBuy && countPromotions == 0) {
+                //     addProdoctBonus(productToGet, countToGet);
+                //     break;
+                // }
+                if (countProductsInOrder >= needToBuy /*&& countProductsInOrder % needToBuy == 0*/) {
+                    var toAdd = countToGet * parseInt(countProductsInOrder / needToBuy);
+                    if (countPromotions == 0) {// קורה כי הכמות לארגד לא מדויקת לכמות המבצע
+                        addProdoctBonus(productToGet, toAdd);
+                    } else {
+                        jQuery("tr.promo:has(.product_id input[type=hidden][value=" + pro.product_get + "])").eq(0)
+                            .find(".count input").val(toAdd);
+                    }
+                }
+                break;
+            case "2": //  קנה מעל
+                var priceToSupplier = 0;
+
+                jQuery("tr.in-cart:not(.bonus,.promo)").each(function () {
+                    const row = jQuery(this);
+
+                    if (row.find("td.supplier_id span").text().trim() !== pro.supplier_id) {
+                        return;
+                    }
+                    priceToSupplier += parseFloat(row.find("td.total input").autoNumeric('get')) || 0;
+                });
+                var countPromotions = getCountPromotions(countToGet);
+                if (priceToSupplier >= pro.price_more) {
+                    if (pro.get && countPromotions == 0) {
+                        var productToGet = jQuery("tr:not(.bonus,.promo):has(.product_id input[type=hidden][value=" + pro.product_get + "])");
+                        addProdoctBonus(productToGet, countToGet);
+                        break;
+                    }
+                    if (pro.discount) {//
+                        var totalOrder = jQuery("input[name=total]").val();
+                        jQuery("input[name=total]").autoNumeric('set', totalOrder * (100 - parseFloat(pro.discount)) / 100)
+                    }
+                }
+                break;
+            case "3": //  קנה קבל מאותו מוצר
+                var countPromotions = getCountPromotions(product_id);
+                if (currentCount >= needToBuy /*&& currentCount % needToBuy == 0*/) {
+                    if (countPromotions == 0) {
+                        addProdoctBonus(product, parseInt(currentCount / needToBuy));
+                    } else {
+                        jQuery("tr.promo:has( .product_id input[type=hidden][value=" + product_id + "])").eq(0)
+                            .find(".count input").val(parseInt(currentCount / needToBuy));
+                    }
+                }
+                break;
+        }
+    });
+}
+
 
 function addNewRow(row){
     var countRows =  table.rows().count();

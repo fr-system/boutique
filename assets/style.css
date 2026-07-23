@@ -26,14 +26,14 @@ input:not([type=search]):-webkit-autofill {
 }
 
 .archive-gallery{
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    grid-auto-rows: 270px;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    grid-auto-rows: 250px;
     overflow-x: auto;
     max-height: 75vh;
 }
 
 .archive-gallery .single{
-    width: 200px;
+    width: 280px;
     background-color: white;
 }
 .archive-gallery a.single{
