@@ -76,7 +76,7 @@ else{
                 $text_left_side = '<span class="bold">מקים ההזמנה: </span>'.get_userdata($single->user_opens)->display_name;
             }
 
-            if($table_name == "tasks") {
+            if($table_name == "tasks" && !empty($single->open_date)) {
                 $timestamp = strtotime($single->open_date); // המרת התאריך לאטימות זמן
                 $text_left_side = '<span class="bold">תאריך פתיחה: </span>'.date('d/m/Y בשעה H:i', $timestamp);
             }

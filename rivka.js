@@ -343,7 +343,7 @@ function startingDataTable(){
     });
 
     table = jQuery('.dataTable').DataTable({
-        //bFilter: true,
+        bFilter: true,
         layout: {
             topStart: {
                 buttons: tableName == "orders" && currentUrl.includes('single') ? [
@@ -375,7 +375,7 @@ function startingDataTable(){
 
             }
         },
-        searching: (tableName == "orders" && currentUrl.includes('single')),
+        searching: true,//(tableName == "orders" && currentUrl.includes('single')),
         paging: false,
         info: false,
         "language":
@@ -421,6 +421,94 @@ function startingDataTable(){
 
     if(tableName == "orders" && currentUrl.includes('single')){}
     else {
-        jQuery('.dataTables_filter').hide();
+        //jQuery('.dataTables_filter').hide();
+        jQuery('.dt-search').closest(".dt-layout-row").hide();
     }
+
+    //onclick="viewFilterTh(jQuery(this).closest('th'))"
+    table.columns().every(function () {
+        var column = this;
+        var th = jQuery(column.header());
+        if(!th.hasClass("no-sort")) {
+            th.find(".dt-column-header").append('<svg  class="svg-filter has-tooltip" data-tooltip="סנן לפי '+th.text()+'" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 26 26" fill="none">\n' +
+                '<path d="M8.12451 15.8588C9.76671 15.8588 11.1442 16.9605 11.5962 18.4603L11.6284 18.5668H23.6831V20.433H11.6284L11.5962 20.5404C11.1441 22.0401 9.7666 23.142 8.12451 23.142C6.4826 23.1418 5.10595 22.04 4.65381 20.5404L4.62158 20.433H2.31689V18.5668H4.62158L4.65381 18.4603C5.10582 16.9606 6.48245 15.8589 8.12451 15.8588ZM8.12451 17.725C7.1459 17.7252 6.3501 18.5217 6.3501 19.5004C6.35027 20.4789 7.14601 21.2746 8.12451 21.2748C9.10316 21.2748 9.89973 20.479 9.8999 19.5004C9.8999 18.5216 9.10327 17.725 8.12451 17.725ZM17.8745 9.35876C19.5167 9.35876 20.8942 10.4605 21.3462 11.9603L21.3784 12.0668H23.6831V13.933H21.3784L21.3462 14.0404C20.8941 15.5401 19.5166 16.642 17.8745 16.642C16.2326 16.6418 14.8559 15.54 14.4038 14.0404L14.3716 13.933H2.31689V12.0668H14.3716L14.4038 11.9603C14.8558 10.4606 16.2325 9.35891 17.8745 9.35876ZM17.8745 11.225C16.8959 11.2252 16.1001 12.0217 16.1001 13.0004C16.1003 13.9789 16.896 14.7746 17.8745 14.7748C18.8532 14.7748 19.6497 13.979 19.6499 13.0004C19.6499 12.0216 18.8533 11.225 17.8745 11.225Z" fill="#1A7870" stroke="#D9F5F3" stroke-width="0.3"/>\n' +
+                '<path d="M10.2915 2.85876C11.9337 2.85876 13.3111 3.96047 13.7632 5.46033L13.7954 5.56677H23.8188V7.43298H13.7954L13.7632 7.54041C13.3111 9.04014 11.9336 10.142 10.2915 10.142C8.64938 10.142 7.27194 9.04014 6.81982 7.54041L6.7876 7.43298H2.31689V5.56677H6.7876L6.81982 5.46033C7.27186 3.96047 8.6493 2.85876 10.2915 2.85876ZM10.2915 4.72498C9.31274 4.72498 8.51611 5.52161 8.51611 6.50037C8.51629 7.47898 9.31285 8.27478 10.2915 8.27478C11.2702 8.27478 12.0667 7.47898 12.0669 6.50037C12.0669 5.52161 11.2703 4.72498 10.2915 4.72498Z" fill="#1A7870" stroke="#D9F5F3" stroke-width="0.3"/>\n' +
+                '</svg>')
+            if(th.data("column-type")=="date"  || th.data("column-type")=="datetime-local"){
+                th.prepend('<div class="th-filter hidden flex-display direction-column">' +
+                    '<div class="flex-display margin-bottom-5"><span class="black font-12">מ: </span><input type="date" class="column-filter date-from "></div>' +
+                    '<div class="flex-display"><span class="black font-12">עד: </span><input type="date" class="column-filter date-to "></div>' +
+                    '</div>');
+            }
+            else {
+                var placeholder = "סנן "+th.text()+"...";
+                th.prepend('<input type="text" class="hidden th-filter column-filter" placeholder="' + placeholder + '">');
+            }
+
+            th.find('.svg-filter').on('click mousedown keydown', function (e) {
+                e.stopPropagation();
+                var thh = jQuery(this).closest('th')
+                if(thh.find(".th-filter").hasClass("hidden")){
+                    thh.find(".th-filter").removeClass("hidden");
+                }else{
+                    thh.find(".th-filter").addClass("hidden");
+                }
+
+            });
+
+            th.find('input').on('click mousedown keydown', function (e) {
+                e.stopPropagation();
+            });
+
+            th.find('input[type=text]').on('keyup change', function () {
+                column.search(jQuery(this).val()).draw();
+            });
+        }
+    });
+
+    jQuery.fn.dataTable.ext.search.push(function(settings, data) {
+
+        let isValid = true;
+
+        jQuery('th[data-column-type="date"], th[data-column-type="datetime-local"]').each(function () {
+
+            const columnIndex = parseInt(jQuery(this).data('dt-column'), 10);
+
+            const from = jQuery(this).find('.date-from').val();
+            const to = jQuery(this).find('.date-to').val();
+
+            if (!from || !to) {
+                return;
+            }
+
+            const cellValue = data[columnIndex];
+
+            if (!cellValue) {
+                isValid = false;
+                return false;
+            }
+
+            const datePart = cellValue.split(' ')[0];
+            const [day, month, year] = datePart.split('/');
+
+            const rowDate = new Date(year, month - 1, day);
+
+            if (from && rowDate < new Date(from)) {
+                isValid = false;
+                return false;
+            }
+
+            if (to && rowDate > new Date(to)) {
+                isValid = false;
+                return false;
+            }
+        });
+
+        return isValid;
+    });
+
+    jQuery('.date-from, .date-to').on('change', function () {
+
+        table.draw();
+    });
 }

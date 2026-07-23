@@ -32,7 +32,7 @@ const BOUTIQUE_TABLES = array(
             array("field_name" => "obligo", "un_apostrophe" => true, "widget" => "text", "label" => "אובליגו","sign"=>"₪"),
             array("field_name" => "promissory_note","widget" => "file", "label" => "שטר חוב","hide_in_table"=>true),
             array("field_name" => "blocked", "widget" => "hidden","create_input"=>true),
-            array("field_name" => "clients_branches" ,"widget" => "table" ,"field_id"=>"main_client_id","hide_in_table"=>true,"new_row"=>true),
+            array("field_name" => "clients_branches" ,"widget" => "table" ,"field_id"=>"main_client_id","hide_in_table"=>true,"add_new_row"=>true),
 
 
         ),
@@ -45,7 +45,7 @@ const BOUTIQUE_TABLES = array(
         "title" => "סניפים",
         "columns" => array(
             array("field_name" => "name", "widget" => "text", "label" => "שם הסניף","create_input"=>true),
-            array("field_name" => "address", "widget" => "text", "label" => "כתובת","hide_in_table"=>true,"create_input"=>true),
+            array("field_name" => "address", "widget" => "text", "label" => "כתובת","create_input"=>true),
 /*            array("field_name" => "city_id", "widget" => "select", "join_table" => "cities", "join_value" => "name", "label" => "עיר","create_input"=>true),*/
             array("field_name" => "mobile", "widget" => "text", "label" => "נייד","required"=>true,"create_input"=>true),
             array("field_name" => "email", "widget" => "text", "label" => "דוא\"ל","required"=>true,"create_input"=>true),
@@ -79,9 +79,10 @@ const BOUTIQUE_TABLES = array(
         "male_female" => "female",
         "columns" => array(
             array("field_name" => "client_id", "widget" => "select", "join_table" => "clients", "join_value" => "name", "label" => "שם לקוח"),
+            array("field_name" => "branch", "widget" => "none", "label" => "סניף", "join_table" => "clients_branches", "join_value" => "name"),
             array("field_name" => "subject", "widget" => "select", "label" => "נושא משימה","required"=>true,
              "join_table" => "subjects", "join_value" => "text","save_as_text"=>true, "add_option"=>true),
-            array("field_name" => "open_date", "widget" => "hidden", "label" => "תאריך פתיחה"),
+            array("field_name" => "open_date", "widget" => "datetime-local", "label" => "תאריך פתיחה","add_class"=>"hidden"),
             array("field_name" => "agent_id", "widget" => "select", "label" => "סוכן", "join_table" => "agents", "join_value" => "name","required"=>true,"filter"=>true),
             array("field_name" => "details", "widget" => "textarea", "label" => "פירוט","hide_in_table" => true),
             array("field_name" => "importance_id", "widget" => "radio", "label" => "חשיבות","filter"=>true,
@@ -132,7 +133,7 @@ const BOUTIQUE_TABLES = array(
         "male_female" => "female",
         "columns" => array(
             array("field_name" => "client_id","widget" => "select", "join_table" => "clients", "join_value" => "name", "label" => "שם הלקוח","required"=>true),
-            array("field_name" => "branch", "widget" => "none", "label" => "סניף"),
+            array("field_name" => "branch", "widget" => "none", "label" => "סניף", "join_table" => "clients_branches", "join_value" => "name"),
             array("field_name" => "order_date", "widget" => "datetime-local", "label" => "תאריך הזמנה","required"=>true),
             array("field_name" => "user_opens","widget" => "none", "label" => "מקים ההזמנה", "type" => "user","join_table" => "agents"/*, "join_value" => "id"*/,"join_field"=>"user_id","join_values_select"=>array("id","name")),//
           //  array("field_name" => "order_products" ,"widget" => "table" ,"field_id"=>"order_id","hide_in_table"=>true,"target_table"=>"specials"),
@@ -270,7 +271,7 @@ const BOUTIQUE_TABLES = array(
                 array("field_name" => "date_end", "widget" => "date", "label" => "תאריך סיום"),
                 array("field_name" => "type", "widget" => "select", "label" => "סוג מבצע","required"=>true,"options"=>SPECIAL_TYPE),
                 array("field_name" => "supplier_id", "widget" => "select","label"=>"ספק", "join_table" => "suppliers", "join_value" => "name","required"=>true),
-                array("field_name" => "price_more","widget" => "text","label"=>"קנה מעל סכום","un_apostrophe" => true,"sign"=>"₪"),
+                array("field_name" => "price_more","widget" => "text","label"=>"קנה מעל סכום","un_apostrophe" => true,"sign"=>"₪","stretch"=>true),
                 array("field_name" => "discount","widget" => "text","label"=>"קבל הנחה של","un_apostrophe" => true,"sign"=>"%"),
                 array("field_name" => "buy", "widget" => "number", "label" => "קנה כמות"),
                 array("field_name" => "products_buy" ,"widget" => "special","label"=>"מהמוצרים","save_as_text"=> true ,"field_id"=>"product_id","hide_in_table"=>true),

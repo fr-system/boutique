@@ -111,3 +111,20 @@ function setDataTable (){
     jQuery('.dt-layout-cell.dt-layout-start').removeClass('dt-layout-start');
     jQuery('.dt-layout-cell.dt-layout-end').removeClass('dt-layout-end');
 }
+
+function addNewRow(row){
+    var countRows =  table.rows().count();
+    var newRow =  row.clone(true);
+    var rowIndex = row.find(".name input").attr("name").replace("rows[","").replace("][name]","");
+
+    jQuery.each(  newRow.find("input"),function (k,input) {
+        var name = jQuery(input).attr("name");
+        name = name.replace("rows[" + rowIndex + "]", "rows[" + countRows + "]");
+        jQuery(input).attr("name", name);
+        if (!name.includes("main")) {
+            jQuery(input).val("");
+        }
+    })
+
+    row.before(newRow);
+}

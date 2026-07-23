@@ -52,16 +52,13 @@ function create_pdf($attr)
                 }
                 
                 .title{
-                    text-underline: black;                    
-                    /*width:8cm; 
-                    background-color: black;
-                    color: white;*/
-                    font-size:12pt;
+                    text-decoration: underline;
+                    font-size:14pt;
                 }
                 </style>
                 ';
 
-    $mpdf->SetHTMLHeader('<div style="margin:0;padding:0;background-color: black;width: 100%; text-align: center; margin-bottom: 10px"><img src="https://kosherboutique.co.il/wp-content/themes/boutique/assets/images/logo_header.png"/></div>');
+    $mpdf->SetHTMLHeader('<div style="margin:0;padding:0;width: 100%; text-align: left; margin-bottom: 10px"><img src="https://kosherboutique.co.il/wp-content/themes/boutique/assets/images/logo_header.png"/></div>');
     $packet = array();
     if(isset($attr["packet"])){
         $packet = $attr["packet"];
@@ -70,6 +67,7 @@ function create_pdf($attr)
     if($table_name=="orders") {
         $packet = ["client", "order", "order_products"];
     }
+
     foreach ($packet as $func) {
         $func_name = "drow_html_" . $func;
         //write_log("func_name ".$func_name);
@@ -89,7 +87,7 @@ function create_pdf($attr)
                 $report_title = $attr["report_title"];
             }
 
-            $mpdf->SetHTMLHeader('<div>'.$report_title.'</div>');
+            //$mpdf->SetHTMLHeader('<div>'.$report_title.'</div>');
             /*if(isset($_GET["ids"])){
                 $filters[]=array("filter_field"=>"id","filter_value"=>$_GET["ids"],"filter_type" => "array");
             }
@@ -104,7 +102,7 @@ function create_pdf($attr)
     //$html = "akuo kfuko!!";
     //echo mb_detect_encoding($html);
     $mpdf->WriteHTML($html);
-    //write_log("html ". $html);
+    write_log("html ". $html);
 
     if(isset($attr["send_mail"])) {
         if(isset($attr["create_only_fill"]) && !preg_match('/<tbody[^>]*>.*?<tr\b/is', $html)){
@@ -148,6 +146,25 @@ function draw_table_pdf($table_name, $filters)
 
     return $html;
 }
+function drow_html_orders_today($attr){
+
+    $filters = array();
+    if(date('H')<23) {
+        $filters[] = array("filter_field" => "order_date", "filter_value" => "order_date >= CONCAT(CURDATE(), ' 00:00:00')", "filter_type" => "filter");
+    }
+    else{
+        $filters[] = array("filter_field" => "order_date", "filter_value" => "order_date >= CONCAT(CURDATE(), ' 18:00:00')", "filter_type" => "filter");
+    }
+    $orders = get_data_table("orders",$filters);
+    $html="";
+    foreach ($orders as $order){
+        $html.=drow_html_client(["client_id"=>$order->client_id]);
+        $html.=drow_html_order(["order_id"=>$order->id]);
+        $html.=drow_html_order_products(["order_id"=>$order->id]);
+        $html.="<pagebreak />";
+    }
+    return $html;
+}
 
 function drow_html_order($attr){
     $result = get_data_table("orders",array(array("filter_field" => "id", "filter_value"=>$attr["order_id"])))[0];
@@ -156,7 +173,9 @@ function drow_html_order($attr){
     $html="<div class='details'>
               <strong class='title'>הזמנה מס. {$result->id}</strong><br>
               <strong>תאריך הזמנה: </strong><span>".date('d/m/Y בשעה H:i',strtotime ($result->order_date))."</span><br>
-              <strong>סוכן: </strong><span>".get_userdata($result->user_opens)->display_name."</span><br>
+              <strong>סכום: </strong><span>₪".$result->total."</span><br>
+              <strong>הנחה: </strong><span>%".$result->discount_percent."</span><br>
+              <strong>סה''כ לתשלום: </strong><span>₪"."1000"."</span><br>
               <strong>הערות: </strong><span>{$result->notes}</span>
            </div>";
     return $html;
@@ -224,7 +243,21 @@ function drow_html_tasks($attr)
 
     $filters[]=array("filter_field" => "status_id", "filter_type" => "!=", "filter_value" => "1");
     $filters[]=array("filter_field" => "target_date", "filter_type" => "date", "filter_ratio" => "<","filter_value"=>"CURDATE()");
-    $html = draw_table_pdf("tasks", $filters);
+    $tasks = get_data_table("tasks",$filters);
+    $html = "<table><tbody>";
+    foreach ($tasks as $task) {
+        //write_log("task ".json_encode($task));
+
+        $html .= "<tr><td><div class='details'>
+                <strong class='title'>".$task->subject_text."</strong><br>                
+                <strong>שם הלקוח: </strong><span>".$task->client_name."</span><br>
+                <strong>פירוט: </strong><span>".$task->details."</span><br>               
+                <strong>תאריך יעד: </strong><span>".date('d/m/Y', strtotime($task->target_date))."</span>                                  
+           </div></td></tr>";
+    }
+    $html .= "</tbody></table>";
+/*    <strong>חשיבות: </strong><span>{$task->importance}</span><br>*/
+    //$html = draw_table_pdf("tasks", $filters);
     write_log("html ".$html);
     return $html;
 }
