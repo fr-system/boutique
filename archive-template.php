@@ -38,7 +38,7 @@ $page_info  = BOUTIQUE_TABLES[$table_name];
     }
     $new_single = $page_info['single']. " חדש" . (isset($page_info["male_female"]) && $page_info["male_female"] == "female" ? "ה" : "");
     $attr = array( "add_text"=>$add_text, "client_id" =>$client_id,"blocked"=>$blocked,"new_single"=>$new_single);
-    echo archive_header($table_name,false,$attr);
+    archive_header($table_name,false,$attr);
 
     if(is_agent() ){
         $agent_id = get_id_by_user();

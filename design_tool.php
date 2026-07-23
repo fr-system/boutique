@@ -184,7 +184,6 @@ function render_row($external_item, $sub_row, $options ){
 
 function archive_header($table_name, $view_only = false,$attr = null)
 {
-    ob_start();
     ?>
     <div class="archive-actions flex-display space-between margin-bottom-20">
         <div class="flex-display align-center space-between">
@@ -197,8 +196,8 @@ function archive_header($table_name, $view_only = false,$attr = null)
             }
             else{
             $href = 'single?subject='.$table_name.'&action=new';
-            if(isset($attr["client_id"])){
-                $href.="&client_id=".$attr["client_id"];
+            if(isset($attr["client_id"])) {
+                $href .= "&client_id=" . $attr["client_id"];
             }
             if($table_name=="lists") { ?>
             <a class="has-tooltip margin-after-10" data-tooltip="<?php echo (isset($attr["new_single"])?$attr["new_single"]:'') ?>" data-bs-toggle="modal" href="#edit-list" role="button" data-action="new">
@@ -235,7 +234,7 @@ function archive_header($table_name, $view_only = false,$attr = null)
             <h1 class="page-title font-30 bold"><?php echo $title.(isset($attr["add_text"]) && !empty($attr["add_text"])?$attr["add_text"]:'')  ?></h1>
         </div>
         <div class="flex-display align-center space-between">
-            <div class="border-dark-gray filter-by-area">
+<!--            <div class="border-dark-gray filter-by-area">
                 <div class="filter">
                     <select name="filter"
                 </div>
@@ -246,7 +245,7 @@ function archive_header($table_name, $view_only = false,$attr = null)
                 <path d="M17.1245 24.8588C18.7667 24.8588 20.1442 25.9605 20.5962 27.4603L20.6284 27.5668H32.6831V29.433H20.6284L20.5962 29.5404C20.1441 31.0401 18.7666 32.142 17.1245 32.142C15.4826 32.1418 14.1059 31.04 13.6538 29.5404L13.6216 29.433H11.3169V27.5668H13.6216L13.6538 27.4603C14.1058 25.9606 15.4825 24.8589 17.1245 24.8588ZM17.1245 26.725C16.1459 26.7252 15.3501 27.5217 15.3501 28.5004C15.3503 29.4789 16.146 30.2746 17.1245 30.2748C18.1032 30.2748 18.8997 29.479 18.8999 28.5004C18.8999 27.5216 18.1033 26.725 17.1245 26.725ZM26.8745 18.3588C28.5167 18.3588 29.8942 19.4605 30.3462 20.9603L30.3784 21.0668H32.6831V22.933H30.3784L30.3462 23.0404C29.8941 24.5401 28.5166 25.642 26.8745 25.642C25.2326 25.6418 23.8559 24.54 23.4038 23.0404L23.3716 22.933H11.3169V21.0668H23.3716L23.4038 20.9603C23.8558 19.4606 25.2325 18.3589 26.8745 18.3588ZM26.8745 20.225C25.8959 20.2252 25.1001 21.0217 25.1001 22.0004C25.1003 22.9789 25.896 23.7746 26.8745 23.7748C27.8532 23.7748 28.6497 22.979 28.6499 22.0004C28.6499 21.0216 27.8533 20.225 26.8745 20.225Z" fill="#1A7870" stroke="#D9F5F3" stroke-width="0.3"/>
                 <path d="M19.2915 11.8588C20.9337 11.8588 22.3111 12.9605 22.7632 14.4603L22.7954 14.5668H32.8188V16.433H22.7954L22.7632 16.5404C22.3111 18.0401 20.9336 19.142 19.2915 19.142C17.6494 19.142 16.2719 18.0401 15.8198 16.5404L15.7876 16.433H11.3169V14.5668H15.7876L15.8198 14.4603C16.2719 12.9605 17.6493 11.8588 19.2915 11.8588ZM19.2915 13.725C18.3127 13.725 17.5161 14.5216 17.5161 15.5004C17.5163 16.479 18.3129 17.2748 19.2915 17.2748C20.2702 17.2748 21.0667 16.479 21.0669 15.5004C21.0669 14.5216 20.2703 13.725 19.2915 13.725Z" fill="#1A7870" stroke="#D9F5F3" stroke-width="0.3"/>
             </svg>
-
+-->
             <?php if(!$view_only){
                 if(is_manager() && $table_name == "collection"){?>
                     <form novalidate id="importCollection"  class="site_form flex-display space-between" data-success="import_excel_done" data-failed="choose_supplier_column_mapping">
@@ -307,7 +306,6 @@ function archive_header($table_name, $view_only = false,$attr = null)
         </div>
     </div>
     <?php
-    return ob_get_clean();
 }
 function products_gallery($products)
 {?>
