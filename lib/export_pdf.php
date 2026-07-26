@@ -14,11 +14,24 @@ function create_pdf($attr)
     $mpdf = new \Mpdf\Mpdf([
         'mode' => 'utf-8',
         'format' => 'A4',
-        'default_font' => 'Heebo',//'dejavusans'
-        'margin_top' => 30
+        'default_font' => 'dejavusans',//'Heebo'
+        'margin_left'   => 0,
+        'margin_right'  => 0,
+        'margin_top'    => 0,
+        'margin_header' => 0,
+        'margin_footer' => 0
     ]);
 
+    $mpdf->setAutoTopMargin = false;
+
     $mpdf->SetDirectionality('rtl');
+    $header = '<div style="width: 100%; text-align: right; margin-bottom: 60px;background-color: black;">
+                   <strong style="margin: auto 0 " class="report-title">פרטי הזמנה</strong>
+                   <img style="float: left" src="https://kosherboutique.co.il/wp-content/themes/boutique/assets/images/logo_header.png"/>
+                </div>';
+
+    $mpdf->SetHTMLHeader($header);
+
     test_mode_table_prefix ();
     $html='<style>
                 body {
@@ -55,10 +68,15 @@ function create_pdf($attr)
                     text-decoration: underline;
                     font-size:14pt;
                 }
+                .report-title{
+                    font-size:20pt;
+                    color: white;
+                    
+                }
                 </style>
-                ';
+                <div style="padding: 30px; margin-top: 20cm">';
 
-    $mpdf->SetHTMLHeader('<div style="margin:0;padding:0;width: 100%; text-align: left; margin-bottom: 10px"><img src="https://kosherboutique.co.il/wp-content/themes/boutique/assets/images/logo_header.png"/></div>');
+
     $packet = array();
     if(isset($attr["packet"])){
         $packet = $attr["packet"];
@@ -98,11 +116,11 @@ function create_pdf($attr)
             break;
     }
 
-
+    $html.="</div>";
     //$html = "akuo kfuko!!";
     //echo mb_detect_encoding($html);
     $mpdf->WriteHTML($html);
-    write_log("html ". $html);
+    //write_log("html ". $html);
 
     if(isset($attr["send_mail"])) {
         if(isset($attr["create_only_fill"]) && !preg_match('/<tbody[^>]*>.*?<tr\b/is', $html)){
