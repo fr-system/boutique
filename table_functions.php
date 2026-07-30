@@ -19,10 +19,10 @@ function get_archive_table($table_name,$data,$attr)
                 <thead><tr class='tr-head gold'>";
 
     if($table_name == "order_products"){
-        $html .= '<th class="no-sort dupl-action" style="width:10px"></th>';//לחצן בונוס בעגלה
+        $html .= '<th class="no-sort dupl-action" ></th>';//לחצן בונוס בעגלה
     }
     if($attr["add_new_row"]??false){
-        $html .= '<th class="no-sort add-new-row" style="width:10px"></th>';
+        $html .= '<th class="no-sort add-new-row" ></th>';
     }
 
     if (isset($page_info["more_columns_in_table"])) {
@@ -43,13 +43,13 @@ function get_archive_table($table_name,$data,$attr)
 
     if(!isset($page_info["update_remove"]) || $page_info["update_remove"] == true) {
         if (is_manager() || is_agent() && $table_name == "orders") {//update/readonly
-            $html .= '<th class="no-sort" style="width:10px"></th>';//update
+            $html .= '<th class="td-action no-sort" style="width:10px"></th>';//update
         }
         if($table_name == "orders"){
-            $html .= '<th class="no-sort" style="width:10px"></th>';//print
+            $html .= '<th class="td-action no-sort" style="width:10px"></th>';//print
         }
         if (is_manager()) {//remove
-            $html .= '<th class="no-sort" style="width:20px"></th>';//remove
+            $html .= '<th class="td-action no-sort" style="width:20px"></th>';//remove
         }
     }
 

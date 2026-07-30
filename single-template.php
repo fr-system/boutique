@@ -88,18 +88,19 @@ else{
     </div>
     <div class="flex-display space-between grow">
         <input type="hidden" name="dirty" value="" />
-            <form class="site_form border-dark-gray padding-20 flex-display direction-column space-between <?php echo $part_left_side?> " novalidate="" data-success='reload_page' data-failed='show_error_messages'>
-                <div>
-                <div id="form_error_msgs_container" class="margin-bottom-20"></div>
-                <input type="hidden" name="form_func" value="save_single_data" />
-                <input type="hidden" name="table_name" value="<?= $table_name ?>" />
-                <input type="hidden" class="<?= $table_name.'_id'?>" name="id" value="<?php echo $id ?>" />
-                <input type="hidden" name="previous_page" value="<?php echo $previous_page ?>" />
-                <?php if($table_name == "orders" || $table_name == "tasks") {?>
-                    <input type="hidden" class="branch-client" value="<?=$single->branch ?? ''?>"/>
-                    <input type="hidden" name='user_opens' value="<?= $single->user_opens ?? ''?>"/>
-                 <?php  }?>
-                <?php get_single_view($table_name,$single,$readonly); ?>
+            <form class="site_form border-dark-gray padding-10 flex-display direction-column space-between <?php echo $part_left_side?> "
+                  novalidate="" data-success='reload_page' data-failed='show_error_messages' style="height: 95%;overflow-y: hidden">
+                <div style="overflow-y: auto">
+                    <div id="form_error_msgs_container" class=""></div>
+                    <input type="hidden" name="form_func" value="save_single_data" />
+                    <input type="hidden" name="table_name" value="<?= $table_name ?>" />
+                    <input type="hidden" class="<?= $table_name.'_id'?>" name="id" value="<?php echo $id ?>" />
+                    <input type="hidden" name="previous_page" value="<?php echo $previous_page ?>" />
+                    <?php if($table_name == "orders" || $table_name == "tasks") {?>
+                        <input type="hidden" class="branch-client" value="<?=$single->branch ?? ''?>"/>
+                        <input type="hidden" name='user_opens' value="<?= $single->user_opens ?? ''?>"/>
+                     <?php  }?>
+                    <?php get_single_view($table_name,$single,$readonly); ?>
                 </div>
             <div class="buttons flex-display align-self-center">
                 <button type="submit" class="save background-gold flex-display center align-center bold font-18">
@@ -216,7 +217,7 @@ else{
              $filters=array( array("filter_type"=>"filter","filter_field"=>"date_end", "filter_value"=>"date_end >= CURDATE() || date_end is null"));
              $promotions= get_data_table ("specials",$filters);
              ?>
-            <div class="specials-area border-dark-gray padding-20" style="flex-basis:23%">
+            <div class="specials-area border-dark-gray padding-20" style="flex-basis:23%;height: 95%;overflow-y: hidden">
                 <div class="specials-corner text-center background-dark-green bold margin-bottom-10">פינת מבצעים</div>
                 <?php specials_gallery($promotions,array("target"=>"orders")); ?>
             </div>

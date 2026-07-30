@@ -138,7 +138,10 @@ const BOUTIQUE_TABLES = array(
             array("field_name" => "user_opens","widget" => "none", "label" => "מקים ההזמנה", "type" => "user","join_table" => "agents"/*, "join_value" => "id"*/,"join_field"=>"user_id","join_values_select"=>array("id","name")),//
           //  array("field_name" => "order_products" ,"widget" => "table" ,"field_id"=>"order_id","hide_in_table"=>true,"target_table"=>"specials"),
             array("field_name" => "order_products" ,"widget" => "table" ,"field_id"=>"order_id","hide_in_table"=>true,"target_table"=>"products"),
-            array("field_name" => "total","widget" => "text", "label" => "סה\"כ", "un_apostrophe" => true,"sign"=>"₪"),
+            array("field_name" => "total","widget" => "text", "label" => "סך הכל", "un_apostrophe" => true,"sign"=>"₪","hide_in_table"=>true,"readonly"=>true),
+            array("field_name" => "discount", "widget" => "text", "label" => "הנחה", "un_apostrophe" => true,"sign"=>"%","hide_in_table"=>true),
+            array("field_name" => "for_payment","widget" => "text", "label" => "לתשלום", "un_apostrophe" => true,"sign"=>"₪","readonly"=>true),
+
             array("field_name" => "notes","widget" => "textarea", "label" => "הערות","hide_in_table"=>true),
             array("field_name" => "user_confirms","widget" => "none", "label" => "מאשר ההזמנה", "type" => "user"),//"join_table" => "agents", "join_value" => "name","join_field"=>"user_id"),
             array("field_name" => "done"/*,"widget" => "bool"*/),
@@ -154,7 +157,7 @@ const BOUTIQUE_TABLES = array(
                     1=>array("class"=>"background-dark-green left","label"=> "בודדים"),
                 )),
             array("field_name" => "bonus", "widget" => "hidden","create_input"=>true,"save_as_text"=> true),
-            array("field_name" => "discount_percent", "widget" => "text", "label" => "אחוזי הנחה", "un_apostrophe" => true,"sign"=>"%","create_input"=>true),
+            array("field_name" => "discount_percent", "widget" => "text", "label" => "הנחה", "un_apostrophe" => true,"sign"=>"%","create_input"=>true),
             array("field_name" => "total", "widget" => "readonly", "label" => "סה\"כ", "un_apostrophe" => true,"sign"=>"₪","create_input"=>true),
             array("field_name" => "id", "widget" => "hidden","create_input"=>true),
             array("field_name" => "order_id", "widget" => "hidden","create_input"=>true),

@@ -115,8 +115,8 @@ function lists_table_rows($list_name)
     $column_name =  $fields_list["columns"][0]["field_name"];
     $rows = '<thead>
             <tr class="tr-head gold">
-                <th class="no-sort"></th>
-                <th class="no-sort"></th>
+                <th class="no-sort td-action"></th>
+                <th class="no-sort td-action"></th>
                 <th data-column-name ="'.$column_name.'">'.$fields_list["single"].'</th>';
     foreach (array_slice($fields_list["columns"],1) as $column) {
         $dataOptions="";
@@ -245,7 +245,7 @@ function get_column_value($column,$row,$field,$list,$key,$is_readonly=false)
     if(isset($column["create_input"])) {
         $type =  isset($column["widget"]) && $column["widget"]== "hidden" ? 'hidden':
             (isset($column["widget"]) && $column["widget"]== "date"? 'date':'text');
-        $readonly = $is_readonly || $row->bonus == "promo" || (isset($column["widget"]) && $column["widget"]== "readonly")?' readonly ':'';
+        $readonly = $is_readonly || (isset($row->bonus) && $row->bonus == "promo") || (isset($column["widget"]) && $column["widget"]== "readonly")?' readonly ':'';
 
         $value = $column_value ?? '';
 
@@ -255,7 +255,7 @@ function get_column_value($column,$row,$field,$list,$key,$is_readonly=false)
                 $readonly =$is_readonly || !$row->individually || empty($row->count) || $row->bonus == "promo" ? ' readonly ' :'';//אם לאפשר בחירת בודדים
                 $value =!empty($row->count)? $value: 0; //ברירת מחדל תמיד ארגזים אלא אם כן כבר מוזמן ובחרו
             }
-            $column_value = "<div class='status-options flex-display font-17'>";
+            $column_value = "<div class='status-options flex-display font-15'>";
             if(isset($column["values"])){
                 $column_value .= "<input type='hidden' id='' name='rows[{$key}][{$field}]' value='{$value}'>";
                 foreach ($column["values"] as $key=>$option) {
@@ -273,7 +273,7 @@ function get_column_value($column,$row,$field,$list,$key,$is_readonly=false)
             }
             else {
                 if ($column['widget'] == 'number') {
-                    $column_value .= "<span class='minus bold font-25 pointer {$readonly}'>-</span>";
+                    $column_value .= "<div class='plus-number-minus flex-display'><span class='minus bold font-25 pointer {$readonly}'>-</span>";
                 }
 
                 if ($column["widget"] == "date" && !empty($value)) {
@@ -285,7 +285,7 @@ function get_column_value($column,$row,$field,$list,$key,$is_readonly=false)
                     (isset($column['un_apostrophe']) && isset($column['sign']) ? "data-a-sign='" . $column['sign'] . "'" : "") . "/>";
 
                 if ($column['widget'] == 'number') {
-                    $column_value .= "<span class='plus bold font-25 pointer {$readonly}'>+</span>";
+                    $column_value .= "<span class='plus bold font-25 pointer {$readonly}'>+</span></div>";
                 }
             }
         }

@@ -192,7 +192,7 @@ function drow_html_order($attr){
               <strong class='title'>הזמנה מס. {$result->id}</strong><br>
               <strong>תאריך הזמנה: </strong><span>".date('d/m/Y בשעה H:i',strtotime ($result->order_date))."</span><br>
               <strong>סכום: </strong><span>₪".$result->total."</span><br>
-              <strong>הנחה: </strong><span>%".$result->discount_percent."</span><br>
+              <strong>הנחה: </strong><span>%".$result->discount."</span><br>
               <strong>סה''כ לתשלום: </strong><span>₪"."1000"."</span><br>
               <strong>הערות: </strong><span>{$result->notes}</span>
            </div>";

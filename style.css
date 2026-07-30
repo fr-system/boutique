@@ -280,11 +280,9 @@ input, textarea, select, button{
 .flex-display .grow, #primary{
     flex-grow: 1;
 }
-
 .grid-display {
     display: grid;
-    /*grid-gap: 25px;*/
-    grid-gap: 2.5vh;
+    grid-gap: 2vh;
 }
 .grid-display .stretch{
      grid-column: 1 / -1;
@@ -323,7 +321,7 @@ input, textarea, select, button{
     padding-bottom: 20px;
 }
 .padding-10{
-    padding: 10px;
+    padding: 1vh;
 }
 .padding-15{
     padding: 15px;
@@ -412,9 +410,7 @@ section.page.single .dt-layout-table .dt-layout-cell{
 section.page.single .dt-layout-table .dt-layout-cell:has(.clients_branches){
      height: 20vh;
  }
-.dt-layout-row{
-    margin: 0 !important;
-}
+
 .box {
     border-radius: 30px;
     box-shadow: 2px 4px 23.6px 7px rgba(0, 0, 0, 0.06);
@@ -422,33 +418,25 @@ section.page.single .dt-layout-table .dt-layout-cell:has(.clients_branches){
 
 table {
     width: 100%;
-    /*
-    text-align: center !important;
-    */
     text-align: right !important;
-
     border-collapse: separate !important;
     border-spacing: 0 10px !important;
-    /*border: 2px red solid;*/
+    /*table-layout: fixed*/
 }
-
-
+.dt-layout-row{
+    margin: 0 !important;
+}
+.dt-search input{
+     border-radius: 12px !important;
+ }
 th{
     outline: none !important;
-    /*
-    text-align: center !important;
-    */
     text-align: right !important;
-
 }
 
 th:hover{
     color: var(--b-global-color-gold-hover);
 }
-.dt-length, .dt-search{
-    /*display: none !important;*/
-}
-
 th .dt-column-header{
     flex-direction: row !important;
 }
@@ -456,6 +444,26 @@ th .dt-column-header{
 td {
     border-top: var(--b-global-color-dark-gray) 1px solid !important;
     border-bottom: var(--b-global-color-dark-gray) 1px solid !important;
+    /*white-space: nowrap;
+    overflow: hidden;*/
+    line-height: 1;
+    /*    text-overflow: ellipsis;
+    max-width: 200px !important;*/
+}
+/*th {
+    !*width: 150px;*!
+    max-width: 150px;
+}
+th[data-column-name=name],th[data-column-name=email]{
+    width: 200px;
+    max-width: 200px;
+}
+td.td-action, th.td-action{
+    width: 50px !important;
+    max-width: 50px;
+}*/
+td:hover {
+    /*overflow-x: auto;*/
 }
 .in-cart td {
     border-top: var(--b-global-color-gold) 1px solid !important;
@@ -650,7 +658,7 @@ input, textarea, select, .input-acting{
     padding: 3px 7px;
 }
 .radio-options, .status-options{
-    padding: 3px 7px;
+    padding: 2px 7px;
 }
 
 input, input[type="datetime-local"], input[type="date"], input[type="time"],.input-acting {
@@ -793,5 +801,12 @@ ul.tables-list li:last-child{
 }
 .textarea-label{
     padding: 3px 0;
+}
+section.page.single form{
+    height: 100%;
+    overflow: hidden;
+}
+section.page.single form buttons{
+    position: sticky;
 }
 

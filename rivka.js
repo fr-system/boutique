@@ -170,6 +170,10 @@ jQuery(document).ready(function($) {
         jQuery(this).find('[name=payment_date]').val(payment_date);
     });
 
+    jQuery('.grid-display [name=discount]').on('change',function (){
+        var total = parseFloat( jQuery('.grid-display [name=total]').autoNumeric('get')||0)
+        calculateForPayment(total);
+    })
 })
 
 jQuery(function ($) {
@@ -287,9 +291,19 @@ function registerToCalculatePrice(){
             total+=parseFloat( jQuery(totalProductPrice).autoNumeric('get')||0);
         })
         jQuery("input[name=total]").autoNumeric('set', total);
+        calculateForPayment(total);
         //jQuery("input[name=total]").autoNumeric.set("input[name=total]", total);
 
     });
+}
+
+function calculateForPayment(total){
+    var discount = parseInt( jQuery("input[name=discount]").autoNumeric('get')||0);
+    var forPayment = total
+    if(discount>0){
+        forPayment = total*(100-discount)/100;
+    }
+    jQuery("input[name=for_payment]").autoNumeric('set', forPayment);
 }
 
 function calculatePrice(me){
@@ -348,14 +362,15 @@ function startingDataTable(){
 
     table = jQuery('.dataTable').DataTable({
         bFilter: true,
+       /* autoWidth: false,*/
         layout: {
             topStart: {
                 buttons: tableName == "orders" && currentUrl.includes('single') ? [
                         {
-                            text: 'הצגת עגלה <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="currentColor" class="bi bi-bag-check" viewBox="0 0 16 16">\n' +
-                                '  <path fill-rule="evenodd" d="M10.854 8.146a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708 0l-1.5-1.5a.5.5 0 0 1 .708-.708L7.5 10.793l2.646-2.647a.5.5 0 0 1 .708 0"/>\n' +
-                                '  <path d="M8 1a2.5 2.5 0 0 1 2.5 2.5V4h-5v-.5A2.5 2.5 0 0 1 8 1m3.5 3v-.5a3.5 3.5 0 1 0-7 0V4H1v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V4zM2 5h12v9a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1z"/>\n' +
-                                '</svg>',
+                            text: '<svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" viewBox="0 0 16 16" fill="none">' +
+                                '<path d="M4.00683 10.7573L2.76083 2.66667H2.00016C1.82335 2.66667 1.65378 2.59643 1.52876 2.47141C1.40373 2.34638 1.3335 2.17681 1.3335 2C1.3335 1.82319 1.40373 1.65362 1.52876 1.5286C1.65378 1.40357 1.82335 1.33334 2.00016 1.33334H3.3235C3.48426 1.33079 3.64052 1.38643 3.7635 1.49C3.88935 1.59608 3.97151 1.74497 3.99416 1.908L4.21283 3.33334H9.3335V4.66667H4.41816L5.23816 10H11.5042L12.5042 6.66667H13.8962L12.6388 10.858C12.5977 10.9954 12.5133 11.1158 12.3982 11.2015C12.2832 11.2871 12.1436 11.3333 12.0002 11.3333H4.6775C4.51218 11.3359 4.35181 11.277 4.2275 11.168C4.10667 11.0622 4.02874 10.9164 4.00683 10.7573ZM6.66683 13.3333C6.66683 13.687 6.52635 14.0261 6.27631 14.2761C6.02626 14.5262 5.68712 14.6667 5.3335 14.6667C4.97987 14.6667 4.64074 14.5262 4.39069 14.2761C4.14064 14.0261 4.00016 13.687 4.00016 13.3333C4.00016 12.9797 4.14064 12.6406 4.39069 12.3905C4.64074 12.1405 4.97987 12 5.3335 12C5.68712 12 6.02626 12.1405 6.27631 12.3905C6.52635 12.6406 6.66683 12.9797 6.66683 13.3333ZM12.6668 13.3333C12.6668 13.687 12.5264 14.0261 12.2763 14.2761C12.0263 14.5262 11.6871 14.6667 11.3335 14.6667C10.9799 14.6667 10.6407 14.5262 10.3907 14.2761C10.1406 14.0261 10.0002 13.687 10.0002 13.3333C10.0002 12.9797 10.1406 12.6406 10.3907 12.3905C10.6407 12.1405 10.9799 12 11.3335 12C11.6871 12 12.0263 12.1405 12.2763 12.3905C12.5264 12.6406 12.6668 12.9797 12.6668 13.3333Z" fill="white"/>' +
+                                '<path d="M10.9985 6.56559C11.0102 6.72591 10.9517 6.88392 10.8357 7.00483L9.12183 8.79299C9.01159 8.90807 8.85776 8.98084 8.69119 8.99672C8.52462 9.0126 8.35764 8.97041 8.22372 8.8786L7.26545 8.22198C7.12465 8.12558 7.03156 7.98208 7.00667 7.82305C6.98178 7.66401 7.02713 7.50246 7.13273 7.37393C7.23833 7.24541 7.39554 7.16044 7.56978 7.13773C7.74401 7.11501 7.921 7.15639 8.0618 7.25279L8.52722 7.57181L9.83677 6.20687C9.9527 6.08595 10.1165 6.01202 10.2921 6.00134C10.4678 5.99066 10.6409 6.04411 10.7734 6.14993C10.9058 6.25574 10.9868 6.40526 10.9985 6.56559Z" fill="white" />' +
+                                '</svg><span class="button-text">הצגת עגלה</span>',
                             className: 'show-cart background-gold flex-display center align-center bold ',
                             action: function (e, t, sender, sProp) {
                                 jQuery(sender).toggleClass("cart-mode");
@@ -363,11 +378,13 @@ function startingDataTable(){
                                 if (cartMode) {
                                     table.column(".dupl-action").visible(true);
                                     show_tooltip();
-                                    jQuery(sender).find("svg")[0].prepend(checkPath[0]);
+                                    jQuery(sender).find(".button-text").text("חזרה להזמנה");
+                                    //jQuery(sender).find("svg")[0].prepend(checkPath[0]);
                                     //jQuery(sender).find("svg").prepend("<path fill-rule=\"evenodd\" d=\"M10.854 8.146a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708 0l-1.5-1.5a.5.5 0 0 1 .708-.708L7.5 10.793l2.646-2.647a.5.5 0 0 1 .708 0\"/>");
                                 } else {
+                                    jQuery(sender).find(".button-text").text("הצגת עגלה");
                                     table.column(".dupl-action").visible(false);
-                                    checkPath = jQuery(sender).find("svg path").first().detach();
+                                    //checkPath = jQuery(sender).find("svg path").first().detach();
                                     // jQuery(sender).find("svg path[fill-rule=\"evenodd\"]").remove();
                                 }
 
@@ -420,7 +437,7 @@ function startingDataTable(){
     jQuery('.dt-button.show-cart').removeClass('dt-button');
 
 
-    var checkPath = jQuery("button.show-cart").find("svg path").first().detach();
+    //var checkPath = jQuery("button.show-cart").find("svg path").first().detach();
     //}, 500);
 
     if(tableName == "orders" && currentUrl.includes('single')){}
@@ -429,67 +446,55 @@ function startingDataTable(){
         jQuery('.dt-search').closest(".dt-layout-row").hide();
     }
 
-    //onclick="viewFilterTh(jQuery(this).closest('th'))"
-    table.columns().every(function () {
-        var column = this;
-        var th = jQuery(column.header());
-        if(!th.hasClass("no-sort")) {
-            th.find(".dt-column-header").append('<svg  class="svg-filter has-tooltip" data-tooltip="סנן לפי '+th.text()+'" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 26 26" fill="none">\n' +
-                '<path d="M8.12451 15.8588C9.76671 15.8588 11.1442 16.9605 11.5962 18.4603L11.6284 18.5668H23.6831V20.433H11.6284L11.5962 20.5404C11.1441 22.0401 9.7666 23.142 8.12451 23.142C6.4826 23.1418 5.10595 22.04 4.65381 20.5404L4.62158 20.433H2.31689V18.5668H4.62158L4.65381 18.4603C5.10582 16.9606 6.48245 15.8589 8.12451 15.8588ZM8.12451 17.725C7.1459 17.7252 6.3501 18.5217 6.3501 19.5004C6.35027 20.4789 7.14601 21.2746 8.12451 21.2748C9.10316 21.2748 9.89973 20.479 9.8999 19.5004C9.8999 18.5216 9.10327 17.725 8.12451 17.725ZM17.8745 9.35876C19.5167 9.35876 20.8942 10.4605 21.3462 11.9603L21.3784 12.0668H23.6831V13.933H21.3784L21.3462 14.0404C20.8941 15.5401 19.5166 16.642 17.8745 16.642C16.2326 16.6418 14.8559 15.54 14.4038 14.0404L14.3716 13.933H2.31689V12.0668H14.3716L14.4038 11.9603C14.8558 10.4606 16.2325 9.35891 17.8745 9.35876ZM17.8745 11.225C16.8959 11.2252 16.1001 12.0217 16.1001 13.0004C16.1003 13.9789 16.896 14.7746 17.8745 14.7748C18.8532 14.7748 19.6497 13.979 19.6499 13.0004C19.6499 12.0216 18.8533 11.225 17.8745 11.225Z" fill="#1A7870" stroke="#D9F5F3" stroke-width="0.3"/>\n' +
-                '<path d="M10.2915 2.85876C11.9337 2.85876 13.3111 3.96047 13.7632 5.46033L13.7954 5.56677H23.8188V7.43298H13.7954L13.7632 7.54041C13.3111 9.04014 11.9336 10.142 10.2915 10.142C8.64938 10.142 7.27194 9.04014 6.81982 7.54041L6.7876 7.43298H2.31689V5.56677H6.7876L6.81982 5.46033C7.27186 3.96047 8.6493 2.85876 10.2915 2.85876ZM10.2915 4.72498C9.31274 4.72498 8.51611 5.52161 8.51611 6.50037C8.51629 7.47898 9.31285 8.27478 10.2915 8.27478C11.2702 8.27478 12.0667 7.47898 12.0669 6.50037C12.0669 5.52161 11.2703 4.72498 10.2915 4.72498Z" fill="#1A7870" stroke="#D9F5F3" stroke-width="0.3"/>\n' +
-                '</svg>')
-            if(th.data("column-type")=="date"  || th.data("column-type")=="datetime-local"){
-                th.prepend('<div class="th-filter hidden flex-display direction-column">' +
-                    '<div class="flex-display margin-bottom-5"><span class="black font-12">מ: </span><input type="date" class="column-filter date-from "></div>' +
-                    '<div class="flex-display"><span class="black font-12">עד: </span><input type="date" class="column-filter date-to "></div>' +
-                    '</div>');
+    jQuery.fn.dataTable.ext.search.push(function (settings, data) {
+        const option = jQuery('.filter-by option:selected');
+        const widgetType = option.data('widget');
+        var fieldName =  option.val();
+
+        // אינדקס עמודת order_date בטבלה
+        //const columnIndex = table.column('[data-column-name="'+fieldName+'"]:name').index();
+        const columnIndex = parseInt(
+            jQuery('th[data-column-name="' + fieldName + '"]')
+                .data('dt-column'),
+            10
+        );
+
+        const cellValue = data[columnIndex];
+
+        if (widgetType === 'text') {
+            const valueToSearch = jQuery('input.filter-value').val();
+
+            if (!valueToSearch) {
+                return true;
             }
-            else {
-                var placeholder = "סנן "+th.text()+"...";
-                th.prepend('<input type="text" class="hidden th-filter column-filter" placeholder="' + placeholder + '">');
-            }
-
-            th.find('.svg-filter').on('click mousedown keydown', function (e) {
-                e.stopPropagation();
-                var thh = jQuery(this).closest('th')
-                if(thh.find(".th-filter").hasClass("hidden")){
-                    thh.find(".th-filter").removeClass("hidden");
-                }else{
-                    thh.find(".th-filter").addClass("hidden");
-                }
-
-            });
-
-            th.find('input').on('click mousedown keydown', function (e) {
-                e.stopPropagation();
-            });
-
-            th.find('input[type=text]').on('keyup change', function () {
-                column.search(jQuery(this).val()).draw();
-            });
-        }
-    });
-
-    jQuery.fn.dataTable.ext.search.push(function(settings, data) {
-
-        let isValid = true;
-
-        jQuery('th[data-column-type="date"], th[data-column-type="datetime-local"]').each(function () {
-
-            const columnIndex = parseInt(jQuery(this).data('dt-column'), 10);
-
-            const from = jQuery(this).find('.date-from').val();
-            const to = jQuery(this).find('.date-to').val();
-
-            if (!from || !to) {
-                return;
-            }
-
-            const cellValue = data[columnIndex];
 
             if (!cellValue) {
-                isValid = false;
                 return false;
+            }
+
+            return data[columnIndex].toLowerCase().includes(valueToSearch.toLowerCase());
+        }
+
+        if (widgetType === 'select') {
+            const valueToSearch = jQuery('select.filter-value').val();
+
+            if (!valueToSearch) {
+                return true;
+            }
+
+            if (!cellValue) {
+                return false;
+            }
+
+            return data[columnIndex] === valueToSearch;
+        }
+
+        if (widgetType === 'date' || widgetType === 'datetime-local') {
+
+            const from = jQuery('.filter-value.filter-from').val();
+            const to = jQuery('.filter-value.filter-to').val();
+            if (!from || !to) {
+                return true;
             }
 
             const datePart = cellValue.split(' ')[0];
@@ -498,21 +503,71 @@ function startingDataTable(){
             const rowDate = new Date(year, month - 1, day);
 
             if (from && rowDate < new Date(from)) {
-                isValid = false;
                 return false;
             }
 
-            if (to && rowDate > new Date(to)) {
-                isValid = false;
-                return false;
-            }
-        });
+            if (to) {
+                const toDate = new Date(to);
+                toDate.setHours(23, 59, 59, 999);
 
-        return isValid;
+                if (rowDate > toDate) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
     });
 
-    jQuery('.date-from, .date-to').on('change', function () {
+
+    jQuery('.filter-by-area .filter-value').on('keyup change', function () {
 
         table.draw();
     });
 }
+
+function viewFilterByArea(){
+    jQuery(".filter-by-area").toggleClass("hidden");
+}
+function onSelectFilterBy(filterBy){
+    var fieldName =  jQuery(filterBy).val();
+    var widget =  jQuery(filterBy).data("widget");
+    var listName =  jQuery(filterBy).data("list-name");
+    const columnIndex = parseInt(jQuery('th[data-column-name="' + fieldName + '"]').data('dt-column'),10);
+
+    jQuery(".filter-by-area .filter-value").addClass("hidden");
+
+    switch (widget) {
+        case "text":
+            jQuery(".filter-by-area input[type=\"text\"]").removeClass("hidden");
+        break;
+        case "date":
+        case "datetime-local":
+            jQuery(".filter-by-area input[type=\"date\"]").removeClass("hidden");
+            jQuery(".filter-by-area input[type=\"date\"]").removeClass("hidden");
+            break;
+        case "select":
+            jQuery(".filter-by-area select.filter-value").removeClass("hidden");
+            const select = jQuery('select.filter-value');
+            select.empty();
+            select.append('<option value="">הכל</option>');
+
+            table
+                .column(columnIndex)
+                .data()
+                .unique()
+                .sort()
+                .each(function (value) {
+                    if(value) {
+                        select.append(
+                            '<option value="' + value + '">' + value + '</option>'
+                        );
+                    }
+                });
+            break;
+
+    }
+    //table.draw();
+}
+
+

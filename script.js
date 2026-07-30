@@ -74,15 +74,15 @@ jQuery(document).ready(function($){
     jQuery('input[data-a-sign=₪]').autoNumeric('init', {
         vMin: '-9999999999999',
         mDec: 1,
-        aSign: ' ₪',
+        aSign: '₪',
         wEmpty: 'empty'
     });
     jQuery('input[data-a-sign="%"]').autoNumeric('init', {
         vMin: '-9999999999999',
         mDec:0,
         wEmpty: 'empty',
-        aSign: ' %',
-        //pSign: 's'
+        aSign: '%',
+        pSign: 's'
     });
 
     jQuery("form").validate({
@@ -162,6 +162,7 @@ jQuery(document).ready(function($){
         //grecaptcha.execute(globalVars.recaptcha_key, {action: 'submit'})
         //.then(function (token) {
         $form.find('#form_error_msgs_container').html('');
+        $form.find('#form_error_msgs_container').removeClass("margin-bottom-20");
 
         if(jQuery(clickedButton).hasClass("block-client")){
             var blocked = "0";
@@ -615,6 +616,8 @@ function reload_page(data){
 }
 function show_error_messages($form, data){
     jQuery($form).find('#form_error_msgs_container').html(data.msg);
+    jQuery($form).find('#form_error_msgs_container').addClass("margin-bottom-20");
+
 }
 
 function show_success_msg($form, data){

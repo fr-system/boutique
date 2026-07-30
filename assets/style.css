@@ -87,18 +87,24 @@ input:not([type=search]):-webkit-autofill {
     width: 80px !important;
     height: 35px !important;
 }
+tr.product{
+    white-space: nowrap;
+}
 tr.product td.count{
     align-self: center;
     display: flex;
 }
 tr.product td.count span,tr.product td.count input{
     border:solid 1px var(--b-global-color-dark-gray);
-    height: 30px;
+    height: 22px;
 }
 tr.product:not(.readonly) td.count span:hover{
     /*border:solid 2px black /*var(--b-global-color-dark-gray);*/
     box-shadow: 2px 2px 6px 1px rgba(0, 0, 0, 0.13);
     background-color: var(--b-global-color-gold-hover);
+}
+tr.product td.count .plus-number-minus{
+    padding: 2px 0 !important;
 }
 .product td.count input{
     width: 50px;
@@ -316,6 +322,7 @@ input[type="radio"] + label:before {
 }
 tr .status-options .ellipse {
     width: 70px;
+    height: 20px;
     padding: 0 3px;
 }
 tr .status-options .ellipse.left {
@@ -337,18 +344,6 @@ tr .status-options .ellipse.right {
     cursor: default;
     border-color:var(--b-global-color-dark-gray) ;
 }
-/*.ellipse.done {
-    background-color: #D9F5F3;
-    color: #000000;
-}*/
-/*.ellipse.in-treatment {
-    background-color: #1A7870;
-    color: #FFFFFF;
-}*/
-/*.ellipse.not-yet-treated {
-    background-color: #FFEDC8;
-    color: #000000;
-}*/
 
 .chat-list {
     max-height: 45vh;
@@ -445,6 +440,12 @@ td a.button{
 .dt-type-numeric{
 
 }
+.dt-buttons{
+    padding-top: 10px;
+}
+.dt-buttons button{
+    height: 30px;
+}
 
 table.dataTable thead > tr > th.dt-orderable-asc span.dt-column-order,
 table.dataTable thead > tr > th.dt-orderable-desc span.dt-column-order{
@@ -510,25 +511,9 @@ td.dt-type-numeric{
     border-radius: 12px;
 }
 
-input.column-filter{
-    text-align: center;
-    height: 25px;
-    padding: 5px;
-    font-size: 14px;
-    /*
-    margin-bottom: 10px;
-    width: 80%;
-    */width: 90%;
-    border: 1px solid var(--b-global-color-dark-gray);
-    border-radius: 5px;
-}
-
-input[type=text].column-filter{
-    display: block;
-
-    margin: 0 auto 10px auto;
-}
-
-input[type=date].column-filter{
-    width: 70%;
+.filter-by-area input, .filter-by-area select{
+    border: var(--b-global-color-dark-gray) 1px solid;
+    height: 40px;
+    margin-left: 10px;
+    border-radius: 12px;
 }
