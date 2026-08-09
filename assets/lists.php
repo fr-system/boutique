@@ -159,7 +159,7 @@ const BOUTIQUE_TABLES = array(
             array("field_name" => "bonus", "widget" => "hidden","create_input"=>true,"save_as_text"=> true),
             array("field_name" => "discount_percent", "widget" => "text", "label" => "הנחה", "un_apostrophe" => true,"sign"=>"%","create_input"=>true),
             array("field_name" => "total", "widget" => "readonly", "label" => "סה\"כ", "un_apostrophe" => true,"sign"=>"₪","create_input"=>true),
-            array("field_name" => "id", "widget" => "hidden","create_input"=>true),
+            array("field_name" => "id", "widget" => "hidden","create_input"=>true,"temp_id"=>true),
             array("field_name" => "order_id", "widget" => "hidden","create_input"=>true),
             array("field_name" => "product_id", "widget" => "hidden","create_input"=>true),
             //array("field_name" => "supplier_id", "join_table_from" => "products", "join_table" => "suppliers", "join_value" => "name"),

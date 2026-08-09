@@ -43,7 +43,7 @@ function send_unclosed_tasks($type)
     $results = run_query($query);
     //write_log("res ".json_encode($results));
     foreach ($results as $result) {
-        $attr = ["export" => "archive", "type" => $type, "packet" => ["tasks"], "send_mail" => true, "create_only_fill" => true,"agent_id"=>$result->agent_id];
+        $attr = ["report_title"=>"", "export" => "archive", "type" => $type, "packet" => ["tasks"], "send_mail" => true, "create_only_fill" => true,"agent_id"=>$result->agent_id];
         $file = create_pdf($attr);
         if ($file == null) exit;
         $subject = "משימות שלא נסגרו ועבר תאריך היעד";

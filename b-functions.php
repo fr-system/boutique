@@ -198,7 +198,9 @@ function get_column_value($column,$row,$field,$list,$key,$is_readonly=false)
             }
             break;
         case "radio":
-            $column_value = '<div class="flex-display align-center" style="color: ' . $column["values"][$row->$field]["color"] . '"><div class="dot" style="background-color: ' . $column["values"][$row->$field]["color"] . '"></div>&nbsp;' . $column["values"][$row->$field]["label"] . '</div>';
+            if(!empty($row->$field)) {
+                $column_value = '<div class="flex-display align-center" style="color: ' . $column["values"][$row->$field]["color"] . '"><div class="dot" style="background-color: ' . $column["values"][$row->$field]["color"] . '"></div>&nbsp;' . $column["values"][$row->$field]["label"] . '</div>';
+            }
             break;
         case "status":
             $column_value = '<span class="pointer ellipse ' . $column["values"][$row->$field]["class"] . '">
@@ -290,7 +292,7 @@ function get_column_value($column,$row,$field,$list,$key,$is_readonly=false)
                     $column_value .= "<span class='plus bold font-25 pointer {$readonly}'>+</span></div>";
                 }
 
-                if($field == "id" && empty($value)){
+                if(isset($column['temp_id']) && empty($value)){
                     $column_value .= "<input type='hidden' class='temp' name='rows[{$key}][temp_id]' value='temp_{$key}'/>";
                 }
             }
@@ -312,7 +314,7 @@ function on_order_confirmation()
                   WHERE id = " . $order_id;
         //run_query ($query);//זה עובד טוב פשוט חבל כל הזמן שיאשר ויפריע לבדיקות!!!!
 
-        $attr=["subject"=>"orders","export"=>"single","order_id"=>$_POST['order_id'],
+        $attr=["report_title"=>"פרטי הזמנה", "subject"=>"orders","export"=>"single","order_id"=>$_POST['order_id'],
             "send_mail"=>true,"client_id"=>$_POST['client_id']];
 
         $file = create_pdf($attr);

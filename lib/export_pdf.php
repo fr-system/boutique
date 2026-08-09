@@ -4,6 +4,7 @@ require_once(dirname(dirname(dirname(dirname(dirname(__FILE__))))) . '/wp-load.p
 //export_pdf.php?file=pdf&export=single&subject='.$table_name.'&id=' . $row->id
 if(isset($_GET['export']) && isset($_GET['file']) && $_GET['file'] == "pdf") {
     //write_log("!!!!");
+
     create_pdf($_GET);
 }
 
@@ -11,13 +12,30 @@ function create_pdf($attr)
 {
     $table_name = $attr["subject"] ?? "";
 
+    $defaultConfig = (new \Mpdf\Config\ConfigVariables())->getDefaults();
+    $fontDirs = $defaultConfig['fontDir'];
+    $defaultFontConfig = (new \Mpdf\Config\FontVariables())->getDefaults();
+    $fontData = $defaultFontConfig['fontdata'];
+
     $mpdf = new \Mpdf\Mpdf([
         'mode' => 'utf-8',
         'format' => 'A4',
-        'default_font' => 'dejavusans',//'Heebo'
+        'fontDir' => array_merge($fontDirs, [
+            __DIR__ . '/fonts',
+        ]),
+        'fontdata' => $fontData + [
+                'noto-sans' => [
+                    'R' => 'NotoSansHebrew-Regular.ttf',
+                ],
+            ],
+        'default_font_size' => 10,
+        'default_font' => 'noto-sans',
+    //    'default_font' => 'Noto-Sans',//'dejavusans',//'Heebo'
+        'margin_top'    => 30,
+        'margin_bottom' => 5,
         'margin_left'   => 0,
         'margin_right'  => 0,
-        'margin_top'    => 0,
+
         'margin_header' => 0,
         'margin_footer' => 0
     ]);
@@ -25,16 +43,18 @@ function create_pdf($attr)
     $mpdf->setAutoTopMargin = false;
 
     $mpdf->SetDirectionality('rtl');
-    $header = '<div style="width: 100%; text-align: right; background-color: black;">
-                   <strong class="report-title">פרטי הזמנה</strong>
-                   <img style="float: left" src="https://kosherboutique.co.il/wp-content/themes/boutique/assets/images/logo_header.png"/>
-                </div>';
+    $header = '<table style="width: 100%; text-align: right; background-color: black;">
+                <tr>
+                   <td class="report-title"><strong>'.$attr["report_title"].'</strong> </td>
+                   <td style="text-align: left;"><img  src="https://kosherboutique.co.il/wp-content/themes/boutique/assets/images/logo_header.png"/></td>
+              </tr>  </table>';
 
     $mpdf->SetHTMLHeader($header);
 
     test_mode_table_prefix ();
     $html='<style>
                 body {
+                    letter-spacing: 1px;
                     direction: rtl;
                     text-align: right;
                     font-size:12pt;
@@ -72,10 +92,10 @@ function create_pdf($attr)
                     font-size:20pt;
                     color: white;
                     margin: auto 0;
-                    padding-right: 10px
+                    padding-right: 40px
                 }
                 </style>
-                <div style="padding: 30px; margin-top: 200px">';
+                <div style="padding: 30px;">';
 
 
     $packet = array();
@@ -83,18 +103,20 @@ function create_pdf($attr)
         $packet = $attr["packet"];
     }
 
-    if($table_name=="orders") {
-        $packet = ["client", "order", "order_products"];
-    }
 
-    foreach ($packet as $func) {
-        $func_name = "drow_html_" . $func;
-        //write_log("func_name ".$func_name);
-        $html .= $func_name($attr);
-    }
 
     switch ($attr["export"]) {
         case "single":
+
+            if($table_name=="orders") {
+                $packet = ["client", "order", "order_products"];
+            }
+
+            foreach ($packet as $func) {
+                $func_name = "drow_html_" . $func;
+                //write_log("func_name ".$func_name);
+                $html .= $func_name($attr);
+            }
             break;
         case 'archive':
             $filters = array();
