@@ -99,7 +99,7 @@ svg:hover path.background-gold, a:hover svg path.background-gold{
 
 svg path.stroke-background-gold {
     stroke: var(--b-global-color-gold);
- }
+}
 svg:hover path.stroke-background-gold, a:hover svg path.stroke-background-gold{
     stroke: var(--b-global-color-dark-green-hover);
 }
@@ -107,11 +107,9 @@ svg:hover path.stroke-background-gold, a:hover svg path.stroke-background-gold{
 svg path.stroke-background-black {
     stroke: black;
 }
-svg:hover path.stroke-background-black, a:hover svg path.stroke-background-black{
-    /*stroke: var(--b-global-color-dark-green-hover);*/
+svg path.stroke-background-green {
+    stroke: var(--b-global-color-dark-green);
 }
-
-
 
 .background-light-light-blue:hover{
     background-color: #c6e2e0;

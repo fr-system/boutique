@@ -223,6 +223,7 @@ else{
             </div>
          <?php } ?>
     </div>
+    <?php if($table_name == "orders"){ ?>
     <script>
         const promotions = <?= json_encode($promotions, JSON_UNESCAPED_UNICODE) ?>;
         const promotionsByProduct = {};
@@ -244,6 +245,7 @@ else{
             }
         });
     </script>
+    <?php } ?>
 </section>
 <?php get_footer();?>
 

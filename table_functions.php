@@ -91,6 +91,11 @@ function get_archive_table($table_name,$data,$attr)
             $html .= '<th class="no-sort"></th>';
         }
     }
+
+    if($table_name == "order_products"){
+        $html .= '<th class="no-sort remove" ></th>';//מחיקת בונוס או מבצע מההזמנה
+    }
+
     $html .= '</tr></thead>';
 
     foreach ($data as $key => $row) {
@@ -273,6 +278,19 @@ function get_tr_data($table_name, $data, $key,$attr){
             }
         }
     }
+
+    if($table_name == "order_products") { //  מחיקת מוצר - בונוס או מבצע מההזמנה
+        $html .= '<td class="td-action remove">';
+        //write_log ('bonus '.isset($bonus_row).' empty '.empty($bonus_row));
+
+            $html .= '<a class="hidden has-tooltip" data-tooltip="מחיקת מוצר בונוס או מבצע מההזמנה" onclick="removeProdoctBonus(jQuery(this).closest(\'tr\'))">
+                      <svg  xmlns="http://www.w3.org/2000/svg" width="25" height="24" viewBox="0 0 25 24" fill="none">
+                    <path d="M4.16663 7H20.8333M10.4166 11V17M14.5833 11V17M5.20829 7L6.24996 19C6.24996 19.5304 6.46945 20.0391 6.86015 20.4142C7.25085 20.7893 7.78076 21 8.33329 21H16.6666C17.2192 21 17.7491 20.7893 18.1398 20.4142C18.5305 20.0391 18.75 19.5304 18.75 19L19.7916 7M9.37496 7V4C9.37496 3.73478 9.48471 3.48043 9.68006 3.29289C9.87541 3.10536 10.1404 3 10.4166 3H14.5833C14.8596 3 15.1245 3.10536 15.3199 3.29289C15.5152 3.48043 15.625 3.73478 15.625 4V7" class="stroke-background-green" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+                    </svg></a>';
+
+        $html .= '</td>';
+    }
+
     $html .='</tr>';
     return $html;
 }

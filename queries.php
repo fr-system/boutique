@@ -105,7 +105,6 @@ function save_single_data()
         }
     }
 
-/*    write_log("post: ".json_encode($_POST));*/
     if($table_name == "specials"){
         $_POST["products_buy"] = json_encode($_POST["products_buy"]);
     }

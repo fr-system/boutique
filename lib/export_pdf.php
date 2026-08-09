@@ -25,8 +25,8 @@ function create_pdf($attr)
     $mpdf->setAutoTopMargin = false;
 
     $mpdf->SetDirectionality('rtl');
-    $header = '<div style="width: 100%; text-align: right; margin-bottom: 60px;background-color: black;">
-                   <strong style="margin: auto 0 " class="report-title">פרטי הזמנה</strong>
+    $header = '<div style="width: 100%; text-align: right; background-color: black;">
+                   <strong class="report-title">פרטי הזמנה</strong>
                    <img style="float: left" src="https://kosherboutique.co.il/wp-content/themes/boutique/assets/images/logo_header.png"/>
                 </div>';
 
@@ -71,10 +71,11 @@ function create_pdf($attr)
                 .report-title{
                     font-size:20pt;
                     color: white;
-                    
+                    margin: auto 0;
+                    padding-right: 10px
                 }
                 </style>
-                <div style="padding: 30px; margin-top: 20cm">';
+                <div style="padding: 30px; margin-top: 200px">';
 
 
     $packet = array();
@@ -192,7 +193,7 @@ function drow_html_order($attr){
               <strong class='title'>הזמנה מס. {$result->id}</strong><br>
               <strong>תאריך הזמנה: </strong><span>".date('d/m/Y בשעה H:i',strtotime ($result->order_date))."</span><br>
               <strong>סכום: </strong><span>₪".$result->total."</span><br>
-              <strong>הנחה: </strong><span>%".$result->discount."</span><br>
+              <strong>הנחה: </strong><span>".(!empty($result->discount) ? "% ". $result->discount:"00.00")."</span><br>
               <strong>סה''כ לתשלום: </strong><span>₪"."1000"."</span><br>
               <strong>הערות: </strong><span>{$result->notes}</span>
            </div>";
