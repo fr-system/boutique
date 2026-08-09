@@ -158,6 +158,51 @@ jQuery(document).ready(function($){
             filterOrderProdoctsRowsToSave();
         }
 
+        if (subjectPage == "specials" && jQuery('.page.single').length > 0){//עמוד מבצעים
+            var type_id = jQuery(".page.single select[name=type]").find('option:selected').val();
+            var good = true;
+            switch (type_id){
+                case "1":
+                    jQuery('.page.single input[name=price_more]').val("");
+                    jQuery('.page.single input[name=discount]').val("");
+
+                    if(!(jQuery('.page.single input[name=buy]').val() &&
+                        jQuery('input[name="products_buy[]"]:checked').length > 0 &&
+                    jQuery('.page.single input[name=get]').val() &&
+                    jQuery('.page.single select[name=product_get]').val() )){
+                        good = false;
+                    }
+                    break;
+                case "2":
+                    jQuery('.page.single input[name=buy]').val("");
+                    jQuery('input[name="products_buy[]"]').prop('checked', false);
+                    if(!jQuery('.page.single input[name=price_more]').val() ||
+                        !(jQuery('.page.single input[name=discount]').val() ||
+                        jQuery('.page.single input[name=get]').val() && jQuery('.page.single select[name=product_get]').val())){
+                        good = false;
+                    }
+                    break;
+                case "3":
+                    jQuery('.page.single input[name=price_more]').val("");
+                    jQuery('.page.single input[name=discount]').val("");
+                    jQuery('.page.single input[name=get]').val("");
+                    jQuery('.page.single select[name=product_get]').val("");
+
+                    if(!jQuery('.page.single input[name=buy]').val() ||
+                        jQuery('input[name="products_buy[]"]:checked').length === 0){
+                        good = false;
+                    }
+
+                    break;
+            }
+
+            if(!good){
+                $form.find('#form_error_msgs_container').html('נא להכניס את כל הנתונים של המבצע לפני שמירה');
+                $form.find('#form_error_msgs_container').addClass("margin-bottom-20");
+                return;
+            }
+        }
+
         $form.addClass('disabled').find('[type="submit"]').prop('disabled', true);
         //grecaptcha.execute(globalVars.recaptcha_key, {action: 'submit'})
         //.then(function (token) {

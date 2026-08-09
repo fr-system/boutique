@@ -37,7 +37,7 @@ const BOUTIQUE_TABLES = array(
 
         ),
         "filter" => "blocked is null or blocked = 0",
-        "actions" => array("orders","tasks",array("title"=>"שליחת דוח חיוב","dialog"=>"bout-massage",
+        "actions" => array("orders","tasks",array("title"=>"דוח חיוב","dialog"=>"bout-massage",
             "ajax_func"=>"client_billing_report","text"=>"האם לשלוח ללקוח דוח חיוב למייל?"))
     ),
     //id	name	main_client_id	city_id	address	phone	email

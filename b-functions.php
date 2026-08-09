@@ -88,11 +88,13 @@ function get_list_ajax(){
             break;
         case "checkboxes"://כרגע שימושים רק בבחירת מוצרים במבצע
             if($selected_value) {
-                $array = json_decode(stripslashes($selected_value), true);
-                $selected_value = array_map('intval', $array);
+                $value = $selected_value;
+                $value = stripslashes($value);
+                $value = trim($value, '"');
+                $array = json_decode($value, true);
+                $selected_value = array_map('intval', (array)$array);
             }
             $checkboxes = build_checkboxes($table_name, $selected_value, array("filter" => $filter,"selector"=>$selector));
-            //$checkboxes = array();
             break;
     }
     echo json_encode (array("options" => $options ,"tableData"=>$table,"array"=>$result,"tableName"=>$table_name,"checkboxes"=>$checkboxes,"selector"=>$selector));
@@ -306,14 +308,20 @@ function on_order_confirmation()
                   WHERE id = " . $order_id;
         //run_query ($query);//זה עובד טוב פשוט חבל כל הזמן שיאשר ויפריע לבדיקות!!!!
 
-        //שליחת מייל לסוכן -למנהל בוטיק על ההזמנה שאושרה
-        //$user = get_user_by('ID', $order_confirmation->user_opens);
         $attr=["subject"=>"orders","export"=>"single","order_id"=>$_POST['order_id'],
             "send_mail"=>true,"client_id"=>$_POST['client_id']];
 
         $file = create_pdf($attr);
         if (!empty($file)) {
-            send_mail("rym76843@gmail.com", "אישור הזמנה מס. " . $order_id, "מצורף קובץ", [$file]);
+            //למנהל בוטיק
+            send_mail(get_option('admin_email'), "אישור הזמנה מס. " . $order_id, "מצורף קובץ הזמנה", [$file]);
+
+            $order_confirmation = get_data_table("orders",array(array("filter_field" => "id", "filter_value" => $_POST["order_id"])))[0];
+            //שליחת מייל לסוכן - על ההזמנה שאושרה
+            if($order_confirmation->user_opens != 2) {
+                $user = get_user_by('ID', $order_confirmation->user_opens);
+                send_mail($user->user_email, "אישור הזמנה מס. " . $order_id, "מצורף קובץ הזמנה", [$file]);
+            }
             if (file_exists($file)) {
                 unlink($file);
             }
