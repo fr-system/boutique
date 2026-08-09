@@ -111,7 +111,7 @@ function checkPromotions(product, currentValue){
                     });
                 }
                 var countPromotions = getCountPromotions(pro.product_get);
-                var productToGet = jQuery("tr:not(.bonus,.promo) td.product_id input[type=hidden][value=" + pro.product_get + "]").closest("tr");
+                var productToGet = jQuery("tr:not(.bonus,.promo) td.product_id input[type=hidden][value=" + pro.product_get + "]").closest("tr").first();
                 //var productToGet = jQuery("tr:not(.bonus,.promo):has(.product_id input[type=hidden][value=" + pro.product_get + "])");
 
                 if (countProductsInOrder >= needToBuy /*&& countProductsInOrder % needToBuy == 0*/) {
@@ -132,13 +132,13 @@ function checkPromotions(product, currentValue){
 
                     if (row.find("td.supplier_id span").text().trim() !== pro.supplier_id) {
                         return;
-                    }
+                    }4
                     priceToSupplier += parseFloat(row.find("td.total input").autoNumeric('get')) || 0;
                 });
-                var countPromotions = getCountPromotions(countToGet);
+                var countPromotions = getCountPromotions(pro.product_get);
                 if (priceToSupplier >= parseFloat( pro.price_more)) {
                     if (pro.get && countPromotions == 0) {
-                        var productToGet = jQuery("tr:not(.bonus,.promo) td.product_id input[type=hidden][value=" + pro.product_get + "]").closest("tr");
+                        var productToGet = jQuery("tr:not(.bonus,.promo) td.product_id input[type=hidden][value=" + pro.product_get + "]").closest("tr").first();
                         //var productToGet = jQuery("tr:not(.bonus,.promo):has(.product_id input[type=hidden][value=" + pro.product_get + "])");
                         addProdoctBonus(productToGet, countToGet);
                         break;

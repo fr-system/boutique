@@ -232,9 +232,6 @@ function plusMinusCountProduct(me){
         } else {
             product.find(".order_individual span.readonly.right").removeClass("readonly un-value");
         }
-        if(!product.hasClass("bonus")) {
-            checkPromotions(product, currentValue);
-        }
     }
     else{
         product.removeClass('in-cart');
@@ -242,6 +239,9 @@ function plusMinusCountProduct(me){
         product.find(".order_individual span").addClass("readonly un-value");
     }
     calculatePrice(me);
+    if(!product.hasClass("bonus")) {//אם הורידו מוצר לבדוק להוריד את המבצע
+        checkPromotions(product, currentValue);
+    }
 }
 function countUnitsForProduct(product,count) {
     product = jQuery(product);
@@ -263,6 +263,7 @@ function getCountPromotions(productId,className){
 function addProdoctBonus(product,countBonus = 0){
     var countRows =  table.rows().count();
     var pBonus =  product.clone(true);
+
     pBonus.find(".count input").val(countBonus || 1);
     var rowIndex = pBonus.find(".count input").attr("name").replace("rows[","").replace("][count]","");
     jQuery.each(  pBonus.find("input"),function (k,input){
@@ -281,8 +282,13 @@ function addProdoctBonus(product,countBonus = 0){
     pBonus.find(".order_individual span.right").addClass("un-value");
     pBonus.find(".order_individual span.left").removeClass("un-value");
     pBonus.find(".dupl-action").html('');
+    pBonus.addClass('in-cart');
     pBonus.addClass((countBonus == 0 ? 'bonus' :'promo'));
     //product.after(pBonus);
+
+    /*jQuery(table.table().body()).append(pBonus[0]);
+
+    table.rows().invalidate('dom').draw(false);*/
 
     table.row.add(pBonus).draw(false);
     var columnIndex =  table
@@ -396,14 +402,16 @@ function startingDataTable(){
                                 jQuery(sender).toggleClass("cart-mode");
                                 cartMode = !cartMode;
                                 if (cartMode) {
-                                    table.column(".dupl-action").visible(true);
+                                    //table.column(".dupl-action").find("a").show();
+                                    table.column(".dupl-action").nodes().to$().find("a").show();
                                     show_tooltip();
                                     jQuery(sender).find(".button-text").text("חזרה להזמנה");
                                     //jQuery(sender).find("svg")[0].prepend(checkPath[0]);
                                     //jQuery(sender).find("svg").prepend("<path fill-rule=\"evenodd\" d=\"M10.854 8.146a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708 0l-1.5-1.5a.5.5 0 0 1 .708-.708L7.5 10.793l2.646-2.647a.5.5 0 0 1 .708 0\"/>");
                                 } else {
                                     jQuery(sender).find(".button-text").text("הצגת עגלה");
-                                    table.column(".dupl-action").visible(false);
+                                    //table.column(".dupl-action").find("a").hide();
+                                    table.column(".dupl-action").nodes().to$().find("a").hide();
                                     //checkPath = jQuery(sender).find("svg path").first().detach();
                                     // jQuery(sender).find("svg path[fill-rule=\"evenodd\"]").remove();
                                 }
@@ -447,7 +455,7 @@ function startingDataTable(){
         order: [],
         "columnDefs": [
             {"orderable": false, "targets": aTargets},//[ 4, 5, 6 ]
-            (tableName == "orders" && currentUrl.includes('single') ? {"visible":false, "targets":0}:{})
+            //(tableName == "orders" && currentUrl.includes('single') ? {"visible":false, "targets":0}:{})
         ],
         // "order": []
         // "order": [[ 3, "desc" ]]
@@ -460,7 +468,9 @@ function startingDataTable(){
     //var checkPath = jQuery("button.show-cart").find("svg path").first().detach();
     //}, 500);
 
-    if(tableName == "orders" && currentUrl.includes('single')){}
+    if(tableName == "orders" && currentUrl.includes('single')){
+        table.column(".dupl-action").nodes().to$().find("a").hide();
+    }
     else {
         //jQuery('.dataTables_filter').hide();
         jQuery('.dt-search').closest(".dt-layout-row").hide();

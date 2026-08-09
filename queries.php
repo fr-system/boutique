@@ -127,11 +127,11 @@ function save_single_data()
         //$id = $wpdb->get_var ("SELECT MAX(id) FROM {$wpdb->prefix}" . $table_name);
     }
 
-    //write_log("save_single_data " .json_encode($_POST));
+    write_log("save_single_data " .json_encode($_POST));
     if (isset($_POST["rows"])) {
-        //write_log("rows ".json_encode($_POST["rows"]));
+        write_log("rows ".json_encode($_POST["rows"]));
 
-        if($table_name = "orders"){
+        if($table_name == "orders"){
             $temp_list = array();
         }
 
@@ -145,7 +145,7 @@ function save_single_data()
                     }
                 }
                 $sub_table_name = "agent_target_supplier";
-                //write_log("row agent_target_supplier" . json_encode($row));
+                write_log("row agent_target_supplier" . json_encode($row));
             }
 
             if ($table_name == "orders") {
@@ -176,17 +176,19 @@ function save_single_data()
                 (isset($row["remove"]) && $row["remove"] ? "remove" : "update") : "new";
            // write_log ("action_product " . $action_product);
             //write_log ("row to save" . json_encode ($row));
-            if($action_product == "new") {
+            if($action_product == "new" && $sub_table_name == "order_products") {
                 $copy =  $row;
                 unset($row["temp_id"]);
                 write_log ('copy '.json_encode ($copy).' row '.json_encode ($row));
             }
             $result = pre_action_query ($sub_table_name, $row);
 
-            //write_log("result to save" . json_encode($result));
+            write_log("result to save" . json_encode($result));
             run_action_query ($sub_table_name, $row["id"], $action_product, $result);
-            $copy["id"]= $wpdb->insert_id;
-            $temp_list[] = $copy;
+            if($table_name = "orders") {
+                $copy["id"] = $wpdb->insert_id;
+                $temp_list[] = $copy;
+            }
 
         }
     }

@@ -7,7 +7,7 @@ if(isset($_GET['export'])) {
 		case 'archive':
 			test_mode_table_prefix ();
 			$table_name = $_GET["subject"];
-			$packet = get_data_to_export($table_name,"xlsx");
+			$packet = get_data_to_export($table_name,"xlsx",array());
 			$headers = $packet["headers"];
 			$data = $packet["data"];
 			break;
