@@ -33,9 +33,11 @@ input:not([type=search]):-webkit-autofill {
 }
 
 .archive-gallery .single{
-    width: 280px;
+    /*width: 280px;*/
     background-color: white;
 }
+.specials-area.archive-gallery .single{
+    width: 95%;}
 .archive-gallery a.single{
     color: inherit;
     text-decoration: none;
@@ -92,7 +94,6 @@ tr.product{
 }
 tr.product td.count{
     align-self: center;
-    display: flex;
 }
 tr.product td.count span,tr.product td.count input{
     border:solid 1px var(--b-global-color-dark-gray);

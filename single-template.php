@@ -236,6 +236,9 @@ else{
                         (promotionsByProduct[productId] ??= []).push(p);
                     });
                 }
+                else if (p.supplier_id) {
+                    (promotionsBySupplier[p.supplier_id] ??= []).push(p);
+                }
             } else if (p.supplier_id) {
                 (promotionsBySupplier[p.supplier_id] ??= []).push(p);
             }

@@ -75,9 +75,14 @@ function filterOrderProdoctsRowsToSave() {
 function checkPromotions(product, currentValue){
     var supplier_id = parseInt(product.find(".supplier_id span").text() || 0);
     var product_id = parseInt(product.find(".product_id span").text() || 0);
-    var relevant_promotions = promotionsByProduct[product_id] ??= [];
+
+    var relevant_promotions = (promotionsByProduct[product_id] ?? []).slice();
     if (promotionsBySupplier[supplier_id]) {
-        relevant_promotions.push(promotionsBySupplier[supplier_id] ??= []);
+        var promotion_Supplier = promotionsBySupplier[supplier_id].slice()
+        promotion_Supplier.forEach(pro_s => {
+            relevant_promotions.push(pro_s );
+        });
+
     }
     var currentCount = countUnitsForProduct(product, currentValue);
 
@@ -106,11 +111,9 @@ function checkPromotions(product, currentValue){
                     });
                 }
                 var countPromotions = getCountPromotions(pro.product_get);
-                var productToGet = jQuery("tr:not(.bonus,.promo):has(.product_id input[type=hidden][value=" + pro.product_get + "])");
-                // if (countProductsInOrder == needToBuy && countPromotions == 0) {
-                //     addProdoctBonus(productToGet, countToGet);
-                //     break;
-                // }
+                var productToGet = jQuery("tr:not(.bonus,.promo) td.product_id input[type=hidden][value=" + pro.product_get + "]").closest("tr");
+                //var productToGet = jQuery("tr:not(.bonus,.promo):has(.product_id input[type=hidden][value=" + pro.product_get + "])");
+
                 if (countProductsInOrder >= needToBuy /*&& countProductsInOrder % needToBuy == 0*/) {
                     var toAdd = countToGet * parseInt(countProductsInOrder / needToBuy);
                     if (countPromotions == 0) {// קורה כי הכמות לארגד לא מדויקת לכמות המבצע
@@ -133,9 +136,10 @@ function checkPromotions(product, currentValue){
                     priceToSupplier += parseFloat(row.find("td.total input").autoNumeric('get')) || 0;
                 });
                 var countPromotions = getCountPromotions(countToGet);
-                if (priceToSupplier >= pro.price_more) {
+                if (priceToSupplier >= parseFloat( pro.price_more)) {
                     if (pro.get && countPromotions == 0) {
-                        var productToGet = jQuery("tr:not(.bonus,.promo):has(.product_id input[type=hidden][value=" + pro.product_get + "])");
+                        var productToGet = jQuery("tr:not(.bonus,.promo) td.product_id input[type=hidden][value=" + pro.product_get + "]").closest("tr");
+                        //var productToGet = jQuery("tr:not(.bonus,.promo):has(.product_id input[type=hidden][value=" + pro.product_get + "])");
                         addProdoctBonus(productToGet, countToGet);
                         break;
                     }

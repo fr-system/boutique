@@ -281,11 +281,15 @@ function get_column_value($column,$row,$field,$list,$key,$is_readonly=false)
                     $value = $date ? $date->format('Y-m-d') : '';
                 }
 
-                $column_value .= "<input type='{$type}' class='' name='rows[{$key}][{$field}]' value='{$value}' {$readonly}" .
+                $column_value .= "<input type='{$type}' class='{$field}' name='rows[{$key}][{$field}]' value='{$value}' {$readonly}" .
                     (isset($column['un_apostrophe']) && isset($column['sign']) ? "data-a-sign='" . $column['sign'] . "'" : "") . "/>";
 
                 if ($column['widget'] == 'number') {
                     $column_value .= "<span class='plus bold font-25 pointer {$readonly}'>+</span></div>";
+                }
+
+                if($field == "id" && empty($value)){
+                    $column_value .= "<input type='hidden' class='temp' name='rows[{$key}][temp_id]' value='temp_{$key}'/>";
                 }
             }
         }

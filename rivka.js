@@ -62,6 +62,12 @@ function fillOrderId(result){
         jQuery("section form input[name=branch]").prop('disabled', true);
         jQuery("section input[name=order_date]").prop('disabled', true);
     }
+    if(result.temp_list){
+        result.temp_list.forEach(temp_row => {
+            var temp_input =  jQuery(".archive-table.order_products tbody tr td.id input.temp[value=\""+temp_row.temp_id+"\"]");
+            temp_input.siblings("input.id").val(temp_row.id);
+        });
+    }
 }
 
 function onCheckingDuplicates(result){
@@ -219,6 +225,7 @@ function plusMinusCountProduct(me){
     numberInput.val(currentValue);
     if(currentValue > 0) {
         product.addClass('in-cart');
+        product.find("input").prop('disabled',false);
         if (product.find(".individually span").text()) {
             product.find(".order_individual span.readonly.right").removeClass("un-value");
             product.find(".order_individual span.readonly").removeClass("readonly");
@@ -267,14 +274,27 @@ function addProdoctBonus(product,countBonus = 0){
     pBonus.find(".name").text(pBonus.find(".name").text() + (countBonus == 0 ? ' - בונוס' :' - מבצע'));
     pBonus.find(".discount_percent input").autoNumeric('set', 100);
     pBonus.find(".total input").autoNumeric('set', 0);
-    pBonus.find(".id input").val("");
+    pBonus.find(".id input.id").val("");
+    pBonus.find(".id input.temp").val("temp_"+countRows);
     pBonus.find(".bonus input").val((countBonus == 0 ? 'bonus' :'promo'));
     pBonus.find(".order_individual input").val("1");
     pBonus.find(".order_individual span.right").addClass("un-value");
     pBonus.find(".order_individual span.left").removeClass("un-value");
     pBonus.find(".dupl-action").html('');
     pBonus.addClass((countBonus == 0 ? 'bonus' :'promo'));
-    product.after(pBonus);
+    //product.after(pBonus);
+
+    table.row.add(pBonus).draw(false);
+    var columnIndex =  table
+        .columns()
+        .header()
+        .toArray()
+        .findIndex(function (th) {
+            return $(th).data('column-name') === 'name';
+        });
+
+
+    table.order([columnIndex, 'asc']).draw();
     if(countBonus != 0)
     pBonus.find(".count span.pointer").off();
 
@@ -446,7 +466,10 @@ function startingDataTable(){
         jQuery('.dt-search').closest(".dt-layout-row").hide();
     }
 
+
     jQuery.fn.dataTable.ext.search.push(function (settings, data) {
+        if(currentUrl.includes('single'))return true;
+
         const option = jQuery('.filter-by option:selected');
         const widgetType = option.data('widget');
         var fieldName =  option.val();

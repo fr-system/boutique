@@ -284,8 +284,12 @@ jQuery(document).ready(function($){
         }
     });
 
-    jQuery(".status-options .ellipse:not(.readonly)").click(function () {
+    jQuery(".status-options .ellipse").click(function () {
+
         var ellipse = jQuery(this);
+        if(ellipse.hasClass("readonly")){
+            return ;
+        }
         var currentChooser = ellipse.closest(".status-options");
         var input = currentChooser.find("input");
 

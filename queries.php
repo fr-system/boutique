@@ -82,7 +82,7 @@ function run_action_query($table_name, $id, $action, $options)
     return $ok;
 }
 
-add_action('wp_ajax_save_single_data', 'א');
+add_action('wp_ajax_save_single_data', 'save_single_data');
 function save_single_data()
 {
     $table_name = $_POST["table_name"];
@@ -124,13 +124,18 @@ function save_single_data()
    // write_log("r ".json_encode($result));
     run_action_query ($table_name, $id, $action, $result);
     if (!$_POST["id"]) {
-        $id = $wpdb->insert_id;
+            $id = $wpdb->insert_id;
         //$id = $wpdb->get_var ("SELECT MAX(id) FROM {$wpdb->prefix}" . $table_name);
     }
 
     //write_log("save_single_data " .json_encode($_POST));
     if (isset($_POST["rows"])) {
         //write_log("rows ".json_encode($_POST["rows"]));
+
+        if($table_name = "orders"){
+            $temp_list = array();
+        }
+
         foreach ($_POST["rows"] as $row) {
             if ($table_name == "agents") {
                 if (empty($row["target"])) {
@@ -148,7 +153,7 @@ function save_single_data()
                 if (empty($row["count"]) && !empty($row["id"])) {
                     $row["remove"] = true;
                 }
-                if ($action == "new") {
+                if (empty($row["order_id"])) {
                     $row["order_id"] = $id;
                 }
                 $sub_table_name = "order_products";
@@ -172,15 +177,25 @@ function save_single_data()
                 (isset($row["remove"]) && $row["remove"] ? "remove" : "update") : "new";
            // write_log ("action_product " . $action_product);
             //write_log ("row to save" . json_encode ($row));
+            if($action_product == "new") {
+                $copy =  $row;
+                unset($row["temp_id"]);
+                write_log ('copy '.json_encode ($copy).' row '.json_encode ($row));
+            }
             $result = pre_action_query ($sub_table_name, $row);
+
             //write_log("result to save" . json_encode($result));
             run_action_query ($sub_table_name, $row["id"], $action_product, $result);
+            $copy["id"]= $wpdb->insert_id;
+            $temp_list[] = $copy;
+
         }
     }
     echo json_encode (array(
         'status' => 'success',
         'id' => $id,
         'redirect' => (isset($_POST["previous_page"]) ? $_POST["previous_page"] : ''),
+        'temp_list'=>$temp_list
     ));
     wp_die ();
 
