@@ -348,14 +348,15 @@ function specials_gallery($list,$attr = array()){ ?>
                     <span class='date_end'>".date('d/m/Y', strtotime($single->date_end)) . "</span>
                     </div>": "") ?>
                 <?= (!empty($single->supplier_name) ? "<div class=\"part-10\"><strong>ספק: </strong>
-<span>". $single->supplier_name ."</span></div>": "") ?>
+                    <span>". $single->supplier_name ."</span></div>": "") ?>
                 <div class="part-10"><?= "<strong>סוג מבצע: </strong>".array_pop($results)["text"]?></div>
                 <?php
                 $html = "";
+                if(!empty($single->buy)) {
+                    $html .= '<div class="part-10">' . "<strong>קנה כמות: </strong>" . $single->buy . '</div>';
+                }
                 $products = json_decode($single->products_buy);
                 if(!empty($single->buy) && is_array($products)) {
-                    $html .= '<div class="part-10">' . (!empty($single->buy) ? "<strong>קנה כמות: </strong>" . $single->buy : "") . '</div>';
-
                     $products_res = run_query("SELECT name FROM test_products WHERE id in(" . implode(',', $products) . ")");
                     $products_str = implode(', ', array_column($products_res, 'name'));
                     $html .= '<div class="part-10"><strong>מהמוצרים: </strong>' . $products_str . '</div>';

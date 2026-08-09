@@ -167,7 +167,6 @@ jQuery(document).ready(function($){
                     jQuery('.page.single input[name=discount]').val("");
 
                     if(!(jQuery('.page.single input[name=buy]').val() &&
-                        jQuery('input[name="products_buy[]"]:checked').length > 0 &&
                     jQuery('.page.single input[name=get]').val() &&
                     jQuery('.page.single select[name=product_get]').val() )){
                         good = false;

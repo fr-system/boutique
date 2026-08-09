@@ -62,8 +62,8 @@ const BOUTIQUE_TABLES = array(
         "columns" => array(
             array("field_name" => "name", "widget" => "text","label"=>"שם","required"=>true),
             array("field_name" => "barcode", "widget" => "text","label"=>"ברקוד","required"=>true),
-            array("field_name" => "supplier_id", "widget" => "select","label"=>"ספק", "join_table" => "suppliers", "join_value" => "name","filter"=>true),
-            array("field_name" => "price", "widget" => "text","label"=>"מחיר", "un_apostrophe" => true,"sign"=>"₪"),
+            array("field_name" => "supplier_id", "widget" => "select","label"=>"ספק", "join_table" => "suppliers", "join_value" => "name","filter"=>true,"required"=>true),
+            array("field_name" => "price", "widget" => "text","label"=>"מחיר", "un_apostrophe" => true,"sign"=>"₪","required"=>true),
             array("field_name" => "description", "widget" => "textarea","label"=>"תיאור","hide_in_table"=>true),
             //array("field_name" => "count", "widget" => "number","label"=>"כמות בקבוקים בארגז","hide_in_table"=>true),
             array("field_name" => "file_id", "widget" => "file","label"=>"דף מוצר","hide_in_table"=>true),

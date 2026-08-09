@@ -301,6 +301,12 @@ function addProdoctBonus(product,countBonus = 0){
     //pBonus.find(".count span.pointer").addClass("readonly").removeClass("pointer");
 }
 
+function removeProdoctFromOrder(tr){
+    tr.find("td.count input").val(0);
+    tr.find("td.discount_percent input").val("");
+    calculatePrice(tr.find("td.count input"));
+}
+
 function registerToCalculatePrice(){
     jQuery('tr.product td:not(.total) input').on('change', function (e) {
         calculatePrice(this);
