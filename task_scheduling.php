@@ -39,7 +39,8 @@ function send_who_needs_pay_today($type)
 
 function send_unclosed_tasks($type)
 {
-    $query = "SELECT agent_id FROM test_tasks WHERE status_id != 1 AND target_date < CURDATE() GROUP BY agent_id";
+    global $wpdb;
+    $query = "SELECT agent_id FROM {$wpdb->prefix}tasks WHERE status_id != 1 AND target_date < CURDATE() GROUP BY agent_id";
     $results = run_query($query);
     //write_log("res ".json_encode($results));
     foreach ($results as $result) {

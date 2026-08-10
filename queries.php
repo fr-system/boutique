@@ -204,7 +204,6 @@ function save_single_data()
 function get_data_table($table_name, $filters=null, $orderby = null, $join_filter=null)
 {
     global $wpdb;
-    $wpdb->prefix = 'test_';
     $apostrophe = "";
     if (array_key_exists($table_name, BOUTIQUE_TABLES)) {
         $columns = BOUTIQUE_TABLES[$table_name]["columns"];
@@ -378,11 +377,11 @@ function get_list($list_name,$filter = '',$table_display =false)
     return $list;
 }
 function test_mode_table_prefix() {
-    //if(get_user_test_mode()) {
+    if(get_user_test_mode()) {
         global $wpdb;
         $wpdb->prefix = 'test_';
         //write_log ("prefix ".$wpdb->prefix);
-    //}
+    }
 }
 
 add_action('wp_ajax_new_chat_ajax', 'new_chat_ajax');

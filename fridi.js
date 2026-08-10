@@ -91,6 +91,13 @@ function checkPromotions(product, currentValue){
         var countToGet = parseInt(pro.get);
         switch (pro.type) {
             case "1": //  קנה קבל
+                if(currentValue ==0){
+                    jQuery("tr.promo:has(.product_id input[type=hidden][value=" + pro.product_get + "])").eq(0)
+                        .find(".count input").val(0);
+                    jQuery("tr.promo:has(.product_id input[type=hidden][value=" + pro.product_get + "])").eq(0).hide();
+                    return;
+                }
+
                 var countProductsInOrder = 0;
                 if (pro.products_buy) {
                     var productsInSpecial = JSON.parse(pro.products_buy);

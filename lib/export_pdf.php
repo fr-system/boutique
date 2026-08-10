@@ -43,13 +43,6 @@ function create_pdf($attr)
     $mpdf->setAutoTopMargin = false;
 
     $mpdf->SetDirectionality('rtl');
-    $header = '<table style="width: 100%; text-align: right; background-color: black;">
-                <tr>
-                   <td class="report-title"><strong>'.$attr["report_title"].'</strong> </td>
-                   <td style="text-align: left;"><img  src="https://kosherboutique.co.il/wp-content/themes/boutique/assets/images/logo_header.png"/></td>
-              </tr>  </table>';
-
-    $mpdf->SetHTMLHeader($header);
 
     test_mode_table_prefix ();
     $html='<style>
@@ -103,13 +96,22 @@ function create_pdf($attr)
         $packet = $attr["packet"];
     }
 
-
+    $report_title = "";
 
     switch ($attr["export"]) {
         case "single":
-
             if($table_name=="orders") {
-                $packet = ["client", "order", "order_products"];
+                if(isset($attr["supplier_id"])){
+                    $packet = ["client", "sup_order", "order_products"];
+                    $report_title = "פרטי הזמנת הלקוח";
+                }
+                else {
+                    $packet = ["client", "order", "order_products"];
+                    $report_title = "פרטי הזמנה";
+                }
+            }
+            else{
+                $report_title = $attr["report_title"];
             }
 
             foreach ($packet as $func) {
@@ -117,10 +119,10 @@ function create_pdf($attr)
                 //write_log("func_name ".$func_name);
                 $html .= $func_name($attr);
             }
+
             break;
         case 'archive':
             $filters = array();
-            $report_title = "";
             if($table_name){
                 $report_title = BOUTIQUE_TABLES[$table_name]["title"];
             }
@@ -128,18 +130,25 @@ function create_pdf($attr)
                 $report_title = $attr["report_title"];
             }
 
-            //$mpdf->SetHTMLHeader('<div>'.$report_title.'</div>');
+
             /*if(isset($_GET["ids"])){
                 $filters[]=array("filter_field"=>"id","filter_value"=>$_GET["ids"],"filter_type" => "array");
             }
             else if(isset($_GET["id"])){
                 $filters[]=array("filter_field"=>"order_id","filter_value"=>$_GET["id"]);
             }*/
-            //$html .= draw_table_pdf($table_name,$filters);
+            $html .= draw_table_pdf($table_name,$filters);
             break;
     }
 
     $html.="</div>";
+    $header = '<table style="width: 100%; text-align: right; background-color: black;">
+                <tr>
+                   <td class="report-title"><strong>'.$report_title.'</strong> </td>
+                   <td style="text-align: left;"><img  src="https://kosherboutique.co.il/wp-content/themes/boutique/assets/images/logo_header.png"/></td>
+              </tr>  </table>';
+
+    $mpdf->SetHTMLHeader($header);
     //$html = "akuo kfuko!!";
     //echo mb_detect_encoding($html);
     $mpdf->WriteHTML($html);
@@ -199,41 +208,64 @@ function drow_html_orders_today($attr){
     $orders = get_data_table("orders",$filters);
     $html="";
     foreach ($orders as $order){
-        $html.=drow_html_client(["client_id"=>$order->client_id]);
-        $html.=drow_html_order(["order_id"=>$order->id]);
+       // $html.= "<table style='width:100%;table-layout: fixed'><tbody><tr>";
+        $html.= "<td>".drow_html_client(["client_id"=>$order->client_id])."</td>";
+        $html.= "<td>".drow_html_order(["order_id"=>$order->id])."</td>";
+        //$html.= "</tr></tbody></table>";
         $html.=drow_html_order_products(["order_id"=>$order->id]);
         $html.="<pagebreak />";
     }
+    return $html;
+}
+function drow_html_sup_order($attr){
+    $order = get_data_table("orders",array(array("filter_field" => "id", "filter_value"=>$attr["order_id"])))[0];
+    global $wpdb;
+    $query = "SELECT op.* FROM {$wpdb->prefix}order_products  as op            
+                  JOIN {$wpdb->prefix}products as p ON p.id = op.product_id                 
+                  WHERE op.order_id = " . $attr["order_id"] . " AND p.supplier_id = ". $attr["supplier_id"];
+    $order_products_to_sup = run_query($query);//המוצרים בהזמנה מספק זה
+    $sup_total=0;
+    $total_bonus=0;
+    foreach ($order_products_to_sup as $pro){
+        $sup_total+=(float)($pro->total ?? 0);
+        $total_bonus += $pro->bonus =='bonus' ?  $pro->count:0;
+    }
+
+    $html="<div class='details'>
+          <strong class='title'>הזמנה מס. {$order->id}</strong><br>
+              <strong>תאריך הזמנה: </strong><span>".date('d/m/Y בשעה H:i',strtotime ($order->order_date))."</span><br>
+                        
+              <strong>סה''כ לתשלום: </strong><span>₪".$sup_total."</span><br>
+              <strong>כמות בונוס: </strong><span>".$total_bonus."</span><br></div>";
+    //<strong>הערות: </strong><span>{$order->notes}</span>
     return $html;
 }
 
 function drow_html_order($attr){
     $result = get_data_table("orders",array(array("filter_field" => "id", "filter_value"=>$attr["order_id"])))[0];
 
-
     $html="<div class='details'>
-              <strong class='title'>הזמנה מס. {$result->id}</strong><br>
+          <strong class='title'>הזמנה מס. {$result->id}</strong><br>
               <strong>תאריך הזמנה: </strong><span>".date('d/m/Y בשעה H:i',strtotime ($result->order_date))."</span><br>
               <strong>סכום: </strong><span>₪".$result->total."</span><br>
               <strong>הנחה: </strong><span>".(!empty($result->discount) ? "% ". $result->discount:"00.00")."</span><br>
               <strong>סה''כ לתשלום: </strong><span>₪"."1000"."</span><br>
-              <strong>הערות: </strong><span>{$result->notes}</span>
-           </div>";
-    return $html;
+              <strong>הערות: </strong><span>{$result->notes}</span></div>";
 
+    return $html;
 }
 
 function drow_html_client($attr){
     $client = get_data_table("clients",array(array("filter_field" => "id", "filter_value"=>$attr["client_id"])))[0];
     $html="<div class='details'>
-                <strong class='title'>פרטי לקוח</strong><br>
+           <strong class='title'>אספקה ללקוח</strong><br>
                 <strong>שם הלקוח: </strong><span>".$client->name."</span><br>
                 <strong>כתובת: </strong><span>".$client->address."</span><br>
                 <strong>נייד: </strong><span>".$client->mobile."</span><br>
                 <strong>דוא''ל: </strong><span>".$client->email."</span>                  
-           </div>";
+         </div>";
+           //
     return $html;
-
 }
 function drow_html_order_products($attr)
 {
@@ -279,7 +311,7 @@ function drow_html_tasks($attr)
 {
     $filters = array();
     if(($attr["agent_id"]??null)!= null){
-        $filters[]=array("filter_field" => "test_tasks.agent_id", "filter_value" => $attr["agent_id"]);
+        $filters[]=array("filter_field" => "tasks.agent_id", "filter_value" => $attr["agent_id"]);
     }
 
     $filters[]=array("filter_field" => "status_id", "filter_type" => "!=", "filter_value" => "1");

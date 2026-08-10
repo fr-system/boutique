@@ -289,7 +289,12 @@ function wporg_usermeta_form_field_lang( $user ) {
 function get_user_test_mode($user_id=null)
 {
     if(empty($user_id)){
-        $user_id = get_user_connected()->ID;
+        if(is_user_logged_in()) {
+            $user_id = get_user_connected ()->ID;
+        }
+        else{
+            return  0;
+        }
     }
     return get_user_meta($user_id,'test_mode',true) ?? 0;
 }

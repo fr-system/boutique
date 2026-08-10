@@ -236,7 +236,8 @@ function get_column_value($column,$row,$field,$list,$key,$is_readonly=false)
             break;
         default:
             if (isset($column["type"]) && $column["type"] == "user") {
-                $column_value = empty($row->$field) ? '' : get_userdata($row->$field)->display_name;
+                
+                $column_value = empty($row->$field) ? '' : (get_userdata($row->$field) ? get_userdata($row->$field)->display_name:"");
             } else {
                 $column_value = isset($column['list_name']) && isset($list[$row->$field]) ? $list[$row->$field] : $row->$field;
                 if (!empty($column_value) && isset($column["sign"]) && !isset($column["create_input"])) {
@@ -715,7 +716,8 @@ function get_value($column,$row,$field)
             }
             break;
         default:
-            $column_value = isset($column['list_name']) && isset($list[$row->$field]) ? $list[$row->$field] : $row->$field;
+            $column_value = isset($column['list_name']) && isset($list[$row->$field]) ? $list[$row->$field] :
+                /*(isset($column['b'])? $row->$field ." בונוס"  : */$row->$field;//);//לשאול אם יש עמטדה בונוס ולכתוב שזה מוצר בונוס או מבצע?
             break;
     }
 

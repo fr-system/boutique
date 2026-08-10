@@ -44,8 +44,9 @@ if(is_agent()) {
             <div class="graphs-charts quick-action border-dark-gray">
                 <div class="flex-display direction-column font-18">
                     <?php
+                    global $wpdb;
                     $filters = array(array("filter_field" => "payment_date","filter_type"=>"null"));
-                    $filters[] = array("filter_field" => "test_collection.doc_type","filter_value"=>"1");
+                    $filters[] = array("filter_field" => "{$wpdb->prefix}collection.doc_type","filter_value"=>"1");
                     if(is_agent()){
                         $filters[] = array("filter_table"=>"clients", "filter_field" => "agent_id", "filter_value" => $agent_id);
                     }
@@ -86,7 +87,7 @@ if(is_agent()) {
                 $agents = get_data_table("agents",$filters);
                 $filters = array(array("filter_field" => "status_id", "filter_value" =>1,"filter_type"=>"!="));
                 if(is_agent()){
-                    $filters[] = array("filter_field" => "test_tasks.agent_id", "filter_value" => $agent_id );                }
+                    $filters[] = array("filter_field" => "tasks.agent_id", "filter_value" => $agent_id );                }
 
                 $result = get_data_table("tasks",$filters);
                 foreach ($result as $task) {

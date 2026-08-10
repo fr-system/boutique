@@ -103,6 +103,7 @@ function get_single_view($table_name, $single, $readonly)
     </div><?php
 }
 function render_row($external_item, $sub_row, $options ){
+    global $wpdb;
     $sub_table_id =$options["sub_table_id"];
     $parent_table_id = $options["parent_table_id"];
     $item = clone $external_item;
@@ -120,14 +121,14 @@ function render_row($external_item, $sub_row, $options ){
             $total = "";
             if (!empty($item->date_from) && !empty($item->date_to)) {
                 $query = "SELECT sum(op.total) as total
-                                            from test_agents
-                                            join test_orders on test_agents.id = test_orders.user_opens
-                                            join test_order_products as op on op.order_id = test_orders.id
-                                            join test_products on test_products.id = op.product_id
-                                            where test_agents.id = {$item->agent_id} 
-                                              and test_products.supplier_id = {$item->$sub_table_id} 
+                                            from {$wpdb->prefix}agents
+                                            join {$wpdb->prefix}orders on {$wpdb->prefix}agents.id = {$wpdb->prefix}orders.user_opens
+                                            join {$wpdb->prefix}order_products as op on op.order_id = {$wpdb->prefix}orders.id
+                                            join {$wpdb->prefix}products on {$wpdb->prefix}products.id = op.product_id
+                                            where {$wpdb->prefix}agents.id = {$item->agent_id} 
+                                              and {$wpdb->prefix}products.supplier_id = {$item->$sub_table_id} 
                                               and op.total > 0 
-                                              and test_orders.order_date BETWEEN '{$item->date_from}' and  '{$item->date_to}'
+                                              and {$wpdb->prefix}orders.order_date BETWEEN '{$item->date_from}' and  '{$item->date_to}'
                                             ";
                 // write_log("q ".$query);
                 $res_total = run_query($query);
@@ -321,7 +322,9 @@ function products_gallery($products)
     </div>
     <?php
 }
-function specials_gallery($list,$attr = array()){ ?>
+function specials_gallery($list,$attr = array()){
+    global $wpdb;
+    ?>
 
     <div class="grid-display archive-gallery">
         <?php foreach ($list as $single){
@@ -356,7 +359,7 @@ function specials_gallery($list,$attr = array()){ ?>
                 if(!empty($single->buy) && is_array($products)) {
                     $html .= '<div class="part-10">' . (!empty($single->buy) ? "<strong>קנה כמות: </strong>" . $single->buy : "") . '</div>';
 
-                    $products_res = run_query("SELECT name FROM test_products WHERE id in(" . implode(',', $products) . ")");
+                    $products_res = run_query("SELECT name FROM {$wpdb->prefix}products WHERE id in(" . implode(',', $products) . ")");
                     $products_str = implode(', ', array_column($products_res, 'name'));
                     $html .= '<div class="part-10"><strong>מהמוצרים: </strong>' . $products_str . '</div>';
                 }
