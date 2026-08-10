@@ -32,7 +32,7 @@ const BOUTIQUE_TABLES = array(
             array("field_name" => "obligo", "un_apostrophe" => true, "widget" => "text", "label" => "אובליגו","sign"=>"₪"),
             array("field_name" => "promissory_note","widget" => "file", "label" => "שטר חוב","hide_in_table"=>true),
             array("field_name" => "blocked", "widget" => "hidden","create_input"=>true),
-            array("field_name" => "clients_branches" ,"widget" => "table" ,"field_id"=>"main_client_id","hide_in_table"=>true,"add_new_row"=>true),
+            array("field_name" => "clients_branches" ,"widget" => "table" ,"field_id"=>"main_client_id","hide_in_table"=>true),
 
 
         ),
@@ -169,6 +169,7 @@ const BOUTIQUE_TABLES = array(
         "more_columns_in_table" => array(
             array("field_name" => "image_id", "widget" => "image"),
             array("field_name" => "name", "widget" => "text","label"=>"שם המוצר"/*,"width"=>"1000px"*/),
+/*            array("field_name" => "supplier_id", "widget" => "select","label"=>"ספק", "join_table" => "suppliers", "join_value" => "name"),*/
             array("field_name" => "individually", "widget" => "hidden","hide_in_table"=>true,"hide_in_pdf"=>true),
             array("field_name" => "units_in_box", "widget" => "hidden","hide_in_table"=>true,"hide_in_pdf"=>true),
             array("field_name" => "supplier_id",  "widget" => "hidden","hide_in_table"=>true,"hide_in_pdf"=>true),

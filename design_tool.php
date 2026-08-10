@@ -273,7 +273,7 @@ function archive_header($table_name, $view_only = false,$attr = null)
                     <select class="filter-by" name="filter" onchange="onSelectFilterBy(this.options[this.selectedIndex])">
                         <?=$html?>
                     </select>
-                    <input type="text" class="filter-value hidden filter-value" placeholder="הכנס...">
+                    <input type="text" class="filter-value hidden" placeholder="הכנס...">
                     <input type="date" class="filter-value hidden filter-from">
                     <input type="date" class="filter-value hidden filter-to">
                     <select class="filter-value hidden"></select>
@@ -617,7 +617,7 @@ function create_input($field,$value = null,$readonly = "")
             <?php
             break;
         case "table":
-            $attr = array("input_table"=>"true","readonly"=>$readonly,"add_new_row"=>($field["add_new_row"]??false));
+            $attr = array("input_table"=>"true","readonly"=>$readonly);
             echo get_archive_table ($field["field_name"],$value,$attr);
             break;
         default:
