@@ -74,9 +74,8 @@ if(is_agent()) {
         </div>
         <div class="part-49">
             <div class="flex-display space-between">
-                <div class="font-20 bold">משימות פתוחות</div>
+                <div class="font-20 bold">משימות</div>
                 <a class="not-link font-15 dark-green" href="/archive/?subject=tasks">לפירוט המלא -></a>
-                <!--  צריך להביא פה קישור לעמוד משימות ויראה רק משימות פתוחות -->
             </div>
             <div class="graphs-charts quick-action border-dark-gray">
                 <?php
@@ -124,6 +123,41 @@ if(is_agent()) {
                 ?>
             </div>
 
+        </div>
+    </div>
+    <div class=" part-30 flex-display space-between">
+        <div class="part-100">
+            <div class="flex-display space-between">
+                <div class="font-20 bold">משימות פתוחות</div>
+                <a class="not-link font-15 dark-green" href="/archive/?subject=tasks">לפירוט המלא -></a>
+                <!--  צריך להביא פה קישור לעמוד משימות ויראה רק משימות פתוחות -->
+            </div>
+            <div class="graphs-charts quick-action border-dark-gray">
+                <?php
+                $filters = array();
+                /*if(is_agent()){
+                    $filters[] = array("filter_field" => "id", "filter_value" => $agent_id);
+                }*/
+                //$agents = get_data_table("agents",$filters);
+                $filters = array(array("filter_field" => "status_id", "filter_value" =>1,"filter_type"=>"!="));
+                if(is_agent()){
+                    //$filters[] = array("filter_field" => "test_tasks.agent_id", "filter_value" => $agent_id );
+                }
+
+                $result = get_data_table("tasks",$filters,array("open_date" => "desc"));
+                //write_log("task ".json_encode($result));
+                foreach ($result as $task) {
+                    //if (empty($task->agent_id)) continue;
+                    //$agent_id = $task->agent_id;
+                    ?>
+                    <a href="single?subject=tasks&action=edit&id=<?=$task->id?>" class="not-link font-15 flex-display open-task margin-bottom-5">
+                        <span class="bold part-10"><?= $task->agent_name ?></span>
+                        <span class="bold part-10"><?= $task->client_name ?></span>
+                        <span class="part-20"><?php echo $task->subject_text ?></span>
+                        <span class=""><?php echo $task->details ?></span>
+                    </a>
+                <?php } ?>
+            </div>
         </div>
     </div>
     <div class="part-40">

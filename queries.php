@@ -145,7 +145,7 @@ function save_single_data()
                     }
                 }
                 $sub_table_name = "agent_target_supplier";
-                write_log("row agent_target_supplier" . json_encode($row));
+                //write_log("row agent_target_supplier" . json_encode($row));
             }
 
             if ($table_name == "orders") {
@@ -160,7 +160,7 @@ function save_single_data()
             }
 
             if($table_name == "clients"){
-                write_log ("row to save" . json_encode ($row));
+                //write_log ("row to save" . json_encode ($row));
 
                 if (empty($row["name"])) {
                     if ($row["id"]) {
@@ -168,6 +168,9 @@ function save_single_data()
                     } else {
                         continue;
                     }
+                }
+                if (empty($row["main_client_id"])) {
+                    $row["main_client_id"] = $id;
                 }
                 $sub_table_name = "clients_branches";
             }
@@ -260,12 +263,6 @@ function get_data_table($table_name, $filters=null, $orderby = null, $join_filte
             (empty($join_filter) ? '' : "AND " . $join_filter);
     }
 
-    /*if($table_name=="products") {
-        $query .= " pc.client_price, " ;
-        $join .= " LEFT JOIN " .$wpdb->prefix . "products_clients as pc 
-        ON {$wpdb->prefix}products.id = pc.product_id ".
-            (empty($join_filter)?'':"AND ".$join_filter);
-    }*/
     $query = substr($query,0,-2);
     $query .= " FROM ".$wpdb->prefix.$table_name. $join;
     if($filters!=null) {
@@ -287,6 +284,9 @@ function get_data_table($table_name, $filters=null, $orderby = null, $join_filte
             }
 
             switch ($filter["filter_type"]) {
+                case "dateime":
+                    $filter_str[] = "".$filter_field . " " . $filter["filter_ratio"] . " " . $filter["filter_value"];
+                    break;
                 case "date":
                     $filter_str[] ="DATE(" .$filter_field . ") " . $filter["filter_ratio"] . " " . $filter["filter_value"];
                     break;
@@ -320,11 +320,13 @@ function get_data_table($table_name, $filters=null, $orderby = null, $join_filte
     }
 
     if($orderby != null){
-        $query .= " ORDER BY " . $orderby;
+        foreach ($orderby as $key=>$order) {
+            $query .= " ORDER BY " . $key ." ".($order ?? '');
+        }
     }
 
     //echo $query;
-    //write_log("query ".$query);
+   // write_log("query ".$query);
     $result = run_query ($query);
    //write_log("res ".json_encode($result));
     return $result ;
@@ -414,10 +416,13 @@ function get_logo_chat($user_id){
 add_action('wp_ajax_get_chat_ajax', 'get_chat_ajax');
 function get_chat_ajax()
 {
+    //write_log("task ".$_POST['task_id']);
+    date_default_timezone_set('Asia/Jerusalem');
     $filters=array();
     $filters[]=array("filter_field" => "task_id", "filter_value"=>$_POST['task_id']);
-    $filters[]=array("filter_field" => "date", "filter_value"=>"NOW() - interval 30 minute","filter_type"=>"date","filter_ratio"=>">");
+    $filters[]=array("filter_field" => "date", "filter_value"=>"NOW() - interval 30 minute","filter_type"=>"dateime","filter_ratio"=>">");
     $rows = get_data_table("chat",$filters);
+    //write_log("chat rows ".json_encode($rows));
     foreach ($rows as $row){
         $row->logo = get_logo_chat($row->user_id);
     }

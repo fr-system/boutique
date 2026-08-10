@@ -21,9 +21,6 @@ function get_archive_table($table_name,$data,$attr)
     if($table_name == "order_products"){
         $html .= '<th class="no-sort dupl-action" ></th>';//לחצן בונוס בעגלה
     }
-    if($attr["add_new_row"]??false){
-        $html .= '<th class="no-sort add-new-row" ></th>';
-    }
 
     if (isset($page_info["more_columns_in_table"])) {
         foreach ($page_info["more_columns_in_table"] as $column) {
@@ -160,13 +157,6 @@ function get_tr_data($table_name, $data, $key,$attr){
         }
         $html .= '</td>';
     }
-    if($attr["add_new_row"]??false){
-        $html .= '<td class="td-action add-new-row"><a class="has-tooltip" data-tooltip="הוספת שורה חדשה" onclick="addNewRow(jQuery(this).closest(\'tr\'))">
-                      <svg width="24" height="23" viewBox="0 0 10 10" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M2.375 3.7085C2.375 3.35483 2.51549 3.01565 2.76557 2.76557C3.01565 2.51549 3.35483 2.375 3.7085 2.375H8.0415C8.21662 2.375 8.39002 2.40949 8.55181 2.47651C8.7136 2.54352 8.8606 2.64175 8.98443 2.76557C9.10825 2.8894 9.20648 3.0364 9.27349 3.19819C9.34051 3.35998 9.375 3.53338 9.375 3.7085V8.0415C9.375 8.21662 9.34051 8.39002 9.27349 8.55181C9.20648 8.7136 9.10825 8.8606 8.98443 8.98443C8.8606 9.10825 8.7136 9.20648 8.55181 9.27349C8.39002 9.34051 8.21662 9.375 8.0415 9.375H3.7085C3.53338 9.375 3.35998 9.34051 3.19819 9.27349C3.0364 9.20648 2.8894 9.10825 2.76557 8.98443C2.64175 8.8606 2.54352 8.7136 2.47651 8.55181C2.40949 8.39002 2.375 8.21662 2.375 8.0415V3.7085Z" class="stroke-background-gold" stroke-width="0.75" stroke-linecap="round" stroke-linejoin="round"/>
-                        <path d="M0.881 7.2435C0.7275 7.15629 0.599825 7.02999 0.51095 6.87745C0.422076 6.7249 0.37517 6.55155 0.375 6.375V1.375C0.375 0.825 0.825 0.375 1.375 0.375H6.375C6.75 0.375 6.954 0.5675 7.125 0.875M4.375 5.875H7.375M5.875 4.375V7.375" class="stroke-background-gold" stroke-width="0.75" stroke-linecap="round" stroke-linejoin="round"/>
-                      </svg></a></td>';
-    }
 
     if(!isset($page_info["update_remove"]) || $page_info["update_remove"] == true) {
         if($is_list){
@@ -282,8 +272,10 @@ function get_tr_data($table_name, $data, $key,$attr){
     if($table_name == "order_products") { //  מחיקת מוצר - בונוס או מבצע מההזמנה
         $html .= '<td class="td-action remove">';
         //write_log ('bonus '.isset($bonus_row).' empty '.empty($bonus_row));
-
-            $html .= '<a class="hidden has-tooltip" data-tooltip="מחיקת מוצר בונוס או מבצע מההזמנה" onclick="removeProdoctBonus(jQuery(this).closest(\'tr\'))">
+        $tooltip_text = "מוצר";
+        if($row->bonus == "bonus")$tooltip_text .= " בונוס";
+        if($row->bonus == "promo")$tooltip_text .= " מבצע";
+            $html .= '<a class="has-tooltip" data-tooltip="מחיקת '.$tooltip_text.' מההזמנה" onclick="removeProdoctFromOrder(jQuery(this).closest(\'tr\'))">
                       <svg  xmlns="http://www.w3.org/2000/svg" width="25" height="24" viewBox="0 0 25 24" fill="none">
                     <path d="M4.16663 7H20.8333M10.4166 11V17M14.5833 11V17M5.20829 7L6.24996 19C6.24996 19.5304 6.46945 20.0391 6.86015 20.4142C7.25085 20.7893 7.78076 21 8.33329 21H16.6666C17.2192 21 17.7491 20.7893 18.1398 20.4142C18.5305 20.0391 18.75 19.5304 18.75 19L19.7916 7M9.37496 7V4C9.37496 3.73478 9.48471 3.48043 9.68006 3.29289C9.87541 3.10536 10.1404 3 10.4166 3H14.5833C14.8596 3 15.1245 3.10536 15.3199 3.29289C15.5152 3.48043 15.625 3.73478 15.625 4V7" class="stroke-background-green" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
                     </svg></a>';

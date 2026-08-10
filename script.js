@@ -167,7 +167,6 @@ jQuery(document).ready(function($){
                     jQuery('.page.single input[name=discount]').val("");
 
                     if(!(jQuery('.page.single input[name=buy]').val() &&
-                        jQuery('input[name="products_buy[]"]:checked').length > 0 &&
                     jQuery('.page.single input[name=get]').val() &&
                     jQuery('.page.single select[name=product_get]').val() )){
                         good = false;
@@ -295,9 +294,11 @@ jQuery(document).ready(function($){
                 field.find("input[type=hidden]").val(uploaded_image.id);
                 field.find("a").attr("href",uploaded_image.attributes.url);
                 field.find("a").html(uploaded_image.attributes.filename);
-                jQuery(".protuct-image").attr("src",uploaded_image.attributes.url);
                 field.find(".remove-file").removeClass("hidden");
-                jQuery(".protuct-image").removeClass("hidden");
+                if(field.find("input[type=hidden]").attr("name") == "image_id") {
+                    jQuery(".protuct-image").attr("src", uploaded_image.attributes.url);
+                    jQuery(".protuct-image").removeClass("hidden");
+                }
             });
         //mediaFrame.open();
 
@@ -576,10 +577,19 @@ function removeRowSuccess(form,result){
 
 function onAddChat(result){
     var chatList = jQuery(".chat-list");
-    var get_mes = result.get_messages;
+var add_message = result.add_message;
 
     jQuery.each(result.rows,function (){
         var row = this;
+
+        if(add_message){
+            var result = jQuery.grep(jQuery(".chat-list .input-label"), function (mess) {
+                return jQuery(mess).data("id") == row.id
+            });
+            if (result.length > 0) {
+                return ;
+            }
+        }
 
         var d = new Date(row.date),
             month = '' + (d.getMonth() + 1),
@@ -599,20 +609,10 @@ function onAddChat(result){
 
         var date = [day, month, year].join('/')+ "\n" + hour+":"+minutes;
 
-        //'+result.client_logo+'
         var message = '<div class="input-label flex-display space-between" data-id="'+row.id+'">'+
             '<div class="part-20">'+row.logo+'</div>'+
             '<div class="text part-50 text-center">'+row.text+'</div>'+
             '<div class="date text-left part-20 font-12">'+date+'</div></div>';
-
-        if(get_mes){
-            var result = jQuery.grep(jQuery(".chat-list .input-label"), function (mess) {
-                return jQuery(mess).data("id") == row.id
-            });
-            if (result.length > 0) {
-                return;
-            }
-        }
 
         chatList.append(jQuery(message));
     })

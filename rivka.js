@@ -1,4 +1,5 @@
 var table;
+let cartMode = false;
 
 function fillClientDetails(results){
     if(results.branches){
@@ -284,13 +285,9 @@ function addProdoctBonus(product,countBonus = 0){
     pBonus.find(".dupl-action").html('');
     pBonus.addClass('in-cart');
     pBonus.addClass((countBonus == 0 ? 'bonus' :'promo'));
-    //product.after(pBonus);
-
-    /*jQuery(table.table().body()).append(pBonus[0]);
-
-    table.rows().invalidate('dom').draw(false);*/
 
     table.row.add(pBonus).draw(false);
+
     var columnIndex =  table
         .columns()
         .header()
@@ -299,12 +296,29 @@ function addProdoctBonus(product,countBonus = 0){
             return $(th).data('column-name') === 'name';
         });
 
-
     table.order([columnIndex, 'asc']).draw();
     if(countBonus != 0)
     pBonus.find(".count span.pointer").off();
+}
 
-    //pBonus.find(".count span.pointer").addClass("readonly").removeClass("pointer");
+function removeProdoctFromOrder(product){
+    product.removeClass("in-cart");
+    product.find("td.count input").val(0);
+    product.find("td.discount_percent input").val("");
+    product.find("td.order_individual input").val(0);
+    product.find("td.order_individual span").addClass("readonly un-value");
+    if(product.hasClass('bonus')){
+        product.removeClass('bonus');
+        product.addClass('hidden');
+    }
+    else if(product.hasClass('promo')){
+        product.removeClass('promo');
+        product.addClass('hidden');
+    }
+    else {
+        calculatePrice(product.find("td.count input"));
+        product.find("td.total input").trigger('change');
+    }
 }
 
 function registerToCalculatePrice(){
@@ -356,17 +370,6 @@ function onOrderConfirmation(){
     },5000)
 }
 
-/*
-jQuery.fn.dataTable.ext.type.order['date-pre'] = function (dateString) {
-    let parts = dateString.split("/"); // מפצל את המחרוזת
-    let dateObject = new Date(parts[2], parts[1] - 1, parts[0]); // בונה את התאריך
-    return  dateObject.getTime();
-};
-
-jQuery.fn.dataTable.ext.type.order['num-pre'] = function (data) {
-    return data == ""? 0: parseInt(data);
-};*/
-
 function startingDataTable(){
     var aTargets = [];
     jQuery.each(jQuery( "table" ).find( "th.no-sort" ),function (){
@@ -377,7 +380,6 @@ function startingDataTable(){
     var tableName = getParameterByName("subject");
     var currentUrl = window.location.pathname;
     var single = currentUrl.includes('single');
-    let cartMode = false;
 
     $.fn.dataTable.ext.search.push(function (settings, data, dataIndex) {
         if (!cartMode) {
@@ -386,45 +388,12 @@ function startingDataTable(){
         return $(settings.aoData[dataIndex].nTr).hasClass('in-cart');
     });
 
+    var buttons = getButtonsTable(tableName,currentUrl);
+
     table = jQuery('.dataTable').DataTable({
         bFilter: true,
-       /* autoWidth: false,*/
-        layout: {
-            topStart: {
-                buttons: tableName == "orders" && currentUrl.includes('single') ? [
-                        {
-                            text: '<svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" viewBox="0 0 16 16" fill="none">' +
-                                '<path d="M4.00683 10.7573L2.76083 2.66667H2.00016C1.82335 2.66667 1.65378 2.59643 1.52876 2.47141C1.40373 2.34638 1.3335 2.17681 1.3335 2C1.3335 1.82319 1.40373 1.65362 1.52876 1.5286C1.65378 1.40357 1.82335 1.33334 2.00016 1.33334H3.3235C3.48426 1.33079 3.64052 1.38643 3.7635 1.49C3.88935 1.59608 3.97151 1.74497 3.99416 1.908L4.21283 3.33334H9.3335V4.66667H4.41816L5.23816 10H11.5042L12.5042 6.66667H13.8962L12.6388 10.858C12.5977 10.9954 12.5133 11.1158 12.3982 11.2015C12.2832 11.2871 12.1436 11.3333 12.0002 11.3333H4.6775C4.51218 11.3359 4.35181 11.277 4.2275 11.168C4.10667 11.0622 4.02874 10.9164 4.00683 10.7573ZM6.66683 13.3333C6.66683 13.687 6.52635 14.0261 6.27631 14.2761C6.02626 14.5262 5.68712 14.6667 5.3335 14.6667C4.97987 14.6667 4.64074 14.5262 4.39069 14.2761C4.14064 14.0261 4.00016 13.687 4.00016 13.3333C4.00016 12.9797 4.14064 12.6406 4.39069 12.3905C4.64074 12.1405 4.97987 12 5.3335 12C5.68712 12 6.02626 12.1405 6.27631 12.3905C6.52635 12.6406 6.66683 12.9797 6.66683 13.3333ZM12.6668 13.3333C12.6668 13.687 12.5264 14.0261 12.2763 14.2761C12.0263 14.5262 11.6871 14.6667 11.3335 14.6667C10.9799 14.6667 10.6407 14.5262 10.3907 14.2761C10.1406 14.0261 10.0002 13.687 10.0002 13.3333C10.0002 12.9797 10.1406 12.6406 10.3907 12.3905C10.6407 12.1405 10.9799 12 11.3335 12C11.6871 12 12.0263 12.1405 12.2763 12.3905C12.5264 12.6406 12.6668 12.9797 12.6668 13.3333Z" fill="white"/>' +
-                                '<path d="M10.9985 6.56559C11.0102 6.72591 10.9517 6.88392 10.8357 7.00483L9.12183 8.79299C9.01159 8.90807 8.85776 8.98084 8.69119 8.99672C8.52462 9.0126 8.35764 8.97041 8.22372 8.8786L7.26545 8.22198C7.12465 8.12558 7.03156 7.98208 7.00667 7.82305C6.98178 7.66401 7.02713 7.50246 7.13273 7.37393C7.23833 7.24541 7.39554 7.16044 7.56978 7.13773C7.74401 7.11501 7.921 7.15639 8.0618 7.25279L8.52722 7.57181L9.83677 6.20687C9.9527 6.08595 10.1165 6.01202 10.2921 6.00134C10.4678 5.99066 10.6409 6.04411 10.7734 6.14993C10.9058 6.25574 10.9868 6.40526 10.9985 6.56559Z" fill="white" />' +
-                                '</svg><span class="button-text">הצגת עגלה</span>',
-                            className: 'show-cart background-gold flex-display center align-center bold ',
-                            action: function (e, t, sender, sProp) {
-                                jQuery(sender).toggleClass("cart-mode");
-                                cartMode = !cartMode;
-                                if (cartMode) {
-                                    //table.column(".dupl-action").find("a").show();
-                                    table.column(".dupl-action").nodes().to$().find("a").show();
-                                    show_tooltip();
-                                    jQuery(sender).find(".button-text").text("חזרה להזמנה");
-                                    //jQuery(sender).find("svg")[0].prepend(checkPath[0]);
-                                    //jQuery(sender).find("svg").prepend("<path fill-rule=\"evenodd\" d=\"M10.854 8.146a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708 0l-1.5-1.5a.5.5 0 0 1 .708-.708L7.5 10.793l2.646-2.647a.5.5 0 0 1 .708 0\"/>");
-                                } else {
-                                    jQuery(sender).find(".button-text").text("הצגת עגלה");
-                                    //table.column(".dupl-action").find("a").hide();
-                                    table.column(".dupl-action").nodes().to$().find("a").hide();
-                                    //checkPath = jQuery(sender).find("svg path").first().detach();
-                                    // jQuery(sender).find("svg path[fill-rule=\"evenodd\"]").remove();
-                                }
-
-                                table.draw();
-                            }
-                        }
-                    ] :
-                    []
-
-            }
-        },
-        searching: true,//(tableName == "orders" && currentUrl.includes('single')),
+        layout: { topStart: { buttons: buttons } },
+        searching: true,
         paging: false,
         info: false,
         "language":
@@ -454,28 +423,23 @@ function startingDataTable(){
         "ordering": true,
         order: [],
         "columnDefs": [
-            {"orderable": false, "targets": aTargets},//[ 4, 5, 6 ]
-            //(tableName == "orders" && currentUrl.includes('single') ? {"visible":false, "targets":0}:{})
+            {"orderable": false, "targets": aTargets},
         ],
-        // "order": []
-        // "order": [[ 3, "desc" ]]
     });
     jQuery('.dt-layout-cell.dt-layout-start').removeClass('dt-layout-start');
     jQuery('.dt-layout-cell.dt-layout-end').removeClass('dt-layout-end');
-    jQuery('.dt-button.show-cart').removeClass('dt-button');
+    jQuery('.dt-button.show-cart, .dt-button.add-row-table ').removeClass('dt-button');
 
-
-    //var checkPath = jQuery("button.show-cart").find("svg path").first().detach();
-    //}, 500);
 
     if(tableName == "orders" && currentUrl.includes('single')){
         table.column(".dupl-action").nodes().to$().find("a").hide();
     }
     else {
-        //jQuery('.dataTables_filter').hide();
-        jQuery('.dt-search').closest(".dt-layout-row").hide();
+        if(currentUrl.includes('single')){}
+        else{
+            jQuery('.dt-search').closest(".dt-layout-row").hide();
+        }
     }
-
 
     jQuery.fn.dataTable.ext.search.push(function (settings, data) {
         if(currentUrl.includes('single'))return true;
@@ -554,15 +518,19 @@ function startingDataTable(){
 
 
     jQuery('.filter-by-area .filter-value').on('keyup change', function () {
-
         table.draw();
     });
 }
 
 function viewFilterByArea(){
     jQuery(".filter-by-area").toggleClass("hidden");
+    jQuery('.filter-value').val("");
+    table.search('').columns().search('').draw();
+
 }
 function onSelectFilterBy(filterBy){
+    table.search('').columns().search('').draw();
+    jQuery('.filter-value').val("");
     var fieldName =  jQuery(filterBy).val();
     var widget =  jQuery(filterBy).data("widget");
     var listName =  jQuery(filterBy).data("list-name");
@@ -601,6 +569,80 @@ function onSelectFilterBy(filterBy){
 
     }
     //table.draw();
+}
+
+function getButtonsTable(tableName,currentUrl ){
+    if(tableName == "orders" && currentUrl.includes('single')) {
+        return [
+            {
+                text: '<svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" viewBox="0 0 16 16" fill="none">' +
+                    '<path d="M4.00683 10.7573L2.76083 2.66667H2.00016C1.82335 2.66667 1.65378 2.59643 1.52876 2.47141C1.40373 2.34638 1.3335 2.17681 1.3335 2C1.3335 1.82319 1.40373 1.65362 1.52876 1.5286C1.65378 1.40357 1.82335 1.33334 2.00016 1.33334H3.3235C3.48426 1.33079 3.64052 1.38643 3.7635 1.49C3.88935 1.59608 3.97151 1.74497 3.99416 1.908L4.21283 3.33334H9.3335V4.66667H4.41816L5.23816 10H11.5042L12.5042 6.66667H13.8962L12.6388 10.858C12.5977 10.9954 12.5133 11.1158 12.3982 11.2015C12.2832 11.2871 12.1436 11.3333 12.0002 11.3333H4.6775C4.51218 11.3359 4.35181 11.277 4.2275 11.168C4.10667 11.0622 4.02874 10.9164 4.00683 10.7573ZM6.66683 13.3333C6.66683 13.687 6.52635 14.0261 6.27631 14.2761C6.02626 14.5262 5.68712 14.6667 5.3335 14.6667C4.97987 14.6667 4.64074 14.5262 4.39069 14.2761C4.14064 14.0261 4.00016 13.687 4.00016 13.3333C4.00016 12.9797 4.14064 12.6406 4.39069 12.3905C4.64074 12.1405 4.97987 12 5.3335 12C5.68712 12 6.02626 12.1405 6.27631 12.3905C6.52635 12.6406 6.66683 12.9797 6.66683 13.3333ZM12.6668 13.3333C12.6668 13.687 12.5264 14.0261 12.2763 14.2761C12.0263 14.5262 11.6871 14.6667 11.3335 14.6667C10.9799 14.6667 10.6407 14.5262 10.3907 14.2761C10.1406 14.0261 10.0002 13.687 10.0002 13.3333C10.0002 12.9797 10.1406 12.6406 10.3907 12.3905C10.6407 12.1405 10.9799 12 11.3335 12C11.6871 12 12.0263 12.1405 12.2763 12.3905C12.5264 12.6406 12.6668 12.9797 12.6668 13.3333Z" fill="white"/>' +
+                    '<path d="M10.9985 6.56559C11.0102 6.72591 10.9517 6.88392 10.8357 7.00483L9.12183 8.79299C9.01159 8.90807 8.85776 8.98084 8.69119 8.99672C8.52462 9.0126 8.35764 8.97041 8.22372 8.8786L7.26545 8.22198C7.12465 8.12558 7.03156 7.98208 7.00667 7.82305C6.98178 7.66401 7.02713 7.50246 7.13273 7.37393C7.23833 7.24541 7.39554 7.16044 7.56978 7.13773C7.74401 7.11501 7.921 7.15639 8.0618 7.25279L8.52722 7.57181L9.83677 6.20687C9.9527 6.08595 10.1165 6.01202 10.2921 6.00134C10.4678 5.99066 10.6409 6.04411 10.7734 6.14993C10.9058 6.25574 10.9868 6.40526 10.9985 6.56559Z" fill="white" />' +
+                    '</svg><span class="button-text">הצגת עגלה</span>',
+                className: 'show-cart background-gold flex-display center align-center bold ',
+                action: function (e, t, sender, sProp) {
+                    jQuery(sender).toggleClass("cart-mode");
+                    cartMode = !cartMode;
+                    if (cartMode) {
+                        table.column(".dupl-action").nodes().to$().find("a").show();
+                        show_tooltip();
+                        jQuery(sender).find(".button-text").text("חזרה להזמנה");
+                    } else {
+                        jQuery(sender).find(".button-text").text("הצגת עגלה");
+                        table.column(".dupl-action").nodes().to$().find("a").hide();
+                    }
+
+                    table.draw();
+                }
+            }
+        ];
+    }
+
+    if(tableName == "clients" && currentUrl.includes('single')){
+        return [
+            {
+                text:'<svg width="24" height="23" viewBox="0 0 10 10" fill="none" xmlns="http://www.w3.org/2000/svg">' +
+                    '                <path d="M2.375 3.7085C2.375 3.35483 2.51549 3.01565 2.76557 2.76557C3.01565 2.51549 3.35483 2.375 3.7085 2.375H8.0415C8.21662 2.375 8.39002 2.40949 8.55181 2.47651C8.7136 2.54352 8.8606 2.64175 8.98443 2.76557C9.10825 2.8894 9.20648 3.0364 9.27349 3.19819C9.34051 3.35998 9.375 3.53338 9.375 3.7085V8.0415C9.375 8.21662 9.34051 8.39002 9.27349 8.55181C9.20648 8.7136 9.10825 8.8606 8.98443 8.98443C8.8606 9.10825 8.7136 9.20648 8.55181 9.27349C8.39002 9.34051 8.21662 9.375 8.0415 9.375H3.7085C3.53338 9.375 3.35998 9.34051 3.19819 9.27349C3.0364 9.20648 2.8894 9.10825 2.76557 8.98443C2.64175 8.8606 2.54352 8.7136 2.47651 8.55181C2.40949 8.39002 2.375 8.21662 2.375 8.0415V3.7085Z" class="stroke-background-gold" stroke-width="0.75" stroke-linecap="round" stroke-linejoin="round"></path>' +
+                    '            <path d="M0.881 7.2435C0.7275 7.15629 0.599825 7.02999 0.51095 6.87745C0.422076 6.7249 0.37517 6.55155 0.375 6.375V1.375C0.375 0.825 0.825 0.375 1.375 0.375H6.375C6.75 0.375 6.954 0.5675 7.125 0.875M4.375 5.875H7.375M5.875 4.375V7.375" class="stroke-background-gold" stroke-width="0.75" stroke-linecap="round" stroke-linejoin="round"></path>' +
+                    '    </svg><span class="button-text">הוספת סניף</span>',
+                className: 'add-row-table flex-display center button background-white gold bold',
+                action: function (e, t, sender, sProp) {
+                    const $tr = $('<tr>', {'data-id': ''});
+                    var countRows =  table.rows().count();
+                    var columns =  [
+                        {name: 'text'},
+                        {address: 'text'},
+                        {mobile: 'text'},
+                        {email: 'text'},
+                        {id: 'hidden'},
+                        {main_client_id: 'hidden'}
+                    ];
+
+                    columns.forEach(function (column) {
+                        const field = Object.keys(column)[0];
+                        const type = Object.values(column)[0];
+
+                        const $td = $('<td>', {class: field});
+                        const $span = $('<span>', {class: 'hidden',text: ''});
+
+                        const $input = $('<input>', {
+                            type: type,
+                            class: field,
+                            name: `rows[${countRows}][${field}]`,
+                            placeholder:'הכנס...'
+                        });
+
+                        $td.append($span, $input);
+                        $tr.append($td);
+                    });
+
+                    $('tbody').prepend($tr);
+                }
+            }
+        ];
+    }
+
+    return [];
 }
 
 
