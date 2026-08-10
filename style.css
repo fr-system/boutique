@@ -30,10 +30,10 @@ Text Domain: boutique
     color:var(--b-global-color-dark-green);
 }
 .background-white {
-    background-color:white;
+    background-color:white !important;
 }
 .background-white.gold{
-    border: var(--b-global-color-gold) 1px solid;
+    border: var(--b-global-color-gold) 1px solid !important;
 }
 .background-white.dark-green{
     border: var(--b-global-color-dark-green) 1px solid;
@@ -806,5 +806,8 @@ section.page.single form{
 }
 section.page.single form buttons{
     position: sticky;
+}
+#media-attachment-date-filters{
+    width: 250px;
 }
 
