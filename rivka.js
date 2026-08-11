@@ -307,6 +307,8 @@ function removeProdoctFromOrder(product){
     product.find("td.discount_percent input").val("");
     product.find("td.order_individual input").val(0);
     product.find("td.order_individual span").addClass("readonly un-value");
+    product.find("td.count input").trigger('change');
+
     if(product.hasClass('bonus')){
         product.removeClass('bonus');
         product.addClass('hidden');
