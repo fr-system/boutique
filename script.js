@@ -811,7 +811,7 @@ function automaticOrderSaving(){
                 value: "send_site_forms"
             });
 
-            call_ajax_function(formData, "fillOrderId");
+            call_ajax_function(formData, "automaticOrderSavingSuccess");
         }
     }
 }
@@ -876,6 +876,25 @@ function fill_special_products(result){
     }
     else if(result.checkboxes){
         jQuery(".page.single [name="+result.selector+"]").closest('div').append(result.checkboxes);
+        if(jQuery('input[name="products_buy[]"]:checked').length === 0) {
+            jQuery("input[name=products_buy]").val("");
+        }
+
+        $(".checkboxes  input[type=checkbox]").on("change",function (){
+            const values = $(".checkboxes input[type=checkbox]:checked")
+                .map(function () {return $(this).val();}).get();
+            const json = JSON.stringify(values);
+            jQuery("input[name=products_buy]").val(json);
+
+            var check = $(this);
+            if (check.is(":checked")) {
+                var a = 1;
+            }
+            else{
+                var b = 1;
+            }
+
+        })
     }
 }
 

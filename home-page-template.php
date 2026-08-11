@@ -107,17 +107,19 @@ if(is_agent()) {
                     else if($task->status_id == 3){
                         $agents[$index]->not_yet_treated++;
                     }
-                }
-
-                foreach ($agents as $agent){
+                }?>
+                <?php foreach ($agents as $agent){
                     //write_log("row ".json_encode( $task));
+                    if(isset($agent->in_treatment) && isset($agent->not_yet_treated)){
+                        $in_treatment = $agent->in_treatment> 0 ?  $agent->in_treatment . " בטיפול":"";
+                        $not_yet_treated = $agent->not_yet_treated > 0 ? $agent->not_yet_treated . " טרם טופלו":""
                     ?>
                     <div class="font-15 flex-display ">
-                        <span class="bold part-30"><?php echo $agent->name ?></span>
-                        <span class="part-30"><?php echo "בטיפול: ".(isset($agent->in_treatment)?$agent->in_treatment:0) ?></span>
-                        <span class="part-30"><?php echo "טרם טופלו: ". (isset($agent->not_yet_treated)?$agent->not_yet_treated:0) ?></span>
+                        <span class="bold part-30"><?= $agent->name ?></span>
+                        <span class=""><?= $in_treatment .(!empty($in_treatment) && !empty($not_yet_treated)?" ו ":"") .$not_yet_treated ?></span>
                     </div>
                     <?php
+                    }
                 }
                 ?>
             </div>
@@ -144,6 +146,7 @@ if(is_agent()) {
                 }
 
                 $result = get_data_table("tasks",$filters,array("open_date" => "desc"));
+
                 //write_log("task ".json_encode($result));
                 foreach ($result as $task) {
                     //if (empty($task->agent_id)) continue;

@@ -355,7 +355,9 @@ function specials_gallery($list,$attr = array()){ ?>
                 if(!empty($single->buy)) {
                     $html .= '<div class="part-10">' . "<strong>קנה כמות: </strong>" . $single->buy . '</div>';
                 }
+                write_log("prodec buy".$single->products_buy);
                 $products = json_decode($single->products_buy);
+
                 if(!empty($single->buy) && is_array($products)) {
                     $products_res = run_query("SELECT name FROM test_products WHERE id in(" . implode(',', $products) . ")");
                     $products_str = implode(', ', array_column($products_res, 'name'));

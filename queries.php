@@ -106,6 +106,7 @@ function save_single_data()
     }
 
     if($table_name == "specials"){
+        write_log("post ".json_encode($_POST));
         $_POST["products_buy"] = json_encode($_POST["products_buy"]);
     }
 
@@ -127,7 +128,7 @@ function save_single_data()
         //$id = $wpdb->get_var ("SELECT MAX(id) FROM {$wpdb->prefix}" . $table_name);
     }
 
-    write_log("save_single_data " .json_encode($_POST));
+    //write_log("save_single_data " .json_encode($_POST));
     if (isset($_POST["rows"])) {
         write_log("rows ".json_encode($_POST["rows"]));
 
@@ -182,7 +183,7 @@ function save_single_data()
             if($action_product == "new" && $sub_table_name == "order_products") {
                 $copy =  $row;
                 unset($row["temp_id"]);
-                write_log ('copy '.json_encode ($copy).' row '.json_encode ($row));
+                //write_log ('copy '.json_encode ($copy).' row '.json_encode ($row));
             }
             $result = pre_action_query ($sub_table_name, $row);
 
@@ -404,10 +405,10 @@ function new_chat_ajax()
         "add_message" => true
     ]);
 }
-
+//'.wp_get_attachment_url(9).'
 function get_logo_chat($user_id){
     if(is_manager(get_user_by('ID', $user_id))) {
-        return '<img class="user-logo" src="'.wp_get_attachment_url(9).'"/>';
+        return '<img class="user-logo" src="https://kosherboutique.co.il/wp-content/themes/boutique/assets/images/logo_icon.png"/>';
     }
     else{
         return '<span class="user-logo"></span>';

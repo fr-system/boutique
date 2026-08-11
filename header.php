@@ -48,7 +48,7 @@ if ( ! defined( 'ABSPATH' ) ) {
         <input id="search_site" type="search" placeholder="חיפוש">-->
     </div>
         <div class="user-logged pointer part-10 flex-display space-between align-center border-dark-gray">
-            <img class="user-logo" src="<?=wp_get_attachment_url(9)?>">
+            <img class="user-logo" src="https://kosherboutique.co.il/wp-content/themes/boutique/assets/images/logo_icon.png">
             <span class="user-name"><?= get_user_display_name();?></span>
             <svg xmlns="http://www.w3.org/2000/svg" width="7" height="4" viewBox="0 0 7 4" fill="none">
                 <path d="M6.13282 0L3.5 2.41146L0.86718 0L0 0.79427L3.5 4L7 0.79427L6.13282 0Z" fill="black"/>

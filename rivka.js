@@ -7,7 +7,7 @@ function fillClientDetails(results){
         var required = disabled==""?" required ":"";
         var html ='<div class="branch-area margin-r-10">' +
                 '<label class="bold" for="branch">סניף:</label>' +
-                '<select class="font-17" id="branch" name="branch" '+disabled + required+'>'+results.branches+'</select>' +
+                '<select class="font-17" id="branch" name="branch" '+disabled+'>'+results.branches+'</select>' +
             '</div>';
         //getSelectClientId().removeClass("grow");
         getSelectClientId().after(html);
@@ -53,10 +53,15 @@ function getSelectClientId(){
     return jQuery('.page.single form .grid-display select[name=client_id]');
 }
 
-function fillOrderId(result){
-    //צריך לשים למעלה בכתובת של האתר את מספר ההזמנה ולשנות את ה action ל edit
+function automaticOrderSavingSuccess(result){
+    const time = new Date().toLocaleTimeString('he-IL', {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false
+    });
+    jQuery(".saving-automatic").html("ההזמנה נשמרה בשעה: "+time);
 
-    if(!jQuery("input.orders_id[name=id]").val()) {
+    if(!jQuery("input.orders_id[name=id]").val()) {//צריך לשים למעלה בכתובת של האתר את מספר ההזמנה ולשנות את ה action ל edit
         window.history.pushState({}, '', 'single/?subject=orders&action=edit&id='+result.id);
         jQuery("section form input.orders_id[name=id]").val(result.id);
         getSelectClientId().prop('disabled', true);
