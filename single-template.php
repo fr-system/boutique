@@ -59,11 +59,15 @@ else{
 <section class="page single flex-display direction-column" data-single="<?php echo $page_info['single']?>">
     <div class="flex-display ">
         <div class="flex-display space-between margin-bottom-20 <?php echo $part_left_side ?> align-center ">
-            <div class="font-30 bold title-page">
-                <?php echo $title_page ?>
+            <div class=" title-page">
+                <span class="font-30 bold"><?= $title_page ?></span>
                 <?php if($table_name != "specials"){?>
-                    <span class="font-18"><?php echo $id ?  "  מס. ".$id : "" ?></span>
-                <?php } ?>
+                    <span class="font-18 bold"><?php echo $id ?  "  מס. ".$id : "" ?></span>
+                <?php }
+                if($table_name == "orders"){
+                    ?><span class="font-15 saving-automatic"></span><?php
+                }
+                ?>
             </div>
 
             <?php
@@ -207,7 +211,7 @@ else{
                         <?php }?>
                     </div>
                     <div class="new-chat input-label flex-display space-between ">
-                        <div class="part-20"><img class="user-logo" src="<?= wp_get_attachment_url(9); ?>"></div>
+                        <div class="part-20"><?= get_logo_chat(get_current_user_id())?></div>
                         <div class="text part-50"><input class="text-center" id="newChat" type="text" placeholder="הכנס הודעה חדשה"/></div>
                         <div class="date text-left part-20"></div>
                     </div>
