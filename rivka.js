@@ -216,19 +216,26 @@ function show_tooltip(){
 }
 
 function plusMinusCountProduct(me){
-    var numberInput = jQuery(me).parent().find("input");
-    var product = numberInput.closest("tr.product");
-    var currentValue = parseInt(numberInput.val()) || 0;
+    var currentValue,product;
+    if(jQuery(me).is("tr") ){
+        currentValue = 0;
+        product = me;
+    }
+    else {
+        var numberInput = jQuery(me).parent().find("input");
+        product = numberInput.closest("tr.product");
+        currentValue = parseInt(numberInput.val()) || 0;
 
-    if(jQuery(me).hasClass("plus")){
-        currentValue++;
-    }
-    else{
-        if(currentValue > 0) {
-            currentValue--;
+        if (jQuery(me).hasClass("plus")) {
+            currentValue++;
+        } else {
+            if (currentValue > 0) {
+                currentValue--;
+            }
         }
+        numberInput.val(currentValue);
     }
-    numberInput.val(currentValue);
+
     if(currentValue > 0) {
         product.addClass('in-cart');
         product.find("input").prop('disabled',false);
@@ -244,7 +251,7 @@ function plusMinusCountProduct(me){
         product.find(".order_individual input").val(0);
         product.find(".order_individual span").addClass("readonly un-value");
     }
-    calculatePrice(me);
+    calculatePrice(product);
     if(!product.hasClass("bonus")) {//אם הורידו מוצר לבדוק להוריד את המבצע
         checkPromotions(product, currentValue);
     }
@@ -282,7 +289,8 @@ function addProdoctBonus(product,countBonus = 0){
     pBonus.find(".discount_percent input").autoNumeric('set', 100);
     pBonus.find(".total input").autoNumeric('set', 0);
     pBonus.find(".id input.id").val("");
-    pBonus.find(".id input.temp").val("temp_"+countRows);
+    const random = String(Math.floor(Math.random() * 10000000)).padStart(7, '0');
+    pBonus.find(".id input.temp").val("temp_"+random);
     pBonus.find(".bonus input").val((countBonus == 0 ? 'bonus' :'promo'));
     pBonus.find(".order_individual input").val("1");
     pBonus.find(".order_individual span.right").addClass("un-value");
@@ -312,25 +320,27 @@ function removeProdoctFromOrder(product){
     product.find("td.discount_percent input").val("");
     product.find("td.order_individual input").val(0);
     product.find("td.order_individual span").addClass("readonly un-value");
+
     product.find("td.count input").trigger('change');
 
     if(product.hasClass('bonus')){
         product.removeClass('bonus');
-        product.addClass('hidden');
+        //product.addClass('hidden');
     }
     else if(product.hasClass('promo')){
         product.removeClass('promo');
-        product.addClass('hidden');
+       // product.addClass('hidden');
     }
     else {
-        calculatePrice(product.find("td.count input"));
+        plusMinusCountProduct(product);
+        //calculatePrice(product.find("td.count input"));
         product.find("td.total input").trigger('change');
     }
 }
 
 function registerToCalculatePrice(){
     jQuery('tr.product td:not(.total) input').on('change', function (e) {
-        calculatePrice(this);
+        calculatePrice(jQuery(this).closest("tr"));
     });
     jQuery("tr.product .total input").on("change", function () {
         var total = 0;
@@ -353,8 +363,8 @@ function calculateForPayment(total){
     jQuery("input[name=for_payment]").autoNumeric('set', forPayment);
 }
 
-function calculatePrice(me){
-    var product = jQuery(me).closest(".product");
+function calculatePrice(product){
+    //var product = jQuery(me).closest(".product");
 
     var count = parseInt(product.find('.count input').val());
     var unitsInBox = parseInt(product.find('.units_in_box span').text());

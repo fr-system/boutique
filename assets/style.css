@@ -173,6 +173,10 @@ tr.product td.count .plus {
     position: relative;
 }
 
+.boutique-header .user-logged img{
+    height: 20px;
+}
+
 .popup-logout{
     position: absolute;
     top: 50px;
@@ -510,7 +514,9 @@ td.dt-type-numeric{
     padding: 5px 0;
     border-radius: 12px;
 }
-
+.specials-area .archive-gallery{
+    max-height: 65vh;
+}
 .filter-by-area input, .filter-by-area select{
     border: var(--b-global-color-dark-gray) 1px solid;
     height: 40px;

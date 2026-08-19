@@ -48,7 +48,20 @@ if ( ! defined( 'ABSPATH' ) ) {
         <input id="search_site" type="search" placeholder="חיפוש">-->
     </div>
         <div class="user-logged pointer part-10 flex-display space-between align-center border-dark-gray">
-            <img class="user-logo" src="https://kosherboutique.co.il/wp-content/themes/boutique/assets/images/logo_icon.png">
+            <?php
+            $url = "https://kosherboutique.co.il/wp-content/themes/boutique/assets/images/logo_icon.png";
+            $user = wp_get_current_user();
+            $email_hash = md5(strtolower(trim($user->user_email)));
+            $avatar_url = "https://secure.gravatar.com/avatar/{$email_hash}?s=96&d=404&r=g";
+            $response = wp_remote_get($avatar_url);
+            if (!is_wp_error($response)) {
+                $status = wp_remote_retrieve_response_code($response);
+                if ($status === 200) {
+                    $url = esc_url($avatar_url);
+                }
+            }
+            ?>
+            <img class="user-logo" src="<?=$url?>">
             <span class="user-name"><?= get_user_display_name();?></span>
             <svg xmlns="http://www.w3.org/2000/svg" width="7" height="4" viewBox="0 0 7 4" fill="none">
                 <path d="M6.13282 0L3.5 2.41146L0.86718 0L0 0.79427L3.5 4L7 0.79427L6.13282 0Z" fill="black"/>

@@ -1,6 +1,5 @@
 <?php
 
-test_mode_table_prefix();
 function run_query($query, $type="")
 {
     //write_log("qu ".$query);
@@ -130,11 +129,8 @@ function save_single_data()
 
     //write_log("save_single_data " .json_encode($_POST));
     if (isset($_POST["rows"])) {
-        write_log("rows ".json_encode($_POST["rows"]));
-
-        if($table_name == "orders"){
-            $temp_list = array();
-        }
+        //write_log("rows ".json_encode($_POST["rows"]));
+        $temp_list = array();
 
         foreach ($_POST["rows"] as $row) {
             if ($table_name == "agents") {
@@ -193,7 +189,6 @@ function save_single_data()
                 $copy["id"] = $wpdb->insert_id;
                 $temp_list[] = $copy;
             }
-
         }
     }
     echo json_encode (array(
@@ -378,13 +373,6 @@ function get_list($list_name,$filter = '',$table_display =false)
     $list = run_query($query);
 
     return $list;
-}
-function test_mode_table_prefix() {
-    if(get_user_test_mode()) {
-        global $wpdb;
-        $wpdb->prefix = 'test_';
-        //write_log ("prefix ".$wpdb->prefix);
-    }
 }
 
 add_action('wp_ajax_new_chat_ajax', 'new_chat_ajax');

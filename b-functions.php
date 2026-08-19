@@ -236,7 +236,7 @@ function get_column_value($column,$row,$field,$list,$key,$is_readonly=false)
             break;
         default:
             if (isset($column["type"]) && $column["type"] == "user") {
-                
+
                 $column_value = empty($row->$field) ? '' : (get_userdata($row->$field) ? get_userdata($row->$field)->display_name:"");
             } else {
                 $column_value = isset($column['list_name']) && isset($list[$row->$field]) ? $list[$row->$field] : $row->$field;
@@ -248,7 +248,7 @@ function get_column_value($column,$row,$field,$list,$key,$is_readonly=false)
     }
 
     if(isset($column["create_input"])) {
-        $type =  isset($column["widget"]) && $column["widget"]== "hidden" ? 'hidden':
+        $type =  isset($column["widget"]) && $column["widget"]== "hidden" ?'hidden':
             (isset($column["widget"]) && $column["widget"]== "date"? 'date':'text');
         $readonly = $is_readonly || (isset($row->bonus) && $row->bonus == "promo") || (isset($column["widget"]) && $column["widget"]== "readonly")?' readonly ':'';
 
@@ -271,8 +271,8 @@ function get_column_value($column,$row,$field,$list,$key,$is_readonly=false)
             }
             $column_value .= "</div>";
         }
-        else {
-            $column_value = ($readonly ? "" : "<span class='hidden'>{$value}</span>");
+        else {//
+            $column_value =  "<span class='hidden'>{$value}</span>";
             if($column['widget'] == 'select') {
 
             }
@@ -292,9 +292,9 @@ function get_column_value($column,$row,$field,$list,$key,$is_readonly=false)
                 if ($column['widget'] == 'number') {
                     $column_value .= "<span class='plus bold font-25 pointer {$readonly}'>+</span></div>";
                 }
-
+                $random = str_pad((string) random_int(0, 9999999), 7, '0', STR_PAD_LEFT);
                 if(isset($column['temp_id']) && empty($value)){
-                    $column_value .= "<input type='hidden' class='temp' name='rows[{$key}][temp_id]' value='temp_{$key}'/>";
+                    $column_value .= "<span class='hidden'>temp_{$random}</span><input type='hidden' class='temp' name='rows[{$key}][temp_id]' value='temp_{$random}'/>";
                 }
             }
         }

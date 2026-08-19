@@ -5,7 +5,6 @@ require_once( dirname( dirname( dirname( dirname( dirname( __FILE__ ) ) ) ) ) . 
 if(isset($_GET['export'])) {
 	switch (fixXSS ($_GET['export'])) {
 		case 'archive':
-			test_mode_table_prefix ();
 			$table_name = $_GET["subject"];
 			$packet = get_data_to_export($table_name,"xlsx",array());
 			$headers = $packet["headers"];

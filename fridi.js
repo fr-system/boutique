@@ -123,9 +123,8 @@ function checkPromotions(product, currentValue){
                 }
                 var countPromotions = getCountPromotions(pro.product_get);
                 var productToGet = jQuery("tr:not(.bonus,.promo) td.product_id input[type=hidden][value=" + pro.product_get + "]").closest("tr").first();
-                //var productToGet = jQuery("tr:not(.bonus,.promo):has(.product_id input[type=hidden][value=" + pro.product_get + "])");
 
-                //if (countProductsInOrder >= needToBuy /*&& countProductsInOrder % needToBuy == 0*/) {
+
                     var toAdd = countToGet * parseInt(countProductsInOrder / needToBuy);
 
                     if (countPromotions == 0 ) {// קורה כי הכמות לארגד לא מדויקת לכמות המבצע
@@ -133,9 +132,9 @@ function checkPromotions(product, currentValue){
                     } else {
                         jQuery("tr.promo:has(.product_id input[type=hidden][value=" + pro.product_get + "])").eq(0)
                             .find(".count input").val(toAdd);
-                        if(toAdd ==0)  jQuery("tr.promo:has(.product_id input[type=hidden][value=" + pro.product_get + "])").eq(0).hide();
+                        //if(toAdd ==0)  jQuery("tr.promo:has(.product_id input[type=hidden][value=" + pro.product_get + "])").eq(0).hide();
                     }
-                //}
+
                 break;
             case "2": //  קנה מעל
                 var priceToSupplier = 0;
@@ -157,8 +156,23 @@ function checkPromotions(product, currentValue){
                         break;
                     }
                     if (pro.discount) {//
-                        var totalOrder = jQuery("input[name=total]").val();
+                        jQuery("input[name=discount]").autoNumeric('set', pro.discount);
+                        calculateForPayment(jQuery("input[name=total]").val());
+                    /*    var totalOrder = jQuery("input[name=total]").val();
                         jQuery("input[name=total]").autoNumeric('set', totalOrder * (100 - parseFloat(pro.discount)) / 100)
+*/
+                    }
+                }
+                else{
+                    if (pro.get && countPromotions > 0) {
+                        var productToGet = jQuery("tr.promo td.product_id input[type=hidden][value=" + pro.product_get + "]").closest("tr").first();
+                        removeProdoctFromOrder(productToGet)
+                        break;
+                    }
+
+                    if (pro.discount) {
+                        jQuery("input[name=discount]").autoNumeric('set', '');
+                        calculateForPayment(jQuery("input[name=total]").val());
                     }
                 }
                 break;
@@ -170,6 +184,12 @@ function checkPromotions(product, currentValue){
                     } else {
                         jQuery("tr.promo:has( .product_id input[type=hidden][value=" + product_id + "])").eq(0)
                             .find(".count input").val(parseInt(currentCount / needToBuy));
+                    }
+                }
+                else{
+                    var tr = jQuery("tr.promo:has( .product_id input[type=hidden][value=" + product_id + "])").eq(0);
+                    if(tr.length>0) {
+                        removeProdoctFromOrder(tr);
                     }
                 }
                 break;

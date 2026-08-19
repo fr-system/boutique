@@ -44,7 +44,6 @@ function create_pdf($attr)
 
     $mpdf->SetDirectionality('rtl');
 
-    test_mode_table_prefix ();
     $html='<style>
                 body {
                     letter-spacing: 1px;
