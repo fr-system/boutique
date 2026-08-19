@@ -358,7 +358,6 @@ function specials_gallery($list,$attr = array()){
                 if(!empty($single->buy)) {
                     $html .= '<div class="part-10">' . "<strong>קנה כמות: </strong>" . $single->buy . '</div>';
                 }
-                write_log("prodec buy".$single->products_buy);
                 $products = json_decode($single->products_buy);
 
                 if(!empty($single->buy) && is_array($products)) {

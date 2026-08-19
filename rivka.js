@@ -310,8 +310,9 @@ function addProdoctBonus(product,countBonus = 0){
         });
 
     table.order([columnIndex, 'asc']).draw();
-    if(countBonus != 0)
-    pBonus.find(".count span.pointer").off();
+    if(countBonus != 0) {
+        pBonus.find(".count span.pointer").off();
+    }
 }
 
 function removeProdoctFromOrder(product){

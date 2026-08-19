@@ -265,7 +265,7 @@ function get_column_value($column,$row,$field,$list,$key,$is_readonly=false)
                 $column_value .= "<input type='hidden' id='' name='rows[{$key}][{$field}]' value='{$value}'>";
                 foreach ($column["values"] as $key=>$option) {
                     $column_value .= "<span data-value='{$key}' class='{$readonly} pointer ellipse " . ($value != null && $value == $key ? "" : "un-value ") . $option["class"] . "'>               
-                                    {$option["label"]}                      
+                                    ".$option["label"].(isset($row->units_in_box)&& $option["label"]=="ארגזים" ?"<span style='margin-right: 2px;font-size: 9px'>({$row->units_in_box})</span>":"")."           
                                 </span>";
                 }
             }
@@ -313,7 +313,7 @@ function on_order_confirmation()
         $order_id = $_POST['order_id'];
         $query = "UPDATE " . $wpdb->prefix . "orders SET done = 1, user_confirms = " . get_current_user_id() . "
                   WHERE id = " . $order_id;
-        //run_query ($query);//זה עובד טוב פשוט חבל כל הזמן שיאשר ויפריע לבדיקות!!!!
+        run_query ($query);//זה עובד טוב פשוט חבל כל הזמן שיאשר ויפריע לבדיקות!!!!
 
         $attr=["report_title"=>"פרטי הזמנה", "subject"=>"orders","export"=>"single","order_id"=>$_POST['order_id'],
             "send_mail"=>true,"client_id"=>$_POST['client_id']];
