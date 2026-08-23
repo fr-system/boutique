@@ -63,7 +63,9 @@ Text Domain: boutique
     color: #000000;
     border: var(--b-global-color-light-light-blue) 1px solid;
 }
-
+.background-light-gray {
+    background-color:var(--b-global-color-light-gray);
+}
 .background-red {
     background-color:red;
     color: #FFFFFF;

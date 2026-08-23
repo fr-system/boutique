@@ -42,11 +42,10 @@ if(is_agent()) {
                 <a class="not-link font-15 dark-green" href="/archive/?subject=collection">לפירוט המלא -></a>
             </div>
             <div class="graphs-charts quick-action border-dark-gray">
-                <div class="flex-display direction-column font-18">
+                <div class="grid-display cols-4">
                     <?php
-                    global $wpdb;
                     $filters = array(array("filter_field" => "payment_date","filter_type"=>"null"));
-                    $filters[] = array("filter_field" => "{$wpdb->prefix}collection.doc_type","filter_value"=>"1");
+                    $filters[] = array("filter_field" => "doc_type","filter_value"=>"1");
                     if(is_agent()){
                         $filters[] = array("filter_table"=>"clients", "filter_field" => "agent_id", "filter_value" => $agent_id);
                     }
@@ -65,7 +64,10 @@ if(is_agent()) {
                             $filters = array(array("filter_field" => "id","filter_value"=>$key));
                             $agent = get_data_table("agents",$filters)[0];
                             ?>
-                            <div class="flex-display "><span class="part-30"><?php echo $agent->name ?>:</span><span class="bold gold" ><?php echo "₪".number_format($total) ?> </span> </div>
+                            <div class="quick-action background-light-gray">
+                                <div class="bold gold font-20 margin-bottom-5"><?php echo "₪".number_format($total) ?> </div>
+                                <div class="font-15"><?php echo $agent->name ?></div>
+                            </div>
                             <?php
                         }
                     ?>
@@ -86,7 +88,8 @@ if(is_agent()) {
                 $agents = get_data_table("agents",$filters);
                 $filters = array(array("filter_field" => "status_id", "filter_value" =>1,"filter_type"=>"!="));
                 if(is_agent()){
-                    $filters[] = array("filter_field" => "tasks.agent_id", "filter_value" => $agent_id );                }
+                    $filters[] = array("filter_field" => "tasks.agent_id", "filter_value" => $agent_id );
+                }
 
                 $result = get_data_table("tasks",$filters);
                 foreach ($result as $task) {
@@ -108,21 +111,59 @@ if(is_agent()) {
                     else if($task->status_id == 3){
                         $agents[$index]->not_yet_treated++;
                     }
-                }
-
-                foreach ($agents as $agent){
+                }?>
+                <?php foreach ($agents as $agent){
                     //write_log("row ".json_encode( $task));
+                    if(isset($agent->in_treatment) && isset($agent->not_yet_treated)){
+                        $in_treatment = $agent->in_treatment> 0 ?  $agent->in_treatment . " בטיפול":"";
+                        $not_yet_treated = $agent->not_yet_treated > 0 ? $agent->not_yet_treated . " טרם טופלו":""
                     ?>
                     <div class="font-15 flex-display ">
-                        <span class="bold part-30"><?php echo $agent->name ?></span>
-                        <span class="part-30"><?php echo "בטיפול: ".(isset($agent->in_treatment)?$agent->in_treatment:0) ?></span>
-                        <span class="part-30"><?php echo "טרם טופלו: ". (isset($agent->not_yet_treated)?$agent->not_yet_treated:0) ?></span>
+                        <span class="bold part-30"><?= $agent->name ?></span>
+                        <span class=""><?= $in_treatment .(!empty($in_treatment) && !empty($not_yet_treated)?" ו ":"") .$not_yet_treated ?></span>
                     </div>
                     <?php
+                    }
                 }
                 ?>
             </div>
 
+        </div>
+    </div>
+    <div class=" part-30 flex-display space-between">
+        <div class="part-100">
+            <div class="flex-display space-between">
+                <div class="font-20 bold">משימות פתוחות</div>
+                <a class="not-link font-15 dark-green" href="/archive/?subject=tasks">לפירוט המלא -></a>
+                <!--  צריך להביא פה קישור לעמוד משימות ויראה רק משימות פתוחות -->
+            </div>
+            <div class="graphs-charts quick-action border-dark-gray">
+                <?php
+                $filters = array();
+/*                if(is_agent()){
+                    $filters[] = array("filter_field" => "id", "filter_value" => $agent_id);
+                }*/
+                //$agents = get_data_table("agents",$filters);
+                $filters = array(array("filter_field" => "status_id", "filter_value" =>1,"filter_type"=>"!="));
+                if(is_agent()){
+                    $filters[] = array("filter_field" => "tasks.agent_id", "filter_value" => $agent_id );
+                }
+
+                $result = get_data_table("tasks",$filters,array("open_date" => "desc"));
+
+                //write_log("task ".json_encode($result));
+                foreach ($result as $task) {
+                    //if (empty($task->agent_id)) continue;
+                    //$agent_id = $task->agent_id;
+                    ?>
+                    <a href="single?subject=tasks&action=edit&id=<?=$task->id?>" class="open-task not-link font-15 flex-display margin-bottom-5">
+                        <span class="bold part-10"><?= $task->agent_name ?></span>
+                        <span class="bold part-10"><?= $task->client_name ?></span>
+                        <span class="part-20"><?php echo $task->subject_text ?></span>
+                        <span class=""><?php echo $task->details ?></span>
+                    </a>
+                <?php } ?>
+            </div>
         </div>
     </div>
     <div class="part-40">

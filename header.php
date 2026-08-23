@@ -69,7 +69,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
             <div class="popup-logout box-shadow hidden  border-dark-gray">
                 <div class="flex-display direction-column space-between">
-                    <div class="pointer margin-bottom-10">הפרטים שלי</div>
+                    <!--<div class="pointer margin-bottom-10">הפרטים שלי</div>-->
                     <div class="logout-button flex-display space-between pointer">
                         <div>יציאה</div>
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">

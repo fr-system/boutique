@@ -257,7 +257,7 @@ a.not-link{
     color: black;
 }
 .quick-action{
-    padding: 12px 25px;
+    padding: 12px/* 25px*/;
     border-radius: 12px;
 }
 .quick-action svg{
@@ -273,7 +273,7 @@ a.not-link{
     text-overflow: ellipsis;
 }
 .open-task:hover{
-    color: var(--b-global-color-dark-green);
+    color: var(--b-global-color-gold);
 }
 .graphs-charts {
     width: 100%;
@@ -281,7 +281,19 @@ a.not-link{
     overflow-y: auto;
     position: relative;
 }
-
+.graphs-charts .open-task{
+    background-color: var(--b-global-color-light-gray);
+    padding: 5px 10px;
+    margin-bottom: 2px;
+}
+.graphs-charts .open-task:first-child{
+    border-top-right-radius:12px ;
+    border-top-left-radius:12px ;
+}
+.graphs-charts .open-task:last-child{
+    border-bottom-right-radius:12px ;
+    border-bottom-left-radius:12px ;
+}
 .graphs-charts canvas {
     width: 100% !important;
     height: 100% !important;
@@ -435,6 +447,7 @@ tr.order-confirm td{
 td a.button{
     margin: 0;
     height: 30px;
+    padding: 0 15px;
 }
 #edit-list .modal-dialog{
     width: 500px;
@@ -517,11 +530,16 @@ td.dt-type-numeric{
 .specials-area .archive-gallery{
     max-height: 65vh;
 }
+.filter-by-area{
+    padding: 5px 15px;
+}
 .filter-by-area input, .filter-by-area select{
     border: var(--b-global-color-dark-gray) 1px solid;
-    height: 40px;
+    height: 30px;
     margin-left: 10px;
     border-radius: 12px;
+    padding-top: 0;
+    padding-bottom: 0;
 }
 .sort-column{
     color:transparent;
