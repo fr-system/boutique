@@ -38,7 +38,7 @@ function get_single_view($table_name, $single, $readonly)
                     $target_table_rows = array();
                     $sub_table_id = null;
                     if(isset($column["target_table"])) {
-                        $target_table_rows = get_data_table($column["target_table"], $filters);
+                        $target_table_rows = get_data_table($column["target_table"], $filters,array("name"=>"asc"));
                         $sub_table_id = substr($column["target_table"], 0, -1) . "_id";
                     }
 
@@ -64,23 +64,43 @@ function get_single_view($table_name, $single, $readonly)
                             }
                         }
                     }
-
                     foreach ($target_table_rows as $table_row) { //
                         if (isset($column["target_table"])) {
-                            if (empty($grouped_list[$table_row->id])) {
+                            if (empty($grouped_list[$table_row->id])) {//אם המוצר לא קיים בהזמנה להוסיף את המצור ללא פרטים נוספים
                                 // הצגת שורה ריקה
                                 $result_list[] = render_row($table_row, null,
                                     array("sub_table_id"=> $sub_table_id,"parent_table_id"=>$parent_table_id
                                     ,"single_id"=>(isset($single->id) ? $single->id : null)
                                     ,"table_name"=>$table_name,"sub_table"=>$sub_table));
-                            } else {
-                                foreach ($grouped_list[$table_row->id] as $single_sub_row) {
+                            } else {//אם הוא כן קיים
+                               /* $hasRegular = !empty(array_filter($grouped_list[$table_row->id],
+                                    fn($item) => empty($item->bonus)
+                                )); //בדיקה אם המוצר מוזמן כמוצר רגיל , ללא מבצע
+                                if(!$hasRegular ) {//אם הוא מוזמן רק כמבצע להוסיף אותו כשורה לא מוזמנת
+                                    $result_list[] = render_row ($table_row, null,
+                                        array("sub_table_id" => $sub_table_id, "parent_table_id" => $parent_table_id
+                                        , "single_id" => (isset($single->id) ? $single->id : null)
+                                        , "table_name" => $table_name, "sub_table" => $sub_table));
+                                }*/
+                                //$table_row = פריט מטבלת מוצרים
+                                //$table_row->id = מספר מוצר
+                                $is_regular = false;
+                                foreach ($grouped_list[$table_row->id] as $single_sub_row) {// בכל מצב לעבור על כל השורות של המוצר בתוך ההזמנה ולהוסיף את כל הפרטים שלהם לרשימת המוצרים
                                     // הצגת שורת מוצר עם נתוני ההזמנה
                                     //write_log ('single_sub_row '.json_encode ($single_sub_row));
+                                    if(empty( $single_sub_row->bonus)) {
+                                        $is_regular = true;
+                                    }
                                     $result_list[] = render_row($table_row, $single_sub_row,
                                         array("sub_table_id"=> $sub_table_id,"parent_table_id"=>$parent_table_id
                                         ,"single_id"=>(isset($single->id) ? $single->id : null)
                                         ,"table_name"=>$table_name,"sub_table"=>$sub_table));
+                                }
+                                if(!$is_regular){
+                                    $result_list[] = render_row ($table_row, null,
+                                        array("sub_table_id" => $sub_table_id, "parent_table_id" => $parent_table_id
+                                        , "single_id" => (isset($single->id) ? $single->id : null)
+                                        , "table_name" => $table_name, "sub_table" => $sub_table));
                                 }
                             }
                         }

@@ -293,8 +293,8 @@ function get_column_value($column,$row,$field,$list,$key,$is_readonly=false)
                     $column_value .= "<span class='plus bold font-25 pointer {$readonly}'>+</span></div>";
                 }
                 $random = str_pad((string) random_int(0, 9999999), 7, '0', STR_PAD_LEFT);
-                if(isset($column['temp_id']) && empty($value)){
-                    $column_value .= "<span class='hidden'>temp_{$random}</span><input type='hidden' class='temp' name='rows[{$key}][temp_id]' value='temp_{$random}'/>";
+                if(isset($column['temp_id']) && empty($value)){//
+                    $column_value .= "<span class='hidden temp'>temp_{$random}</span><input type='hidden' class='temp' name='rows[{$key}][temp_id]' value='temp_{$random}'/>";
                 }
             }
         }

@@ -131,6 +131,7 @@ function save_single_data()
     if (isset($_POST["rows"])) {
         //write_log("rows ".json_encode($_POST["rows"]));
         $temp_list = array();
+        $removed_list = array();
 
         foreach ($_POST["rows"] as $row) {
             if ($table_name == "agents") {
@@ -181,11 +182,14 @@ function save_single_data()
                 unset($row["temp_id"]);
                 //write_log ('copy '.json_encode ($copy).' row '.json_encode ($row));
             }
+            if($action_product == "remove" && $sub_table_name == "order_products" && empty($row["bonus"])) {
+                $removed_list[]=$row["id"];
+            }
             $result = pre_action_query ($sub_table_name, $row);
 
-            write_log("result to save" . json_encode($result));
+            //write_log("result to save" . json_encode($result));
             run_action_query ($sub_table_name, $row["id"], $action_product, $result);
-            if($table_name = "orders") {
+            if($action_product == "new" && $table_name = "orders") {
                 $copy["id"] = $wpdb->insert_id;
                 $temp_list[] = $copy;
             }
@@ -195,7 +199,8 @@ function save_single_data()
         'status' => 'success',
         'id' => $id,
         'redirect' => (isset($_POST["previous_page"]) ? $_POST["previous_page"] : ''),
-        'temp_list'=>$temp_list
+        'temp_list'=>$temp_list,
+        'removed_list'=>$removed_list,
     ));
     wp_die ();
 

@@ -74,6 +74,23 @@ function automaticOrderSavingSuccess(result){
             temp_input.siblings("input.id").val(temp_row.id);
         });
     }
+    if(result.removed_list) {
+        result.removed_list.forEach(removed_row => {
+            const random = String(Math.floor(Math.random() * 10000000)).padStart(7, '0');
+            var newTempId = "temp_"+random;
+            var idInput =  jQuery(".archive-table.order_products tbody tr td.id input.id[value=\""+removed_row+"\"]");
+            idInput.val("");
+            var key = idInput.attr("name").replace("rows[","").replace("][id]","")
+            var tempInput = idInput.siblings("input.temp");
+            if(tempInput.length ==0){
+                html = `<span class=' temp'>${newTempId}</span><input type='hidden' class='temp' name='rows[${key}][temp_id]' value='${newTempId}'/>`;
+                idInput.parent().append(html);
+            }
+            else {
+                tempInput.val(newTempId);
+            }
+        });
+    }
 }
 
 function onCheckingDuplicates(result){
@@ -273,7 +290,7 @@ function getCountPromotions(productId,className){
     });
     return countPromotions;
 }
-function addProdoctBonus(product,countBonus = 0){
+function addProdoctBonus(product,countBonus = 0,sourceKey){
     var countRows =  table.rows().count();
     var pBonus =  product.clone(true);
 
@@ -284,13 +301,14 @@ function addProdoctBonus(product,countBonus = 0){
         name = name.replace("rows["+rowIndex+"]", "rows["+countRows+"]");
         jQuery(input).attr("name",name);
     })
-
+    pBonus.find(".sort-column").html(sourceKey + ".1");
     pBonus.find(".name").text(pBonus.find(".name").text() + (countBonus == 0 ? ' - בונוס' :' - מבצע'));
     pBonus.find(".discount_percent input").autoNumeric('set', 100);
     pBonus.find(".total input").autoNumeric('set', 0);
     pBonus.find(".id input.id").val("");
     const random = String(Math.floor(Math.random() * 10000000)).padStart(7, '0');
     pBonus.find(".id input.temp").val("temp_"+random);
+    pBonus.find(".id span.temp").text("temp_"+random);
     pBonus.find(".bonus input").val((countBonus == 0 ? 'bonus' :'promo'));
     pBonus.find(".order_individual input").val("1");
     pBonus.find(".order_individual span.right").addClass("un-value");
@@ -309,7 +327,7 @@ function addProdoctBonus(product,countBonus = 0){
             return $(th).data('column-name') === 'name';
         });
 
-    table.order([columnIndex, 'asc']).draw();
+    //table.order([columnIndex, 'asc']).draw();
     if(countBonus != 0) {
         pBonus.find(".count span.pointer").off();
     }
@@ -439,8 +457,11 @@ function startingDataTable(){
                 },
             },
         "ordering": true,
-        order: [],
+        order:(tableName == "orders" && currentUrl.includes('single'))?  [0,'asc']:[],
         "columnDefs": [
+             /*{                targets: 0,
+                 visible: false
+             },*/
             {"orderable": false, "targets": aTargets},
         ],
     });

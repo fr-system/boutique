@@ -17,8 +17,8 @@ function get_archive_table($table_name,$data,$attr)
     }
     $html = "<table name='' class='archive-table {$class_table} dataTable {$table_name}'>
                 <thead><tr class='tr-head gold'>";
-
     if($table_name == "order_products"){
+        $html .= '<th class="no-sort"></th>';//עמודה למיון
         $html .= '<th class="no-sort dupl-action" ></th>';//לחצן בונוס בעגלה
     }
 
@@ -138,6 +138,9 @@ function get_tr_data($table_name, $data, $key,$attr){
     }
 
     $html="<tr data-id='{$row->id}' class='{$tr_class}'>";
+    if($table_name =="order_products") {
+        $html .= "<td class=\"sort-column\">{$key}</td>";
+    }
     if(is_manager() && $table_name == "collection" && !isset($_GET["payed"])){
         $html.= '<td>';
         if($row->doc_type == 1) {

@@ -523,3 +523,6 @@ td.dt-type-numeric{
     margin-left: 10px;
     border-radius: 12px;
 }
+.sort-column{
+    color:transparent;
+}

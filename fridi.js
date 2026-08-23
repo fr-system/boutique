@@ -73,6 +73,7 @@ function filterOrderProdoctsRowsToSave() {
     rows.find('td input').prop('disabled', true);
 }
 function checkPromotions(product, currentValue){
+    var sourceKey = product.find(".sort-column").text();
     var supplier_id = parseInt(product.find(".supplier_id span").text() || 0);
     var product_id = parseInt(product.find(".product_id span").text() || 0);
 
@@ -89,6 +90,8 @@ function checkPromotions(product, currentValue){
     relevant_promotions.forEach(pro => {
         var needToBuy = parseInt(pro.buy);
         var countToGet = parseInt(pro.get);
+        var product_get = (pro.type == "3" ? product_id : pro.product_get);
+        var productPromo = jQuery("tr.promo td.product_id input[type=hidden][value=" + product_get + "]").closest("tr").first();
         switch (pro.type) {
             case "1": //  קנה קבל
               /*  if(currentValue ==0){
@@ -124,15 +127,14 @@ function checkPromotions(product, currentValue){
                 var countPromotions = getCountPromotions(pro.product_get);
                 var productToGet = jQuery("tr:not(.bonus,.promo) td.product_id input[type=hidden][value=" + pro.product_get + "]").closest("tr").first();
 
-
                     var toAdd = countToGet * parseInt(countProductsInOrder / needToBuy);
 
-                    if (countPromotions == 0 ) {// קורה כי הכמות לארגד לא מדויקת לכמות המבצע
-                        if(toAdd >0) addProdoctBonus(productToGet, toAdd);
+                    if (countPromotions == 0 && productPromo.length==0) {// קורה כי הכמות לארגז לא מדויקת לכמות המבצע
+                        if(toAdd >0) addProdoctBonus(productToGet, toAdd,sourceKey);
                     } else {
-                        jQuery("tr.promo:has(.product_id input[type=hidden][value=" + pro.product_get + "])").eq(0)
-                            .find(".count input").val(toAdd);
-                        //if(toAdd ==0)  jQuery("tr.promo:has(.product_id input[type=hidden][value=" + pro.product_get + "])").eq(0).hide();
+                        productPromo.find(".count input").val(toAdd);
+                        if(toAdd ==0){  productPromo.hide();}
+                        else {productPromo.show();}
                     }
 
                 break;
@@ -149,12 +151,20 @@ function checkPromotions(product, currentValue){
                 });
                 var countPromotions = getCountPromotions(pro.product_get);
                 if (priceToSupplier >= parseFloat( pro.price_more)) {
-                    if (pro.get && countPromotions == 0) {
-                        var productToGet = jQuery("tr:not(.bonus,.promo) td.product_id input[type=hidden][value=" + pro.product_get + "]").closest("tr").first();
-                        //var productToGet = jQuery("tr:not(.bonus,.promo):has(.product_id input[type=hidden][value=" + pro.product_get + "])");
-                        addProdoctBonus(productToGet, countToGet);
+
+                    if (pro.get && countPromotions == 0 ) {
+                        if( productPromo.length>0){
+                            productPromo.find(".count input").val(countToGet);
+                            productPromo.show();
+                        }
+                        else {
+                            var productToGet = jQuery("tr:not(.bonus,.promo) td.product_id input[type=hidden][value=" + pro.product_get + "]").closest("tr").first();
+                            //var productToGet = jQuery("tr:not(.bonus,.promo):has(.product_id input[type=hidden][value=" + pro.product_get + "])");
+                            addProdoctBonus(productToGet, countToGet, sourceKey);
+                        }
                         break;
                     }
+
                     if (pro.discount) {//
                         jQuery("input[name=discount]").autoNumeric('set', pro.discount);
                         calculateForPayment(jQuery("input[name=total]").val());
@@ -165,8 +175,10 @@ function checkPromotions(product, currentValue){
                 }
                 else{
                     if (pro.get && countPromotions > 0) {
-                        var productToGet = jQuery("tr.promo td.product_id input[type=hidden][value=" + pro.product_get + "]").closest("tr").first();
-                        removeProdoctFromOrder(productToGet)
+                        productPromo.find(".count input").val(0);
+                        productPromo.hide();
+
+                        //removeProdoctFromOrder(productToGet)
                         break;
                     }
 
@@ -179,17 +191,21 @@ function checkPromotions(product, currentValue){
             case "3": //  קנה קבל מאותו מוצר
                 var countPromotions = getCountPromotions(product_id);
                 if (currentCount >= needToBuy /*&& currentCount % needToBuy == 0*/) {
-                    if (countPromotions == 0) {
-                        addProdoctBonus(product, parseInt(currentCount / needToBuy));
+
+                    if (countPromotions == 0 && productPromo.length == 0) {
+                        addProdoctBonus(product, parseInt(currentCount / needToBuy),sourceKey);
                     } else {
-                        jQuery("tr.promo:has( .product_id input[type=hidden][value=" + product_id + "])").eq(0)
-                            .find(".count input").val(parseInt(currentCount / needToBuy));
+                        //jQuery("tr.promo:has( .product_id input[type=hidden][value=" + product_id + "])").eq(0)
+                        productPromo.find(".count input").val(parseInt(currentCount / needToBuy));
+                        productPromo.show();
                     }
                 }
                 else{
-                    var tr = jQuery("tr.promo:has( .product_id input[type=hidden][value=" + product_id + "])").eq(0);
-                    if(tr.length>0) {
-                        removeProdoctFromOrder(tr);
+
+                    if(productPromo.length>0) {
+                        productPromo.find(".count input").val(0);
+                        productPromo.hide() ;
+                        //removeProdoctFromOrder(tr);
                     }
                 }
                 break;
