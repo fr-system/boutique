@@ -264,10 +264,13 @@ function archive_header($table_name, $view_only = false,$attr = null)
             <div class=" flex-display align-center input-label filter-by-area hidden">
                     <?php
                     $html = "";
-                    foreach ($columns as $column){
-                        if(!isset($column["widget"]))continue;
-                        if($column["widget"]=="text" || $column["widget"]=="date"|| $column["widget"]=="datetime-local"|| $column["widget"]=="select")
-                        $html.="<option value='{$column["field_name"]}' data-widget='{$column["widget"]}' data-list-name='".($column["join_table"]??"")."'>{$column["label"]}</option>";
+                    foreach ($columns as $column) {
+                        if (!isset($column["widget"])) continue;
+                        $widgets = ['text', 'date', 'datetime-local', 'select', 'radio','status'];
+
+                        if (in_array($column['widget'], $widgets, true)) {
+                            $html .= "<option value='{$column["field_name"]}' data-widget='{$column["widget"]}' data-list-name='" . ($column["join_table"] ?? "") . "'>{$column["label"]}</option>";
+                        }
                     }
                     ?>
                     <span for="filter" class="margin-after-10">סינון לפי</span>
@@ -342,10 +345,10 @@ function specials_gallery($list,$attr = array()){
             ?>
             <a href="<?=$href?>" class="border-dark-gray single pointer flex-display direction-column start font-15 padding-15" data-id="<?php echo $single->id?>">
                 <div class="flex-display space-between bold part-20">
-                    <div class="font-17 text-center bold gold"><?= $single->descript ?></div>
+                    <div class="descript font-17 text-center bold gold"><?= $single->descript ?></div>
                 </div>
-                <span class="hidden supplier_id"><?= $single->supplier_id ?></span>
-                <span class="hidden type"><?= $type ?></span>
+                <span class="supplier_id hidden supplier_id"><?= $single->supplier_id ?></span>
+                <span class="type hidden"><?= $type ?></span>
                 <?= (!empty($single->date_end) ? "<div class=\"part-10\">
                     <strong>תאריך סיום: </strong>
                     <span class='date_end'>".date('d/m/Y', strtotime($single->date_end)) . "</span>
@@ -356,7 +359,7 @@ function specials_gallery($list,$attr = array()){
                 <?php
                 $html = "";
                 if(!empty($single->buy)) {
-                    $html .= '<div class="part-10">' . "<strong>קנה כמות: </strong>" . $single->buy . '</div>';
+                    $html .= '<div class="buy part-10">' . "<strong>קנה כמות: </strong>" . $single->buy . '</div>';
                 }
                 $products = json_decode($single->products_buy);
 
@@ -373,9 +376,9 @@ function specials_gallery($list,$attr = array()){
                              }
                             break;
                         case "2":
-                            $html .= '<div class="part-10">'.(!empty($single->price_more) ? "<strong>קנה מעל: </strong>". $single->price_more." ₪" : "") .'</div>';
+                            $html .= '<div class="price_more part-10">'.(!empty($single->price_more) ? "<strong>קנה מעל: </strong>". $single->price_more." ₪" : "") .'</div>';
                             if(!empty($single->discount)){
-                                $html.='<div class="part-10"><strong>קבל הנחה של: </strong>'. $single->discount." %" .'</div>';
+                                $html.='<div class="discount part-10"><strong>קבל הנחה של: </strong>'. $single->discount." %" .'</div>';
                             }
                             else if(!empty($single->get) && !empty($single->product_name)) {
                                 $html .= '<div class="part-10"><strong>קבל: </strong>' . $single->get . ' בקבוקי ' . $single->product_name . '</div>';

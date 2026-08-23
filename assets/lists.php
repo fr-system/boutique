@@ -65,7 +65,7 @@ const BOUTIQUE_TABLES = array(
             array("field_name" => "supplier_id", "widget" => "select","label"=>"ספק", "join_table" => "suppliers", "join_value" => "name","filter"=>true,"required"=>true),
             array("field_name" => "price", "widget" => "text","label"=>"מחיר", "un_apostrophe" => true,"sign"=>"₪","required"=>true),
             array("field_name" => "description", "widget" => "textarea","label"=>"תיאור","hide_in_table"=>true),
-            //array("field_name" => "count", "widget" => "number","label"=>"כמות בקבוקים בארגז","hide_in_table"=>true),
+            array("field_name" => "year", "widget" => "text","label"=>"שנת בציר"),
             array("field_name" => "file_id", "widget" => "file","label"=>"דף מוצר","hide_in_table"=>true),
             array("field_name" => "image_id", "widget" => "image","label"=>"תמונת מוצר"),
             array("field_name" => "blocked", "widget" => "checkbox","label"=>"מוצר חסום","hide_in_table"=>true),
@@ -242,7 +242,7 @@ const BOUTIQUE_TABLES = array(
 
                 ),"hide_in_pdf"=>true),
             array("field_name" => "check_number", "widget" => "text", "label" => "מספר צ'ק","hide_in_pdf"=>true),
-            array("field_name" => "imported_at", "widget" => "date","hide_in_table"=>true,"hide_in_pdf"=>true),
+            array("field_name" => "imported_at", "widget" => "date","hide_in_table"=>true,"hide_in_pdf"=>true, "label" => "נקלט בתאריך"),
 /*            array("field_name" => "agent_id", "widget" => "select", "label" => "סוכן", "join_table" => "agents", "join_value" => "user_id", "user_field" => "display_name"),//להביא מטבלת יוזר*/
 
         ),

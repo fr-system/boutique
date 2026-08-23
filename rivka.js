@@ -1,5 +1,6 @@
 var table;
 let cartMode = false;
+const tableName = getParameterByName("subject")
 
 function fillClientDetails(results){
     if(results.branches){
@@ -490,7 +491,7 @@ function startingDataTable(){
             return data[columnIndex].toLowerCase().includes(valueToSearch.toLowerCase());
         }
 
-        if (widgetType === 'select') {
+        if (widgetType === 'select' || widgetType === "radio" || widgetType === "status") {
             const valueToSearch = jQuery('select.filter-value').val();
 
             if (!valueToSearch) {
@@ -501,7 +502,7 @@ function startingDataTable(){
                 return false;
             }
 
-            return data[columnIndex] === valueToSearch;
+            return cellValue.trim() === valueToSearch;
         }
 
         if (widgetType === 'date' || widgetType === 'datetime-local') {
@@ -536,7 +537,13 @@ function startingDataTable(){
 
 
     jQuery('.filter-by-area .filter-value').on('keyup change', function () {
-        table.draw();
+
+
+
+        if(tableName == "specials"){
+            onFilterGalery()
+        }
+        else{ table.draw(); }
     });
 }
 
@@ -566,6 +573,8 @@ function onSelectFilterBy(filterBy){
             jQuery(".filter-by-area input[type=\"date\"]").removeClass("hidden");
             break;
         case "select":
+        case "radio":
+        case "status":
             jQuery(".filter-by-area select.filter-value").removeClass("hidden");
             const select = jQuery('select.filter-value');
             select.empty();
@@ -578,6 +587,8 @@ function onSelectFilterBy(filterBy){
                 .sort()
                 .each(function (value) {
                     if(value) {
+                        if(value.includes('<div'))value = $('<div>').html(value).text().trim();
+                        if(value.includes('<span'))value = $('<span>').html(value).text().trim();
                         select.append(
                             '<option value="' + value + '">' + value + '</option>'
                         );
@@ -587,6 +598,37 @@ function onSelectFilterBy(filterBy){
 
     }
     //table.draw();
+}
+
+function onFilterGalery(){
+    const option = jQuery('.filter-by option:selected');
+    const widgetType = option.data('widget');
+    var fieldName =  option.val();
+    var valueToSearch;
+    if (widgetType === 'text') {
+        valueToSearch = jQuery('input.filter-value').val();
+    }
+    else if (widgetType === 'date' || widgetType === 'datetime-local') {
+        const from = jQuery('.filter-value.filter-from').val();
+        const to = jQuery('.filter-value.filter-to').val();
+        if (!from || !to) {
+            return true;
+        }
+    }
+    else if (widgetType === 'select' || widgetType === "radio" || widgetType === "status") {
+         valueToSearch = jQuery('select.filter-value').val();
+    }
+
+    $('.archive-gallery .single').each(function () {
+         var field = $(this).find('.'+fieldName).text().trim();
+
+        if (field.includes(valueToSearch)) {
+            $(this).show();
+        } else {
+            $(this).hide();
+        }
+    });
+
 }
 
 function getButtonsTable(tableName,currentUrl ){
