@@ -97,7 +97,8 @@ function get_list_ajax(){
             $checkboxes = build_checkboxes($table_name, $selected_value, array("filter" => $filter,"selector"=>$selector));
             break;
     }
-    echo json_encode (array("options" => $options ,"tableData"=>$table,"array"=>$result,"tableName"=>$table_name,"checkboxes"=>$checkboxes,"selector"=>$selector));
+    echo json_encode (array("options" => $options ,"tableData"=>$table,
+        "array"=>$result,"tableName"=>$table_name,"checkboxes"=>$checkboxes,"selector"=>$selector));
     die();
 }
 
@@ -755,5 +756,14 @@ function get_tasks_not_done()
         //send_mail("" ,"משימה שעדיין לא בוצעה",$body);
 
     }
+}
+add_action('wp_ajax_get_table_properties', 'get_table_properties');
+function get_table_properties()
+{
+    $table_name = $_POST["table_name"];
+    wp_send_json([
+        'table_properties' =>  BOUTIQUE_LISTS[$table_name]
+    ]);
+
 }
 ?>

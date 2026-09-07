@@ -115,12 +115,12 @@ function save_single_data()
         $result = array();
     } else {
         $action = isset($_POST["id"]) && !empty($_POST["id"]) ? "update" : "new";
-        //write_log ('tablename '.$table_name. 'post '.json_encode ( $_POST));
+        //write_log ('tablename '.$table_name. ' post '.json_encode ( $_POST));
         $result = pre_action_query ($table_name, $_POST);
     }
 
     $id = isset($_POST["id"]) ? $_POST["id"] : null;
-   // write_log("r ".json_encode($result));
+   // write_log("run_action_query ".json_encode($result));
     run_action_query ($table_name, $id, $action, $result);
     if (!$_POST["id"]) {
             $id = $wpdb->insert_id;
@@ -221,7 +221,6 @@ function get_data_table($table_name, $filters=null, $orderby = null, $join_filte
     $query = "SELECT ".$wpdb->prefix.$table_name.".id, ";
     $i = 0;
     foreach ($columns as $column) {
-
         if(!isset($column["field_name"]) || isset($column["widget"]) && $column["widget"] == "table" ||
             isset($column["not_in_query"]))continue;
 
@@ -375,6 +374,7 @@ function get_list($list_name,$filter = '',$table_display =false)
     else if(!empty($filter)){
         $query .= " WHERE ".$filter;
     }
+    $query .= " ORDER BY ".$field_name;
     $list = run_query($query);
 
     return $list;

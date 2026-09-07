@@ -16,7 +16,7 @@ const BOUTIQUE_TABLES = array(
             array("field_name" => "mobile", "widget" => "text", "label" => "נייד","required"=>true),
             array("field_name" => "BnNumber", "widget" => "text", "label" => "ח\"פ","required"=>true,"hide_in_table"=>true),
             array("field_name" => "address", "widget" => "text", "label" => "כתובת","hide_in_table"=>true),
-            array("field_name" => "city_id", "widget" => "select", "join_table" => "cities", "join_value" => "name", "label" => "עיר"),
+            array("field_name" => "city_id", "widget" => "select", "join_table" => "cities", "join_value" => "name", "label" => "עיר", "add_option"=>true),
             array("field_name" => "note", "widget" => "text", "label" => "הערה","hide_in_table"=>true),
             array("field_name" => "payment_term_id", "widget" => "select", "label" => "תנאי תשלום","required"=>true,"hide_in_table"=>true,"filter"=>true,
                 "options"=>array(
@@ -185,7 +185,7 @@ const BOUTIQUE_TABLES = array(
             array("field_name" => "name", "widget" => "text", "label" => "שם","required"=>true),
             array("field_name" => "email", "widget" => "email", "label" => "דוא\"ל","required"=>true),
             array("field_name" => "mobile", "widget" => "text", "label" => "נייד"),
-            array("field_name" => "work_area_id","widget" => "select", "join_table" => "areas", "join_value" => "area", "label" => "אזור עבודה","required"=>true),// סינון אזור
+            array("field_name" => "work_area_id","widget" => "select", "join_table" => "areas", "join_value" => "area", "label" => "אזור עבודה","required"=>true, "add_option"=>true),// סינון אזור
             array("field_name" => "agent_target_supplier", "widget" => "table" ,"hide_in_table"=>true,"field_id"=>"agent_id","target_table"=>"suppliers"),
 
             array("field_name" => "target","widget" => "text", "label" => "יעד כללי", "un_apostrophe" => true,"sign"=>"₪"),

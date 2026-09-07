@@ -543,4 +543,5 @@ td.dt-type-numeric{
 }
 .sort-column{
     color:transparent;
+    font-size: 1px;
 }

@@ -49,7 +49,7 @@ if (isset($_SERVER['HTTP_REFERER'])) {
 }
 
 if($table_name == "orders"){
-    $part_left_side="part-100 ";//75
+    $part_left_side="part-75";//
 }
 else{
     $part_left_side="part-65 ";

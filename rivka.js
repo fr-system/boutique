@@ -432,6 +432,7 @@ function startingDataTable(){
         layout: { topStart: { buttons: buttons } },
         searching: true,
         paging: false,
+        autoWidth: false,
         info: false,
         "language":
             {
