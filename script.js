@@ -154,6 +154,8 @@ jQuery(document).ready(function($){
             return;
         }
 
+
+
         if (subjectPage == "orders" && jQuery('.page.single').length > 0){//עמוד הזמנה
             filterOrderProdoctsRowsToSave();
         }
@@ -201,8 +203,10 @@ jQuery(document).ready(function($){
                 return;
             }
         }
+        $form.find('[type="submit"]').find(".animation-sending").append('<iconify-icon icon="svg-spinners:12-dots-scale-rotate"></iconify-icon>');
+        $form.addClass('disabled').find('[type = "submit"]').prop('disabled', true);
 
-        $form.addClass('disabled').find('[type="submit"]').prop('disabled', true);
+        //$form.addClass('disabled').find('[type="submit"]').prop('disabled', true);
         //grecaptcha.execute(globalVars.recaptcha_key, {action: 'submit'})
         //.then(function (token) {
         $form.find('#form_error_msgs_container').html('');

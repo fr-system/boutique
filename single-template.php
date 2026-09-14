@@ -130,14 +130,17 @@ else{
 
                     </a>
                 <?php }
-                if($action != "new") {?>
-                    <a data-bs-toggle="modal" href="#bout-massage" class=" flex-display center button background-dark-green bold font-18" role="button" data-action="remove">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 14 14" fill="none">
-                            <path d="M2.3335 4.08333H11.6668M5.8335 6.41667V9.91667M8.16683 6.41667V9.91667M2.91683 4.08333L3.50016 11.0833C3.50016 11.3928 3.62308 11.6895 3.84187 11.9083C4.06066 12.1271 4.35741 12.25 4.66683 12.25H9.3335C9.64292 12.25 9.93966 12.1271 10.1585 11.9083C10.3772 11.6895 10.5002 11.3928 10.5002 11.0833L11.0835 4.08333M5.25016 4.08333V2.33333C5.25016 2.17862 5.31162 2.03025 5.42102 1.92085C5.53041 1.81146 5.67879 1.75 5.8335 1.75H8.16683C8.32154 1.75 8.46991 1.81146 8.57931 1.92085C8.6887 2.03025 8.75016 2.17862 8.75016 2.33333V4.08333" stroke="white" stroke-linecap="round" stroke-linejoin="round"/>
-                        </svg>
-                        <span>מחיקת <?php echo $page_info["single"]; ?></span>
-                    </a>
+                if($action != "new") {
+                    write_log();
+                    if($table_name != "orders" || !isset($single->done) || !$single->done){ ?>
+                        <a data-bs-toggle="modal" href="#bout-massage" class=" flex-display center button background-dark-green bold font-18" role="button" data-action="remove">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 14 14" fill="none">
+                                <path d="M2.3335 4.08333H11.6668M5.8335 6.41667V9.91667M8.16683 6.41667V9.91667M2.91683 4.08333L3.50016 11.0833C3.50016 11.3928 3.62308 11.6895 3.84187 11.9083C4.06066 12.1271 4.35741 12.25 4.66683 12.25H9.3335C9.64292 12.25 9.93966 12.1271 10.1585 11.9083C10.3772 11.6895 10.5002 11.3928 10.5002 11.0833L11.0835 4.08333M5.25016 4.08333V2.33333C5.25016 2.17862 5.31162 2.03025 5.42102 1.92085C5.53041 1.81146 5.67879 1.75 5.8335 1.75H8.16683C8.32154 1.75 8.46991 1.81146 8.57931 1.92085C8.6887 2.03025 8.75016 2.17862 8.75016 2.33333V4.08333" stroke="white" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                            <span>מחיקת <?php echo $page_info["single"]; ?></span>
+                        </a>
                 <?php }
+                }
                 if($table_name == "clients" && $action != "new"){
                     $block_text = "חסום לקוח";
                     if($single->blocked == 1){

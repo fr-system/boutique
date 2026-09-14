@@ -545,7 +545,11 @@ function create_input($field,$value = null,$readonly = "")
             ?><input type="hidden" name="<?= $field["field_name"]?>" value="<?= esc_attr($value)?>"><?php
             break;
         case "textarea":
-            return '<textarea rows ="2" class="font-17 grow" id="'.$field["field_name"].'" name="'.$field["field_name"].'" '. $required.' '.$readonly .'>'.esc_attr( $value).'</textarea>';
+            $count_rows = 2;
+            if(isset($field["count_rows"])){
+                $count_rows = $field["count_rows"];
+            }
+            return '<textarea rows ="'.$count_rows.'" class="font-17 grow" id="'.$field["field_name"].'" name="'.$field["field_name"].'" '. $required.' '.$readonly .'>'.esc_attr( $value).'</textarea>';
         case "select":?>
             <select class="<?php echo $field['field_name']?>  font-17 grow" id="<?php echo $field["field_name"]?>"
                     name="<?php echo $field["field_name"].(isset($field["multiple"]) ? "[]" : "" )?>" <?php echo (isset($field["multiple"]) ? "multiple=\"multiple\" size=\"10\"" : "" )?>

@@ -64,7 +64,7 @@ const BOUTIQUE_TABLES = array(
             array("field_name" => "barcode", "widget" => "text","label"=>"ברקוד","required"=>true),
             array("field_name" => "supplier_id", "widget" => "select","label"=>"ספק", "join_table" => "suppliers", "join_value" => "name","filter"=>true,"required"=>true),
             array("field_name" => "price", "widget" => "text","label"=>"מחיר", "un_apostrophe" => true,"sign"=>"₪","required"=>true),
-            array("field_name" => "description", "widget" => "textarea","label"=>"תיאור","hide_in_table"=>true),
+            array("field_name" => "description", "widget" => "textarea","label"=>"תיאור","hide_in_table"=>true, "count_rows" => 5),
             array("field_name" => "year", "widget" => "text","label"=>"שנת בציר"),
             array("field_name" => "file_id", "widget" => "file","label"=>"דף מוצר","hide_in_table"=>true),
             array("field_name" => "image_id", "widget" => "image","label"=>"תמונת מוצר"),

@@ -55,7 +55,7 @@ function run_action_query($table_name, $id, $action, $options)
             if($table_name == "suppliers" || $table_name == "agents"){
                 $users = get_data_table($table_name,array(array("filter_field" => "id", "filter_value" =>$id)));
                 if(count($users)) {
-                    wp_delete_user($users[0]->user_id);
+                    //wp_delete_user($users[0]->user_id);
                 }
             }
             //$id = 999999;
@@ -147,9 +147,14 @@ function save_single_data()
             }
 
             if ($table_name == "orders") {
-                if (empty($row["count"]) && !empty($row["id"])) {
-                    $row["remove"] = true;
+                if (empty($row["count"])) {
+                    if (!empty($row["id"])) {
+                        $row["remove"] = true;
+                    } else {
+                        continue;
+                    }
                 }
+
                 if (empty($row["order_id"])) {
                     $row["order_id"] = $id;
                 }
