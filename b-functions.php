@@ -328,7 +328,9 @@ function on_order_confirmation()
             //שליחת מייל לסוכן - על ההזמנה שאושרה
             if($order_confirmation->user_opens != 2) {
                 $user = get_user_by('ID', $order_confirmation->user_opens);
-                send_mail($user->user_email, "אישור הזמנה מס. " . $order_id, "מצורף קובץ הזמנה", [$file]);
+                if($user->user_email!=get_option('admin_email')) {
+                    send_mail ($user->user_email, "אישור הזמנה מס. " . $order_id, "מצורף קובץ הזמנה", [$file]);
+                }
             }
             if (file_exists($file)) {
                 unlink($file);

@@ -363,10 +363,14 @@ function registerToCalculatePrice(){
         calculatePrice(jQuery(this).closest("tr"));
     });
     jQuery("tr.product .total input").on("change", function () {
-        var total = 0;
+        let total = 0;
+        jQuery('table').DataTable().rows().nodes().to$().find('.total input').each(function () {
+            total += parseFloat(jQuery(this).autoNumeric('get') || 0);
+        });
+      /*  var total = 0;
         jQuery("tr.product .total input").each(function (i,totalProductPrice){
             total+=parseFloat( jQuery(totalProductPrice).autoNumeric('get')||0);
-        })
+        })*/
         jQuery("input[name=total]").autoNumeric('set', total);
         calculateForPayment(total);
         //jQuery("input[name=total]").autoNumeric.set("input[name=total]", total);

@@ -444,6 +444,7 @@ function build_select_options($table_name, $value=null,$attr = null)
         $fields_list = BOUTIQUE_TABLES[$table_name];
     }
     $options='';
+
     if(isset($attr["options"]) && isset($attr["field_name"])){
         $field_name = $attr["field_name"];
         $results = array_filter($fields_list["columns"], function ($field_obj) use ($field_name) {
@@ -460,14 +461,20 @@ function build_select_options($table_name, $value=null,$attr = null)
             $options = '<option value=""></option>';
         }
     }
-
+    if(isset($fields_list["data-field"])) {
+        $field = $fields_list["data-field"];
+    }
     foreach ($list as $row) {
         $value_text="";
         if($value) {
             $row_text = str_replace('\\', '', str_replace('"', '', $row->text));
             $value_text = str_replace('\\', '', str_replace('"', '', $value));
         }
-        $options .= '<option  value="' . $row->value . '"' . (!empty($value)&& (is_array($value) && in_array($row->value, $value) || (!is_array($value) && ($row->value == $value ||  $row_text  == $value_text))) ? 'selected' : '') . '>' . $row->text . '</option>';
+        $data_field = "";
+        if(isset($fields_list["data-field"])){
+            $data_field =' data-field="'.$row->$field.'"';
+        }
+        $options .= '<option '.$data_field.' value="' . $row->value . '"' . (!empty($value)&& (is_array($value) && in_array($row->value, $value) || (!is_array($value) && ($row->value == $value ||  $row_text  == $value_text))) ? 'selected' : '') . '>' . $row->text . '</option>';
     }
     return $options;
 }

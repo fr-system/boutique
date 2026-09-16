@@ -57,8 +57,18 @@ function register_new_user1($display_name, $email,$role)
         die;
     }*/
     //write_log("em ".$email);
-    if (email_exists($email) || username_exists($email)) {
-        return array("status" => "failed", "msg" => "המייל רשום כבר במערכת");
+    $user_id = email_exists($email);
+    if(!$user_id){
+        $user_id = username_exists($email);
+    }
+    /*if (email_exists($email) || username_exists($email)) {*/
+    if($user_id){
+        //למצוא האם קיים סוכן שרשום לו היוזר הזה
+        $agents = get_data_table("agents",array(array("filter_field" => "user_id", "filter_value" => $user_id)));
+        if(count($agents)==0){
+            return array("status" => "success", "user_id" => $user_id);
+        }
+        return array("status" => "faild", "msg"=> "המייל רשום כבר על סוכן אחר");
         /*echo json_encode(array(
             'status' => 'error',
             'msg' => "המייל רשום כבר במערכת"
