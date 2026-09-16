@@ -40,7 +40,7 @@ const BOUTIQUE_TABLES = array(
         "actions" => array("orders","tasks",array("title"=>"דוח חיוב","dialog"=>"bout-massage",
             "ajax_func"=>"client_billing_report","text"=>"האם לשלוח ללקוח דוח חיוב למייל?"))
     ),
-    //id	name	main_client_id	city_id	address	phone	email
+
     "clients_branches" => array(
         "title" => "סניפים",
         "columns" => array(
@@ -64,7 +64,7 @@ const BOUTIQUE_TABLES = array(
             array("field_name" => "barcode", "widget" => "text","label"=>"ברקוד","required"=>true),
             array("field_name" => "supplier_id", "widget" => "select","label"=>"ספק", "join_table" => "suppliers", "join_value" => "name","filter"=>true,"required"=>true),
             array("field_name" => "price", "widget" => "text","label"=>"מחיר", "un_apostrophe" => true,"sign"=>"₪","required"=>true),
-            array("field_name" => "description", "widget" => "textarea","label"=>"תיאור","hide_in_table"=>true),
+            array("field_name" => "description", "widget" => "textarea","label"=>"תיאור","hide_in_table"=>true, "count_rows" => 5),
             array("field_name" => "year", "widget" => "text","label"=>"שנת בציר"),
             array("field_name" => "file_id", "widget" => "file","label"=>"דף מוצר","hide_in_table"=>true),
             array("field_name" => "image_id", "widget" => "image","label"=>"תמונת מוצר"),
@@ -141,10 +141,14 @@ const BOUTIQUE_TABLES = array(
             array("field_name" => "total","widget" => "text", "label" => "סך הכל", "un_apostrophe" => true,"sign"=>"₪","hide_in_table"=>true,"readonly"=>true),
             array("field_name" => "discount", "widget" => "text", "label" => "הנחה", "un_apostrophe" => true,"sign"=>"%","hide_in_table"=>true),
             array("field_name" => "for_payment","widget" => "text", "label" => "לתשלום", "un_apostrophe" => true,"sign"=>"₪","readonly"=>true),
-
+            array("field_name" => "return_certificate", "widget" => "none","filter"=>true,"th_label"=> "החזרה",
+                "values"=>array(1=>array("class"=>"done background-light-light-blue","label"=> "החזרה"))),
+            array("field_name" => "reason_for_return", "widget" => "select", "label" => "סיבת ההחזרה","required"=>true,"hide_in_table"=>true,
+                "join_table" => "returns_reasons", "join_value" => "text", "add_option"=>true,"show_if_condition"=>"return_certificate"),
             array("field_name" => "notes","widget" => "textarea", "label" => "הערות","hide_in_table"=>true),
             array("field_name" => "user_confirms","widget" => "none", "label" => "מאשר ההזמנה", "type" => "user"),//"join_table" => "agents", "join_value" => "name","join_field"=>"user_id"),
             array("field_name" => "done"/*,"widget" => "bool"*/),
+
         )),
     "order_products" => array(
         "title" => "הזמנות מוצרים",
@@ -312,20 +316,20 @@ const BOUTIQUE_LISTS = array(
                 array("field_name" => "importance","widget" => "text"),
             )
         ),*/
-   /* "payment_terms" =>
-        array(
-            "title" => "תנאי תשלום",
-            "single" => "תנאי תשלום",
-            "columns" => array(
-                array("field_name" => "importance","widget" => "text"),
-            )
-        ),*/
     "subjects" =>
         array(
             "title" => "נושא משימה",
             "single" => "נושא",
             "columns" => array(
                 array("field_name" => "text","widget" => "text","label"=>"נושא"),
+            )
+        ),
+    "returns_reasons" =>
+        array(
+            "title" => "סיבת ההחזרה",
+            "single" => "סיבה",
+            "columns" => array(
+                array("field_name" => "text","widget" => "text","label"=>"סיבה"),
             )
         )
     );

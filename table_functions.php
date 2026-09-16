@@ -54,7 +54,7 @@ function get_archive_table($table_name,$data,$attr)
         if (isset($column["create_input"])) {
             //$html .= '<th class="no-sort"></th>';
         } else {
-            if (isset($column["hide_in_table"]) && !$is_list || !isset($column["label"]) ||
+            if (isset($column["hide_in_table"]) && !$is_list || (!isset($column["label"])&&!isset($column["th_label"])) ||
                 isset($attr["add_text"]) && !empty($attr["add_text"]) && $column["field_name"] == "client_id" ||
                 is_agent () && $column["field_name"] == "agent_id") {
                 continue;
@@ -80,7 +80,7 @@ function get_archive_table($table_name,$data,$attr)
         }
 
         $html .= '<th  class="' . $class_td . '" ' . (empty($width) ? '' : 'style="width:' . $width . '"') . ' data-column-name ="'.$column["field_name"].'"  data-column-type ="'.$column["widget"].'" 
-                        data-table ="'.($column["join_table"]??"").'" data-column-options="'.$dataOptions.'">' . ($column["label"] ?? '') . '</th>';
+                        data-table ="'.($column["join_table"]??"").'" data-column-options="'.$dataOptions.'">' . ($column["label"]??$column["th_label"] ?? '') . '</th>';
     }
 
     if (isset($page_info["actions"])) {
@@ -211,7 +211,7 @@ function get_tr_data($table_name, $data, $key,$attr){
             </td>';
         }
     }
-    $columns_counter = 0;
+
     if (isset($page_info["more_columns_in_table"])) {
         foreach ($page_info["more_columns_in_table"] as $column) {
             $column_value = get_column_value($column, $row, $column["field_name"], null,$key);
@@ -219,7 +219,6 @@ function get_tr_data($table_name, $data, $key,$attr){
                 $column_value .=$row->bonus =="bonus" ? ' - בונוס' : ' - מבצע' ;
             }
             $html .= '<td class="' . $column["field_name"] .'">' . $column_value. '</td>';
-            $columns_counter++;
         }
     }
 
@@ -227,7 +226,7 @@ function get_tr_data($table_name, $data, $key,$attr){
         //איזה שדות שמראים בכותרת(גם אם אין כיתוב של כותרת) אותו דבר להראות בשורה בטבלה והפוך שדות שמסתירים בכותרת להסתיר גם בשורה בטבלה
         if (isset($column["create_input"])) {
         } else {
-            if (isset($column["hide_in_table"]) && !$is_list  || !isset($column["label"]) ||
+            if (isset($column["hide_in_table"]) && !$is_list  || (!isset($column["label"])&&!isset($column["th_label"])) ||
                 isset($attr["add_text"]) && !empty($attr["add_text"]) && $column["field_name"] == "client_id" ||
                 is_agent() && $column["field_name"] == "agent_id") {
                 continue;

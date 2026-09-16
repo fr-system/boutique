@@ -1,11 +1,16 @@
 <?php
-function get_single_view($table_name, $single, $readonly)
-{?>
-    <div class="grid-display cols-2 margin-bottom-20">
-    <?php
+function get_single_view($table_name, $single, $attr)
+{    ?>
+  <div class="grid-display cols-2 margin-bottom-20">
+  <?php
+    $readonly = $attr["readonly"];
     $columns = BOUTIQUE_TABLES[$table_name]["columns"];
     foreach($columns as $column){
         if(!isset($column["widget"])||$column["widget"] == "none" || $column["widget"] == "hidden" && !isset($column["create_input"])){continue;}
+        if(isset($column["show_if_condition"])){
+            if($column["show_if_condition"] == "return_certificate" && $attr["return_certificate"]){}
+            else{continue;}
+        }
         $add_class = "";
         if($column["widget"] == "table") {
             $add_class = " direction-column ";
@@ -184,7 +189,7 @@ function render_row($external_item, $sub_row, $options ){
 function archive_header($table_name, $view_only = false,$attr = null)
 {//space-between
     ?>
-    <div class="archive-actions flex-display start  margin-bottom-20">
+    <div class="archive-actions flex-display start margin-bottom-10">
         <div class="flex-display align-center space-between">
             <?php
             //מתי אין אפשרות להוסיף משהו חדש
@@ -194,12 +199,12 @@ function archive_header($table_name, $view_only = false,$attr = null)
             (isset($attr["client_id"]) && isset($attr["blocked"]) && $attr["blocked"] ==1)) {
             }
             else{
-            $href = 'single?subject='.$table_name.'&action=new';
-            if(isset($attr["client_id"])) {
-                $href .= "&client_id=" . $attr["client_id"];
-            }
-            if($table_name=="lists") { ?>
-            <a class="has-tooltip margin-after-10" data-tooltip="<?php echo (isset($attr["new_single"])?$attr["new_single"]:'') ?>" data-bs-toggle="modal" href="#edit-list" role="button" data-action="new">
+                $href = 'single?subject='.$table_name.'&action=new';
+                if(isset($attr["client_id"])) {
+                    $href .= "&client_id=" . $attr["client_id"];
+                }
+                if($table_name=="lists") { ?>
+                <a class="has-tooltip margin-after-10" data-tooltip="<?php echo (isset($attr["new_single"])?$attr["new_single"]:'') ?>" data-bs-toggle="modal" href="#edit-list" role="button" data-action="new">
                 <?php }
                 else { ?>
                 <a class="has-tooltip margin-after-10" data-tooltip="<?php echo (isset($attr["new_single"])?$attr["new_single"]:'') ?>" href="<?php echo $href ?>">
@@ -210,7 +215,18 @@ function archive_header($table_name, $view_only = false,$attr = null)
                         <line x1="41" y1="31" x2="19" y2="31" stroke="white" stroke-width="2"/>
                     </svg>
                 </a>
-                <?php }?>
+                <?php
+                if($table_name == "orders"){?>
+                    <a class="has-tooltip margin-after-10" data-tooltip="תעודת החזרה" href="<?php echo $href.'&return=true' ?>">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="60" height="60" viewBox="0 0 60 60" fill="none">
+                            <circle cx="30" cy="30" r="29.5" class="background-dark-green" stroke="white"/>
+                            <!--<line x1="30" y1="20" x2="30" y2="42" stroke="white" stroke-width="2"/>-->
+                            <line x1="41" y1="31" x2="19" y2="31" stroke="white" stroke-width="2"/>
+                        </svg>
+                    </a>
+                <?php }
+            }
+            ?>
             <?php if($table_name=="products" && !$view_only){ ?>
                 <svg data-tooltip="הצג בגלריה" class="has-tooltip margin-after-10" data-view="gallery" xmlns="http://www.w3.org/2000/svg" width="44" height="44" viewBox="0 0 44 44" fill="none">
                     <circle cx="22" cy="22" r="22" class="background-light-light-blue"/>
@@ -552,7 +568,11 @@ function create_input($field,$value = null,$readonly = "")
             ?><input type="hidden" name="<?= $field["field_name"]?>" value="<?= esc_attr($value)?>"><?php
             break;
         case "textarea":
-            return '<textarea rows ="2" class="font-17 grow" id="'.$field["field_name"].'" name="'.$field["field_name"].'" '. $required.' '.$readonly .'>'.esc_attr( $value).'</textarea>';
+            $count_rows = 2;
+            if(isset($field["count_rows"])){
+                $count_rows = $field["count_rows"];
+            }
+            return '<textarea rows ="'.$count_rows.'" class="font-17 grow" id="'.$field["field_name"].'" name="'.$field["field_name"].'" '. $required.' '.$readonly .'>'.esc_attr( $value).'</textarea>';
         case "select":?>
             <select class="<?php echo $field['field_name']?>  font-17 grow" id="<?php echo $field["field_name"]?>"
                     name="<?php echo $field["field_name"].(isset($field["multiple"]) ? "[]" : "" )?>" <?php echo (isset($field["multiple"]) ? "multiple=\"multiple\" size=\"10\"" : "" )?>
@@ -636,7 +656,7 @@ function create_input($field,$value = null,$readonly = "")
             <?php
             break;
         case "status":?>
-            <div class="status-options flex-display font-17  grow space-around">
+            <div class="status-options flex-display font-17  grow space-between">
                 <?php
                 if(isset($field["values"])){
                     ?><input type="hidden" id="<?php echo $field["field_name"]?>" name="<?php echo $field["field_name"]?>" value="<?php echo ($value ?? '')?>">

@@ -182,7 +182,9 @@ function lists_table_rows($list_name)
 
 function get_column_value($column,$row,$field,$list,$key,$is_readonly=false)
 {
-    //write_log("column ".json_encode($column)." key ".$key);
+    if($column["field_name"] == "return_certificate"){
+        $column["widget"] = "status";
+    }
     $column_value = "";
     switch ($column["widget"]) {
         case "select":
@@ -204,9 +206,10 @@ function get_column_value($column,$row,$field,$list,$key,$is_readonly=false)
             }
             break;
         case "status":
-            $column_value = '<span class="pointer ellipse ' . $column["values"][$row->$field]["class"] . '">
-                                   ' . $column["values"][$row->$field]["label"] . '
-                                </span>';
+            $current_option = $column["values"][$row->$field] ?? null;
+            if(!empty($current_option)) {
+                $column_value = '<span class="pointer ellipse ' . $current_option["class"] . '">' . $current_option["label"] . '</span>';
+            }
             break;
         case "date":
             if ($row->$field) {
