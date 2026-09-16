@@ -477,9 +477,11 @@ function build_select_options($table_name, $value=null,$attr = null)
             $options = '<option value=""></option>';
         }
     }
+    write_log ('fields_list city '.json_encode ( $fields_list));
     if(isset($fields_list["data-field"])) {
         $field = $fields_list["data-field"];
     }
+    write_log ('fields_list field '.  $field);
     foreach ($list as $row) {
         $value_text="";
         if($value) {
@@ -490,6 +492,7 @@ function build_select_options($table_name, $value=null,$attr = null)
         if(isset($fields_list["data-field"])){
             $data_field =' data-field="'.$row->$field.'"';
         }
+        write_log ('fields_list data field '.  $data_field);
         $options .= '<option '.$data_field.' value="' . $row->value . '"' . (!empty($value)&& (is_array($value) && in_array($row->value, $value) || (!is_array($value) && ($row->value == $value ||  $row_text  == $value_text))) ? 'selected' : '') . '>' . $row->text . '</option>';
     }
     return $options;

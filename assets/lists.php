@@ -16,7 +16,7 @@ const BOUTIQUE_TABLES = array(
             array("field_name" => "mobile", "widget" => "text", "label" => "נייד","required"=>true),
             array("field_name" => "BnNumber", "widget" => "text", "label" => "ח\"פ","required"=>true,"hide_in_table"=>true),
             array("field_name" => "address", "widget" => "text", "label" => "כתובת","hide_in_table"=>true),
-            array("field_name" => "city_id", "widget" => "select", "join_table" => "cities", "join_value" => "name", "label" => "עיר", "add_option"=>true,"data-field"=>"area_id"),
+            array("field_name" => "city_id", "widget" => "select", "join_table" => "cities", "join_value" => "name", "label" => "עיר", "add_option"=>true),
             array("field_name" => "note", "widget" => "text", "label" => "הערה","hide_in_table"=>true),
             array("field_name" => "payment_term_id", "widget" => "select", "label" => "תנאי תשלום","required"=>true,"hide_in_table"=>true,"filter"=>true,
                 "options"=>array(
@@ -299,6 +299,7 @@ const BOUTIQUE_LISTS = array(
                 array("field_name" => "name","widget" => "text","label"=>"עיר"),
                 array("field_name" => "area_id","widget" => "select", "join_table" => "areas", "join_value" => "area", "label" => "איזור"),
             ),
+            "data-field"=>"area_id"
         ),
     "areas" =>
         array(

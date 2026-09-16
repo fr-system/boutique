@@ -719,17 +719,17 @@ function call_ajax_function(postData,func) {
 }
 
 function onchangeSelect(e,element,value){
-    if(jQuery(element).hasClass("city_id")){
+    if(jQuery(element).hasClass("city_id") && !jQuery("select[name=agent_id]").val() ) {
         var selectedOption = jQuery(element).find('option:selected');
         var value = selectedOption.val();
         var extraData = selectedOption.data('field');
 
         var postData = [
-                {name: "filter", value: "work_area_id = "+extraData},
-                {name: "action", value: "get_list_ajax"},
-                {name: "table_name", value: "agents"},
-            ];
-        call_ajax_function(postData,"fillAgentsSelect");
+            extraData ? {name: "filter", value: "work_area_id = " + extraData} : {},
+            {name: "action", value: "get_list_ajax"},
+            {name: "table_name", value: "agents"},
+        ];
+        call_ajax_function(postData, "fillAgentsSelect");
     }
 }
 
