@@ -17,6 +17,11 @@ jQuery(document).ready(function($){
         getTableAjaxData(null,{tableName:selected.data("list-name")});
     }
 
+    if(subjectPage == "orders" && window.location.pathname.includes('single') && jQuery('input[name=return_certificate]').val() == "1"){
+        jQuery('input[name=discount]').closest("div").hide();
+        jQuery('input[name=for_payment]').closest("div").hide();
+    }
+
     if(subjectPage == "orders" && getParameterByName("action") && getParameterByName("action") != "readonly") {
 
         setInterval(function () {
@@ -60,17 +65,7 @@ jQuery(document).ready(function($){
             }
         });
     }
-    // jQuery('input[data-a-sign=₪]').each(function () {
-    //
-    //     new AutoNumeric(this, {
-    //         currencySymbol: '₪ ',
-    //         decimalPlaces: 2
-    //     });
-    //  });
-    // new AutoNumeric('input[data-a-sign=₪]', {
-    //     currencySymbol: '₪ ',
-    //     decimalPlaces: 2
-    // });
+
     jQuery('input[data-a-sign=₪]').autoNumeric('init', {
         vMin: '-9999999999999',
         mDec: 1,
@@ -153,8 +148,6 @@ jQuery(document).ready(function($){
         if (!$form.valid()) {
             return;
         }
-
-
 
         if (subjectPage == "orders" && jQuery('.page.single').length > 0){//עמוד הזמנה
             filterOrderProdoctsRowsToSave();

@@ -110,7 +110,7 @@ tr.product td.count .plus-number-minus{
 .product td.count input{
     width: 50px;
     text-align: center;
-    moz-appearance: textfield;
+    -moz-appearance: textfield;
     padding: 0;
     border: none;
 }

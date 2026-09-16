@@ -12,6 +12,7 @@ date_default_timezone_set('Asia/Jerusalem');
 $action = $_GET["action"];
 $readonly ="";
 $page_info = BOUTIQUE_TABLES[$table_name];
+
 if($action == "new") {
     $title_page = "הוספת " . $page_info["single"] . " חדש" . ($page_info["male_female"] == "female" ? "ה" : "");
     $single = (object)array();
@@ -22,6 +23,7 @@ if($action == "new") {
     if($table_name == "orders"){
         $single->order_date =date('Y-m-d\TH:i');// date('Y-m-d H:i');
         $single->user_opens = get_current_user_id();// get_id_by_user();
+        $single->return_certificate = isset($_GET["return"]);
     }
     if($table_name == "tasks"){
         $single->open_date = date('Y-m-d\TH:i');
@@ -47,9 +49,14 @@ $previous_page = null;
 if (isset($_SERVER['HTTP_REFERER'])) {
     $previous_page = $_SERVER['HTTP_REFERER'];
 }
-
+$return_certificate = false;
 if($table_name == "orders"){
-    $part_left_side="part-75";//
+    $part_left_side="part-75";
+
+    if($single->return_certificate){
+        $return_certificate = true;
+        $title_page = "תעודת החזרה";
+    }
 }
 else{
     $part_left_side="part-65 ";
@@ -77,7 +84,8 @@ else{
             }
 
             if($table_name == "orders" && $single->user_opens) {
-                $text_left_side = '<span class="bold">מקים ההזמנה: </span>'.get_userdata($single->user_opens)->display_name;
+                $user_opens = get_userdata($single->user_opens);
+                $text_left_side = '<span class="bold">מקים ההזמנה: </span>'.($user_opens == false ? "לא ידוע":$user_opens->display_name)  ;
             }
 
             if($table_name == "tasks" && !empty($single->open_date)) {
@@ -103,8 +111,12 @@ else{
                     <?php if($table_name == "orders" || $table_name == "tasks") {?>
                         <input type="hidden" class="branch-client" value="<?=$single->branch ?? ''?>"/>
                         <input type="hidden" name='user_opens' value="<?= $single->user_opens ?? ''?>"/>
-                     <?php  }?>
-                    <?php get_single_view($table_name,$single,$readonly); ?>
+                        <?php if($table_name == "orders"){ ?>
+                            <input type="hidden" name='return_certificate' value="<?= $single->return_certificate?>"/>
+                        <?php  }
+                    }
+                    $attr = array("readonly" => $readonly ,"return_certificate"=> $return_certificate);
+                    get_single_view($table_name,$single,$attr); ?>
                 </div>
             <div class="buttons flex-display align-self-center">
                 <button type="submit" class="save background-gold flex-display center align-center bold font-18">
@@ -131,8 +143,8 @@ else{
                     </a>
                 <?php }
                 if($action != "new") {
-                    write_log();
-                    if($table_name != "orders" || !isset($single->done) || !$single->done){ ?>
+                    $is_done = isset($single->done) && $single->done || false;
+                    if($table_name != "orders" || !$is_done){ ?>
                         <a data-bs-toggle="modal" href="#bout-massage" class=" flex-display center button background-dark-green bold font-18" role="button" data-action="remove">
                             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 14 14" fill="none">
                                 <path d="M2.3335 4.08333H11.6668M5.8335 6.41667V9.91667M8.16683 6.41667V9.91667M2.91683 4.08333L3.50016 11.0833C3.50016 11.3928 3.62308 11.6895 3.84187 11.9083C4.06066 12.1271 4.35741 12.25 4.66683 12.25H9.3335C9.64292 12.25 9.93966 12.1271 10.1585 11.9083C10.3772 11.6895 10.5002 11.3928 10.5002 11.0833L11.0835 4.08333M5.25016 4.08333V2.33333C5.25016 2.17862 5.31162 2.03025 5.42102 1.92085C5.53041 1.81146 5.67879 1.75 5.8335 1.75H8.16683C8.32154 1.75 8.46991 1.81146 8.57931 1.92085C8.6887 2.03025 8.75016 2.17862 8.75016 2.33333V4.08333" stroke="white" stroke-linecap="round" stroke-linejoin="round"/>
@@ -165,7 +177,7 @@ else{
                                 <span>אישור הזמנה</span>
                             </button>
                          <?php
-                        if(!is_manager() ){
+                        if(!is_manager()){
                             ?>
                             <button type="button" class="manager-approval hidden flex-display center align-center background-white dark-green bold font-18">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 16 16" fill="none">

@@ -60,7 +60,7 @@ function automaticOrderSavingSuccess(result){
         minute: '2-digit',
         hour12: false
     });
-    jQuery(".saving-automatic").html("ההזמנה נשמרה בשעה: "+time);
+    jQuery(".saving-automatic").html("נשמרה בשעה: "+time);
 
     if(!jQuery("input.orders_id[name=id]").val()) {//צריך לשים למעלה בכתובת של האתר את מספר ההזמנה ולשנות את ה action ל edit
         window.history.pushState({}, '', 'single/?subject=orders&action=edit&id='+result.id);
@@ -294,7 +294,9 @@ function getCountPromotions(productId,className){
 function addProdoctBonus(product,countBonus = 0,sourceKey){
     var countRows =  table.rows().count();
     var pBonus =  product.clone(true);
-
+    if(sourceKey === undefined) {
+        sourceKey = product.find(".sort-column").text();
+    }
     pBonus.find(".count input").val(countBonus || 1);
     var rowIndex = pBonus.find(".count input").attr("name").replace("rows[","").replace("][count]","");
     jQuery.each(  pBonus.find("input"),function (k,input){

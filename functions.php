@@ -20,7 +20,7 @@ require_once dirname(__FILE__) . "/task_scheduling.php";
 
 function boutique_enqueue_scripts()
 {
-    $ver = '1.0.0';
+    $ver = '1.2.6';
     wp_register_style( 'bootstrap-style', get_template_directory_uri(). '/assets/bootstrap.min.css' , array(), $ver);
     wp_enqueue_style( 'bootstrap-style' );
 
@@ -37,7 +37,7 @@ function boutique_enqueue_scripts()
     wp_register_style( 'css-datatable', get_template_directory_uri(). '/assets/datatables.min.css' );
     wp_enqueue_style( 'css-datatable' );
 
-    wp_register_style( 'assets-style', get_template_directory_uri(). '/assets/style.css' , array(), $ver);
+    wp_register_style( 'assets-style', get_template_directory_uri(). '/assets/style.css' , array(), '1.5.7');
     wp_enqueue_style( 'assets-style' );
 
     wp_enqueue_script('jquery');
