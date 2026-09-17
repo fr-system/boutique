@@ -725,7 +725,7 @@ function onchangeSelect(e,element,value){
         var extraData = selectedOption.data('field');
 
         var postData = [
-            extraData ? {name: "filter", value: "work_area_id = " + extraData} : {},
+            extraData ? {name: "filter", value: "work_area_id in(3, " + extraData+")"} : {},
             {name: "action", value: "get_list_ajax"},
             {name: "table_name", value: "agents"},
         ];

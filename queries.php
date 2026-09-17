@@ -381,7 +381,6 @@ function get_list($list_name,$filter = '',$table_display =false)
     }
     $query .= " ORDER BY ".$field_name;
     $list = run_query($query);
-write_log ('select city list '.json_encode ( $list));
     return $list;
 }
 

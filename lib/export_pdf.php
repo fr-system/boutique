@@ -198,21 +198,27 @@ function draw_table_pdf($table_name, $filters)
 function drow_html_orders_today($attr){
 
     $filters = array();
-    if(date('H')<23) {
+   /* if(date('H')<23) {
         $filters[] = array("filter_field" => "order_date", "filter_value" => "order_date >= CONCAT(CURDATE(), ' 00:00:00')", "filter_type" => "filter");
     }
     else{
         $filters[] = array("filter_field" => "order_date", "filter_value" => "order_date >= CONCAT(CURDATE(), ' 18:00:00')", "filter_type" => "filter");
-    }
+    }*/
+    $filters[] = array("filter_field" => "order_date", "filter_value" => "order_date >= CURDATE() And order_date <= CONCAT(CURDATE(), ' {$attr['time']}:00:00')", "filter_type" => "filter");
+
     $orders = get_data_table("orders",$filters);
     $html="";
-    foreach ($orders as $order){
+    foreach ($orders as $i=>$order){
+        if($i>0){
+            $html.="<pagebreak />";
+        }
        // $html.= "<table style='width:100%;table-layout: fixed'><tbody><tr>";
-        $html.= "<td>".drow_html_client(["client_id"=>$order->client_id])."</td>";
-        $html.= "<td>".drow_html_order(["order_id"=>$order->id])."</td>";
+//        $html.= "<td>".drow_html_client(["client_id"=>$order->client_id])."</td>";
+//        $html.= "<td>".drow_html_order(["order_id"=>$order->id])."</td>";
+        $html.= drow_html_client(["client_id"=>$order->client_id]);
+        $html.= drow_html_order(["order_id"=>$order->id]);
         //$html.= "</tr></tbody></table>";
         $html.=drow_html_order_products(["order_id"=>$order->id]);
-        $html.="<pagebreak />";
     }
     return $html;
 }

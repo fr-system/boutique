@@ -114,7 +114,7 @@ const BOUTIQUE_TABLES = array(
             ["field_name" => "phone", "widget" => "text", "label" => "טלפון"],
             ["field_name" => "mobile", "widget" => "text", "label" => "נייד"],
             ["field_name" => "address", "widget" => "text", "label" => "כתובת"],
-            ["field_name" => "city_id","widget" => "select", "join_table" => "cities", "join_value" => "name", "label" => "עיר"],
+            ["field_name" => "city_id","widget" => "select", "join_table" => "cities", "join_value" => "name", "label" => "עיר" ,"add_option"=>true],
             ["field_name" => "notes", "widget" => "textarea", "label" => "הערות","hide_in_table" => true],
             ["field_name" => "user_id", "widget" => "hidden"],
         ]),

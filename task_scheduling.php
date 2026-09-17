@@ -16,7 +16,6 @@ switch ($argv[1]){
     case "orders":
         send_orders_today($argv[2]);
         break;
-
 }
 
 
@@ -51,12 +50,12 @@ function send_unclosed_tasks($type)
         send_mail(get_option('admin_email'), $subject, "<br><br>בברכה, בוטיק כשר", [$file]);
     }
 }
-function send_orders_today($type)
+function send_orders_today($time)
 {
-    $attr = ["export" => "single", "type" => $type, "packet" => ["orders_today"], "send_mail" => true, "create_only_fill" => true];
+    $attr = ["report_title"=>"פרטי הזמנה","export" => "single", "time" => $time, "packet" => ["orders_today"], "send_mail" => true, "create_only_fill" => true];
     $file = create_pdf($attr);
     if ($file == null) exit;
-    $subject = "הזמנות מהיום";
+    $subject = " הזמנות מהיום נכון ל: " .date ('d/m/y H:i');
     send_mail(get_option('admin_email'), $subject, "<br><br>בברכה, בוטיק כשר", [$file]);
 
 }
