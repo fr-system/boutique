@@ -58,6 +58,30 @@ function run_action_query($table_name, $id, $action, $options)
                     //wp_delete_user($users[0]->user_id);
                 }
             }
+
+            $table_options = array();
+            if (array_key_exists($table_name, BOUTIQUE_TABLES)) {
+                $table_options = BOUTIQUE_TABLES[$table_name];
+            }
+            else if (array_key_exists($table_name, BOUTIQUE_LISTS)) {
+                $table_options = BOUTIQUE_LISTS[$table_name];
+            }
+
+            if(isset($table_options["linked_tables"])){
+                $linked_tables = $table_options["linked_tables"];
+                $field = $linked_tables["field"];
+                foreach($linked_tables["tables"] as $linked_table){
+                    $linked_table_name = $wpdb->prefix . $linked_table["table_name"];
+                    switch ($linked_table["action"]){
+                        case "update":
+                            run_query("UPDATE {$linked_table_name} SET {$field} = NULL WHERE {$field} = ".intval($id), "execute");
+                            break;
+                        case "remove":
+                            run_query("DELETE FROM {$linked_table_name} WHERE {$field} = ".intval($id), "execute");
+                            break;
+                    }
+                }
+            }
             //$id = 999999;
             break;
         case "update":

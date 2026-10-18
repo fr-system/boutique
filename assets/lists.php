@@ -38,7 +38,16 @@ const BOUTIQUE_TABLES = array(
         ),
         "filter" => "blocked is null or blocked = 0",
         "actions" => array("orders","tasks",array("title"=>"דוח חיוב","dialog"=>"bout-massage",
-            "ajax_func"=>"client_billing_report","text"=>"האם לשלוח ללקוח דוח חיוב למייל?"))
+            "ajax_func"=>"client_billing_report","text"=>"האם לשלוח ללקוח דוח חיוב למייל?")),
+        "linked_tables" => array(
+            "field"=>"client_id",
+            "tables" =>array(
+                array("table_name"=>"orders","action"=>"update"),
+                array("table_name"=>"tasks","action"=>"update"),
+                array("table_name"=>"clients_branches","action"=>"remove"),
+            )
+        )
+
     ),
 
     "clients_branches" => array(
@@ -46,7 +55,6 @@ const BOUTIQUE_TABLES = array(
         "columns" => array(
             array("field_name" => "name", "widget" => "text", "label" => "שם הסניף","create_input"=>true),
             array("field_name" => "address", "widget" => "text", "label" => "כתובת","create_input"=>true),
-/*            array("field_name" => "city_id", "widget" => "select", "join_table" => "cities", "join_value" => "name", "label" => "עיר","create_input"=>true),*/
             array("field_name" => "mobile", "widget" => "text", "label" => "נייד","required"=>true,"create_input"=>true),
             array("field_name" => "email", "widget" => "text", "label" => "דוא\"ל","required"=>true,"create_input"=>true),
             array("field_name" => "id", "widget" => "hidden","create_input"=>true),
@@ -72,7 +80,15 @@ const BOUTIQUE_TABLES = array(
             /*array("field_name" => "factor_of_friction", "widget" => "select","label"=>"גורם אירוז","hide_in_table"=>true),*/
             array("field_name" => "individually", "widget" => "checkbox","label"=>"ניתן למכירה בבודדים","hide_in_table"=>true),
             array("field_name" => "units_in_box", "widget" => "number","label"=>"כמות יחידות בארגז","required"=>true,"hide_in_table"=>true,"max"=>49),
-        )),
+        ),
+        "linked_tables" => array(
+            "field"=>"product_id",
+            "tables" =>array(
+                array("table_name"=>"products_clients","action"=>"remove"),
+                array("table_name"=>"order_products","action"=>"remove"),
+            )
+        )
+    ),
     "tasks" => array(
         "title" => "משימות",
         "single" => "משימה",
@@ -117,7 +133,17 @@ const BOUTIQUE_TABLES = array(
             ["field_name" => "city_id","widget" => "select", "join_table" => "cities", "join_value" => "name", "label" => "עיר" ,"add_option"=>true],
             ["field_name" => "notes", "widget" => "textarea", "label" => "הערות","hide_in_table" => true],
             ["field_name" => "user_id", "widget" => "hidden"],
-        ]),
+        ],
+        "linked_tables" => [
+            "field"=>"supplier_id",
+            "tables" =>[
+                ["table_name"=>"products","action"=>"update"],
+                ["table_name"=>"agent_target_supplier","action"=>"remove"],
+                ["table_name"=>"specials","action"=>"remove"],
+                ["table_name"=>"supplier_column_mapping","action"=>"remove"],
+            ]
+        ]
+    ),
     "supplier_column_mapping" => array(
         "title" => "מיפוי עמודות ספקים",
         "single" => "ספק",
@@ -166,9 +192,6 @@ const BOUTIQUE_TABLES = array(
             array("field_name" => "id", "widget" => "hidden","create_input"=>true,"temp_id"=>true),
             array("field_name" => "order_id", "widget" => "hidden","create_input"=>true),
             array("field_name" => "product_id", "widget" => "hidden","create_input"=>true),
-            //array("field_name" => "supplier_id", "join_table_from" => "products", "join_table" => "suppliers", "join_value" => "name"),
-            //array("field_name" => "agent_id","widget" => "hidden", "join_table_from" => "clients", "join_table" => "agents", "join_value" => "name", "label" => "סוכן"),
-
         ),
         "more_columns_in_table" => array(
             array("field_name" => "image_id", "widget" => "image"),
@@ -191,12 +214,19 @@ const BOUTIQUE_TABLES = array(
             array("field_name" => "mobile", "widget" => "text", "label" => "נייד"),
             array("field_name" => "work_area_id","widget" => "select", "join_table" => "areas", "join_value" => "area", "label" => "אזור עבודה","required"=>true, "add_option"=>true),// סינון אזור
             array("field_name" => "agent_target_supplier", "widget" => "table" ,"hide_in_table"=>true,"field_id"=>"agent_id","target_table"=>"suppliers"),
-
             array("field_name" => "target","widget" => "text", "label" => "יעד כללי", "un_apostrophe" => true,"sign"=>"₪"),
             array("field_name" => "notes", "widget" => "textarea", "label" => "הערה","hide_in_table"=>true),
             array("field_name" => "user_id", "widget" => "hidden"),
         ),
-        //"filter"=>"area_id == []"
+       "linked_tables" => array(
+           "field"=>"agent_id",
+           "tables" =>array(
+               array("table_name"=>"orders","action"=>"update"),
+               array("table_name"=>"clients","action"=>"update"),
+               array("table_name"=>"tasks","action"=>"update"),
+               array("table_name"=>"agent_target_supplier","action"=>"remove"),
+       )
+       )
     ),
     "agent_target_supplier"=>array(
         "title" => "יעד לסוכן לכל ספק",
@@ -235,7 +265,6 @@ const BOUTIQUE_TABLES = array(
                 )),
 
             array("field_name" => "payment_date", "widget" => "date", "label" => "תאריך תשלום","hide_in_pdf"=>true),
-            //array("field_name" => "credit_number", "widget" => "text", "label" => "מספר כרטיס אשראי"),
             array("field_name" => "payment_type", "widget" => "select", "label" => "אופן תשלום",
                 "options"=>array(
                     array("value"=>"1","text"=>"מזומן"),
@@ -247,8 +276,6 @@ const BOUTIQUE_TABLES = array(
                 ),"hide_in_pdf"=>true),
             array("field_name" => "check_number", "widget" => "text", "label" => "מספר צ'ק","hide_in_pdf"=>true),
             array("field_name" => "imported_at", "widget" => "date","hide_in_table"=>true,"hide_in_pdf"=>true, "label" => "נקלט בתאריך"),
-/*            array("field_name" => "agent_id", "widget" => "select", "label" => "סוכן", "join_table" => "agents", "join_value" => "user_id", "user_field" => "display_name"),//להביא מטבלת יוזר*/
-
         ),
             "update_remove"=>false
     ),
@@ -299,7 +326,14 @@ const BOUTIQUE_LISTS = array(
                 array("field_name" => "name","widget" => "text","label"=>"עיר"),
                 array("field_name" => "area_id","widget" => "select", "join_table" => "areas", "join_value" => "area", "label" => "איזור"),
             ),
-            "data-field"=>"area_id"
+            "data-field"=>"area_id",
+            "linked_tables" => [
+                "field"=>"city_id",
+                "tables" =>[
+                    ["table_name"=>"clients","action"=>"update"],
+                    ["table_name"=>"suppliers","action"=>"update"],
+                ]
+            ]
         ),
     "areas" =>
         array(
@@ -307,16 +341,8 @@ const BOUTIQUE_LISTS = array(
             "single" => "אזור",
             "columns" => array(
                 array("field_name" => "area","widget" => "text","label"=>"אזור"),
-            )
+            ),
         ),
-    /*"importance" =>
-        array(
-            "title" => "חשיבות",
-            "single" => "חשיבות",
-            "columns" => array(
-                array("field_name" => "importance","widget" => "text"),
-            )
-        ),*/
     "subjects" =>
         array(
             "title" => "נושא משימה",
