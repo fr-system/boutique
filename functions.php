@@ -20,7 +20,7 @@ require_once dirname(__FILE__) . "/task_scheduling.php";
 
 function boutique_enqueue_scripts()
 {
-    $ver = '1.2.6';
+    $ver = '1.2.7';
     wp_register_style( 'bootstrap-style', get_template_directory_uri(). '/assets/bootstrap.min.css' , array(), $ver);
     wp_enqueue_style( 'bootstrap-style' );
 
