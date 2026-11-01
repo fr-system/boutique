@@ -110,8 +110,13 @@ function save_single_data()
 {
     $table_name = $_POST["table_name"];
     if (($table_name == "agents" || $table_name == "suppliers"))  {
+        //שם משתמש וסיסמה - לסוכנים בלבד. נשמרים רק ביוזר, לא בטבלה
+        $username = $table_name == "agents" && isset($_POST["username"]) ? sanitize_user(wp_unslash($_POST["username"]), true) : "";
+        $password = $table_name == "agents" && isset($_POST["password"]) ? wp_unslash($_POST["password"]) : "";
+        unset($_POST["username"], $_POST["password"]);
+
         if(empty($_POST["id"])) {
-            $result = register_new_user1($_POST["name"], $_POST["email"], $table_name);
+            $result = register_new_user1($_POST["name"], $_POST["email"], $table_name, $username, $password);
             if ($result == null || $result["status"] == "failed") {
                 echo json_encode($result);
                 die();
@@ -119,12 +124,45 @@ function save_single_data()
             $_POST["user_id"] = $result["user_id"];
         }
         else if(!empty($_POST["user_id"])){
+            global $wpdb;
+            $user_id = intval($_POST["user_id"]);
+            $user = get_userdata($user_id);
+            $change_login = false;
+            $user_email = $_POST["email"];
+            if ($table_name == "agents" && $user) {
+                if (empty($_POST["email"])) {
+                    echo json_encode(array("status" => "failed", "msg" => "יש להזין מייל"));
+                    die();
+                }
+                $change_login = !empty($username) && $username != $user->user_login;
+                if ($change_login && username_exists($username)) {
+                    echo json_encode(array("status" => "failed", "msg" => "שם המשתמש כבר קיים במערכת"));
+                    die();
+                }
+                //מייל של יוזר אחר - נשמר רק בטבלת הסוכנים, היוזר נשאר בלי מייל
+                $email_owner = email_exists($user_email);
+                if ($email_owner && $email_owner != $user_id) {
+                    $user_email = "";
+                }
+            }
             $result = wp_update_user([
-                'ID'         => $_POST["user_id"],
+                'ID'         => $user_id,
                 'display_name' => $_POST["name"],
                 'last_name'  => $_POST["name"],
-                'user_email' => $_POST["email"],
+                'user_email' => $user_email,
             ]);
+            if (is_wp_error($result)) {
+                echo json_encode(array("status" => "failed", "msg" => $result->get_error_message()));
+                die();
+            }
+            //wp_update_user לא משנה user_login - מעדכנים ישירות
+            if ($change_login) {
+                $wpdb->update($wpdb->users, array("user_login" => $username), array("ID" => $user_id));
+                clean_user_cache($user_id);
+            }
+            if (!empty($password)) {
+                wp_set_password($password, $user_id);
+            }
         }
     }
 

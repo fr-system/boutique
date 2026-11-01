@@ -19,7 +19,7 @@ if(is_user_logged_in()) {
                 <input type="hidden" name="form_func" value="login">
                 <div class="font-40 bold">ברוכים הבאים</div>
                 <div class="font-17">בואו נתחבר</div>
-                <input class="font-18 border-dark-gray" required="" type="text" name="username"  autocomplete='off' placeholder="מייל">
+                <input class="font-18 border-dark-gray" required="" type="text" name="username"  autocomplete='off' placeholder="מייל או שם משתמש">
                 <input class="font-18 border-dark-gray" required="" type="password" name="password"  autocomplete='off' placeholder="סיסמא">
                 <div class="flex-display space-between align-center">
                     <button type="submit" class="btn-login background-gold font-18 bold">נכנסתי</button>

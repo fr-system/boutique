@@ -528,6 +528,7 @@ function create_input($field,$value = null,$readonly = "")
     switch($field["widget"]){
         case "text":
         case "email":
+        case "password":
         case "number":
         case "date":
         case "datetime-local":
@@ -538,11 +539,16 @@ function create_input($field,$value = null,$readonly = "")
             if($field["widget"] == "datetime-local" && !empty($value)) {
                 $value = date('Y-m-d H:i:s', strtotime($value));
             }
-            //if($field["widget"] == "email"){
-                //$autocomplete = ' autocomplete="email"';
-            //} else {
-                $autocomplete = ' autocomplete="off"';
-            //}
+            $autocomplete = ' autocomplete="off"';
+            if($field["widget"] == "password"){
+                $value = "";
+                $autocomplete = ' autocomplete="new-password"';
+            }
+            //כרום מתעלם מ-autocomplete="off" בשדות מייל/סיסמה - השדה נעול עד שלוחצים עליו
+            $is_email = $field["widget"] == "email" || strpos($field["field_name"], "email") === 0;
+            if(($is_email || $field["widget"] == "password" || isset($field["no_autofill"])) && empty($readonly)){
+                $autocomplete .= ' readonly onfocus="this.removeAttribute(\'readonly\')"';
+            }
             $button="";
             if(isset($field["popup_button"])){
                 $button = "<a data-tooltip='{$field["popup_button"]["tooltip"]}' class='has-tooltip button' data-bs-toggle='modal' href='#{$field["popup_button"]["target_modal"]}' role='button' >

@@ -88,7 +88,7 @@ jQuery(document).ready(function($){
                 email: true
             },
             password: {
-                required: true,
+                required: function (element) { return !isAgentForm(element); },
                 minlength: 8
             },
             confirm_password: {
@@ -529,6 +529,11 @@ jQuery(document).ready(function($){
         singleSpecialsPage();
     }
 })
+
+// בטופס סוכן הסיסמה אינה חובה - השרת דורש אותה רק כשהמייל כבר תפוס
+function isAgentForm(element){
+    return jQuery(element).closest("form").find('input[name="table_name"]').val() == "agents";
+}
 
 function removeRowSuccess(form,result){
     var currentUrl = window.location.pathname;

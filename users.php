@@ -45,50 +45,70 @@ function login()
 
 }
 
-function register_new_user1($display_name, $email,$role)
+function register_new_user1($display_name, $email, $role, $username = "", $password = "")
 {
     $email = fixXSS($email);
-    //$pass = fixXSS($_POST['password']);
-    /*if (strlen($email) < 5) {
-        echo json_encode(array(
-            'status' => 'error',
-            'msg' => "הכנס את המייל שלך"
-        ));
-        die;
-    }*/
-    $user_id = email_exists($email);
-    if(!$user_id){
-        $user_id = username_exists($email);
-    }
-    /*if (email_exists($email) || username_exists($email)) {*/
+    $username = sanitize_user($username, true);
 
-    if($user_id){
-        //למצוא האם קיים סוכן שרשום לו היוזר הזה
-        $agents = get_data_table("agents",array(array("filter_field" => "user_id", "filter_value" => $user_id)));
-        if(count($agents)==0){
+    if (empty($email)) {
+        return array("status" => "failed", "msg" => "יש להזין מייל");
+    }
+
+    if (empty($username)) {
+        //בלי שם משתמש - משייכים משתמש קיים לפי המייל, אם יש כזה
+        $user_id = email_exists($email);
+        if(!$user_id){
+            $user_id = username_exists($email);
+        }
+
+        if($user_id){
+            //למצוא האם קיימת רשומה (סוכן/ספק) שרשום לה היוזר הזה
+            $linked = get_data_table($role,array(array("filter_field" => "user_id", "filter_value" => $user_id)));
+            if(count($linked) > 0){
+                $msg = "המייל כבר משויך לרשומה אחרת";
+                if ($role == "agents") {
+                    $msg .= ". כדי ליצור משתמש נפרד עם אותו מייל יש להזין שם משתמש וסיסמה";
+                }
+                return array("status" => "failed", "msg"=> $msg);
+            }
+            //לכל משתמש תפקיד אחד - מחליפים את התפקיד, חוץ ממנהל
+            $user = get_userdata($user_id);
+            if($user && !in_array("administrator", $user->roles)){
+                $user->set_role($role);
+            }
+            if (!empty($password)) {
+                wp_set_password($password, $user_id);
+            }
             return array("status" => "success", "user_id" => $user_id);
         }
-        return array("status" => "failed", "msg"=> "המייל רשום כבר על סוכן אחר");
-        /*echo json_encode(array(
-            'status' => 'error',
-            'msg' => "המייל רשום כבר במערכת"
-        ));
-        die;*/
+    }
+    else {
+        //עם שם משתמש - תמיד יוזר חדש
+        if (username_exists($username)) {
+            return array("status" => "failed", "msg" => "שם המשתמש כבר קיים במערכת");
+        }
+    }
+
+    //וורדפרס לא מאפשר שני יוזרים עם אותו מייל - אם המייל תפוס היוזר נוצר בלי מייל, והמייל נשמר רק בטבלת הסוכנים
+    $user_email = email_exists($email) ? "" : $email;
+    if (empty($user_email) && empty($password)) {
+        return array("status" => "failed", "msg" => "המייל כבר רשום למשתמש אחר, ולכן יש להזין סיסמה");
     }
 
     $userdata = array(
-        'user_login' => $email,
-        'user_pass' => null,
-        'user_email' => $email,
+        'user_login' => !empty($username) ? $username : $email,
+        'user_pass' => !empty($password) ? $password : null,
+        'user_email' => $user_email,
         'last_name' => fixXSS($display_name),
+        'display_name' => fixXSS($display_name),
         'role' => $role,
     );
 
     $user_id = wp_insert_user($userdata);
 
-    if ($user_id)
-        return array("status" => "success", "user_id" => $user_id);
-    return null;
+    if (is_wp_error($user_id))
+        return array("status" => "failed", "msg" => $user_id->get_error_message());
+    return array("status" => "success", "user_id" => $user_id);
 }
 
 add_action('wp_ajax_user_logout', 'user_logout');

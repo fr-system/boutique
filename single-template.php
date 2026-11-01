@@ -37,6 +37,11 @@ else{//edit || readonly
     $result = get_data_table($table_name,array(array("filter_field" => "id", "filter_value"=>$id)));
     if(count($result)>0){
         $single = $result[0];
+        //שם המשתמש לא נשמר בטבלת הסוכנים - מביאים מהיוזר
+        if($table_name == "agents" && !empty($single->user_id)){
+            $agent_user = get_userdata($single->user_id);
+            $single->username = $agent_user ? $agent_user->user_login : "";
+        }
     }
 
     if($action == "edit") {    }
