@@ -540,9 +540,11 @@ function create_input($field,$value = null,$readonly = "")
                 $value = date('Y-m-d H:i:s', strtotime($value));
             }
             $autocomplete = ' autocomplete="off"';
+            //סיסמה מוצגת כטקסט רגיל: המנהל צריך לראות אותה כדי להעביר לסוכן,
+            //ושדה מסוג password גורם לכרום להתייחס לטופס כהתחברות ולמלא פרטים שמורים
+            $input_type = $field["widget"] == "password" ? "text" : $field["widget"];
             if($field["widget"] == "password"){
                 $value = "";
-                $autocomplete = ' autocomplete="new-password"';
             }
             //כרום מתעלם מ-autocomplete="off" בשדות מייל/סיסמה - השדה נעול עד שלוחצים עליו
             $is_email = $field["widget"] == "email" || strpos($field["field_name"], "email") === 0;
@@ -559,11 +561,16 @@ function create_input($field,$value = null,$readonly = "")
                 $button .="</a>";
                 //$button = "<button class='client-price' onclick=''>{$field["popup_button"]["label"]}</button>";
             }
-            return '<input type="'.$field["widget"].'"  class="grow font-17" id="'.$field["field_name"].'" name="'.$field["field_name"].'" '
+            $input = '<input type="'.$input_type.'"  class="grow font-17" id="'.$field["field_name"].'" name="'.$field["field_name"].'" '
                 .($field["widget"]=="text" && isset($field["un_apostrophe"]) && isset($field["sign"]) ? 'data-a-sign="'.$field["sign"].'"':'').  'value="'.esc_attr($value).'" '.
                 option_if_set($field,"class").
                 $required.$autocomplete.$readonly.
                 ($field["widget"] == "number" ? option_if_set($field,"step"). option_if_set($field,"max")." min=\"1\" style=\"width: 70px\"" : "" ).'/>'.$button;
+            //הערת הסבר מתחת לשדה
+            if(isset($field["note"]) && empty($readonly)){
+                $input = '<div class="flex-display direction-column grow">'.$input.'<span class="field-note">'.$field["note"].'</span></div>';
+            }
+            return $input;
         case "checkbox":
             ?>
             <input type="hidden" name="<?= $field["field_name"]?>" value="0">

@@ -212,7 +212,8 @@ const BOUTIQUE_TABLES = array(
             array("field_name" => "name", "widget" => "text", "label" => "שם","required"=>true),
             array("field_name" => "email", "widget" => "email", "label" => "דוא\"ל","required"=>true),
             array("field_name" => "username", "widget" => "text", "label" => "שם משתמש", "no_autofill" => true, "not_in_query" => true, "hide_in_table" => true),
-            array("field_name" => "password", "widget" => "password", "label" => "סיסמה", "not_in_query" => true, "hide_in_table" => true),
+            array("field_name" => "password", "widget" => "password", "label" => "סיסמה", "not_in_query" => true, "hide_in_table" => true,
+                "note" => "שימו לב: שמרו את הסיסמה כדי לשלוח אותה לסוכן יחד עם שם המשתמש או המייל. אחרי השמירה לא ניתן לראות אותה שוב. בעריכה - השאירו ריק כדי לא לשנות את הסיסמה."),
             array("field_name" => "mobile", "widget" => "text", "label" => "נייד"),
             array("field_name" => "work_area_id","widget" => "select", "join_table" => "areas", "join_value" => "area", "label" => "אזור עבודה","required"=>true, "add_option"=>true),// סינון אזור
             array("field_name" => "agent_target_supplier", "widget" => "table" ,"hide_in_table"=>true,"field_id"=>"agent_id","target_table"=>"suppliers"),
