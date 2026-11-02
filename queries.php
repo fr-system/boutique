@@ -52,13 +52,6 @@ function run_action_query($table_name, $id, $action, $options)
             if($table_name == "orders"){
                 run_query("DELETE FROM {$wpdb->prefix}order_products WHERE order_id = ".$id, "execute");
             }
-            if($table_name == "suppliers" || $table_name == "agents"){
-                $users = get_data_table($table_name,array(array("filter_field" => "id", "filter_value" =>$id)));
-                if(count($users)) {
-                    //wp_delete_user($users[0]->user_id);
-                }
-            }
-
             $table_options = array();
             if (array_key_exists($table_name, BOUTIQUE_TABLES)) {
                 $table_options = BOUTIQUE_TABLES[$table_name];
@@ -109,11 +102,33 @@ add_action('wp_ajax_save_single_data', 'save_single_data');
 function save_single_data()
 {
     $table_name = $_POST["table_name"];
-    if (($table_name == "agents" || $table_name == "suppliers"))  {
+    $is_remove = isset($_POST["remove"]) && $_POST["remove"];
+    if (($table_name == "agents" || $table_name == "suppliers") && !$is_remove)  {
         //שם משתמש וסיסמה - לסוכנים בלבד. נשמרים רק ביוזר, לא בטבלה
-        $username = $table_name == "agents" && isset($_POST["username"]) ? sanitize_user(wp_unslash($_POST["username"]), true) : "";
+        $raw_username = $table_name == "agents" && isset($_POST["username"]) ? trim(wp_unslash($_POST["username"])) : "";
+        $username = sanitize_user($raw_username, true);
         $password = $table_name == "agents" && isset($_POST["password"]) ? wp_unslash($_POST["password"]) : "";
         unset($_POST["username"], $_POST["password"]);
+
+        if ($username !== $raw_username) {
+            echo json_encode(array("status" => "failed", "msg" => "שם המשתמש יכול להכיל רק אותיות באנגלית, ספרות והתווים . _ - @"));
+            die();
+        }
+        if (!empty($password) && mb_strlen($password) < 8) {
+            echo json_encode(array("status" => "failed", "msg" => "הסיסמה חייבת להכיל לפחות 8 תווים"));
+            die();
+        }
+        //user_id לא נשלח בטופס - בעריכה מביאים אותו מהטבלה
+        if (!empty($_POST["id"])) {
+            $existing = get_data_table($table_name, array(array("filter_field" => "id", "filter_value" => intval($_POST["id"]))));
+            $_POST["user_id"] = count($existing) > 0 ? $existing[0]->user_id : "";
+        }
+
+        //אין להוסיף או לעדכן סוכן/ספק עם מייל של מנהל
+        if (!empty($_POST["email"]) && is_admin_email(wp_unslash($_POST["email"]))) {
+            echo json_encode(array("status" => "failed", "msg" => "המייל שייך למנהל המערכת, יש להזין מייל אחר"));
+            die();
+        }
 
         if(empty($_POST["id"])) {
             $result = register_new_user1($_POST["name"], $_POST["email"], $table_name, $username, $password);
@@ -122,6 +137,7 @@ function save_single_data()
                 die();
             }
             $_POST["user_id"] = $result["user_id"];
+            $user_notice = $result["notice"] ?? "";
         }
         else if(!empty($_POST["user_id"])){
             global $wpdb;
@@ -182,18 +198,27 @@ function save_single_data()
     }
 
     $id = isset($_POST["id"]) ? $_POST["id"] : null;
+
+    //מחיקת סוכן/ספק - היוזרים המקושרים נמחקים אחרי מחיקת הרשומה (delete_users_of_removed_records)
+    $removed_user_ids = array();
+    if ($action == "remove" && in_array($table_name, USER_EMAIL_TABLES) && !empty($id)) {
+        $ids = array_map('intval', explode(',', $id));
+        $removed_user_ids = $wpdb->get_col("SELECT DISTINCT user_id FROM {$wpdb->prefix}{$table_name} WHERE user_id > 0 AND id IN (" . implode(',', $ids) . ")");
+    }
+
    // write_log("run_action_query ".json_encode($result));
     run_action_query ($table_name, $id, $action, $result);
+    $user_notice = $action == "remove" ? delete_users_of_removed_records($removed_user_ids) : ($user_notice ?? "");
     if (!$_POST["id"]) {
             $id = $wpdb->insert_id;
         //$id = $wpdb->get_var ("SELECT MAX(id) FROM {$wpdb->prefix}" . $table_name);
     }
 
     //write_log("save_single_data " .json_encode($_POST));
+    $temp_list = array();
+    $removed_list = array();
     if (isset($_POST["rows"])) {
         //write_log("rows ".json_encode($_POST["rows"]));
-        $temp_list = array();
-        $removed_list = array();
 
         foreach ($_POST["rows"] as $row) {
             if ($table_name == "agents") {
@@ -262,9 +287,29 @@ function save_single_data()
             }
         }
     }
+    //הודעה אחרי הוספה (מה נוסף, ומה נעשה עם היוזר של סוכן/ספק) ואחרי מחיקה
+    $message = "";
+    $table_info = BOUTIQUE_TABLES[$table_name] ?? (BOUTIQUE_LISTS[$table_name] ?? array());
+    if (isset($table_info["single"])) {
+        $is_female = ($table_info["male_female"] ?? "male") == "female";
+        if ($action == "new") {
+            $message = ($is_female ? "נוספה " : "נוסף ") . $table_info["single"] . ($is_female ? " חדשה" : " חדש");
+            if (!empty($user_notice)) {
+                $message .= "<br>" . esc_html($user_notice);
+            }
+        }
+        else if ($action == "remove") {
+            $message = "ה" . $table_info["single"] . ($is_female ? " נמחקה" : " נמחק");
+            if (!empty($user_notice)) {
+                $message .= "<br>" . esc_html($user_notice);
+            }
+        }
+    }
+
     echo json_encode (array(
         'status' => 'success',
         'id' => $id,
+        'message' => $message,
         'redirect' => (isset($_POST["previous_page"]) ? $_POST["previous_page"] : ''),
         'temp_list'=>$temp_list,
         'removed_list'=>$removed_list,

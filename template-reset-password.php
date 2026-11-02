@@ -5,7 +5,7 @@
         <?php
         $error_msg ='';
         // קודם כל - בדיקה האם הקישור תקין ובתוקף
-        $user = get_user_by('email', fixXSS($_GET['login']));
+        $user = get_user_by_reset_login(sanitize_text_field(wp_unslash($_GET['login'] ?? '')));
         if (!$user|| is_wp_error($user)){
             $error_msg = "אתה לא רשום כמשתמש בתוכנה";
         } else {

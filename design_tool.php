@@ -1,4 +1,13 @@
 <?php
+//השם וה-id של השדה בטופס. שדה מייל מקבל שם שלא נראה כמו מייל, כדי שכרום לא יציע כתובות שמורות (ראו create_input)
+function get_input_name($field)
+{
+    if (($field["widget"] ?? "") == "email") {
+        return "nf_" . substr(md5($field["field_name"]), 0, 8);
+    }
+    return $field["field_name"];
+}
+
 function get_single_view($table_name, $single, $attr)
 {    ?>
   <div class="grid-display cols-2 margin-bottom-20">
@@ -27,7 +36,7 @@ function get_single_view($table_name, $single, $attr)
         ?>
         <div class="input-label flex-display <?php echo  $add_class . ($column["widget"] != "textarea" && $column["widget"] != "table"  ? 'align-center' :'stretch') ?> ">
             <?php if (isset($column["label"])){?>
-                <label class="bold <?= $column["widget"]== "textarea"? 'textarea-label':''?>" for="<?php echo $column["field_name"] ?>"><?php echo $column["label"].":"?></label>
+                <label class="bold <?= $column["widget"]== "textarea"? 'textarea-label':''?>" for="<?php echo get_input_name($column) ?>"><?php echo $column["label"].":"?></label>
             <?php }
             $single_sub_data = "";
             if(isset($column["field_name"])) {
@@ -551,6 +560,15 @@ function create_input($field,$value = null,$readonly = "")
             if(($is_email || $field["widget"] == "password" || isset($field["no_autofill"])) && empty($readonly)){
                 $autocomplete .= ' readonly onfocus="this.removeAttribute(\'readonly\')"';
             }
+            //כרום מציע כתובות ששמורות בדפדפן לכל שדה שהסוג, השם או ה-id שלו נראים כמו מייל.
+            //לכן השדה מוצג כטקסט עם שם אחר, והשם האמיתי נשמר ב-data-real-name ומוחזר בשליחה (submit של .site_form ב-script.js).
+            //בדיקת תקינות המייל נשארת דרך jquery.validate
+            $input_name = $field["field_name"];
+            if($field["widget"] == "email"){
+                $input_type = "text";
+                $input_name = get_input_name($field);
+                $autocomplete .= ' inputmode="email" data-rule-email="true" data-real-name="'.$field["field_name"].'"';
+            }
             $button="";
             if(isset($field["popup_button"])){
                 $button = "<a data-tooltip='{$field["popup_button"]["tooltip"]}' class='has-tooltip button' data-bs-toggle='modal' href='#{$field["popup_button"]["target_modal"]}' role='button' >
@@ -561,15 +579,17 @@ function create_input($field,$value = null,$readonly = "")
                 $button .="</a>";
                 //$button = "<button class='client-price' onclick=''>{$field["popup_button"]["label"]}</button>";
             }
-            $input = '<input type="'.$input_type.'"  class="grow font-17" id="'.$field["field_name"].'" name="'.$field["field_name"].'" '
+            //הערת הסבר - מוצגת בחלונית צפה במעבר עכבר / פוקוס (script.js)
+            $note = isset($field["note"]) && empty($readonly) ? ' data-note="'.esc_attr($field["note"]).'"' : '';
+            $note .= isset($field["latin_only"]) ? ' data-latin-only="1" dir="ltr"' : '';
+            if(isset($field["minlength"])){
+                $note .= ' minlength="'.intval($field["minlength"]).'" data-msg-minlength="יש להזין לפחות '.intval($field["minlength"]).' תווים"';
+            }
+            $input = '<input type="'.$input_type.'"  class="grow font-17" id="'.$input_name.'" name="'.$input_name.'" '.$note.' '
                 .($field["widget"]=="text" && isset($field["un_apostrophe"]) && isset($field["sign"]) ? 'data-a-sign="'.$field["sign"].'"':'').  'value="'.esc_attr($value).'" '.
                 option_if_set($field,"class").
                 $required.$autocomplete.$readonly.
                 ($field["widget"] == "number" ? option_if_set($field,"step"). option_if_set($field,"max")." min=\"1\" style=\"width: 70px\"" : "" ).'/>'.$button;
-            //הערת הסבר מתחת לשדה
-            if(isset($field["note"]) && empty($readonly)){
-                $input = '<div class="flex-display direction-column grow">'.$input.'<span class="field-note">'.$field["note"].'</span></div>';
-            }
             return $input;
         case "checkbox":
             ?>

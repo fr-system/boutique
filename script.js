@@ -10,6 +10,13 @@ jQuery(document).ready(function($){
     var currentUrl = window.location.pathname;
     var subjectPage = getParameterByName("subject")
 
+    //הודעה ששמרנו לפני מעבר העמוד (reload_page)
+    var pendingMessage = sessionStorage.getItem('slider_message');
+    if (pendingMessage) {
+        sessionStorage.removeItem('slider_message');
+        show_slider_message(pendingMessage);
+    }
+
     if (currentUrl.includes('manage-lists'))
     {
         var selected = jQuery("ul.tables-list li:first-child")
@@ -80,16 +87,18 @@ jQuery(document).ready(function($){
         pSign: 's'
     });
 
-    jQuery("form").validate({
+    // הגדרות הוולידציה - מופעלות על כל טופס בזמן השליחה (ראו submit של .site_form)
+    var validateOptions = {
         rules: {
             'input, textarea':{ required: true},
             email: {
                 required: true,
                 email: true
             },
+            // בלי minlength כללי - כדי לא לחסום התחברות עם סיסמה ישנה קצרה.
+            // בטופס סוכן האורך נבדק לפי minlength שעל השדה
             password: {
-                required: function (element) { return !isAgentForm(element); },
-                minlength: 8
+                required: function (element) { return !isAgentForm(element); }
             },
             confirm_password: {
                 required: true,
@@ -111,7 +120,10 @@ jQuery(document).ready(function($){
                 equalTo: "סיסמת האישור אינה תואמת"
             }
 
-        }});
+        }};
+    jQuery("form").each(function () {
+        jQuery(this).validate(validateOptions);
+    });
 
     jQuery('.user-logged:not(.popup-logout)').click(function(){
         jQuery('.popup-logout').toggleClass("hidden");
@@ -126,6 +138,13 @@ jQuery(document).ready(function($){
                 location.reload();
             }
         });
+    });
+
+    jQuery('body').on('click', '.forgot-password-retry', function(){
+        var $form = jQuery(this).closest('form');
+        jQuery(this).addClass('d-none');
+        $form.find('#form_error_msgs_container').html('').removeClass('margin-bottom-20');
+        $form.find('.forgot-password-fields').removeClass('d-none');
     });
 
     jQuery('#login_forgot_password_btn').click(function(){
@@ -145,6 +164,8 @@ jQuery(document).ready(function($){
     jQuery('body').on('submit', '.site_form', function(e) {
         e.preventDefault();
         var $form = jQuery(this);
+        // validate() מחזיר את הוולידטור הקיים, או יוצר אחד עם ההגדרות לטופס שנוצר אחרי טעינת הדף
+        $form.validate(validateOptions);
         if (!$form.valid()) {
             return;
         }
@@ -215,6 +236,11 @@ jQuery(document).ready(function($){
 
         var formData = new FormData($form[0]);
         formData.append('action', 'send_site_forms');
+        //שדות שהוצגו עם שם אחר כדי שכרום לא יציע ערכים שמורים (design_tool.php) - נשלחים בשם האמיתי
+        $form.find('[data-real-name]').each(function () {
+            formData.delete(this.name);
+            formData.set(jQuery(this).data('real-name'), this.value);
+        });
 
         if (xhr && xhr.readyState != 4)
             xhr.abort();
@@ -530,6 +556,43 @@ jQuery(document).ready(function($){
     }
 })
 
+// חלונית הסבר ליד שדה עם data-note - מוצגת במעבר עכבר או כשהשדה בפוקוס
+jQuery(function () {
+    var $popup = jQuery('<div class="field-note-popup"></div>').appendTo('body');
+
+    function showNote(input) {
+        var rect = input.getBoundingClientRect();
+        $popup.text(jQuery(input).data('note')).show();
+        var width = $popup.outerWidth();
+        var left = rect.left - width - 10; // משמאל לשדה
+        var top = rect.top;
+        if (left < 10) { // אין מקום משמאל - מתחת לשדה
+            left = Math.max(10, rect.right - width);
+            top = rect.bottom + 6;
+        }
+        $popup.css({left: left, top: top});
+    }
+
+    jQuery(document)
+        .on('mouseenter focus', 'input[data-note]', function () { showNote(this); })
+        .on('mouseleave', 'input[data-note]', function () {
+            if (document.activeElement !== this) $popup.hide();
+        })
+        .on('blur', 'input[data-note]', function () { $popup.hide(); });
+
+    // שדה באנגלית בלבד (שם משתמש) - מוחקים תווים אחרים ומציגים את ההסבר
+    jQuery(document).on('input', 'input[data-latin-only]', function () {
+        var clean = this.value.replace(/[^A-Za-z0-9._@-]/g, '');
+        if (clean !== this.value) {
+            this.value = clean;
+            showNote(this);
+        }
+    });
+
+    // בגלילה המיקום משתנה - מסתירים
+    window.addEventListener('scroll', function () { $popup.hide(); }, true);
+});
+
 // בטופס סוכן הסיסמה אינה חובה - השרת דורש אותה רק כשהמייל כבר תפוס
 function isAgentForm(element){
     return jQuery(element).closest("form").find('input[name="table_name"]').val() == "agents";
@@ -546,9 +609,16 @@ function removeRowSuccess(form,result){
         tr.remove();
     }
     else{
+        //מעבר לעמוד הקודם - ההודעה תוצג אחרי הטעינה
+        if(result.message) {
+            sessionStorage.setItem('slider_message', result.message);
+        }
         window.location.href =jQuery("input[name=previous_page]").val();
+        closeModal();
+        return;
     }
     closeModal();
+    show_slider_message(result.message);
 }
 
 function onAddChat(result){
@@ -632,6 +702,10 @@ function searchElements(text,selector,searchSelector){
 }
 
 function reload_page(data){
+    //הודעה מהשמירה (למשל "נוסף סוכן חדש") - מוצגת אחרי טעינת העמוד הבא
+    if(data.message) {
+        sessionStorage.setItem('slider_message', data.message);
+    }
     if(data.redirect) {
         window.location.href = data.redirect;
     }
@@ -645,8 +719,16 @@ function show_error_messages($form, data){
 
 }
 
-function show_success_msg($form, data){
+//שכחתי סיסמא - אחרי השליחה מסתירים את הטופס ומציגים רק את ההודעה
+function forgot_password_success($form, data){
+    $form.addClass('d-none');
     $form.next('.success_msg_of_form').removeClass('d-none');
+}
+
+function forgot_password_failed($form, data){
+    $form.find('.forgot-password-fields').addClass('d-none');
+    show_error_messages($form, data);
+    $form.find('.forgot-password-retry').removeClass('d-none');
 }
 function closePopup(){
     jQuery('html').removeClass('popup_open');
@@ -664,36 +746,44 @@ function forgot_password_state(data){
 
 }
 
-jQuery(".slider-message").click(function(){
-    jQuery(this).stop(true, true).fadeOut();
-    jQuery(this).fadeOut(1000, function() {
-        messageElement.css("right", "-500px");
+var sliderMessageTimer;
+
+function hide_slider_message() {
+    clearTimeout(sliderMessageTimer);
+    jQuery(".slider-message").stop(true).animate({
+        top: "-200px",
+        opacity: 0
+    }, 500, function () {
+        jQuery(this).hide();
     });
-})
+}
+
+//לחיצה על ההודעה סוגרת אותה מיד (delegated - עובד גם אם הסקריפט נטען לפני האלמנט)
+jQuery(document).on('click', '.slider-message', hide_slider_message);
 
 function show_slider_message(text) {
     if(text) {
         var messageElement = jQuery(".slider-message");
+        clearTimeout(sliderMessageTimer);
         messageElement.find(".text").html(text);
         messageElement
+            .attr("title", "לחיצה לסגירה")
             .css({
                 display: "block",
                 top: "-200px",
-                opacity: 0
+                opacity: 0,
+                cursor: "pointer"
             })
+            .stop(true)
             .animate({
                 top: "45%",
                 opacity: 0.95
             }, 1000);
 
-        setTimeout(function () {
-            messageElement.animate({
-                top: "-200px",
-                opacity: 0
-            }, 500, function () {
-                jQuery(this).hide();
-            });
-        }, 5000);
+        //זמן התצוגה לפי אורך הטקסט: 4 שניות + 120ms לכל תו, לפחות 5 ולכל היותר 30 שניות
+        var length = messageElement.find(".text").text().length;
+        var duration = Math.min(Math.max(4000 + length * 120, 5000), 30000);
+        sliderMessageTimer = setTimeout(hide_slider_message, duration);
     }
 }
 

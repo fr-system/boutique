@@ -88,7 +88,7 @@ if(is_agent()) {
                 $agents = get_data_table("agents",$filters);
                 $filters = array(array("filter_field" => "status_id", "filter_value" =>1,"filter_type"=>"!="));
                 if(is_agent()){
-                    $filters[] = array("filter_field" => "tasks.agent_id", "filter_value" => $agent_id );
+                    $filters[] = array("filter_field" => "agent_id", "filter_table" => "tasks", "filter_value" => $agent_id );
                 }
 
                 $result = get_data_table("tasks",$filters);
@@ -146,7 +146,7 @@ if(is_agent()) {
                 //$agents = get_data_table("agents",$filters);
                 $filters = array(array("filter_field" => "status_id", "filter_value" =>1,"filter_type"=>"!="));
                 if(is_agent()){
-                    $filters[] = array("filter_field" => "tasks.agent_id", "filter_value" => $agent_id );
+                    $filters[] = array("filter_field" => "agent_id", "filter_table" => "tasks", "filter_value" => $agent_id );
                 }
 
                 $result = get_data_table("tasks",$filters,array("open_date" => "desc"));

@@ -54,50 +54,47 @@ function register_new_user1($display_name, $email, $role, $username = "", $passw
         return array("status" => "failed", "msg" => "יש להזין מייל");
     }
 
+    //יוזר קיים עם המייל הזה
+    $existing_id = email_exists($email);
+    if (!$existing_id) {
+        $existing_id = username_exists($email);
+    }
+    $existing = $existing_id ? get_userdata($existing_id) : null;
+
+    if (is_admin_email($email)) {
+        return array("status" => "failed", "msg" => "המייל שייך למנהל המערכת, יש להזין מייל אחר");
+    }
+
     if (empty($username)) {
-        //בלי שם משתמש - משייכים משתמש קיים לפי המייל, אם יש כזה
-        $user_id = email_exists($email);
-        if(!$user_id){
-            $user_id = username_exists($email);
-        }
-
-        if($user_id){
-            //למצוא האם קיימת רשומה (סוכן/ספק) שרשום לה היוזר הזה
-            $linked = get_data_table($role,array(array("filter_field" => "user_id", "filter_value" => $user_id)));
-            if(count($linked) > 0){
-                $msg = "המייל כבר משויך לרשומה אחרת";
-                if ($role == "agents") {
-                    $msg .= ". כדי ליצור משתמש נפרד עם אותו מייל יש להזין שם משתמש וסיסמה";
-                }
-                return array("status" => "failed", "msg"=> $msg);
-            }
-            //לכל משתמש תפקיד אחד - מחליפים את התפקיד, חוץ ממנהל
-            $user = get_userdata($user_id);
-            if($user && !in_array("administrator", $user->roles)){
-                $user->set_role($role);
-            }
+        //בלי שם משתמש - משייכים ליוזר הקיים רק אם הוא באותו תפקיד ולא משויך לשום רשומה (סוכן/ספק)
+        if ($existing && in_array($role, $existing->roles) && !is_user_linked_to_record($existing->ID)) {
             if (!empty($password)) {
-                wp_set_password($password, $user_id);
+                wp_set_password($password, $existing->ID);
             }
-            return array("status" => "success", "user_id" => $user_id);
+            return array("status" => "success", "user_id" => $existing->ID,
+                "notice" => "שויך למשתמש קיים במערכת עם המייל הזה (שם משתמש: " . $existing->user_login . ")");
         }
+        //יוזר קיים שאי אפשר לשייך - כדי ליצור יוזר נפרד חובה להזין שם משתמש (קיים רק בטופס סוכן)
+        if ($existing) {
+            $msg = "קיים כבר במערכת משתמש עם המייל הזה";
+            $msg .= $role == "agents" ? ". כדי ליצור משתמש נפרד יש להזין שם משתמש" : ", יש להזין מייל אחר";
+            return array("status" => "failed", "msg" => $msg);
+        }
+        //אין יוזר עם המייל - שם המשתמש הוא המייל
+        $username = $email;
     }
-    else {
+    else if (username_exists($username)) {
         //עם שם משתמש - תמיד יוזר חדש
-        if (username_exists($username)) {
-            return array("status" => "failed", "msg" => "שם המשתמש כבר קיים במערכת");
-        }
+        return array("status" => "failed", "msg" => "שם המשתמש כבר קיים במערכת");
     }
 
-    //וורדפרס לא מאפשר שני יוזרים עם אותו מייל - אם המייל תפוס היוזר נוצר בלי מייל, והמייל נשמר רק בטבלת הסוכנים
+    //וורדפרס לא מאפשר שני יוזרים עם אותו מייל - אם המייל תפוס היוזר נוצר בלי מייל, והמייל נשמר רק ברשומה (סוכן/ספק).
+    //איפוס סיסמה מוצא את היוזר גם לפי המייל שברשומה (send_password_reset_link)
     $user_email = email_exists($email) ? "" : $email;
-    if (empty($user_email) && empty($password)) {
-        return array("status" => "failed", "msg" => "המייל כבר רשום למשתמש אחר, ולכן יש להזין סיסמה");
-    }
 
     $userdata = array(
-        'user_login' => !empty($username) ? $username : $email,
-        'user_pass' => !empty($password) ? $password : null,
+        'user_login' => $username,
+        'user_pass' => !empty($password) ? $password : wp_generate_password(16),
         'user_email' => $user_email,
         'last_name' => fixXSS($display_name),
         'display_name' => fixXSS($display_name),
@@ -108,7 +105,102 @@ function register_new_user1($display_name, $email, $role, $username = "", $passw
 
     if (is_wp_error($user_id))
         return array("status" => "failed", "msg" => $user_id->get_error_message());
-    return array("status" => "success", "user_id" => $user_id);
+
+    $notice = "נוצר משתמש חדש, שם משתמש: " . $username;
+    if ($existing) {
+        $notice = "קיים כבר במערכת משתמש אחר עם המייל הזה, ולכן " . $notice;
+    }
+    if (empty($password)) {
+        $notice .= ". לא הוגדרה סיסמה - לכניסה ראשונה יש להשתמש ב'שכחתי סיסמא'";
+    }
+    return array("status" => "success", "user_id" => $user_id, "notice" => $notice);
+}
+
+//עמודה בלוח הבקרה, עמוד משתמשים - הרשומה (סוכן/ספק) שהיוזר משויך אליה, עם קישור לעריכה
+add_filter('manage_users_columns', 'add_linked_record_user_column');
+function add_linked_record_user_column($columns) {
+    $columns['linked_record'] = 'רשומה משויכת';
+    return $columns;
+}
+
+add_filter('manage_users_custom_column', 'show_linked_record_user_column', 10, 3);
+function show_linked_record_user_column($output, $column_name, $user_id) {
+    if ($column_name != 'linked_record') {
+        return $output;
+    }
+    global $wpdb;
+    //כל השיוכים נטענים פעם אחת לכל העמוד
+    static $records = null;
+    if ($records === null) {
+        $records = array();
+        foreach (USER_EMAIL_TABLES as $table) {
+            $rows = $wpdb->get_results("SELECT id, name, user_id FROM {$wpdb->prefix}{$table} WHERE user_id > 0");
+            foreach ($rows as $row) {
+                $records[$row->user_id][] = array("table" => $table, "id" => $row->id, "name" => $row->name);
+            }
+        }
+    }
+    if (empty($records[$user_id])) {
+        return '—';
+    }
+    $links = array();
+    foreach ($records[$user_id] as $record) {
+        $url = home_url('/single/?subject=' . $record["table"] . '&action=edit&id=' . $record["id"]);
+        $links[] = '<a href="' . esc_url($url) . '">' . esc_html(BOUTIQUE_TABLES[$record["table"]]["single"]) . ' #' . intval($record["id"]) . '</a> ' . esc_html($record["name"]);
+    }
+    return implode('<br>', $links);
+}
+
+//מחיקת היוזרים של סוכנים/ספקים שנמחקו - חוץ ממנהל ומיוזר שמשויך לרשומה נוספת. מחזיר הודעה על מה שנעשה
+function delete_users_of_removed_records($user_ids) {
+    require_once ABSPATH . 'wp-admin/includes/user.php';
+    $deleted = 0;
+    $kept = array();
+    foreach ($user_ids as $user_id) {
+        $user = get_userdata($user_id);
+        if (!$user) {
+            continue;
+        }
+        if (in_array("administrator", $user->roles)) {
+            $kept[] = "המשתמש " . $user->user_login . " לא נמחק כי הוא מנהל";
+        }
+        else if (is_user_linked_to_record($user_id)) {
+            $kept[] = "המשתמש " . $user->user_login . " לא נמחק כי הוא משויך לרשומה נוספת";
+        }
+        else if (wp_delete_user($user_id)) {
+            $deleted++;
+        }
+    }
+    $notices = $kept;
+    if ($deleted > 0) {
+        array_unshift($notices, $deleted == 1 ? "המשתמש המקושר נמחק" : "נמחקו " . $deleted . " משתמשים מקושרים");
+    }
+    return implode(". ", $notices);
+}
+
+//האם המייל שייך למנהל - מייל של יוזר מנהל (או שם משתמש של מנהל), או מייל הניהול של האתר
+function is_admin_email($email) {
+    if (strcasecmp(trim($email), get_option('admin_email')) == 0) {
+        return true;
+    }
+    foreach (array(email_exists($email), username_exists($email)) as $user_id) {
+        $user = $user_id ? get_userdata($user_id) : null;
+        if ($user && in_array("administrator", $user->roles)) {
+            return true;
+        }
+    }
+    return false;
+}
+
+//האם היוזר משויך לרשומה כלשהי (סוכן/ספק)
+function is_user_linked_to_record($user_id) {
+    global $wpdb;
+    foreach (USER_EMAIL_TABLES as $table) {
+        if ($wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM {$wpdb->prefix}{$table} WHERE user_id = %d", $user_id)) > 0) {
+            return true;
+        }
+    }
+    return false;
 }
 
 add_action('wp_ajax_user_logout', 'user_logout');
@@ -162,47 +254,149 @@ function get_reset_password_page(){
     return get_site_url().'/reset-password';
 }
 
+//טבלאות שהמייל של היוזר יכול להישמר בהן כשהוא לא נשמר ביוזר עצמו (מייל משותף לכמה יוזרים)
+const USER_EMAIL_TABLES = array("agents", "suppliers");
+
+//המייל של היוזר - מהיוזר עצמו, ואם אין - מהרשומה המקושרת (סוכן/ספק)
+function get_user_email_for_reset($user) {
+    global $wpdb;
+    if (!empty($user->user_email)) {
+        return $user->user_email;
+    }
+    foreach (USER_EMAIL_TABLES as $table) {
+        $email = $wpdb->get_var($wpdb->prepare("SELECT email FROM {$wpdb->prefix}{$table} WHERE user_id = %d LIMIT 1", $user->ID));
+        if (!empty($email)) {
+            return $email;
+        }
+    }
+    return "";
+}
+
+//כל היוזרים שהמייל שייך להם - היוזר שהמייל רשום אצלו, וגם יוזרים בלי מייל שהמייל רשום ברשומה המקושרת שלהם
+function get_users_by_email_for_reset($email) {
+    global $wpdb;
+    $users = array();
+    $user = get_user_by('email', $email);
+    if ($user) {
+        $users[$user->ID] = $user;
+    }
+    foreach (USER_EMAIL_TABLES as $table) {
+        $user_ids = $wpdb->get_col($wpdb->prepare("SELECT user_id FROM {$wpdb->prefix}{$table} WHERE email = %s AND user_id > 0", $email));
+        foreach ($user_ids as $user_id) {
+            $user = get_userdata($user_id);
+            if ($user && !isset($users[$user->ID])) {
+                $users[$user->ID] = $user;
+            }
+        }
+    }
+    return array_values($users);
+}
+
+//היוזר לפי הפרמטר login בקישור האיפוס - שם משתמש, או מייל בקישורים ישנים
+function get_user_by_reset_login($login) {
+    $user = get_user_by('login', $login);
+    if (!$user && is_email($login)) {
+        $user = get_user_by('email', $login);
+    }
+    return $user;
+}
+
+//תוכן מייל איפוס הסיסמה - קישור נפרד לכל יוזר. בנוי בטבלאות וסגנון inline כדי שיוצג נכון בכל תוכנות המייל
+function build_reset_password_email($users) {
+    $gold = '#C9A24B';
+    $logo = get_stylesheet_directory_uri() . '/assets/images/logo_header.png';
+    $is_single = count($users) == 1;
+
+    $greeting = $is_single ? 'שלום ' . esc_html(get_user_display_name($users[0])) . ',' : 'שלום,';
+    $intro = $is_single
+        ? 'קיבלנו בקשה לאיפוס הסיסמה שלך בתוכנה של בוטיק כשר. כדי לבחור סיסמה חדשה, יש ללחוץ על הכפתור:'
+        : 'קיבלנו בקשה לאיפוס סיסמה בתוכנה של בוטיק כשר. כתובת המייל הזו משויכת לכמה משתמשים, יש ללחוץ על הכפתור של המשתמש שאת הסיסמה שלו רוצים לאפס:';
+
+    $users_html = '';
+    foreach ($users as $user) {
+        $key = get_password_reset_key($user);
+        $url = get_reset_password_page() . "?action=reset_pass&key=$key&login=" . rawurlencode($user->user_login);
+
+        $users_html .= '
+            <tr><td style="padding: 0 0 16px 0;">
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#FAF7F0; border:1px solid #EFE6D2; border-radius:12px;">
+                    <tr><td style="padding:20px 24px; text-align:right;">
+                        <div style="font-size:17px; font-weight:700; color:#1A1A1A; margin-bottom:4px;">' . esc_html(get_user_display_name($user)) . '</div>
+                        <div style="font-size:14px; color:#6B6B6B; margin-bottom:18px;">שם משתמש: <span style="direction:ltr; unicode-bidi:embed; color:#1A1A1A;">' . esc_html($user->user_login) . '</span></div>
+                        <a href="' . esc_url($url) . '" style="display:inline-block; background-color:' . $gold . '; color:#FFFFFF; font-size:16px; font-weight:700; text-decoration:none; padding:12px 32px; border-radius:50px;">לבחירת סיסמה חדשה</a>
+                    </td></tr>
+                </table>
+            </td></tr>';
+    }
+
+    return '
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#F3F1EC; padding:32px 12px; direction:rtl;">
+        <tr><td align="center">
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px; background-color:#FFFFFF; border-radius:16px; overflow:hidden; box-shadow:0 4px 18px rgba(0,0,0,0.06);">
+                <tr><td align="center" style="background-color:#000000; padding:22px 24px; border-bottom:4px solid ' . $gold . ';">
+                    <img src="' . esc_url($logo) . '" alt="בוטיק כשר" height="48" style="display:block; height:48px; border:0;">
+                </td></tr>
+                <tr><td style="padding:36px 32px 12px 32px; text-align:right;">
+                    <div style="font-size:24px; font-weight:700; color:#1A1A1A; margin-bottom:6px;">איפוס סיסמה</div>
+                    <div style="width:48px; height:3px; background-color:' . $gold . '; border-radius:2px; margin-bottom:24px;"></div>
+                    <div style="font-size:16px; font-weight:700; color:#1A1A1A; margin-bottom:8px;">' . $greeting . '</div>
+                    <div style="font-size:15px; line-height:1.7; color:#444444; margin-bottom:24px;">' . $intro . '</div>
+                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0">' . $users_html . '</table>
+                    <div style="font-size:13px; line-height:1.7; color:#8A8A8A; margin:8px 0 28px 0;">
+                        הקישור תקף ל-24 שעות.<br>
+                        אם לא ביקשת לאפס את הסיסמה, אפשר להתעלם מהמייל הזה. הסיסמה הנוכחית לא תשתנה.
+                    </div>
+                </td></tr>
+                <tr><td style="background-color:#FAF7F0; padding:18px 32px; text-align:center; font-size:13px; color:#8A8A8A; border-top:1px solid #EFE6D2;">
+                    בברכה, <span style="color:#1A1A1A; font-weight:700;">בוטיק כשר</span>
+                </td></tr>
+            </table>
+        </td></tr>
+    </table>';
+}
+
 function send_password_reset_link() {
 
     //check_ajax_referer( 'ajax-lostpass-nonce', 'security' );
-    $user_email = sanitize_text_field( $_POST['email'] );
+    $login = sanitize_text_field( wp_unslash( $_POST['login'] ?? '' ) );
 
-    $user = get_user_by( 'email', $user_email );
-    if ( $user instanceof WP_User ) {
-        $user_id    = $user->ID;
-        $user_info  = get_userdata( $user_id );
-        $unique     = get_password_reset_key( $user_info );
-        $unique_url = get_reset_password_page() . "?action=reset_pass&key=$unique&login=" . rawurlencode( $user_email );
-
-        $subject = "איפוס סיסמה בתוכנה של בוטיק כשר";
-        $message =  '<span style="font-size:25px; font-weight: bold;">'.get_user_display_name($user).',</span><br><br>
-                            <span style="margin-bottom: 10px">התקבלה בקשה לאיפוס הסיסמא</span>
-                            <a style="background-color:#E2B252; color:white; display: block; padding: 0 20px;width: fit-content; text-decoration: none; font-weight: 700; 
-                            border-radius: 64px; border: none" 
-                            href="'.$unique_url.'">לסיסמא חדשה לחץ כאן 
-                            <svg xmlns="http://www.w3.org/2000/svg" width="102" height="21" viewBox="0 0 102 21" fill="none" class="">
-                                <path d="M101 10H2" stroke="#0166FF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
-                                <path d="M11 19.0328L1 10.0164L11 1" stroke="#0166FF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
-                            </svg>
-                            </a>';
-
-        $ok = send_mail($user_email,$subject,$message);
-        echo json_encode( array(
-            'status' => 'success',
-            'ok' => $ok
-        ) );
-        die;
+    //אפשר להזין מייל או שם משתמש
+    if (is_email($login)) {
+        $users = get_users_by_email_for_reset($login);
+        $to = $login;
     } else {
+        $user = get_user_by('login', $login);
+        $users = $user ? array($user) : array();
+        $to = $user ? get_user_email_for_reset($user) : "";
+    }
 
+    if (count($users) == 0) {
         echo json_encode( array(
             'status' => 'failed',
             'msg'    => 'אתה לא רשום במערכת'
         ) );
         die;
     }
+    if (empty($to)) {
+        echo json_encode( array(
+            'status' => 'failed',
+            'msg'    => 'לא רשום מייל למשתמש הזה, יש לפנות למנהל המערכת'
+        ) );
+        die;
+    }
+
+    $subject = "איפוס סיסמה בתוכנה של בוטיק כשר";
+    $message = build_reset_password_email($users);
+
+    $ok = send_mail($to,$subject,$message);
+    echo json_encode( array(
+        'status' => 'success',
+        'ok' => $ok
+    ) );
+    die;
 }
 
-function send_mail($to,$subject,$message,$files)
+function send_mail($to,$subject,$message,$files = array())
 {
     //$to = "kosherboutique@gmail.com";
     //$to = "fr305070@gmail.com";
@@ -268,14 +462,15 @@ function _reset_password() {
 function display_forgot_password_form($login_page = true){
     ?>
     <div class="forgot-password-form d-none <?php echo(!$login_page?'flex-display center':'')?>">
-        <form novalidate="" id="forgot_password_form" class="site_form row" data-success="show_success_msg" data-failed="show_error_messages">
+        <form novalidate="" id="forgot_password_form" class="site_form row" data-success="forgot_password_success" data-failed="forgot_password_failed">
+            <div class="forgot-password-fields">
             <?php if($login_page){ ?>
-                <p class="font-18">שכחת את הסיסמה? יש להזין כתובת מייל.
+                <p class="font-18">שכחת את הסיסמה? יש להזין כתובת מייל שאיתה נכנסים למערכת או שם משתמש.
                     קישור לאיפוס הסיסמה יישלח אליך במייל</p>
             <?php }
             else {
                 ?>
-                <div class="margin-bottom-10">שכחת את הסיסמה? יש להזין כתובת מייל.</div>
+                <div class="margin-bottom-10">שכחת את הסיסמה? יש להזין כתובת מייל או שם משתמש.</div>
                 <div class="margin-bottom-10">קישור לאיפוס הסיסמה יישלח אליך במייל</div>
                 <?php
             }
@@ -283,10 +478,12 @@ function display_forgot_password_form($login_page = true){
             <input type="hidden" name="form_func" value="send_password_reset_link">
             <?php /*wp_nonce_field( 'ajax-lostpass-nonce', 'security' ); */?>
             <div class="flex-display  <?=(!$login_page?' direction-column space-between':'')?>">
-                <input class="border-dark-gray margin-after-10 font-18 <?=(!$login_page?' margin-bottom-20':'')?>" required="" type="email" name="email"  id="email" placeholder="הכנס כתובת אימייל">
+                <input class="border-dark-gray margin-after-10 font-18 <?=(!$login_page?' margin-bottom-20':'')?>" required="" type="text" name="login"  id="reset_login" placeholder="מייל או שם משתמש" autocomplete="username">
                 <button  id="reset_pass_button" type="submit" class="align-self-center btn-login font-18 bold background-gold margin-after-10 margin-bottom-20">איפוס סיסמא</button>
             </div>
+            </div>
             <div id="form_error_msgs_container"></div>
+            <div class="forgot-password-retry underline pointer font-18 d-none">ניסיון נוסף</div>
         </form>
         <div id="success_msg_of_form " class="success_msg_of_form d-none font-18">נשלח אליך קישור לאיפוס סיסמה לכתובת המייל שהזנת</div>
     </div>

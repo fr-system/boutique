@@ -238,6 +238,10 @@ input, textarea, select, button{
 .flex-display .part-10{
     flex-basis:10% !important;
 }
+/* שהתפריט לא יתכווץ מתחת ל-10% כשהתוכן לידו רחב (למשל טבלה) */
+#sidebar-menu{
+    flex-shrink: 0;
+}
 .flex-display .part-20{
     flex-basis:20% !important;
 }
@@ -822,11 +826,19 @@ section.page.single form > .buttons{
     flex-shrink: 0;
     padding-top: 10px;
 }
-.field-note{
-    font-size: 0.85em;
-    color: #555;
-    margin-top: 4px;
-    line-height: 1.3;
+.field-note-popup{
+    display: none;
+    position: fixed;
+    z-index: 2000;
+    max-width: 260px;
+    padding: 10px 12px;
+    background: var(--b-global-color-light-gray);
+    border: 1px solid var(--b-global-color-gold);
+    border-radius: 10px;
+    box-shadow: 2px 4px 12px rgba(0, 0, 0, 0.12);
+    font-size: 1.4rem;
+    line-height: 1.4;
+    direction: rtl;
 }
 #media-attachment-date-filters{
     width: 250px;

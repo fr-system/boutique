@@ -211,8 +211,9 @@ const BOUTIQUE_TABLES = array(
         "columns" => array(
             array("field_name" => "name", "widget" => "text", "label" => "שם","required"=>true),
             array("field_name" => "email", "widget" => "email", "label" => "דוא\"ל","required"=>true),
-            array("field_name" => "username", "widget" => "text", "label" => "שם משתמש", "no_autofill" => true, "not_in_query" => true, "hide_in_table" => true),
-            array("field_name" => "password", "widget" => "password", "label" => "סיסמה", "not_in_query" => true, "hide_in_table" => true,
+            array("field_name" => "username", "widget" => "text", "label" => "שם משתמש", "no_autofill" => true, "not_in_query" => true, "hide_in_table" => true,
+                "latin_only" => true, "note" => "אותיות באנגלית, ספרות והתווים . _ - @ בלבד"),
+            array("field_name" => "password", "widget" => "password", "label" => "סיסמה", "not_in_query" => true, "hide_in_table" => true, "minlength" => 8,
                 "note" => "שימו לב: שמרו את הסיסמה כדי לשלוח אותה לסוכן יחד עם שם המשתמש או המייל. אחרי השמירה לא ניתן לראות אותה שוב. בעריכה - השאירו ריק כדי לא לשנות את הסיסמה."),
             array("field_name" => "mobile", "widget" => "text", "label" => "נייד"),
             array("field_name" => "work_area_id","widget" => "select", "join_table" => "areas", "join_value" => "area", "label" => "אזור עבודה","required"=>true, "add_option"=>true),// סינון אזור
@@ -224,7 +225,7 @@ const BOUTIQUE_TABLES = array(
        "linked_tables" => array(
            "field"=>"agent_id",
            "tables" =>array(
-               array("table_name"=>"orders","action"=>"update"),
+               //בהזמנות אין agent_id - הסוכן מגיע דרך הלקוח (clients.agent_id)
                array("table_name"=>"clients","action"=>"update"),
                array("table_name"=>"tasks","action"=>"update"),
                array("table_name"=>"agent_target_supplier","action"=>"remove"),

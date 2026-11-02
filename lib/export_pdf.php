@@ -316,7 +316,7 @@ function drow_html_tasks($attr)
 {
     $filters = array();
     if(($attr["agent_id"]??null)!= null){
-        $filters[]=array("filter_field" => "tasks.agent_id", "filter_value" => $attr["agent_id"]);
+        $filters[]=array("filter_field" => "agent_id", "filter_table" => "tasks", "filter_value" => $attr["agent_id"]);
     }
 
     $filters[]=array("filter_field" => "status_id", "filter_type" => "!=", "filter_value" => "1");
