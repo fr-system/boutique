@@ -317,6 +317,10 @@ function on_order_confirmation()
     if (!$order) {
         wp_send_json(['status' => 'failed', "message" => "ההזמנה לא נמצאה"]);
     }
+    //אישור חוזר היה שולח שוב את הזמנות הרכש לכל הספקים
+    if (!empty($order->done)) {
+        wp_send_json(['status' => 'failed', "message" => "ההזמנה כבר אושרה"]);
+    }
 
     //הרשאה: מנהל וסוכן מאשרים הזמנה (ספק לא). לקוח שחורג מהאובליגו - רק מנהל
     if (!is_manager() && !is_agent()) {
@@ -671,16 +675,47 @@ function get_obligation_client_id($client_id)
 add_action('wp_ajax_sent_to_manager', 'sent_to_manager');
 function sent_to_manager()
 {
-    $filters = array(array("filter_field" => "id", "filter_value"=>$_POST["id"]));
-    $order = get_data_table("orders",$filters)[0];
+    $order_id = intval($_POST["id"] ?? 0);
+    $order = $order_id ? (get_data_table("orders",array(array("filter_field" => "id", "filter_value"=>$order_id)))[0] ?? null) : null;
+    if (!$order) {
+        wp_send_json(['status' => 'failed', 'message' => "ההזמנה לא נמצאה, יש לשמור את ההזמנה לפני שליחה לאישור מנהל"]);
+    }
+    if (!empty($order->done)) {
+        wp_send_json(['status' => 'failed', 'message' => "ההזמנה כבר אושרה"]);
+    }
 
     $client = get_client_details($order->client_id);
-    $body = " ללקוח {$order->client_name} יש חריגה מתשלום<br>
-  יש לו חוב בסכום של:   {$client["debts"]} ₪
- <br> ותקרת החוב שלו היא: {$client["obligo"]}<br>
- <a href='https://kosherboutique.co.il/single/?subject=orders&action=edit&id={$_POST["id"]}'>לאישור ההזמנה</a>" ;
+    $debts = floatval($client["debts"]);
+    $obligo = floatval($client["obligo"]);
+    $money = function ($value) {
+        return "₪ " . number_format(floatval(str_replace(',', '', (string)$value)), 2);
+    };
+    //הקישור לפי האתר הנוכחי (גם בסביבת הבדיקות)
+    $url = home_url("/single/?subject=orders&action=edit&id=" . $order_id);
 
-    send_mail(get_option('admin_email'),"בקשה לאישור הזמנה חדשה ללקוח " .$order->client_name,$body);
+    $body = build_email_layout("בקשה לאישור הזמנה", "שלום,",
+        '<div style="font-size:15px; line-height:1.7; color:#444444; margin-bottom:20px;">' . esc_html(get_user_display_name()) .
+        ' ביקש/ה לאשר את הזמנה מס. ' . $order_id . ' ללקוח <strong>' . esc_html($order->client_name) . '</strong>, שהחוב שלו חורג מהאובליגו. קובץ ההזמנה מצורף.</div>' .
+        order_email_details(array(
+            "חוב שמועד התשלום שלו עבר" => $money($debts),
+            "אובליגו (תקרת חוב)" => $money($obligo),
+            "חריגה" => $money(max(0, $debts - $obligo)),
+            "סכום ההזמנה" => $money($order->for_payment ?: $order->total),
+        )) .
+        '<div style="text-align:center; margin-bottom:28px;"><a href="' . esc_url($url) . '" style="display:inline-block; background-color:#C9A24B; color:#FFFFFF; font-size:16px; font-weight:700; text-decoration:none; padding:12px 32px; border-radius:50px;">לצפייה ואישור ההזמנה</a></div>');
+
+    $file = create_pdf(["subject"=>"orders","export"=>"single","order_id"=>$order_id,"send_mail"=>true,"client_id"=>$order->client_id]);
+    $file_client_name = str_replace(['/', '\\', '"', ':', '*', '?', '<', '>', '|'], '', $order->client_name);
+    $attachments = !empty($file) ? ["הזמנה " . $order_id . " - " . $file_client_name . ".pdf" => $file] : array();
+
+    $ok = send_mail(get_option('admin_email'), "בקשה לאישור הזמנה מס. " . $order_id . " - " . $order->client_name, $body, $attachments);
+    if (!empty($file) && file_exists($file)) {
+        unlink($file);
+    }
+    if (!$ok) {
+        wp_send_json(['status' => 'failed', 'message' => "שליחת הבקשה למנהל נכשלה, יש לנסות שוב"]);
+    }
+    wp_send_json(['status' => 'success', 'message' => "הבקשה לאישור נשלחה למנהל"]);
 }
 
 function get_payment_until($payment_term_id,$date)
