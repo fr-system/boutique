@@ -3,12 +3,16 @@
 function run_query($query, $type="")
 {
     //write_log("qu ".$query);
-    global $wpdb;
+    global $wpdb, $boutique_query_errors;
    // write_log ('run query '. $query );
     if ($type == "execute") {
         $result = $wpdb->query($query);
     } else {
         $result = $wpdb->get_results($query);
+    }
+    //שגיאות נאספות כדי ש-save_single_data תדע שהשמירה נכשלה
+    if ($wpdb->last_error) {
+        $boutique_query_errors[] = $wpdb->last_error;
     }
 
     //write_log("result ". json_encode($result));
@@ -138,6 +142,23 @@ function save_single_data()
             }
             $_POST["user_id"] = $result["user_id"];
             $user_notice = $result["notice"] ?? "";
+            $created_user_id = !empty($result["created"]) ? $result["user_id"] : 0;
+        }
+        else if(!empty($_POST["user_id"]) && ($linked_user = get_userdata(intval($_POST["user_id"]))) && in_array("administrator", $linked_user->roles)){
+            //הרשומה מקושרת ליוזר של מנהל - לא משנים את היוזר של המנהל.
+            //עם שם משתמש: נוצר יוזר חדש לרשומה והיא מנותקת מהמנהל. בלי שם משתמש: חסום
+            if (empty($username)) {
+                echo json_encode(array("status" => "failed", "msg" => "ה" . BOUTIQUE_TABLES[$table_name]["single"] . " מקושר למשתמש של מנהל המערכת. כדי לנתק אותו יש להזין שם משתמש חדש"));
+                die();
+            }
+            $result = register_new_user1($_POST["name"], $_POST["email"], $table_name, $username, $password);
+            if ($result == null || $result["status"] == "failed") {
+                echo json_encode($result);
+                die();
+            }
+            $_POST["user_id"] = $result["user_id"];
+            $user_notice = "נותק מהמשתמש של מנהל המערכת (שלא שונה). " . ($result["notice"] ?? "");
+            $created_user_id = !empty($result["created"]) ? $result["user_id"] : 0;
         }
         else if(!empty($_POST["user_id"])){
             global $wpdb;
@@ -151,8 +172,9 @@ function save_single_data()
                     die();
                 }
                 $change_login = !empty($username) && $username != $user->user_login;
-                if ($change_login && username_exists($username)) {
-                    echo json_encode(array("status" => "failed", "msg" => "שם המשתמש כבר קיים במערכת"));
+                $username_error = $change_login ? get_username_error($username, $user_id) : "";
+                if ($username_error) {
+                    echo json_encode(array("status" => "failed", "msg" => $username_error));
                     die();
                 }
                 //מייל של יוזר אחר - נשמר רק בטבלת הסוכנים, היוזר נשאר בלי מייל
@@ -206,9 +228,13 @@ function save_single_data()
         $removed_user_ids = $wpdb->get_col("SELECT DISTINCT user_id FROM {$wpdb->prefix}{$table_name} WHERE user_id > 0 AND id IN (" . implode(',', $ids) . ")");
     }
 
+    //כל השאילתות של השמירה (הרשומה, הטבלאות המקושרות ושורות המשנה) בטרנזקציה אחת - אם אחת נכשלת, שום דבר לא נשמר
+    global $boutique_query_errors;
+    $boutique_query_errors = array();
+    $wpdb->query("START TRANSACTION");
+
    // write_log("run_action_query ".json_encode($result));
     run_action_query ($table_name, $id, $action, $result);
-    $user_notice = $action == "remove" ? delete_users_of_removed_records($removed_user_ids) : ($user_notice ?? "");
     if (!$_POST["id"]) {
             $id = $wpdb->insert_id;
         //$id = $wpdb->get_var ("SELECT MAX(id) FROM {$wpdb->prefix}" . $table_name);
@@ -287,6 +313,23 @@ function save_single_data()
             }
         }
     }
+
+    if (!empty($boutique_query_errors)) {
+        $wpdb->query("ROLLBACK");
+        //יוזר שנוצר בשביל הרשומה הזו - מוחקים, כדי שלא יישאר יוזר בלי רשומה
+        if (!empty($created_user_id)) {
+            require_once ABSPATH . 'wp-admin/includes/user.php';
+            wp_delete_user($created_user_id);
+        }
+        write_log("save_single_data failed ({$table_name}, {$action}): " . implode(" | ", $boutique_query_errors));
+        $failed_msg = $action == "remove" ? "המחיקה נכשלה, שום דבר לא נמחק." : "השמירה נכשלה, השינויים לא נשמרו.";
+        echo json_encode(array("status" => "failed", "msg" => $failed_msg . " יש לנסות שוב, ואם הבעיה חוזרת לפנות למנהל המערכת"));
+        wp_die();
+    }
+    $wpdb->query("COMMIT");
+
+    //מחיקת היוזרים - רק אחרי שמחיקת הרשומה נשמרה
+    $user_notice = $action == "remove" ? delete_users_of_removed_records($removed_user_ids) : ($user_notice ?? "");
     //הודעה אחרי הוספה (מה נוסף, ומה נעשה עם היוזר של סוכן/ספק) ואחרי מחיקה
     $message = "";
     $table_info = BOUTIQUE_TABLES[$table_name] ?? (BOUTIQUE_LISTS[$table_name] ?? array());
@@ -297,6 +340,9 @@ function save_single_data()
             if (!empty($user_notice)) {
                 $message .= "<br>" . esc_html($user_notice);
             }
+        }
+        else if ($action == "update" && !empty($user_notice)) {
+            $message = "השינויים נשמרו<br>" . esc_html($user_notice);
         }
         else if ($action == "remove") {
             $message = "ה" . $table_info["single"] . ($is_female ? " נמחקה" : " נמחק");

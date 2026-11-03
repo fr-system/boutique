@@ -83,9 +83,12 @@ function register_new_user1($display_name, $email, $role, $username = "", $passw
         //אין יוזר עם המייל - שם המשתמש הוא המייל
         $username = $email;
     }
-    else if (username_exists($username)) {
+    else {
         //עם שם משתמש - תמיד יוזר חדש
-        return array("status" => "failed", "msg" => "שם המשתמש כבר קיים במערכת");
+        $username_error = get_username_error($username);
+        if ($username_error) {
+            return array("status" => "failed", "msg" => $username_error);
+        }
     }
 
     //וורדפרס לא מאפשר שני יוזרים עם אותו מייל - אם המייל תפוס היוזר נוצר בלי מייל, והמייל נשמר רק ברשומה (סוכן/ספק).
@@ -113,7 +116,7 @@ function register_new_user1($display_name, $email, $role, $username = "", $passw
     if (empty($password)) {
         $notice .= ". לא הוגדרה סיסמה - לכניסה ראשונה יש להשתמש ב'שכחתי סיסמא'";
     }
-    return array("status" => "success", "user_id" => $user_id, "notice" => $notice);
+    return array("status" => "success", "user_id" => $user_id, "notice" => $notice, "created" => true);
 }
 
 //עמודה בלוח הבקרה, עמוד משתמשים - הרשומה (סוכן/ספק) שהיוזר משויך אליה, עם קישור לעריכה
@@ -176,6 +179,23 @@ function delete_users_of_removed_records($user_ids) {
         array_unshift($notices, $deleted == 1 ? "המשתמש המקושר נמחק" : "נמחקו " . $deleted . " משתמשים מקושרים");
     }
     return implode(". ", $notices);
+}
+
+//בדיקת שם משתמש לסוכן - מחזיר הודעת שגיאה, או ריק אם תקין. $user_id - היוזר שמעדכנים (בעריכה)
+//וורדפרס מאפשר להתחבר גם עם מייל, ולכן שם משתמש שהוא מייל של יוזר אחר מבלבל ומסוכן - חסום
+function get_username_error($username, $user_id = 0) {
+    if (is_admin_email($username)) {
+        return "אין אפשרות להשתמש במייל של מנהל המערכת כשם משתמש";
+    }
+    $login_owner = username_exists($username);
+    if ($login_owner && $login_owner != $user_id) {
+        return "שם המשתמש כבר קיים במערכת";
+    }
+    $email_owner = email_exists($username);
+    if ($email_owner && $email_owner != $user_id) {
+        return "שם המשתמש הוא מייל של משתמש אחר במערכת, יש לבחור שם משתמש אחר";
+    }
+    return "";
 }
 
 //האם המייל שייך למנהל - מייל של יוזר מנהל (או שם משתמש של מנהל), או מייל הניהול של האתר
