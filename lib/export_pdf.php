@@ -31,9 +31,14 @@ function create_pdf($attr)
                 'noto-sans' => [
                     'R' => 'NotoSansHebrew-Regular.ttf',
                 ],
+                //פונט קבצי ה-PDF - כמו באתר. עם קובץ מודגש אמיתי (בלי B, mPDF מדגיש באופן מלאכותי)
+                'assistant' => [
+                    'R' => 'Assistant-Regular.ttf',
+                    'B' => 'Assistant-Bold.ttf',
+                ],
             ],
-        'default_font_size' => 10,
-        'default_font' => 'noto-sans',
+        'default_font_size' => 10.5,
+        'default_font' => 'assistant',
     //    'default_font' => 'Noto-Sans',//'dejavusans',//'Heebo'
         //מקום לפס השחור למעלה ולשורת העמודים למטה
         'margin_top'    => 22,
@@ -122,13 +127,22 @@ function create_pdf($attr)
         if(isset($attr["create_only_fill"]) && !preg_match('/<tbody[^>]*>.*?<tr\b/is', $html)){
             return null;
         }
-        $file = $table_name.'_rpt_' . time() . '.pdf';
+        //בתיקייה הזמנית - ב-cron התיקייה הנוכחית היא תיקיית הבית בשרת, וקבצים שנשארו שם הצטברו
+        $file = trailingslashit(get_temp_dir()) . $table_name . '_rpt_' . uniqid() . '.pdf';
         $mpdf->Output($file, \Mpdf\Output\Destination::FILE);
         return $file;
     }
     else {
         $mpdf->Output();
         exit();
+    }
+}
+
+//מחיקת קובץ דוח אחרי שליחה במייל - יש בו נתוני לקוחות
+function delete_report_file($file)
+{
+    if (!empty($file) && file_exists($file)) {
+        unlink($file);
     }
 }
 
@@ -139,7 +153,7 @@ function create_pdf($attr)
 function pdf_style()
 {
     return '<style>
-        body { direction: rtl; text-align: right; font-size: 10pt; color: #1A1A1A; }
+        body { direction: rtl; text-align: right; font-size: 10.5pt; color: #1A1A1A; }
         table { border-collapse: collapse; }
         .doc-body { padding: 0 28px; }
 
@@ -404,7 +418,9 @@ function drow_html_orders_today($attr){
     else{
         $filters[] = array("filter_field" => "order_date", "filter_value" => "order_date >= CONCAT(CURDATE(), ' 18:00:00')", "filter_type" => "filter");
     }*/
-    $filters[] = array("filter_field" => "order_date", "filter_value" => "order_date >= CURDATE() And order_date <= CONCAT(CURDATE(), ' {$attr['time']}:00:00')", "filter_type" => "filter");
+    //במוצאי שבת - גם ההזמנות של שישי (בשישי הדוח לא נשלח)
+    $from = date('w') == 6 ? "CURDATE() - INTERVAL 1 DAY" : "CURDATE()";
+    $filters[] = array("filter_field" => "order_date", "filter_value" => "order_date >= {$from} And order_date <= CONCAT(CURDATE(), ' " . intval($attr['time']) . ":00:00')", "filter_type" => "filter");
 
     $orders = get_data_table("orders",$filters);
     $html="";
@@ -497,5 +513,26 @@ function drow_html_tasks($attr)
     }
 /*    <strong>חשיבות: </strong><span>{$task->importance}</span><br>*/
     return pdf_data_table(array("נושא", "לקוח", "פירוט", "תאריך יעד"), $rows, array("", "", "", "center"));
+}
+
+//סיכום למנהל - טבלת משימות נפרדת לכל סוכן, עם שם הסוכן ומספר המשימות
+function drow_html_tasks_by_agent($attr)
+{
+    global $wpdb;
+    $agents = run_query("SELECT a.id, a.name, COUNT(*) AS tasks_count FROM {$wpdb->prefix}tasks t
+                         LEFT JOIN {$wpdb->prefix}agents a ON a.id = t.agent_id
+                         WHERE t.status_id != 1 AND t.target_date < CURDATE()
+                         GROUP BY t.agent_id ORDER BY a.name");
+    $html = "";
+    foreach ($agents as $agent) {
+        //בלי סוכן drow_html_tasks היה מחזיר את כל המשימות
+        if (empty($agent->id)) {
+            continue;
+        }
+        $html .= "<div style='font-size:12pt; font-weight:bold; margin:14px 0 6px 0;'>" . pdf_esc($agent->name ?: "בלי סוכן") .
+            " <span style='color:#8A8A8A; font-weight:normal; font-size:10pt;'>(" . ($agent->tasks_count == 1 ? "משימה אחת" : intval($agent->tasks_count) . " משימות") . ")</span></div>";
+        $html .= drow_html_tasks(array("agent_id" => $agent->id));
+    }
+    return $html;
 }
 ?>

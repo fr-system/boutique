@@ -448,9 +448,17 @@ function get_order_agent_email($user_id)
     if (!$user_id) {
         return "";
     }
-    $email = $wpdb->get_var($wpdb->prepare("SELECT email FROM {$wpdb->prefix}agents WHERE user_id = %d LIMIT 1", $user_id));
-    if (!is_email((string)$email)) {
-        $user = get_userdata($user_id);
+    $agent = $wpdb->get_row($wpdb->prepare("SELECT email, user_id FROM {$wpdb->prefix}agents WHERE user_id = %d LIMIT 1", $user_id));
+    return get_agent_email($agent ?: (object)array("email" => "", "user_id" => $user_id));
+}
+
+//המייל של סוכן (רשומה מטבלת agents) - מהרשומה (מייל משותף נשמר רק שם), ואם אין - מהיוזר שלו.
+//ריק אם אין מייל או שהמייל הוא של המנהל (המנהל מקבל את המיילים בנפרד)
+function get_agent_email($agent)
+{
+    $email = trim((string)($agent->email ?? ""));
+    if (!is_email($email) && !empty($agent->user_id)) {
+        $user = get_userdata(intval($agent->user_id));
         $email = $user ? $user->user_email : "";
     }
     if (!is_email((string)$email) || is_admin_email($email)) {
@@ -897,21 +905,6 @@ function client_billing_report()
     wp_send_json(['status' => 'success','message' => "נשלח דוח חיוב ללקוח ל: " . implode(", ", $to)]);
 }
 
-function get_tasks_not_done()
-{
-    $filters = array(array("filter_field" => "status_id", "filter_value" =>1,"filter_type"=>"!="));
-    $filters[] = array("filter_field" => "target_date", "filter_ratio" =>"<","filter_type"=>"date","filter_value"=>"CURDATE()");
-    $filters[] = array("filter_type"=>"filter","filter_value"=>"(sending_reminder is null OR sending_reminder < CURDATE() - INTERVAL 7 DAY)");
-
-    $result = get_data_table("tasks",$filters);
-    foreach ($result as $task) {
-        $body="לכבוד הסוכן {$task->name}  {$task->subject} 
-        {$task->details} ";
-//לשלוח גם לסוכן וגם לבוטיק
-        //send_mail("" ,"משימה שעדיין לא בוצעה",$body);
-
-    }
-}
 add_action('wp_ajax_get_table_properties', 'get_table_properties');
 function get_table_properties()
 {
