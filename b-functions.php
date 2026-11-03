@@ -736,15 +736,36 @@ add_action('wp_ajax_client_billing_report', 'client_billing_report');
 
 function client_billing_report()
 {
-    send_unclosed_tasks("");
-    return;
-    $attr=["client_id"=>$_POST["id"],"export"=>"single", "packet"=>["client", "obligation_client"],"send_mail"=>true];
+    $client_id = intval($_POST["id"] ?? 0);
+    $client = $client_id ? (get_data_table("clients",array(array("filter_field" => "id", "filter_value" => $client_id)))[0] ?? null) : null;
+    if (!$client) {
+        wp_send_json(['status' => 'failed','message' => "הלקוח לא נמצא"]);
+    }
+    //רק מיילים תקינים - שדה ריק או שגוי לא נכנס לרשימת הנמענים
+    $to = array_values(array_filter(array_map('trim', [(string)$client->email, (string)$client->email2]), 'is_email'));
+    if (empty($to)) {
+        wp_send_json(['status' => 'failed','message' => "לא רשום מייל ללקוח, הדוח לא נשלח"]);
+    }
+
+    //create_only_fill - בלי חשבוניות פתוחות לא נוצר קובץ
+    $attr=["report_title"=>"דוח חיוב","client_id"=>$client_id,"export"=>"single",
+        "packet"=>["billing"],"send_mail"=>true,"create_only_fill"=>true];
     $file = create_pdf($attr);
-    $client = get_data_table("clients",array(array("filter_field" => "id", "filter_value" => $_POST["id"])))[0];
-    $body = "לכבוד ".$client->name.",<br><br>מצורף החשבוניות שלא שולמו<br><br>בברכה, בוטיק כשר";
-    $to = $client->email.",".$client->email2;
-    send_mail($to ,"דו''ח חיוב",$body,[$file]);
-    wp_send_json(['status' => 'success','message' => "נשלח דוח חיוב ללקוח"]);
+    if (empty($file)) {
+        wp_send_json(['status' => 'failed','message' => "אין ללקוח חשבוניות פתוחות שמועד התשלום שלהן עבר, הדוח לא נשלח"]);
+    }
+    $body = build_email_layout("דוח חיוב", "לכבוד " . esc_html($client->name) . ",",
+        '<div style="font-size:15px; line-height:1.7; color:#444444; margin-bottom:28px;">מצורפות החשבוניות שמועד התשלום שלהן עבר וטרם שולמו.<br>לשאלות ולבירורים אפשר להשיב למייל זה.</div>');
+    //שם הקובץ שהלקוח רואה במייל (המפתח במערך)
+    $attachment_name = "דוח חיוב - " . str_replace(['/', '\\', '"', ':', '*', '?', '<', '>', '|'], '', $client->name) . ".pdf";
+    $ok = send_mail($to ,"דוח חיוב - בוטיק כשר",$body,[$attachment_name => $file]);
+    if (file_exists($file)) {
+        unlink($file);
+    }
+    if (!$ok) {
+        wp_send_json(['status' => 'failed','message' => "שליחת המייל נכשלה, יש לנסות שוב"]);
+    }
+    wp_send_json(['status' => 'success','message' => "נשלח דוח חיוב ללקוח ל: " . implode(", ", $to)]);
 }
 
 function get_tasks_not_done()

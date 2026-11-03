@@ -324,7 +324,6 @@ function get_user_by_reset_login($login) {
 //תוכן מייל איפוס הסיסמה - קישור נפרד לכל יוזר. בנוי בטבלאות וסגנון inline כדי שיוצג נכון בכל תוכנות המייל
 function build_reset_password_email($users) {
     $gold = '#C9A24B';
-    $logo = get_stylesheet_directory_uri() . '/assets/images/logo_header.png';
     $is_single = count($users) == 1;
 
     $greeting = $is_single ? 'שלום ' . esc_html(get_user_display_name($users[0])) . ',' : 'שלום,';
@@ -349,6 +348,21 @@ function build_reset_password_email($users) {
             </td></tr>';
     }
 
+    return build_email_layout('איפוס סיסמה', $greeting, '
+                    <div style="font-size:15px; line-height:1.7; color:#444444; margin-bottom:24px;">' . $intro . '</div>
+                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0">' . $users_html . '</table>
+                    <div style="font-size:13px; line-height:1.7; color:#8A8A8A; margin:8px 0 28px 0;">
+                        הקישור תקף ל-24 שעות.<br>
+                        אם לא ביקשת לאפס את הסיסמה, אפשר להתעלם מהמייל הזה. הסיסמה הנוכחית לא תשתנה.
+                    </div>');
+}
+
+//מסגרת משותפת למיילים: לוגו, כותרת, פנייה, תוכן וחתימה. בנוי בטבלאות וסגנון inline כדי שיוצג נכון בכל תוכנות המייל
+//$greeting ו-$content הם HTML - טקסט של משתמש צריך לעבור esc_html לפני
+function build_email_layout($title, $greeting, $content) {
+    $gold = '#C9A24B';
+    $logo = get_stylesheet_directory_uri() . '/assets/images/logo_header.png';
+
     return '
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#F3F1EC; padding:32px 12px; direction:rtl;">
         <tr><td align="center">
@@ -357,15 +371,10 @@ function build_reset_password_email($users) {
                     <img src="' . esc_url($logo) . '" alt="בוטיק כשר" height="48" style="display:block; height:48px; border:0;">
                 </td></tr>
                 <tr><td style="padding:36px 32px 12px 32px; text-align:right;">
-                    <div style="font-size:24px; font-weight:700; color:#1A1A1A; margin-bottom:6px;">איפוס סיסמה</div>
+                    <div style="font-size:24px; font-weight:700; color:#1A1A1A; margin-bottom:6px;">' . esc_html($title) . '</div>
                     <div style="width:48px; height:3px; background-color:' . $gold . '; border-radius:2px; margin-bottom:24px;"></div>
                     <div style="font-size:16px; font-weight:700; color:#1A1A1A; margin-bottom:8px;">' . $greeting . '</div>
-                    <div style="font-size:15px; line-height:1.7; color:#444444; margin-bottom:24px;">' . $intro . '</div>
-                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0">' . $users_html . '</table>
-                    <div style="font-size:13px; line-height:1.7; color:#8A8A8A; margin:8px 0 28px 0;">
-                        הקישור תקף ל-24 שעות.<br>
-                        אם לא ביקשת לאפס את הסיסמה, אפשר להתעלם מהמייל הזה. הסיסמה הנוכחית לא תשתנה.
-                    </div>
+                    ' . $content . '
                 </td></tr>
                 <tr><td style="background-color:#FAF7F0; padding:18px 32px; text-align:center; font-size:13px; color:#8A8A8A; border-top:1px solid #EFE6D2;">
                     בברכה, <span style="color:#1A1A1A; font-weight:700;">בוטיק כשר</span>
