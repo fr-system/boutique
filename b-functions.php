@@ -311,64 +311,158 @@ function get_column_value($column,$row,$field,$list,$key,$is_readonly=false)
 add_action('wp_ajax_on_order_confirmation', 'on_order_confirmation');
 function on_order_confirmation()
 {
-
     global $wpdb;
-    if (isset($_POST['order_id'])) {
-        $order_id = $_POST['order_id'];
-        $query = "UPDATE " . $wpdb->prefix . "orders SET done = 1, user_confirms = " . get_current_user_id() . "
-                  WHERE id = " . $order_id;
-        run_query ($query);//זה עובד טוב פשוט חבל כל הזמן שיאשר ויפריע לבדיקות!!!!
-
-        $attr=["report_title"=>"פרטי הזמנה", "subject"=>"orders","export"=>"single","order_id"=>$_POST['order_id'],
-            "send_mail"=>true,"client_id"=>$_POST['client_id']];
-
-        $file = create_pdf($attr);
-        if (!empty($file)) {
-            //למנהל בוטיק
-            send_mail(get_option('admin_email'), "אישור הזמנה מס. " . $order_id, "מצורף קובץ הזמנה", [$file]);
-
-            $order_confirmation = get_data_table("orders",array(array("filter_field" => "id", "filter_value" => $_POST["order_id"])))[0];
-            //שליחת מייל לסוכן - על ההזמנה שאושרה
-            if($order_confirmation->user_opens != 2) {
-                $user = get_user_by('ID', $order_confirmation->user_opens);
-                if($user->user_email!=get_option('admin_email')) {
-                    send_mail ($user->user_email, "אישור הזמנה מס. " . $order_id, "מצורף קובץ הזמנה", [$file]);
-                }
-            }
-            if (file_exists($file)) {
-                unlink($file);
-            }
-        }
-
-        $query = "SELECT s.* FROM {$wpdb->prefix}order_products  as op            
-                  JOIN {$wpdb->prefix}products as p ON p.id = op.product_id
-                  JOIN {$wpdb->prefix}suppliers as s ON p.supplier_id = s.id
-                  WHERE op.order_id = " . $_POST['order_id'] .
-            " GROUP BY s.id";
-
-        $suppliers = run_query($query);
-        foreach ($suppliers as $supplier) {
-            $attr["supplier_id"] = $supplier->id;
-            $file = create_pdf($attr);
-            if (!empty($file)) {
-                $to = [
-                    $supplier->email,
-                    $supplier->email2,
-                    $supplier->email3,
-                    $supplier->email4,
-                ];
-                send_mail($to, "הזמנה מס. " . $order_id, "מצורף קובץ<br>בברכה, בוטיק כשר", [$file]);
-                if (file_exists($file)) {
-                    unlink($file);
-                }
-            }
-        }
-
-        wp_send_json([
-            'status' => 'success',
-            "message" => "ההזמנה אושרה! נשלחו הודעות במייל ללקוח ולספקים"
-        ]);
+    $order_id = intval($_POST['order_id'] ?? 0);
+    $order = $order_id ? (get_data_table("orders",array(array("filter_field" => "id", "filter_value" => $order_id)))[0] ?? null) : null;
+    if (!$order) {
+        wp_send_json(['status' => 'failed', "message" => "ההזמנה לא נמצאה"]);
     }
+
+    //הרשאה: מנהל וסוכן מאשרים הזמנה (ספק לא). לקוח שחורג מהאובליגו - רק מנהל
+    if (!is_manager() && !is_agent()) {
+        wp_send_json(['status' => 'failed', "message" => "אין לך הרשאה לאשר הזמנה"]);
+    }
+    if (!is_manager() && is_client_over_obligo($order->client_id)) {
+        wp_send_json(['status' => 'failed', "message" => "הלקוח חורג מהאובליגו - ההזמנה צריכה אישור מנהל"]);
+    }
+
+    $query = "UPDATE " . $wpdb->prefix . "orders SET done = 1, user_confirms = " . get_current_user_id() . "
+              WHERE id = " . $order_id;
+    run_query ($query);//זה עובד טוב פשוט חבל כל הזמן שיאשר ויפריע לבדיקות!!!!
+
+    $client_name = $order->client_name;
+    //שם קובץ בלי תווים שאסורים בשמות קבצים
+    $file_client_name = str_replace(['/', '\\', '"', ':', '*', '?', '<', '>', '|'], '', $client_name);
+    $sent = array();
+    $failed = array();
+
+    $attr=["report_title"=>"הזמנה", "subject"=>"orders","export"=>"single","order_id"=>$order_id,
+        "send_mail"=>true,"client_id"=>$order->client_id];
+
+    //למנהל ולסוכן שפתח את ההזמנה
+    $file = create_pdf($attr);
+    if (!empty($file)) {
+        $body = build_email_layout("אישור הזמנה", "שלום,",
+            '<div style="font-size:15px; line-height:1.7; color:#444444; margin-bottom:20px;">הזמנה מס. ' . $order_id . ' של הלקוח <strong>' . esc_html($client_name) . '</strong> אושרה. קובץ ההזמנה מצורף.</div>' .
+            order_email_details(array(
+                "תאריך הזמנה" => date('d/m/Y H:i', strtotime($order->order_date)),
+                "לתשלום" => "₪ " . number_format(floatval(str_replace(',', '', (string)($order->for_payment ?: $order->total))), 2),
+                "אושרה על ידי" => get_user_display_name(),
+            )));
+        $subject = "אישור הזמנה מס. " . $order_id . " - " . $client_name;
+        $attachments = ["הזמנה " . $order_id . " - " . $file_client_name . ".pdf" => $file];
+
+        if (send_mail(get_option('admin_email'), $subject, $body, $attachments)) {
+            $sent[] = "המנהל";
+        } else {
+            $failed[] = "המנהל";
+        }
+
+        $agent_email = get_order_agent_email($order->user_opens);
+        if ($agent_email) {
+            if (send_mail($agent_email, $subject, $body, $attachments)) {
+                $sent[] = "הסוכן";
+            } else {
+                $failed[] = "הסוכן";
+            }
+        }
+        if (file_exists($file)) {
+            unlink($file);
+        }
+    } else {
+        $failed[] = "המנהל והסוכן (יצירת הקובץ נכשלה)";
+    }
+
+    //לכל ספק - הזמנת רכש רק עם המוצרים שלו
+    $query = "SELECT s.* FROM {$wpdb->prefix}order_products  as op
+              JOIN {$wpdb->prefix}products as p ON p.id = op.product_id
+              JOIN {$wpdb->prefix}suppliers as s ON p.supplier_id = s.id
+              WHERE op.order_id = " . $order_id .
+        " GROUP BY s.id";
+
+    $suppliers = run_query($query);
+    $no_email = array();
+    foreach ($suppliers as $supplier) {
+        //רק מיילים תקינים - שדה ריק לא נכנס לרשימת הנמענים
+        $to = array_values(array_filter(array_map('trim', [(string)$supplier->email, (string)$supplier->email2, (string)$supplier->email3, (string)$supplier->email4]), 'is_email'));
+        if (empty($to)) {
+            $no_email[] = $supplier->name;
+            continue;
+        }
+        $attr["supplier_id"] = $supplier->id;
+        $file = create_pdf($attr);
+        if (empty($file)) {
+            $failed[] = $supplier->name;
+            continue;
+        }
+        $body = build_email_layout("הזמנת רכש", "לכבוד " . esc_html($supplier->name) . ",",
+            '<div style="font-size:15px; line-height:1.7; color:#444444; margin-bottom:28px;">מצורפת הזמנת רכש מס. ' . $order_id . ' לאספקה ללקוח <strong>' . esc_html($client_name) . '</strong>.<br>לשאלות ולבירורים אפשר להשיב למייל זה.</div>');
+        if (send_mail($to, "הזמנת רכש מס. " . $order_id . " - בוטיק כשר", $body, ["הזמנת רכש " . $order_id . ".pdf" => $file])) {
+            $sent[] = $supplier->name;
+        } else {
+            $failed[] = $supplier->name;
+        }
+        if (file_exists($file)) {
+            unlink($file);
+        }
+    }
+
+    //הודעה מדויקת - למי נשלח, מה נכשל ולמי אין מייל
+    $message = "ההזמנה אושרה!";
+    if ($sent) {
+        $message .= "<br>נשלח מייל ל: " . esc_html(implode(", ", $sent));
+    }
+    if ($failed) {
+        $message .= "<br>השליחה נכשלה ל: " . esc_html(implode(", ", $failed));
+    }
+    if ($no_email) {
+        $message .= "<br>אין מייל לספק: " . esc_html(implode(", ", $no_email));
+    }
+    wp_send_json([
+        'status' => 'success',
+        "message" => $message
+    ]);
+}
+
+//האם החוב של הלקוח (חשבוניות שלא שולמו ומועד התשלום שלהן עבר) גבוה מהאובליגו - אותו חישוב כמו בטופס ההזמנה
+function is_client_over_obligo($client_id)
+{
+    $debts = 0;
+    foreach (get_obligation_client_id(intval($client_id)) as $row) {
+        $debts += floatval($row->obligation);
+    }
+    $client = get_data_table("clients", array(array("filter_field" => "id", "filter_value" => intval($client_id))))[0] ?? null;
+    return $client && $debts > floatval($client->obligo);
+}
+
+//המייל של הסוכן שפתח את ההזמנה - מרשומת הסוכן (מייל משותף נשמר רק שם), ואם אין - מהיוזר.
+//ריק אם אין סוכן או שהמייל הוא של המנהל (המנהל כבר מקבל את המייל)
+function get_order_agent_email($user_id)
+{
+    global $wpdb;
+    $user_id = intval($user_id);
+    if (!$user_id) {
+        return "";
+    }
+    $email = $wpdb->get_var($wpdb->prepare("SELECT email FROM {$wpdb->prefix}agents WHERE user_id = %d LIMIT 1", $user_id));
+    if (!is_email((string)$email)) {
+        $user = get_userdata($user_id);
+        $email = $user ? $user->user_email : "";
+    }
+    if (!is_email((string)$email) || is_admin_email($email)) {
+        return "";
+    }
+    return $email;
+}
+
+//טבלת פרטים קצרה לגוף המייל. $rows: תווית => ערך
+function order_email_details($rows)
+{
+    $html = '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#FAF7F0; border:1px solid #EFE6D2; border-radius:12px; margin-bottom:28px;">';
+    foreach ($rows as $label => $value) {
+        $html .= '<tr><td style="padding:8px 20px; font-size:14px; color:#6B6B6B; width:40%;">' . esc_html($label) . '</td><td style="padding:8px 20px; font-size:14px; color:#1A1A1A; font-weight:700;">' . esc_html($value) . '</td></tr>';
+    }
+    return $html . '</table>';
 }
 
 function get_favorite_products($client_id)

@@ -406,7 +406,11 @@ function calculatePrice(product){
     product.find(".total input").autoNumeric('set',calculatedPrice).trigger("change");
     //product.find('td.order_id input').val();
 }
-function onOrderConfirmation(){
+function onOrderConfirmation(result){
+    //האישור נדחה (הרשאה / חריגה מאובליגו) - ההודעה כבר מוצגת, נשארים בעמוד
+    if (result && result.status == "failed") {
+        return;
+    }
     jQuery(".order-confirmation").hide();
     setTimeout(function (){
         window.location.href = '/archive/?subject=orders';
