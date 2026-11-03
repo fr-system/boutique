@@ -628,7 +628,8 @@ function create_input($field,$value = null,$readonly = "")
                 else if(isset($field["join_table"])) {
                     $filter = null;
                     if($field["join_table"] == "clients" && is_agent()){
-                        $filter = "agent_id=".get_id_by_user();
+                        //הלקוחות של הסוכן, וגם הלקוח שכבר בחור (הזמנה שהלקוח שלה של סוכן אחר) - כדי שהשמירה לא תחליף אותו
+                        $filter = "(agent_id=" . intval(get_id_by_user()) . (!empty($value) ? " OR id=" . intval($value) : "") . ")";
                     }
                     echo build_select_options($field["join_table"],$value,array("filter"=>$filter));
                 }

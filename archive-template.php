@@ -49,7 +49,12 @@ $page_info  = BOUTIQUE_TABLES[$table_name];
             $filters[] = array("filter_table"=>"tasks", "filter_field" => "agent_id", "filter_value" => $agent_id );
         }
 
-        if($table_name == "orders" || $table_name == "collection") {
+        if($table_name == "orders") {
+            //ההזמנות של הלקוחות שלו, וגם הזמנות שהוא פתח ללקוח של סוכן אחר
+            $filters[] = array("filter_type" => "filter", "filter_field" => "",
+                "filter_value" => "({$wpdb->prefix}clients.agent_id = " . intval($agent_id) . " OR {$wpdb->prefix}orders.user_opens = " . get_current_user_id() . ")");
+        }
+        if($table_name == "collection") {
             $filters[] = array("filter_table"=>"clients", "filter_field" => "agent_id", "filter_value" => $agent_id);
         }
     }

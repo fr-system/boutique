@@ -144,20 +144,17 @@ function save_single_data()
             $user_notice = $result["notice"] ?? "";
             $created_user_id = !empty($result["created"]) ? $result["user_id"] : 0;
         }
-        else if(!empty($_POST["user_id"]) && ($linked_user = get_userdata(intval($_POST["user_id"]))) && in_array("administrator", $linked_user->roles)){
-            //הרשומה מקושרת ליוזר של מנהל - לא משנים את היוזר של המנהל.
-            //עם שם משתמש: נוצר יוזר חדש לרשומה והיא מנותקת מהמנהל. בלי שם משתמש: חסום
-            if (empty($username)) {
-                echo json_encode(array("status" => "failed", "msg" => "ה" . BOUTIQUE_TABLES[$table_name]["single"] . " מקושר למשתמש של מנהל המערכת. כדי לנתק אותו יש להזין שם משתמש חדש"));
-                die();
-            }
+        else if(!empty($_POST["user_id"]) && ($bad_link = get_bad_user_link(intval($_POST["user_id"]), $table_name, intval($_POST["id"])))){
+            //הרשומה מקושרת ליוזר שלא קיים, ליוזר של מנהל או ליוזר בתפקיד אחר (למשל סוכן שמקושר ליוזר של ספק).
+            //לא נוגעים ביוזר הזה - הרשומה מקבלת יוזר משלה (לפי שם המשתמש, ובלי שם משתמש - לפי המייל) ומנותקת ממנו
             $result = register_new_user1($_POST["name"], $_POST["email"], $table_name, $username, $password);
             if ($result == null || $result["status"] == "failed") {
+                $result["msg"] = "ה" . BOUTIQUE_TABLES[$table_name]["single"] . " " . str_replace("היה מקושר", "מקושר", $bad_link) . ", ולכן צריך ליצור לו משתמש חדש: " . ($result["msg"] ?? "");
                 echo json_encode($result);
                 die();
             }
             $_POST["user_id"] = $result["user_id"];
-            $user_notice = "נותק מהמשתמש של מנהל המערכת (שלא שונה). " . ($result["notice"] ?? "");
+            $user_notice = "ה" . BOUTIQUE_TABLES[$table_name]["single"] . " " . $bad_link . " ונותק ממנו. " . ($result["notice"] ?? "");
             $created_user_id = !empty($result["created"]) ? $result["user_id"] : 0;
         }
         else if(!empty($_POST["user_id"])){
@@ -526,11 +523,16 @@ function get_list($list_name,$filter = '',$table_display =false)
     $table_name=$list_name;
     $query .= " FROM ".$wpdb->prefix.$table_name.$join;
 
-    if(isset($page_info["filter"])){
-        $query .= " WHERE ".$page_info["filter"];
+    //הסינון הקבוע של הטבלה (למשל לקוחות לא חסומים) וגם הסינון שהתקבל (למשל הלקוחות של הסוכן) - שניהם יחד
+    $where = array();
+    if(!empty($page_info["filter"])){
+        $where[] = "(" . $page_info["filter"] . ")";
     }
-    else if(!empty($filter)){
-        $query .= " WHERE ".$filter;
+    if(!empty($filter)){
+        $where[] = "(" . $filter . ")";
+    }
+    if($where){
+        $query .= " WHERE " . implode(" AND ", $where);
     }
     $query .= " ORDER BY ".$field_name;
     $list = run_query($query);

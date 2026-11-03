@@ -212,6 +212,30 @@ function is_admin_email($email) {
     return false;
 }
 
+//קישור לא תקין של רשומה (סוכן/ספק) ליוזר - מחזיר תיאור הבעיה, או מחרוזת ריקה אם הקישור תקין.
+//לא תקין: היוזר לא קיים, הוא מנהל, הוא בתפקיד אחר, או שהוא משויך גם לרשומה אחרת
+function get_bad_user_link($user_id, $table_name, $record_id) {
+    global $wpdb;
+    $user = get_userdata($user_id);
+    if (!$user) {
+        return "היה מקושר למשתמש שלא קיים";
+    }
+    if (in_array("administrator", $user->roles)) {
+        return "היה מקושר למשתמש של מנהל המערכת (שלא שונה)";
+    }
+    if (!in_array($table_name, $user->roles)) {
+        return "היה מקושר למשתמש בתפקיד אחר (" . $user->user_login . ", שלא שונה)";
+    }
+    foreach (USER_EMAIL_TABLES as $table) {
+        $other = $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM {$wpdb->prefix}{$table} WHERE user_id = %d AND NOT (%s = %s AND id = %d)",
+            $user_id, $table, $table_name, $record_id));
+        if ($other > 0) {
+            return "היה מקושר למשתמש שמשויך גם לרשומה אחרת (" . $user->user_login . ", שלא שונה)";
+        }
+    }
+    return "";
+}
+
 //האם היוזר משויך לרשומה כלשהי (סוכן/ספק)
 function is_user_linked_to_record($user_id) {
     global $wpdb;

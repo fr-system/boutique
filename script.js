@@ -279,16 +279,14 @@ jQuery(document).ready(function($){
                 }
             }
 
-        }).fail(function (data) {
+        }).fail(function (data, textStatus) {
             $form.find('[type = "submit"]').find(".animation-sending").empty();
             $form.removeClass('disabled').find('[type = "submit"]').prop('disabled', false);
-            if(data.responseText){
-                alert(data.responseText)
+            //בקשה שבוטלה כי נשלחה שמירה חדשה במקומה (xhr.abort למעלה) - אין מה להודיע
+            if (textStatus === 'abort') {
+                return;
             }
-            else{
-                alert('השליחה נכשלה! שורה 50');
-            }
-
+            alert(ajax_fail_message(data, 'השמירה'));
         });
     })
     jQuery('.input-label:has(.open-file-uploader)').find(".remove-file").click(function (e) {
@@ -802,15 +800,30 @@ function call_ajax_function(postData,func) {
         if(func) {
             window[func](result);
         }
-    }).fail(function (data) {
-    if(data.responseText){
-        alert(data.responseText)
-    }
-    else{
-        alert('השליחה נכשלה!');
-    }
+    }).fail(function (data, textStatus) {
+        if (textStatus === 'abort') {
+            return;
+        }
+        alert(ajax_fail_message(data, 'הפעולה'));
+    });
+}
 
-});
+//הודעה למשתמש כשבקשת ajax נכשלה.
+//כשתהליך ה-PHP בשרת נופל (503 וכדומה) חוזר דף HTML של חברת האחסון - מציגים במקומו הודעה ברורה.
+//טקסט קצר מהשרת (למשל שגיאת PHP) מוצג כמו שהוא, כדי שאפשר יהיה לדווח עליו
+function ajax_fail_message(xhr, what) {
+    var text = (xhr.responseText || '').trim();
+    var is_html_page = /^(<!doctype|<html)/i.test(text);
+    if (xhr.status >= 500 || is_html_page) {
+        return what + ' לא הושלמה בגלל תקלה זמנית בשרת.\nיש לנסות שוב בעוד רגע. אם הבעיה חוזרת, יש לפנות למנהל המערכת.';
+    }
+    if (xhr.status === 0) {
+        return what + ' לא הושלמה - אין חיבור לשרת. יש לבדוק את החיבור לאינטרנט ולנסות שוב.';
+    }
+    if (text) {
+        return text;
+    }
+    return what + ' נכשלה. יש לנסות שוב.';
 }
 
 function onchangeSelect(e,element,value){
