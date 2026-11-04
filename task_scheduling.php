@@ -81,12 +81,30 @@ function send_unclosed_tasks($type)
 }
 function send_orders_today($time)
 {
+    //שני קבצים: הזמנות שאושרו והזמנות שעדיין לא אושרו. קובץ בלי הזמנות לא נוצר
     $attr = ["report_title"=>"פרטי הזמנה","export" => "single", "time" => $time, "packet" => ["orders_today"], "send_mail" => true, "create_only_fill" => true];
-    $file = create_pdf($attr);
-    if ($file == null) exit;
-    $subject = (date('w') == 6 ? "הזמנות משישי ומוצאי שבת" : "הזמנות מהיום") . " נכון ל: " .date ('d/m/y H:i');
-    send_mail(get_option('admin_email'), $subject, "<br><br>בברכה, בוטיק כשר", [$file]);
-    delete_report_file($file);
+    $files = array();
+    $parts = array();
+    foreach (array("הזמנות שלא אושרו" => false, "הזמנות שאושרו" => true) as $name => $approved) {
+        $file = create_pdf($attr + ["approved" => $approved]);
+        if (!empty($file)) {
+            $files[$name . ".pdf"] = $file;
+            $parts[] = $name;
+        }
+    }
+    if (empty($files)) {
+        return;
+    }
+    //הטווח של הדוח (drow_html_orders_today) - מהדוח הקודם עד עכשיו
+    $from_text = array(13 => "מאתמול 23:00", 18 => "מ-13:00", 23 => "מ-18:00")[intval($time)] ?? "";
+    $range = (date('w') == 6 ? "מחמישי 23:00" : $from_text) . " עד " . intval($time) . ":00";
+    $subject = "הזמנות " . $range . " - " . date('d/m/y');
+    $body = build_email_layout("סיכום הזמנות", "שלום,",
+        '<div style="font-size:15px; line-height:1.7; color:#444444; margin-bottom:28px;">מצורפות ההזמנות שנפתחו ' . esc_html($range) . ':<br>' . esc_html(implode(", ", $parts)) . '.</div>');
+    send_mail(get_option('admin_email'), $subject, $body, $files);
+    foreach ($files as $file) {
+        delete_report_file($file);
+    }
 }
 
 ?>

@@ -418,9 +418,26 @@ function drow_html_orders_today($attr){
     else{
         $filters[] = array("filter_field" => "order_date", "filter_value" => "order_date >= CONCAT(CURDATE(), ' 18:00:00')", "filter_type" => "filter");
     }*/
-    //במוצאי שבת - גם ההזמנות של שישי (בשישי הדוח לא נשלח)
-    $from = date('w') == 6 ? "CURDATE() - INTERVAL 1 DAY" : "CURDATE()";
-    $filters[] = array("filter_field" => "order_date", "filter_value" => "order_date >= {$from} And order_date <= CONCAT(CURDATE(), ' " . intval($attr['time']) . ":00:00')", "filter_type" => "filter");
+    //כל דוח - מהדוח הקודם עד שעת הדוח, בלי כפילויות: 13:00 מאתמול 23:00, 18:00 מ-13:00, 23:00 מ-18:00.
+    //במוצאי שבת - מחמישי ב-23:00 (בשישי ובשבת עד 20:00 הדוחות לא נשלחים)
+    $time = intval($attr['time']);
+    $report_hours = array(13, 18, 23);
+    $prev_hours = array_values(array_filter($report_hours, function ($h) use ($time) { return $h < $time; }));
+    if (date('w') == 6) {
+        $from = "CURDATE() - INTERVAL 1 DAY - INTERVAL 1 HOUR";
+    } else if ($prev_hours) {
+        $from = "CURDATE() + INTERVAL " . end($prev_hours) . " HOUR";
+    } else {
+        $from = "CURDATE() - INTERVAL " . (24 - end($report_hours)) . " HOUR";
+    }
+    $filters[] = array("filter_field" => "order_date", "filter_value" => "order_date > {$from} And order_date <= CURDATE() + INTERVAL {$time} HOUR", "filter_type" => "filter");
+    //approved: true - רק הזמנות שאושרו, false - רק שלא אושרו, בלי - הכול
+    if (isset($attr["approved"])) {
+        global $wpdb;
+        $filters[] = array("filter_field" => "done", "filter_type" => "filter", "filter_value" => $attr["approved"]
+            ? "{$wpdb->prefix}orders.done = 1"
+            : "({$wpdb->prefix}orders.done IS NULL OR {$wpdb->prefix}orders.done != 1)");
+    }
 
     $orders = get_data_table("orders",$filters);
     $html="";
