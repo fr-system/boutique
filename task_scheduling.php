@@ -22,19 +22,26 @@ switch ($argv[1]){
 
 function send_who_needs_pay_today($type)
 {
-    //$argv = array("", "weekly");
-
-    $attr = ["export" => "single", "type" => $type, "packet" => ["obligations"], "send_mail" => true, "create_only_fill" => true];
-    $file = create_pdf($attr);
-    if ($file == null) exit;
-
-    if ($type == "daily") {
-        $subject = "חשבוניות שלא שולמו היום";
-    } else if ($type == "weekly") {
-        $subject = "סיכום שבועי לחשבוניות שלא שולמו";
+    //daily - חשבוניות שמועד התשלום שלהן היום (במוצאי שבת גם של שישי), weekly - כל החשבוניות שמועד התשלום שלהן עבר
+    if ($type == "weekly") {
+        $title = "חשבוניות שלא שולמו - סיכום שבועי";
+        $text = "מצורפות כל החשבוניות שמועד התשלום שלהן עבר ועדיין לא שולמו.";
+    } else {
+        $title = "חשבוניות שמועד התשלום שלהן היום";
+        $text = date('w') == 6
+            ? "מצורפות החשבוניות שמועד התשלום שלהן היה בשישי או בשבת, ועדיין לא שולמו."
+            : "מצורפות החשבוניות שמועד התשלום שלהן היום, ועדיין לא שולמו.";
     }
 
-    send_mail(get_option('admin_email'), $subject, "<br><br>בברכה, בוטיק כשר", [$file]);
+    $attr = ["report_title" => $title, "export" => "single", "type" => $type, "packet" => ["obligations"], "send_mail" => true, "create_only_fill" => true];
+    $file = create_pdf($attr);
+    if (empty($file)) {
+        return;
+    }
+
+    $body = build_email_layout($title, "שלום,",
+        '<div style="font-size:15px; line-height:1.7; color:#444444; margin-bottom:28px;">' . esc_html($text) . '<br>אחרי קבלת תשלום יש לעדכן אותו במערכת, במסך החשבוניות.</div>');
+    send_mail(get_option('admin_email'), $title . " - " . date('d/m/y'), $body, [$title . ".pdf" => $file]);
     delete_report_file($file);
 }
 

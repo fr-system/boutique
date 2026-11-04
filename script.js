@@ -87,6 +87,16 @@ jQuery(document).ready(function($){
         pSign: 's'
     });
 
+    // שדה שיש בו רק רווחים נחשב ריק (גם בשדות חובה). הבדיקה בלבד - הערך שנשלח לא משתנה. סיסמאות לא נבדקות כך
+    jQuery.validator.setDefaults({
+        normalizer: function (value) {
+            if (typeof value !== 'string' || /password/i.test(this.name || '')) {
+                return value;
+            }
+            return value.trim();
+        }
+    });
+
     // הגדרות הוולידציה - מופעלות על כל טופס בזמן השליחה (ראו submit של .site_form)
     var validateOptions = {
         rules: {

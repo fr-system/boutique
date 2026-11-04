@@ -587,6 +587,7 @@ function create_input($field,$value = null,$readonly = "")
             }
             $input = '<input type="'.$input_type.'"  class="grow font-17" id="'.$input_name.'" name="'.$input_name.'" '.$note.' '
                 .($field["widget"]=="text" && isset($field["un_apostrophe"]) && isset($field["sign"]) ? 'data-a-sign="'.$field["sign"].'"':'').  'value="'.esc_attr($value).'" '.
+                (isset($field["placeholder"]) && empty($readonly) ? 'placeholder="'.esc_attr($field["placeholder"]).'" ' : '').
                 option_if_set($field,"class").
                 $required.$autocomplete.$readonly.
                 ($field["widget"] == "number" ? option_if_set($field,"step"). option_if_set($field,"max")." min=\"1\" style=\"width: 70px\"" : "" ).'/>'.$button;

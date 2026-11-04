@@ -844,3 +844,112 @@ section.page.single form > .buttons{
     width: 250px;
 }
 
+
+/* אייקוני הפעולות בטבלאות (עדכון, מחיקה, הזמנות וכו') - רווח משני הצדדים כדי שלא יהיו דבוקים */
+table.dataTable > tbody > tr > td.td-action,
+.list-table td.td-action,
+td.td-action {
+    padding-left: 10px !important;
+    padding-right: 10px !important;
+    text-align: center;
+    white-space: nowrap;
+}
+
+/* כפתורי הפעולות בשורות הטבלה (הזמנות, משימות, דוח חיוב) - הכיתוב תמיד בשורה אחת, והעמודה מתרחבת לפיו */
+td.td-buttons {
+    white-space: nowrap;
+    padding-left: 4px !important;
+    padding-right: 4px !important;
+}
+td.td-buttons a.button {
+    min-width: auto;
+    white-space: nowrap;
+    margin: 0 4px;
+    padding: 0 16px;
+}
+
+/* חלונית ההודעה/האישור (#bout-massage) - רוחב לפי התוכן, בין 360 ל-520 פיקסלים; תוכן ארוך יורד שורה */
+#bout-massage .modal-dialog {
+    width: fit-content;
+    min-width: min(360px, 92vw);
+    max-width: min(520px, 92vw);
+    margin-left: auto;
+    margin-right: auto;
+}
+#bout-massage .modal-body {
+    white-space: normal;
+    overflow-wrap: anywhere;
+    line-height: 1.6;
+}
+
+/* ===== תפריט הצד =====
+   הפריט הפעיל: "+ חדש" מתחתיו באופן קבוע. מעבר עכבר על פריט אחר: חלונית צפה לצד הפריט (משמאל) */
+#sidebar-menu ul.menu {
+    height: auto;
+    justify-content: flex-start;
+    gap: 6px;
+}
+#sidebar-menu ul.menu li.menu-item {
+    height: auto;
+    min-height: 0;
+    padding: 0;
+    border-radius: 8px;
+    position: relative;
+}
+#sidebar-menu .menu-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 10px;
+    border-radius: 8px;
+}
+#sidebar-menu .menu-row svg {
+    flex: 0 0 15px !important;
+}
+#sidebar-menu .menu-row .menu-link {
+    flex: 1 1 auto !important;
+    white-space: nowrap;
+}
+#sidebar-menu ul.menu li.menu-item.selected,
+#sidebar-menu ul.menu li.menu-item:hover {
+    background-color: transparent;
+}
+#sidebar-menu li.menu-item.selected > .menu-row,
+#sidebar-menu li.menu-item > .menu-row:hover {
+    background-color: var(--b-global-color-light-gray);
+}
+#sidebar-menu li.menu-item.selected > .menu-row {
+    box-shadow: inset -3px 0 0 #C9A24B;
+}
+
+/* תת-התפריט */
+#sidebar-menu ul.menu .sub-menu { display: none; list-style: none; padding-right: 0; }
+#sidebar-menu .sub-menu li { height: auto; padding: 4px 34px 4px 10px; border-radius: 6px; }
+#sidebar-menu .sub-menu li a { color: #8A6A1F; }
+#sidebar-menu .sub-menu li:hover { background-color: #FAF7F0; }
+
+/* בפריט הפעיל - פתוח מתחתיו */
+#sidebar-menu ul.menu li.menu-item.selected .sub-menu {
+    display: block; position: static; background: transparent; padding: 2px 0 6px 0; margin: 0;
+}
+/* במעבר עכבר על פריט אחר - חלונית צפה לצדו, בלי להזיז או להסתיר את שאר הפריטים */
+#sidebar-menu ul.menu li.menu-item:not(.selected):hover .sub-menu {
+    display: block;
+    position: absolute;
+    top: 0;
+    right: 100%;
+    z-index: 50;
+    min-width: 150px;
+    margin: 0 6px 0 0;
+    padding: 4px;
+    white-space: nowrap;
+    background: #FFFFFF;
+    border: 1px solid #EFE6D2;
+    border-radius: 8px;
+    box-shadow: 0 6px 16px rgba(0,0,0,0.10);
+}
+#sidebar-menu ul.menu li.menu-item:not(.selected):hover .sub-menu li { padding-right: 10px; }
+/* גשר שקוף בין הפריט לחלונית - כדי שהחלונית לא תיסגר כשהעכבר עובר אליה */
+#sidebar-menu ul.menu li.menu-item.has-children:not(.selected):hover::after {
+    content: ""; position: absolute; top: 0; right: 100%; width: 10px; height: 100%;
+}

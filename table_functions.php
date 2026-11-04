@@ -261,12 +261,12 @@ function get_tr_data($table_name, $data, $key,$attr){
                     $res = get_client_details($row->id);
                     $obligation = $res["debts"];
                 }
-                $html .= '<td>'.($table_name != "clients" || $obligation > 0  ?
+                $html .= '<td class="td-buttons">'.($table_name != "clients" || $obligation > 0  ?
                         '<a data-text="'.$action["text"].'" data-ajax_func="'.$action["ajax_func"].'" class="button background-gold font-17" data-bs-toggle="modal" href="#'.$action["dialog"].'" role="button">'.$action["title"].'</a>':'').
                     '</td>';
             }
             else {
-                $html .= '<td ><a class="button background-gold font-17" href="/archive?subject=' . $action . '&id=' . $row->id . '">' . BOUTIQUE_TABLES[$action]["title"] . '</a></td>';
+                $html .= '<td class="td-buttons"><a class="button background-gold font-17" href="/archive?subject=' . $action . '&id=' . $row->id . '">' . BOUTIQUE_TABLES[$action]["title"] . '</a></td>';
             }
         }
     }

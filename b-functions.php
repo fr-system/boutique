@@ -1,55 +1,48 @@
 <?php
 function get_side_menu()
 {
-    $subject =isset($_GET) && isset($_GET["subject"]) ? $_GET["subject"] : "home"; ?>
+    $subject =isset($_GET) && isset($_GET["subject"]) ? $_GET["subject"] : "home";
+
+    //פריטי התפריט: ראשיים, ולכל אחד הפריטים שמתחתיו (חדש / ששולמו) שהמשתמש רשאי לראות
+    $menu = wp_get_nav_menu_object( get_nav_menu_locations()[ 'main_menu' ] );
+    $menuitems = wp_get_nav_menu_items( $menu->term_id, array( 'order' => 'DESC' ) );
+    $parents = array();
+    foreach ($menuitems as $item) {
+        $name = trim($item->description);
+        //פריט משנה (חדש / ששולמו) שייך לטבלה של הפריט הראשי - השם נלקח ממנו, כדי שטעות בתיאור של פריט המשנה לא תשבור את הקישור
+        if ($item->menu_item_parent) {
+            if (!isset($parents[$item->menu_item_parent])) continue;
+            $name = $parents[$item->menu_item_parent]["name"];
+        }
+        if(is_agent() && ($name=="agents" || $name=="suppliers" || $name=="collection"||$name=="lists") ||
+            is_supplier() && $name !="collection")continue;
+        $url = $item->url."?subject=".$name;
+        if (!$item->menu_item_parent) {
+            $parents[$item->ID] = array("name" => $name, "title" => $item->title, "url" => $url, "children" => array());
+        }
+        else if (isset($parents[$item->menu_item_parent]) && (is_manager() || is_agent() && $name=="orders" || is_supplier() && $name=="collection")) {
+            $is_new = $name != "collection";
+            $parents[$item->menu_item_parent]["children"][] = array("title" => $item->title, "is_new" => $is_new,
+                "url" => $url . ($is_new ? "&action=new" : "&payed=true"));
+        }
+    } ?>
 <div id="sidebar-menu" class="part-10">
     <ul class="menu flex-display direction-column" role="navigation">
-        <?php
-        $menu = wp_get_nav_menu_object( get_nav_menu_locations()[ 'main_menu' ] );
-        $menuitems = wp_get_nav_menu_items( $menu->term_id, array( 'order' => 'DESC' ) );
-        $count = 0;
-        $submenu = false;
-        foreach($menuitems as $item ){
-            $name = $item->description;
-            if(is_agent() && ($name=="agents" || $name=="suppliers" || $name=="collection"||$name=="lists") ||
-                is_supplier() && $name !="collection")continue;
-            $url = $item->url."?subject=".$name;
-            if ( !$item->menu_item_parent ){
-                $parent_id = $item->ID;?>
-                <li class="pointer flex-display direction-column center  <?=($subject == $name ? 'selected':'') ?> ">
-                    <div class="flex-display space-between align-center">
-                        <?php echo get_svg($name) ?>
-                        <a class="not-link" href="<?= esc_url($url)?>"><?=esc_html($item->title)?></a>
-                    </div>
-            <?php }
-            else{
-                if($name=="collection"){
-                    $url .= "&payed=true";
-                }
-                else {
-                    $url .= "&action=new";
-                }
-            }
-            //לבדוק מה סוכן יכול להוסיף חדש (הזמנה? מה עוד)
-            ?>
-            <?php if ( $parent_id == $item->menu_item_parent && (is_manager() || is_agent() && $name=="orders"
-                || is_supplier() && $name=="collection")){ ?>
-                <?php if ( !$submenu ){ $submenu = true; ?>
+        <?php foreach ($parents as $parent) { ?>
+            <li class="menu-item <?= $subject == $parent["name"] ? 'selected' : '' ?> <?= $parent["children"] ? 'has-children' : '' ?>">
+                <div class="menu-row">
+                    <?php echo get_svg($parent["name"]) ?>
+                    <a class="not-link menu-link" href="<?= esc_url($parent["url"]) ?>"><?= esc_html($parent["title"]) ?></a>
+                </div>
+                <?php if ($parent["children"]) { ?>
                     <ul class="sub-menu font-15">
+                        <?php foreach ($parent["children"] as $child) { ?>
+                            <li><a class="not-link" href="<?= esc_url($child["url"]) ?>"><?= $child["is_new"] ? '+ ' : '' ?><?= esc_html($child["title"]) ?></a></li>
+                        <?php } ?>
+                    </ul>
                 <?php } ?>
-                <li class="pointer flex-display start align-center">
-                    <a class="not-link" href="<?= esc_url($url)?>"><?=esc_html($item->title)?></a></li>
-                    <?php if ( $menuitems[ $count + 1 ]->menu_item_parent != $parent_id && $submenu ){ ?>
-                        </ul>
-                        <?php $submenu = false;
-                    }
-           if ( $menuitems[ $count + 1 ]->menu_item_parent != $parent_id ){ ?>
-                </li>
-                <?php $submenu = false;
-           } ?>
-           <?php $count++;
-           }
-        }?>
+            </li>
+        <?php } ?>
     </ul>
 </div>
 <?php }

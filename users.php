@@ -381,6 +381,42 @@ function build_reset_password_email($users) {
                     </div>');
 }
 
+//מייל ברוכים הבאים לסוכן שנוצר לו משתמש: שם המשתמש, קישור לכניסה וכפתור לבחירת סיסמה.
+//הסיסמה עצמה לא נשלחת במייל - אם המנהל הגדיר סיסמה, הוא מוסר אותה לסוכן בעצמו
+function send_new_agent_welcome_email($user_id, $email, $has_password) {
+    $user = get_userdata($user_id);
+    if (!$user || !is_email($email) || is_admin_email($email)) {
+        return false;
+    }
+    $gold = '#C9A24B';
+    $key = get_password_reset_key($user);
+    if (is_wp_error($key)) {
+        return false;
+    }
+    $reset_url = get_reset_password_page() . "?action=reset_pass&key=$key&login=" . rawurlencode($user->user_login);
+    $login_url = get_site_url() . "/login";
+
+    $password_text = $has_password
+        ? 'את הסיסמה תקבל/י ממשרד בוטיק כשר. אפשר גם לבחור סיסמה אחרת בכפתור למטה.'
+        : 'כדי להיכנס בפעם הראשונה, יש לבחור סיסמה בכפתור למטה.';
+
+    $content = '
+        <div style="font-size:15px; line-height:1.7; color:#444444; margin-bottom:24px;">נוצר עבורך משתמש בתוכנה של בוטיק כשר.<br>' . $password_text . '</div>
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#FAF7F0; border:1px solid #EFE6D2; border-radius:12px; margin-bottom:16px;">
+            <tr><td style="padding:20px 24px; text-align:right;">
+                <div style="font-size:14px; color:#6B6B6B; margin-bottom:6px;">שם משתמש: <span style="direction:ltr; unicode-bidi:embed; color:#1A1A1A; font-weight:700;">' . esc_html($user->user_login) . '</span></div>
+                <div style="font-size:14px; color:#6B6B6B; margin-bottom:18px;">כתובת הכניסה: <a href="' . esc_url($login_url) . '" style="color:#8A6A1F; direction:ltr; unicode-bidi:embed;">' . esc_html($login_url) . '</a></div>
+                <a href="' . esc_url($reset_url) . '" style="display:inline-block; background-color:' . $gold . '; color:#FFFFFF; font-size:16px; font-weight:700; text-decoration:none; padding:12px 32px; border-radius:50px;">' . ($has_password ? 'לבחירת סיסמה אחרת' : 'לבחירת סיסמה') . '</a>
+            </td></tr>
+        </table>
+        <div style="font-size:13px; line-height:1.7; color:#8A8A8A; margin:8px 0 28px 0;">
+            הקישור לבחירת סיסמה תקף ל-24 שעות. אחר כך אפשר להשתמש ב"שכחתי סיסמה" בדף הכניסה.
+        </div>';
+
+    $body = build_email_layout('ברוכים הבאים', 'שלום ' . esc_html($user->display_name) . ',', $content);
+    return send_mail($email, "המשתמש שלך בתוכנה של בוטיק כשר", $body);
+}
+
 //מסגרת משותפת למיילים: לוגו, כותרת, פנייה, תוכן וחתימה. בנוי בטבלאות וסגנון inline כדי שיוצג נכון בכל תוכנות המייל
 //$greeting ו-$content הם HTML - טקסט של משתמש צריך לעבור esc_html לפני
 function build_email_layout($title, $greeting, $content) {

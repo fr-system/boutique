@@ -107,6 +107,17 @@ function save_single_data()
 {
     $table_name = $_POST["table_name"];
     $is_remove = isset($_POST["remove"]) && $_POST["remove"];
+    //טבלאות עזר (ערים, אזורים, נושאים, סיבות החזרה) - הערך המוצג (העמודה הראשונה) חובה, בלי רווחים בלבד
+    if (isset(BOUTIQUE_LISTS[$table_name]) && !$is_remove) {
+        $main_column = BOUTIQUE_LISTS[$table_name]["columns"][0];
+        $main_value = trim(wp_unslash((string)($_POST[$main_column["field_name"]] ?? "")));
+        if ($main_value === "") {
+            echo json_encode(array("status" => "failed", "msg" => "יש להזין " . $main_column["label"]));
+            die();
+        }
+        //בחזרה עם ה-escaping של וורדפרס - הערכים נכנסים לשאילתה כמו שהם (pre_action_query)
+        $_POST[$main_column["field_name"]] = wp_slash($main_value);
+    }
     if (($table_name == "agents" || $table_name == "suppliers") && !$is_remove)  {
         //שם משתמש וסיסמה - לסוכנים בלבד. נשמרים רק ביוזר, לא בטבלה
         $raw_username = $table_name == "agents" && isset($_POST["username"]) ? trim(wp_unslash($_POST["username"])) : "";
@@ -304,7 +315,8 @@ function save_single_data()
 
             //write_log("result to save" . json_encode($result));
             run_action_query ($sub_table_name, $row["id"], $action_product, $result);
-            if($action_product == "new" && $table_name = "orders") {
+            //== ולא = : השמה כאן הפכה שמירה של לקוח/סוכן עם שורה חדשה (סניף/יעד) לשמירה של הזמנה, ושאר השורות טופלו כמוצרים בהזמנה
+            if($action_product == "new" && $table_name == "orders") {
                 $copy["id"] = $wpdb->insert_id;
                 $temp_list[] = $copy;
             }
@@ -327,6 +339,12 @@ function save_single_data()
 
     //מחיקת היוזרים - רק אחרי שמחיקת הרשומה נשמרה
     $user_notice = $action == "remove" ? delete_users_of_removed_records($removed_user_ids) : ($user_notice ?? "");
+    //סוכן שנוצר לו משתמש חדש - מייל עם שם המשתמש וקישור לבחירת סיסמה (רק אחרי שהשמירה הצליחה)
+    if ($table_name == "agents" && !empty($created_user_id)) {
+        $agent_email = trim(wp_unslash($_POST["email"] ?? ""));
+        $welcome_sent = send_new_agent_welcome_email($created_user_id, $agent_email, !empty($password));
+        $user_notice .= $welcome_sent ? " נשלח לסוכן מייל עם שם המשתמש וקישור לבחירת סיסמה (" . $agent_email . ")." : " לא נשלח לסוכן מייל עם פרטי הכניסה.";
+    }
     //הודעה אחרי הוספה (מה נוסף, ומה נעשה עם היוזר של סוכן/ספק) ואחרי מחיקה
     $message = "";
     $table_info = BOUTIQUE_TABLES[$table_name] ?? (BOUTIQUE_LISTS[$table_name] ?? array());
