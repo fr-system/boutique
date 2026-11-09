@@ -62,24 +62,34 @@ function automaticOrderSavingSuccess(result){
     });
     jQuery(".saving-automatic").html("נשמרה בשעה: "+time);
 
-    if(!jQuery("input.orders_id[name=id]").val()) {//צריך לשים למעלה בכתובת של האתר את מספר ההזמנה ולשנות את ה action ל edit
+    //רק כשהשרת החזיר מספר הזמנה - אחרת נכנס "undefined" כמספר ההזמנה והלקוח/התאריך ננעלו
+    if(!jQuery("input.orders_id[name=id]").val() && result.id) {//צריך לשים למעלה בכתובת של האתר את מספר ההזמנה ולשנות את ה action ל edit
         window.history.pushState({}, '', 'single/?subject=orders&action=edit&id='+result.id);
         jQuery("section form input.orders_id[name=id]").val(result.id);
         getSelectClientId().prop('disabled', true);
         jQuery("section form input[name=branch]").prop('disabled', true);
         jQuery("section input[name=order_date]").prop('disabled', true);
     }
+    //שורות חדשות שנשמרו - מכניסים לשורה את המספר שקיבלה בשרת, כדי שבשמירה הבאה היא תתעדכן ולא תתווסף שוב
     if(result.temp_list){
         result.temp_list.forEach(temp_row => {
-            var temp_input =  jQuery(".archive-table.order_products tbody tr td.id input.temp[value=\""+temp_row.temp_id+"\"]");
+            if (!temp_row.temp_id) {
+                return;
+            }
+            var temp_input = findOrderRowInput("temp", temp_row.temp_id);
             temp_input.siblings("input.id").val(temp_row.id);
         });
     }
+    //שורות שנמחקו בשרת (כמות 0) - כולל שורות בונוס/מבצע. השורה מקבלת מזהה זמני חדש,
+    //כדי שאם הכמות תעלה שוב היא תתווסף מחדש (בעבר נשאר בה המספר הישן והעדכון הלך לשורה שכבר לא קיימת)
     if(result.removed_list) {
         result.removed_list.forEach(removed_row => {
             const random = String(Math.floor(Math.random() * 10000000)).padStart(7, '0');
             var newTempId = "temp_"+random;
-            var idInput =  jQuery(".archive-table.order_products tbody tr td.id input.id[value=\""+removed_row+"\"]");
+            var idInput = findOrderRowInput("id", removed_row);
+            if (idInput.length == 0) {
+                return;
+            }
             idInput.val("");
             var key = idInput.attr("name").replace("rows[","").replace("][id]","")
             var tempInput = idInput.siblings("input.temp");
@@ -92,6 +102,14 @@ function automaticOrderSavingSuccess(result){
             }
         });
     }
+}
+
+//שדה בעמודת ה-id של שורות המוצרים (input.id / input.temp) לפי הערך הנוכחי שלו.
+//לא לפי [value=...]: הסלקטור בודק את הערך שנכתב ב-HTML, ושורות שנוספו או עודכנו בדפדפן (val()) לא נמצאו - והשורה נשמרה שוב
+function findOrderRowInput(className, value) {
+    return jQuery(".archive-table.order_products tbody tr td.id input." + className).filter(function () {
+        return this.value == value;
+    });
 }
 
 function onCheckingDuplicates(result){
@@ -312,11 +330,15 @@ function addProdoctBonus(product,countBonus = 0,sourceKey){
     const random = String(Math.floor(Math.random() * 10000000)).padStart(7, '0');
     pBonus.find(".id input.temp").val("temp_"+random);
     pBonus.find(".id span.temp").text("temp_"+random);
+    //שורה שנטענה מהשרת (כבר שמורה) אין לה שדה temp - בלעדיו הבונוס/המבצע לא קיבל את המספר שלו מהשרת ונשמר שוב בכל שמירה
+    if (pBonus.find(".id input.temp").length == 0) {
+        pBonus.find(".id input.id").after("<span class='hidden temp'>temp_" + random + "</span><input type='hidden' class='temp' name='rows[" + countRows + "][temp_id]' value='temp_" + random + "'/>");
+    }
     pBonus.find(".bonus input").val((countBonus == 0 ? 'bonus' :'promo'));
     pBonus.find(".order_individual input").val("1");
     pBonus.find(".order_individual span.right").addClass("un-value");
     pBonus.find(".order_individual span.left").removeClass("un-value");
-    pBonus.find(".dupl-action").html('');
+    pBonus.find(".dupl-action").html(countBonus == 0 ? removeBonusIconHtml() : '');
     pBonus.addClass('in-cart');
     pBonus.addClass((countBonus == 0 ? 'bonus' :'promo'));
 
@@ -334,6 +356,25 @@ function addProdoctBonus(product,countBonus = 0,sourceKey){
     if(countBonus != 0) {
         pBonus.find(".count span.pointer").off();
     }
+}
+
+//אייקון הסרת בונוס - כמו אייקון ההוספה, עם מינוס במקום פלוס, בירוק (זהה ל-table_functions.php)
+function removeBonusIconHtml() {
+    return '<a class="has-tooltip" data-tooltip="הסרת מוצר בונוס" onclick="removeBonusProduct(jQuery(this).closest(\'tr\'))">' +
+        '<svg width="24" height="23" viewBox="0 0 10 10" fill="none" xmlns="http://www.w3.org/2000/svg">' +
+        '<path d="M2.375 3.7085C2.375 3.35483 2.51549 3.01565 2.76557 2.76557C3.01565 2.51549 3.35483 2.375 3.7085 2.375H8.0415C8.21662 2.375 8.39002 2.40949 8.55181 2.47651C8.7136 2.54352 8.8606 2.64175 8.98443 2.76557C9.10825 2.8894 9.20648 3.0364 9.27349 3.19819C9.34051 3.35998 9.375 3.53338 9.375 3.7085V8.0415C9.375 8.21662 9.34051 8.39002 9.27349 8.55181C9.20648 8.7136 9.10825 8.8606 8.98443 8.98443C8.8606 9.10825 8.7136 9.20648 8.55181 9.27349C8.39002 9.34051 8.21662 9.375 8.0415 9.375H3.7085C3.53338 9.375 3.35998 9.34051 3.19819 9.27349C3.0364 9.20648 2.8894 9.10825 2.76557 8.98443C2.64175 8.8606 2.54352 8.7136 2.47651 8.55181C2.40949 8.39002 2.375 8.21662 2.375 8.0415V3.7085Z" class="stroke-background-green" stroke-width="0.75" stroke-linecap="round" stroke-linejoin="round"/>' +
+        '<path d="M0.881 7.2435C0.7275 7.15629 0.599825 7.02999 0.51095 6.87745C0.422076 6.7249 0.37517 6.55155 0.375 6.375V1.375C0.375 0.825 0.825 0.375 1.375 0.375H6.375C6.75 0.375 6.954 0.5675 7.125 0.875M4.375 5.875H7.375" class="stroke-background-green" stroke-width="0.75" stroke-linecap="round" stroke-linejoin="round"/>' +
+        '</svg></a>';
+}
+
+//הסרת מוצר בונוס: כמות 0 והסתרת השורה. בשמירה הבאה השרת מוחק אותה (שורה שעוד לא נשמרה - פשוט לא נשמרת)
+function removeBonusProduct(product){
+    jQuery(".tooltip-box").fadeOut(150);
+    product.removeClass("in-cart");
+    product.find("td.order_individual input").val(0);
+    product.find("td.count input").val(0).trigger('change');
+    product.addClass("hidden");
+    jQuery('input[name=dirty]').val("1");
 }
 
 function removeProdoctFromOrder(product){

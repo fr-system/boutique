@@ -953,3 +953,6 @@ td.td-buttons a.button {
 #sidebar-menu ul.menu li.menu-item.has-children:not(.selected):hover::after {
     content: ""; position: absolute; top: 0; right: 100%; width: 10px; height: 100%;
 }
+
+/* שמירה אוטומטית של הזמנה שנכשלה (script.js - automaticOrderSavingFailed) */
+.saving-automatic .saving-failed { color: #c0392b; font-weight: bold; }

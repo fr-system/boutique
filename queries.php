@@ -107,6 +107,15 @@ function save_single_data()
 {
     $table_name = $_POST["table_name"];
     $is_remove = isset($_POST["remove"]) && $_POST["remove"];
+    //הזמנה שאושרה (done=1) - הזמנות הרכש כבר נשלחו לספקים, אסור לשנות אותה (גם מלשונית פתוחה או מכתובת עריכה). מחיקה מותרת
+    if ($table_name == "orders" && !$is_remove && !empty($_POST["id"])) {
+        global $wpdb;
+        $order_done = $wpdb->get_var($wpdb->prepare("SELECT done FROM {$wpdb->prefix}orders WHERE id = %d", intval($_POST["id"])));
+        if (!empty($order_done)) {
+            echo json_encode(array("status" => "failed", "msg" => "ההזמנה כבר אושרה ולא ניתן לשנות אותה"));
+            wp_die();
+        }
+    }
     //טבלאות עזר (ערים, אזורים, נושאים, סיבות החזרה) - הערך המוצג (העמודה הראשונה) חובה, בלי רווחים בלבד
     if (isset(BOUTIQUE_LISTS[$table_name]) && !$is_remove) {
         $main_column = BOUTIQUE_LISTS[$table_name]["columns"][0];
@@ -308,7 +317,8 @@ function save_single_data()
                 unset($row["temp_id"]);
                 //write_log ('copy '.json_encode ($copy).' row '.json_encode ($row));
             }
-            if($action_product == "remove" && $sub_table_name == "order_products" && empty($row["bonus"])) {
+            //גם שורות בונוס/מבצע: בלי זה השורה נשארה בדפדפן עם המספר הישן, וכשהכמות עלתה שוב העדכון הלך לשורה שנמחקה והמבצע לא נשמר
+            if($action_product == "remove" && $sub_table_name == "order_products") {
                 $removed_list[]=$row["id"];
             }
             $result = pre_action_query ($sub_table_name, $row);

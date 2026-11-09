@@ -174,6 +174,20 @@ jQuery(document).ready(function($){
     jQuery('body').on('submit', '.site_form', function(e) {
         e.preventDefault();
         var $form = jQuery(this);
+        //"שמור" בהזמנה בזמן שהשמירה האוטומטית רצה - מחכים שתסתיים ואז שולחים.
+        //בעבר השמירה האוטומטית בוטלה בדפדפן אבל נשמרה בשרת, והשורות החדשות נשמרו פעמיים
+        if ($form.is(getOrderForm()) && isOrderAutoSaving()) {
+            if (!$form.data('waiting-auto-save')) {
+                $form.data('waiting-auto-save', true);
+                $form.find('[type="submit"]').prop('disabled', true);
+                orderAutoSaveXhr.always(function () {
+                    $form.data('waiting-auto-save', false);
+                    $form.find('[type="submit"]').prop('disabled', false);
+                    $form.trigger('submit');
+                });
+            }
+            return;
+        }
         // validate() מחזיר את הוולידטור הקיים, או יוצר אחד עם ההגדרות לטופס שנוצר אחרי טעינת הדף
         $form.validate(validateOptions);
         if (!$form.valid()) {
@@ -406,12 +420,7 @@ jQuery(document).ready(function($){
     })
 
     jQuery( ".order-confirmation" ).on("click",function(event){
-        var postData = [
-            {name: "action", value: "on_order_confirmation"},
-            {name: "order_id", value: getParameterByName("id")},
-            {name: "client_id", value: getSelectClientId().val()},
-        ];
-        call_ajax_function(postData,"onOrderConfirmation");
+        confirmOrder(jQuery(this));
     })
 
     jQuery('#accept_process_modal').on('hide.bs.modal', function (e) {
@@ -879,7 +888,31 @@ function fillListTable(result){
     }
 }
 
+//הבקשה של השמירה האוטומטית - משתנה נפרד מ-xhr, כדי ששמירה ידנית או בקשה אחרת לא יבטלו אותה, וכדי לדעת אם היא עדיין רצה
+var orderAutoSaveXhr = null;
+//ההזמנה נשלחה לאישור - לא שומרים יותר אוטומטית
+var orderConfirmed = false;
+
+function isOrderAutoSaving() {
+    return orderAutoSaveXhr !== null && orderAutoSaveXhr.readyState != 4;
+}
+
+//רק טופס ההזמנה - כמו כפתור "שמור". בעבר נשלחו כל הטפסים בדף, וכשחלונית המחיקה הייתה פתוחה נשלח גם remove=1 וההזמנה נמחקה
+function getOrderForm() {
+    return jQuery('input[name=table_name][value=orders]').closest('form');
+}
+
 function automaticOrderSaving(){
+    //חלונית פתוחה (מחיקה, תשלום וכו') - לא שומרים עכשיו; השינוי יישמר בפעם הבאה אחרי שהחלונית נסגרת
+    if (jQuery('.modal.show').length > 0) {
+        return;
+    }
+    var $form = getOrderForm();
+    //שמירה אחת בכל רגע: שמירה אוטומטית קודמת עוד לא חזרה, או שמירה ידנית באמצע (הטופס מסומן disabled בזמן השליחה).
+    //שתי שמירות במקביל שולחות את אותן שורות חדשות - והן נשמרות פעמיים
+    if (isOrderAutoSaving() || $form.hasClass('disabled') || orderConfirmed) {
+        return;
+    }
 
     if (jQuery('input[name=dirty]').val() == "1" && jQuery('input[name=order_date]').val()
         && jQuery('.grid-display select[name=client_id]').val()) {
@@ -889,23 +922,128 @@ function automaticOrderSaving(){
             return jQuery(input).val() > 0;
         })
         if (count.length > 0) {
-            jQuery('input[name=dirty]').val("0");
-            var $form = jQuery('form');
             if (!$form.valid()) {
                 return;
             }
+            jQuery('input[name=dirty]').val("0");
             filterOrderProdoctsRowsToSave();
 
-            var formData = $form.serializeArray();
+            //שמירה אוטומטית לעולם לא מוחקת
+            var formData = jQuery.grep($form.serializeArray(), function (field) {
+                return field.name !== "remove";
+            });
 
             formData.push({
                 name: "action",
                 value: "send_site_forms"
             });
 
-            call_ajax_function(formData, "automaticOrderSavingSuccess");
+            //בזמן השמירה - "שומר...", ובסיום מוחלף ב"נשמרה בשעה" או בשורת הכישלון
+            jQuery(".saving-automatic").text("שומר...");
+            orderAutoSaveXhr = jQuery.ajax({
+                url: "/wp-admin/admin-ajax.php",
+                data: formData,
+                dataType: 'json',
+                method: 'POST'
+            }).done(function (result) {
+                //הצלחה רק כשהשרת אישר - "נכשל" מהשרת (למשל טרנזקציה שבוטלה) לא מוצג כשמירה
+                if (result && result.status == "success") {
+                    if (result.message) {
+                        show_slider_message(result.message);
+                    }
+                    automaticOrderSavingSuccess(result);
+                }
+                else {
+                    automaticOrderSavingFailed(result && result.msg);
+                }
+            }).fail(function () {
+                automaticOrderSavingFailed();
+            });
         }
     }
+}
+
+//"אישור הזמנה" - קודם שומרים את מה שלא נשמר (ומחכים לשמירה אוטומטית שרצה), ורק אחרי שהשמירה הצליחה מאשרים.
+//בעבר האישור שלח את הנתונים השמורים בלבד, ושינוי מהשניות האחרונות לא נכנס ל-PDF ולהזמנות הרכש
+function saveOrderBeforeConfirm() {
+    var deferred = jQuery.Deferred();
+
+    function step(attempted) {
+        if (isOrderAutoSaving()) {
+            orderAutoSaveXhr.always(function () { step(attempted); });
+            return;
+        }
+        if (jQuery('input[name=dirty]').val() != "1") {
+            deferred.resolve();
+            return;
+        }
+        //כבר ניסינו לשמור ועדיין יש שינוי שלא נשמר (השמירה נכשלה) - לא מאשרים
+        if (attempted) {
+            deferred.reject();
+            return;
+        }
+        automaticOrderSaving();
+        if (isOrderAutoSaving()) {
+            orderAutoSaveXhr.always(function () { step(true); });
+        } else {
+            //השמירה לא יצאה (שדה חובה חסר, אין מוצרים וכו')
+            deferred.reject();
+        }
+    }
+
+    step(false);
+    return deferred.promise();
+}
+
+function confirmOrder($button) {
+    if ($button.prop('disabled')) {
+        return;
+    }
+    $button.prop('disabled', true);
+
+    saveOrderBeforeConfirm().done(function () {
+        //מכאן אין יותר שמירה אוטומטית - שינוי אחרי האישור לא יגיע לספקים (חוזר אם האישור נכשל)
+        orderConfirmed = true;
+        jQuery.ajax({
+            url: "/wp-admin/admin-ajax.php",
+            data: [
+                {name: "action", value: "on_order_confirmation"},
+                //מהטופס ולא מהכתובת - בהזמנה חדשה המספר נכנס לטופס אחרי השמירה הראשונה
+                {name: "order_id", value: jQuery("input.orders_id[name=id]").val()},
+                {name: "client_id", value: getSelectClientId().val()}
+            ],
+            dataType: 'json',
+            method: 'POST'
+        }).done(function (result) {
+            if (result && result.message) {
+                show_slider_message(result.message);
+            }
+            if (!result || result.status == "failed") {
+                orderConfirmed = false;
+                $button.prop('disabled', false);
+            }
+            onOrderConfirmation(result);
+        }).fail(function (data) {
+            orderConfirmed = false;
+            $button.prop('disabled', false);
+            alert(ajax_fail_message(data, 'אישור ההזמנה'));
+        });
+    }).fail(function () {
+        $button.prop('disabled', false);
+        alert('ההזמנה לא אושרה כי השינויים האחרונים לא נשמרו.\nיש לבדוק את ההזמנה ולנסות שוב.');
+    });
+}
+
+//השמירה האוטומטית נכשלה: מסמנים שוב שיש שינוי, כדי שתהיה עוד שמירה בעוד 12 שניות,
+//ומציגים שורה אדומה במקום "נשמרה בשעה" (בלי חלונית קופצת כל 12 שניות)
+function automaticOrderSavingFailed(msg) {
+    jQuery('input[name=dirty]').val("1");
+    var time = new Date().toLocaleTimeString('he-IL', {hour: '2-digit', minute: '2-digit', hour12: false});
+    var text = "השמירה האוטומטית נכשלה (" + time + ") - ננסה שוב בעוד רגע";
+    if (msg) {
+        text += ": " + jQuery('<div>').html(msg).text();
+    }
+    jQuery(".saving-automatic").html(jQuery('<span class="saving-failed">').text(text));
 }
 function fill_modal_list(result){
     var selector =result.selector || result.tableName.slice(0, -1)+ "_id";
