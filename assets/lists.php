@@ -115,7 +115,8 @@ const BOUTIQUE_TABLES = array(
                     3=>array("class"=>"not-yet-treated background-light-orange","label"=> "טרם טופל")
                 )),
             array("field_name" => "target_date", "widget" => "date", "label" => "תאריך יעד"),
-/*            array("field_name" => "sending_reminder", "widget" => "date", "label" => "שליחת תזכורת"),*/
+            //תזכורת: ביום הזה (בהרצת דוח המשימות) נשלח לסוכן מייל - send_task_reminders. העמודה נוספת במסד ב-boutique_ensure_tasks_reminder_columns
+            array("field_name" => "sending_reminder", "widget" => "date", "label" => "תזכורת"),
         )),
     "suppliers" => array(
         "title" => "ספקים",

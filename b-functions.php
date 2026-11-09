@@ -20,7 +20,7 @@ function get_side_menu()
         if (!$item->menu_item_parent) {
             $parents[$item->ID] = array("name" => $name, "title" => $item->title, "url" => $url, "children" => array());
         }
-        else if (isset($parents[$item->menu_item_parent]) && (is_manager() || is_agent() && $name=="orders" || is_supplier() && $name=="collection")) {
+        else if (isset($parents[$item->menu_item_parent]) && (is_manager() || is_agent() && ($name=="orders" || $name=="clients") || is_supplier() && $name=="collection")) {
             $is_new = $name != "collection";
             $parents[$item->menu_item_parent]["children"][] = array("title" => $item->title, "is_new" => $is_new,
                 "url" => $url . ($is_new ? "&action=new" : "&payed=true"));

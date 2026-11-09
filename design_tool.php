@@ -204,7 +204,7 @@ function archive_header($table_name, $view_only = false,$attr = null)
             //מתי אין אפשרות להוסיף משהו חדש
             //בחשבוניות ; הוספת מוצר להזמנה(נפתח הקטלוג) ; אם אתה לא מנהל ועכשיו עומדים על משימות ;
 
-            if($table_name == "collection"  || $view_only || (!is_manager() && $table_name != "orders") ||
+            if($table_name == "collection"  || $view_only || (!is_manager() && $table_name != "orders" && !(is_agent() && $table_name == "clients")) ||
             (isset($attr["client_id"]) && isset($attr["blocked"]) && $attr["blocked"] ==1)) {
             }
             else{
@@ -631,6 +631,11 @@ function create_input($field,$value = null,$readonly = "")
                     if($field["join_table"] == "clients" && is_agent()){
                         //הלקוחות של הסוכן, וגם הלקוח שכבר בחור (הזמנה שהלקוח שלה של סוכן אחר) - כדי שהשמירה לא תחליף אותו
                         $filter = "(agent_id=" . intval(get_id_by_user()) . (!empty($value) ? " OR id=" . intval($value) : "") . ")";
+                    }
+                    //סוכן בכרטיס לקוח ובמשימה - רק הוא עצמו (קבוע). בשרת הסוכן נקבע בכל מקרה (save_single_data)
+                    if($field["join_table"] == "agents" && $field["field_name"] == "agent_id" && is_agent() && in_array(($_GET["subject"] ?? ""), array("clients", "tasks"))){
+                        $filter = "id=" . intval(get_id_by_user());
+                        $value = intval(get_id_by_user());
                     }
                     echo build_select_options($field["join_table"],$value,array("filter"=>$filter));
                 }

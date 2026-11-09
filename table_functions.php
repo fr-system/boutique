@@ -39,7 +39,7 @@ function get_archive_table($table_name,$data,$attr)
 
 
     if(!isset($page_info["update_remove"]) || $page_info["update_remove"] == true) {
-        if (is_manager() || is_agent() && $table_name == "orders") {//update/readonly
+        if (is_manager() || is_agent() && ($table_name == "orders" || $table_name == "clients" || $table_name == "tasks")) {//update/readonly
             $html .= '<th class="td-action no-sort" style="width:10px"></th>';//update
         }
         if($table_name == "orders"){
@@ -178,8 +178,11 @@ function get_tr_data($table_name, $data, $key,$attr){
                   </td>';
         }
         else {
-            if (is_manager() || is_agent() && $table_name == "orders") {
-                if ($table_name != "orders" || $row->done == 0) {
+            if (is_manager() || is_agent() && ($table_name == "orders" || $table_name == "clients" || $table_name == "tasks")) {
+                if (is_agent() && $table_name == "tasks" && intval($row->agent_id) != intval(get_id_by_user())) {
+                    $html .= '<td class="td-action"></td>';//משימה שהסוכן לא רשום עליה - בלי עריכה (תא ריק, כדי שמספר העמודות יישאר זהה)
+                }
+                else if ($table_name != "orders" || $row->done == 0) {
                     $html .= '<td class="td-action"><a   class="has-tooltip" data-tooltip="עדכון ' . $page_info['single'] . '"  href="single?subject=' . $table_name . '&action=edit&id=' . $row->id . '">
                         <svg class="edit-row" xmlns="http://www.w3.org/2000/svg" width="24" height="23" viewBox="0 0 24 23" fill="none">
                             <path d="M7 16.3041L11.413 16.2898L21.045 7.14726C21.423 6.78501 21.631 6.30393 21.631 5.79218C21.631 5.28043 21.423 4.79934 21.045 4.43709L19.459 2.91717C18.703 2.19267 17.384 2.19651 16.634 2.9143L7 12.0587V16.3041ZM18.045 4.27226L19.634 5.7893L18.037 7.30538L16.451 5.78643L18.045 4.27226ZM9 12.858L15.03 7.13384L16.616 8.65376L10.587 14.376L9 14.3808V12.858Z" class="background-gold"/>

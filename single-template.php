@@ -30,6 +30,10 @@ if($action == "new") {
         $single->status_id = 3;
         //אולי צריך לשמור מי פתח את המשימה???
     }
+    //לקוח חדש שסוכן פותח - הסוכן הוא הוא עצמו
+    if($table_name == "clients" && is_agent()){
+        $single->agent_id = get_id_by_user();
+    }
 }
 else{//edit || readonly
     $id = $_GET["id"];
@@ -45,6 +49,12 @@ else{//edit || readonly
         }
     }
 
+    //סוכן - רק הלקוחות והמשימות שלו (גם מכתובת ישירה)
+    if(($table_name == "clients" || $table_name == "tasks") && is_agent() && (empty($single) || intval($single->agent_id) != intval(get_id_by_user()))){
+        echo '<div class="padding-15 font-18 bold">אין לך הרשאה לפתוח את ה' . $page_info['single'] . ($page_info['male_female'] == 'female' ? ' הזו' : ' הזה') . '</div>';
+        get_footer();
+        exit;
+    }
     if($action == "edit") {    }
     if($action == "readonly") {
         $readonly = "readonly";

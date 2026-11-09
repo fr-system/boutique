@@ -12,6 +12,7 @@ switch ($argv[1]){
         send_who_needs_pay_today($argv[2]);
         break;
     case "tasks":
+        send_task_reminders();
         send_unclosed_tasks($argv[2]);
         break;
     case "orders":
@@ -43,6 +44,64 @@ function send_who_needs_pay_today($type)
         '<div style="font-size:15px; line-height:1.7; color:#444444; margin-bottom:28px;">' . esc_html($text) . '<br>אחרי קבלת תשלום יש לעדכן אותו במערכת, במסך החשבוניות.</div>');
     send_mail(get_option('admin_email'), $title . " - " . date('d/m/y'), $body, [$title . ".pdf" => $file]);
     delete_report_file($file);
+}
+
+//תזכורות: משימות פתוחות שתאריך התזכורת שלהן הגיע (או עבר - למשל שישי ושבת, שבהם לא שולחים) ועוד לא נשלחה עליהן תזכורת.
+//לכל סוכן מייל אחד עם המשימות שלו; משימה בלי סוכן (או סוכן בלי מייל תקין) - למנהל. אחרי שליחה - reminder_sent = 1
+function send_task_reminders()
+{
+    global $wpdb;
+    $filters = array(
+        array("filter_field" => "status_id", "filter_type" => "!=", "filter_value" => "1"),
+        array("filter_type" => "filter", "filter_field" => "",
+            "filter_value" => "({$wpdb->prefix}tasks.sending_reminder <= CURDATE() AND {$wpdb->prefix}tasks.reminder_sent = 0)"),
+    );
+    $tasks = get_data_table("tasks", $filters);
+    if (empty($tasks)) {
+        return;
+    }
+
+    //קיבוץ לפי נמען
+    $groups = array();
+    foreach ($tasks as $task) {
+        $agent = !empty($task->agent_id) ? (get_data_table("agents", array(array("filter_field" => "id", "filter_value" => intval($task->agent_id))))[0] ?? null) : null;
+        $email = $agent ? get_agent_email($agent) : "";
+        if (!$email) {
+            $email = get_option('admin_email');
+            $name = "";
+        } else {
+            $name = $agent->name;
+        }
+        $groups[$email]["name"] = $name;
+        $groups[$email]["tasks"][] = $task;
+    }
+
+    foreach ($groups as $email => $group) {
+        $rows = "";
+        foreach ($group["tasks"] as $task) {
+            $rows .= '<tr>
+                <td style="padding:8px 10px; border-bottom:1px solid #EFE6D2; font-weight:700;">' . esc_html($task->subject_text) . '</td>
+                <td style="padding:8px 10px; border-bottom:1px solid #EFE6D2;">' . esc_html($task->client_name) . '</td>
+                <td style="padding:8px 10px; border-bottom:1px solid #EFE6D2;">' . nl2br(esc_html($task->details)) . '</td>
+                <td style="padding:8px 10px; border-bottom:1px solid #EFE6D2; white-space:nowrap;">' . (!empty($task->target_date) ? date('d/m/Y', strtotime($task->target_date)) : '') . '</td>
+            </tr>';
+        }
+        $intro = count($group["tasks"]) == 1 ? "תזכורת למשימה שלך:" : "תזכורת למשימות שלך:";
+        if ($group["name"] === "") {
+            $intro = "תזכורת למשימות שאין להן סוכן עם מייל תקין:";
+        }
+        $content = '<div style="font-size:15px; line-height:1.7; color:#444444; margin-bottom:16px;">' . $intro . '</div>
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="font-size:14px; color:#1A1A1A; text-align:right; margin-bottom:24px;">
+                <tr style="background-color:#FAF7F0;"><th style="padding:8px 10px;">נושא</th><th style="padding:8px 10px;">לקוח</th><th style="padding:8px 10px;">פירוט</th><th style="padding:8px 10px;">תאריך יעד</th></tr>
+                ' . $rows . '
+            </table>
+            <div style="font-size:13px; line-height:1.7; color:#8A8A8A; margin-bottom:28px;">אחרי ביצוע משימה יש לעדכן את המצב שלה במערכת.</div>';
+        $body = build_email_layout("תזכורת משימות", "שלום" . ($group["name"] !== "" ? " " . esc_html($group["name"]) : "") . ",", $content);
+        if (send_mail($email, "תזכורת משימות - " . date('d/m/y'), $body)) {
+            $ids = array_map(function ($task) { return intval($task->id); }, $group["tasks"]);
+            $wpdb->query("UPDATE {$wpdb->prefix}tasks SET reminder_sent = 1 WHERE id IN (" . implode(',', $ids) . ")");
+        }
+    }
 }
 
 //משימות שעבר תאריך היעד שלהן: לכל סוכן המשימות שלו, ולמנהל סיכום של כל הסוכנים.

@@ -19,6 +19,33 @@ function run_query($query, $type="")
     return $result;
 }
 
+//עמודות התזכורת בטבלת המשימות - נוספות פעם אחת לכל מסד (בדיקות/ייצור) בטעינה הראשונה אחרי העדכון.
+//sending_reminder - תאריך התזכורת (שדה בטופס), reminder_sent - האם המייל כבר נשלח (send_task_reminders)
+add_action('init', 'boutique_ensure_tasks_reminder_columns');
+function boutique_ensure_tasks_reminder_columns()
+{
+    if (get_option('boutique_tasks_reminder_columns') == 1) {
+        return;
+    }
+    global $wpdb;
+    $table = $wpdb->prefix . 'tasks';
+    if (!$wpdb->get_var("SHOW TABLES LIKE '{$table}'")) {
+        return;
+    }
+    if (!$wpdb->get_var("SHOW COLUMNS FROM {$table} LIKE 'sending_reminder'")) {
+        $wpdb->query("ALTER TABLE {$table} ADD sending_reminder DATE NULL");
+    }
+    if (!$wpdb->get_var("SHOW COLUMNS FROM {$table} LIKE 'reminder_sent'")) {
+        $wpdb->query("ALTER TABLE {$table} ADD reminder_sent TINYINT(1) NOT NULL DEFAULT 0");
+    }
+    if ($wpdb->get_var("SHOW COLUMNS FROM {$table} LIKE 'sending_reminder'") && $wpdb->get_var("SHOW COLUMNS FROM {$table} LIKE 'reminder_sent'")) {
+        update_option('boutique_tasks_reminder_columns', 1, true);
+    }
+    else {
+        write_log("boutique_ensure_tasks_reminder_columns failed: " . $wpdb->last_error);
+    }
+}
+
 function pre_action_query($table_name, $row)
 {
     $update = array();
@@ -107,6 +134,43 @@ function save_single_data()
 {
     $table_name = $_POST["table_name"];
     $is_remove = isset($_POST["remove"]) && $_POST["remove"];
+    //סוכן במשימות: רק עריכה של משימה שהוא רשום עליה כסוכן - בלי הוספה, בלי מחיקה ובלי העברה לסוכן אחר
+    if ($table_name == "tasks" && is_agent()) {
+        global $wpdb;
+        $own_agent_id = intval(get_id_by_user());
+        if ($is_remove || empty($_POST["id"])) {
+            echo json_encode(array("status" => "failed", "msg" => $is_remove ? "אין לך הרשאה למחוק משימה" : "אין לך הרשאה להוסיף משימה"));
+            wp_die();
+        }
+        $task_agent_id = intval($wpdb->get_var($wpdb->prepare("SELECT agent_id FROM {$wpdb->prefix}tasks WHERE id = %d", intval($_POST["id"]))));
+        if ($task_agent_id != $own_agent_id) {
+            echo json_encode(array("status" => "failed", "msg" => "אין לך הרשאה לעדכן את המשימה הזו"));
+            wp_die();
+        }
+        $_POST["agent_id"] = $own_agent_id;
+    }
+    //סוכן בלקוחות: מוסיף ועורך רק לקוחות שלו, הסוכן נקבע לו תמיד, ואין לו מחיקה
+    if ($table_name == "clients" && is_agent()) {
+        global $wpdb;
+        $own_agent_id = intval(get_id_by_user());
+        if ($is_remove) {
+            echo json_encode(array("status" => "failed", "msg" => "אין לך הרשאה למחוק לקוח"));
+            wp_die();
+        }
+        if (!empty($_POST["id"])) {
+            $client_agent_id = intval($wpdb->get_var($wpdb->prepare("SELECT agent_id FROM {$wpdb->prefix}clients WHERE id = %d", intval($_POST["id"]))));
+            if ($client_agent_id != $own_agent_id) {
+                echo json_encode(array("status" => "failed", "msg" => "אין לך הרשאה לעדכן את הלקוח הזה"));
+                wp_die();
+            }
+        }
+        $_POST["agent_id"] = $own_agent_id;
+    }
+    //משימה: תאריך התזכורת לפני השמירה - אם השתנה, התזכורת תישלח שוב בתאריך החדש (reminder_sent מתאפס אחרי השמירה)
+    if ($table_name == "tasks" && !$is_remove && !empty($_POST["id"])) {
+        global $wpdb;
+        $old_reminder = (string)$wpdb->get_var($wpdb->prepare("SELECT sending_reminder FROM {$wpdb->prefix}tasks WHERE id = %d", intval($_POST["id"])));
+    }
     //הזמנה שאושרה (done=1) - הזמנות הרכש כבר נשלחו לספקים, אסור לשנות אותה (גם מלשונית פתוחה או מכתובת עריכה). מחיקה מותרת
     if ($table_name == "orders" && !$is_remove && !empty($_POST["id"])) {
         global $wpdb;
@@ -398,6 +462,10 @@ function save_single_data()
         wp_die();
     }
     $wpdb->query("COMMIT");
+
+    if (isset($old_reminder) && $action == "update" && $old_reminder !== (string)($_POST["sending_reminder"] ?? "")) {
+        $wpdb->query($wpdb->prepare("UPDATE {$wpdb->prefix}tasks SET reminder_sent = 0 WHERE id = %d", intval($id)));
+    }
 
     //מחיקת היוזרים - רק אחרי שמחיקת הרשומה נשמרה
     $user_notice = $action == "remove" ? delete_users_of_removed_records($removed_user_ids) : ($user_notice ?? "");
