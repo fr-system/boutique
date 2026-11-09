@@ -18,6 +18,168 @@ switch ($argv[1]){
     case "orders":
         send_orders_today($argv[2]);
         break;
+    case "agents_daily":
+        send_agents_daily_summary();
+        break;
+}
+
+//סיכום יומי לכל סוכן (תזמון ב-19:00): רק הזמנות שהסוכן עצמו הקים (user_opens), מהסיכום הקודם עד עכשיו -
+//טבלה לפי חנות וטבלה לפי יקב (ספק), ותעודות ההחזרה בטבלה נפרדת. סוכן בלי הזמנות והחזרות - לא מקבל מייל.
+//ביום ראשון - מחמישי ב-19:00 (בשישי ובשבת לפני 20:00 לא שולחים)
+function send_agents_daily_summary()
+{
+    global $wpdb;
+    $p = $wpdb->prefix;
+    $from = date('w') == 0 ? "CURDATE() - INTERVAL 3 DAY + INTERVAL 19 HOUR" : "CURDATE() - INTERVAL 1 DAY + INTERVAL 19 HOUR";
+    $to = "CURDATE() + INTERVAL 19 HOUR";
+    $range_text = date('w') == 0 ? "מחמישי 19:00 עד היום 19:00" : "מאתמול 19:00 עד היום 19:00";
+
+    $agents = $wpdb->get_results("SELECT id, name, email, user_id FROM {$p}agents WHERE user_id > 0");
+    foreach ($agents as $agent) {
+        $email = get_agent_email($agent);
+        if (!$email) {
+            continue;
+        }
+        $rows = $wpdb->get_results($wpdb->prepare(
+            "SELECT o.id AS order_id, o.done, o.return_certificate, c.name AS client_name, cb.name AS branch_name, s.name AS supplier_name,
+                    op.count, op.order_individual, p.units_in_box, op.total
+             FROM {$p}orders o
+             JOIN {$p}clients c ON c.id = o.client_id
+             LEFT JOIN {$p}clients_branches cb ON cb.id = o.branch
+             JOIN {$p}order_products op ON op.order_id = o.id
+             JOIN {$p}products p ON p.id = op.product_id
+             LEFT JOIN {$p}suppliers s ON s.id = p.supplier_id
+             WHERE o.order_date > {$from} AND o.order_date <= {$to}
+               AND op.count > 0
+               AND o.user_opens = %d",
+            intval($agent->user_id)));
+        if (empty($rows)) {
+            continue;
+        }
+
+        $stores = array();
+        $suppliers = array();
+        $total_units = 0;
+        $total_sum = 0;
+        $orders = array();
+        $not_approved = array();
+        //תעודות החזרה - נספרות בנפרד ומוצגות בטבלה משלהן
+        $return_stores = array();
+        $return_orders = array();
+        $return_units = 0;
+        $return_sum = 0;
+        foreach ($rows as $row) {
+            $units = intval($row->order_individual) == 1 ? intval($row->count) : intval($row->count) * max(1, intval($row->units_in_box));
+            $sum = abs(floatval($row->total));
+            $store = $row->client_name . (!empty($row->branch_name) ? " - " . $row->branch_name : "");
+            $supplier = $row->supplier_name ?: "ללא ספק";
+
+            if (!empty($row->return_certificate)) {
+                $return_stores[$store]["orders"][$row->order_id] = true;
+                $return_stores[$store]["units"] = ($return_stores[$store]["units"] ?? 0) + $units;
+                $return_stores[$store]["sum"] = ($return_stores[$store]["sum"] ?? 0) + $sum;
+                $return_orders[$row->order_id] = true;
+                $return_units += $units;
+                $return_sum += $sum;
+                continue;
+            }
+            $stores[$store]["orders"][$row->order_id] = true;
+            $stores[$store]["units"] = ($stores[$store]["units"] ?? 0) + $units;
+            $stores[$store]["sum"] = ($stores[$store]["sum"] ?? 0) + $sum;
+            $suppliers[$supplier]["units"] = ($suppliers[$supplier]["units"] ?? 0) + $units;
+            $suppliers[$supplier]["sum"] = ($suppliers[$supplier]["sum"] ?? 0) + $sum;
+            $total_units += $units;
+            $total_sum += $sum;
+            $orders[$row->order_id] = true;
+            if (intval($row->done) != 1) {
+                $not_approved[$row->order_id] = true;
+            }
+        }
+        $by_sum = function ($a, $b) { return $b["sum"] <=> $a["sum"]; };
+        uasort($stores, $by_sum);
+        uasort($suppliers, $by_sum);
+        uasort($return_stores, $by_sum);
+
+        $intro = array();
+        if (count($orders) > 0) {
+            $intro[] = '<strong>' . count($orders) . '</strong> הזמנות ב-<strong>' . count($stores) . '</strong> חנויות, '
+                . '<strong>' . number_format($total_units) . '</strong> בקבוקים, <strong>' . number_format($total_sum, 2) . ' ₪</strong>.';
+        }
+        if (count($return_orders) > 0) {
+            $intro[] = '<span style="color:#c0392b;"><strong>' . count($return_orders) . '</strong> תעודות החזרה: '
+                . number_format($return_units) . ' בקבוקים, ' . number_format($return_sum, 2) . ' ₪.</span>';
+        }
+        if (count($not_approved) > 0) {
+            $intro[] = '<span style="color:#c0392b;">' . count($not_approved) . ' מההזמנות עדיין לא אושרו.</span>';
+        }
+        $content = '<div style="font-size:15px; line-height:1.7; color:#444444; margin-bottom:20px;">ההזמנות שהקמת ' . esc_html($range_text) . ':<br>'
+            . implode('<br>', $intro) . '</div>';
+
+        if (count($orders) > 0) {
+            $store_rows = array();
+            foreach ($stores as $name => $s) {
+                $store_rows[] = array($name, count($s["orders"]), $s["units"], $s["sum"]);
+            }
+            $content .= agent_summary_table("הזמנות לפי חנות", array("חנות", "הזמנות", "בקבוקים", "סה\"כ"), $store_rows,
+                array("סה\"כ", count($orders), $total_units, $total_sum));
+
+            $supplier_rows = array();
+            foreach ($suppliers as $name => $s) {
+                $supplier_rows[] = array($name, null, $s["units"], $s["sum"]);
+            }
+            $content .= agent_summary_table("הזמנות לפי יקב", array("יקב", null, "בקבוקים", "סה\"כ"), $supplier_rows,
+                array("סה\"כ", null, $total_units, $total_sum));
+        }
+
+        if (count($return_orders) > 0) {
+            $return_rows = array();
+            foreach ($return_stores as $name => $s) {
+                $return_rows[] = array($name, count($s["orders"]), $s["units"], $s["sum"]);
+            }
+            $content .= agent_summary_table("תעודות החזרה", array("חנות", "תעודות", "בקבוקים", "סה\"כ"), $return_rows,
+                array("סה\"כ", count($return_orders), $return_units, $return_sum), "#c0392b");
+        }
+
+        $content .= '<div style="font-size:13px; line-height:1.7; color:#8A8A8A; margin:8px 0 28px 0;">הסכומים לפני הנחה כללית על ההזמנה. בקבוקי בונוס ומבצע נספרים בכמות.</div>';
+
+        $body = build_email_layout("סיכום הזמנות יומי", "שלום " . esc_html($agent->name) . ",", $content);
+        send_mail($email, "סיכום הזמנות - " . date('d/m/y'), $body);
+    }
+}
+
+//טבלה מעוצבת למייל (inline style): כותרת, שורות ושורת סה"כ. עמודה שהכותרת שלה null - לא מוצגת.
+//$color - צבע הכותרת (תעודות החזרה באדום), ושורת הסה"כ בגוון בהיר שלו
+function agent_summary_table($title, $headers, $rows, $total_row, $color = "#1A7870")
+{
+    $total_bg = $color == "#1A7870" ? "#E8F2F1" : "#FBEAEA";
+    $cell = 'padding:8px 12px; border-bottom:1px solid #EFE6D2;';
+    $html = '<div style="font-size:16px; font-weight:700; color:' . $color . '; margin:18px 0 8px 0;">' . esc_html($title) . '</div>'
+        . '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="font-size:14px; color:#1A1A1A; text-align:right; border:1px solid #EFE6D2; border-radius:8px; border-collapse:separate; margin-bottom:8px;">'
+        . '<tr style="background-color:#FAF7F0;">';
+    foreach ($headers as $i => $h) {
+        if ($h === null) continue;
+        $html .= '<th style="' . $cell . ($i > 0 ? ' text-align:center;' : '') . '">' . esc_html($h) . '</th>';
+    }
+    $html .= '</tr>';
+    $format = function ($i, $v) {
+        if ($i == 0) return esc_html($v);
+        if ($i == 3) return number_format(floatval($v), 2) . ' ₪';
+        return number_format(intval($v));
+    };
+    foreach ($rows as $n => $row) {
+        $html .= '<tr' . ($n % 2 ? ' style="background-color:#FCFBF8;"' : '') . '>';
+        foreach ($row as $i => $v) {
+            if ($headers[$i] === null) continue;
+            $html .= '<td style="' . $cell . ($i > 0 ? ' text-align:center; white-space:nowrap;' : '') . '">' . $format($i, $v) . '</td>';
+        }
+        $html .= '</tr>';
+    }
+    $html .= '<tr style="background-color:' . $total_bg . '; font-weight:700;">';
+    foreach ($total_row as $i => $v) {
+        if ($headers[$i] === null) continue;
+        $html .= '<td style="' . $cell . ($i > 0 ? ' text-align:center; white-space:nowrap;' : '') . '">' . $format($i, $v) . '</td>';
+    }
+    return $html . '</tr></table>';
 }
 
 
