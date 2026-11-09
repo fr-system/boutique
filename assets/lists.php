@@ -312,7 +312,7 @@ const BOUTIQUE_TABLES = array(
                 array("field_name" => "price_more","widget" => "text","label"=>"קנה מעל סכום","un_apostrophe" => true,"sign"=>"₪","stretch"=>true),
                 array("field_name" => "discount","widget" => "text","label"=>"קבל הנחה של","un_apostrophe" => true,"sign"=>"%"),
                 array("field_name" => "buy", "widget" => "number", "label" => "קנה כמות"),
-                array("field_name" => "products_buy" ,"widget" => "special","label"=>"מהמוצרים","save_as_text"=> true ,"field_id"=>"product_id","hide_in_table"=>true),
+                array("field_name" => "products_buy" ,"widget" => "special","label"=>"מהמוצרים","add_class"=>"direction-column products-buy","save_as_text"=> true ,"field_id"=>"product_id","hide_in_table"=>true),
                 array("field_name" => "get", "widget" => "number", "label" => "קבל כמות"),
                 array("field_name" => "product_get" ,"widget" => "select","label"=>"ממוצר","save_as_text"=> true ,"field_id"=>"product_id"/*,"hide_in_table"=>true*/, "join_table" => "products", "join_value" => "name"),
             )

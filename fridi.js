@@ -190,13 +190,15 @@ function checkPromotions(product, currentValue){
                 break;
             case "3": //  קנה קבל מאותו מוצר
                 var countPromotions = getCountPromotions(product_id);
+                //כמות המתנה = "מקבלים" כפול מספר הפעמים שנכנסת כמות "קונים" (בעבר תמיד יחידה אחת - 10+2 נתן רק 1)
+                var sameProductToAdd = (countToGet || 1) * parseInt(currentCount / needToBuy);
                 if (currentCount >= needToBuy /*&& currentCount % needToBuy == 0*/) {
 
                     if (countPromotions == 0 && productPromo.length == 0) {
-                        addProdoctBonus(product, parseInt(currentCount / needToBuy),sourceKey);
+                        addProdoctBonus(product, sameProductToAdd, sourceKey);
                     } else {
                         //jQuery("tr.promo:has( .product_id input[type=hidden][value=" + product_id + "])").eq(0)
-                        productPromo.find(".count input").val(parseInt(currentCount / needToBuy));
+                        productPromo.find(".count input").val(sameProductToAdd);
                         productPromo.show();
                     }
                 }
