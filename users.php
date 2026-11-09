@@ -198,18 +198,10 @@ function get_username_error($username, $user_id = 0) {
     return "";
 }
 
-//האם המייל שייך למנהל - מייל של יוזר מנהל (או שם משתמש של מנהל), או מייל הניהול של האתר
+//האם זה מייל הניהול של האתר (מנהל בוטיק - הגדרות > כללי). מייל של יוזר אחר בתפקיד מנהל מותר:
+//היוזר של המנהל לא נוגע - הסוכן/הספק מקבל משתמש משלו (register_new_user1 לא משייך יוזר בתפקיד אחר, get_bad_user_link)
 function is_admin_email($email) {
-    if (strcasecmp(trim($email), get_option('admin_email')) == 0) {
-        return true;
-    }
-    foreach (array(email_exists($email), username_exists($email)) as $user_id) {
-        $user = $user_id ? get_userdata($user_id) : null;
-        if ($user && in_array("administrator", $user->roles)) {
-            return true;
-        }
-    }
-    return false;
+    return strcasecmp(trim((string)$email), trim((string)get_option('admin_email'))) == 0;
 }
 
 //קישור לא תקין של רשומה (סוכן/ספק) ליוזר - מחזיר תיאור הבעיה, או מחרוזת ריקה אם הקישור תקין.
