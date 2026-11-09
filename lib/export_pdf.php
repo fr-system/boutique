@@ -519,6 +519,14 @@ function drow_html_tasks($attr)
     $filters[]=array("filter_field" => "status_id", "filter_type" => "!=", "filter_value" => "1");
     $filters[]=array("filter_field" => "target_date", "filter_type" => "date", "filter_ratio" => "<","filter_value"=>"CURDATE()");
     $tasks = get_data_table("tasks",$filters);
+    //משימות בלי סוכן: agent_id ריק (הסוכן נמחק) או סוכן שכבר לא קיים
+    if (!empty($attr["no_agent"])) {
+        global $wpdb;
+        $agent_ids = array_map('intval', $wpdb->get_col("SELECT id FROM {$wpdb->prefix}agents"));
+        $tasks = array_filter($tasks, function ($task) use ($agent_ids) {
+            return empty($task->agent_id) || !in_array(intval($task->agent_id), $agent_ids);
+        });
+    }
     $rows = array();
     foreach ($tasks as $task) {
         $rows[] = array(
@@ -539,14 +547,17 @@ function drow_html_tasks_by_agent($attr)
     $agents = run_query("SELECT a.id, a.name, COUNT(*) AS tasks_count FROM {$wpdb->prefix}tasks t
                          LEFT JOIN {$wpdb->prefix}agents a ON a.id = t.agent_id
                          WHERE t.status_id != 1 AND t.target_date < CURDATE()
-                         GROUP BY t.agent_id ORDER BY a.name");
+                         GROUP BY a.id ORDER BY a.name");
     $html = "";
     foreach ($agents as $agent) {
-        //בלי סוכן drow_html_tasks היה מחזיר את כל המשימות
+        //משימות בלי סוכן (הסוכן נמחק) - קבוצה משלהן, כדי שלא ייפלו בין הכיסאות (מופיעה ראשונה, NULL ממוין ראשון)
         if (empty($agent->id)) {
+            $html .= "<div style='font-size:12pt; font-weight:bold; margin:14px 0 6px 0; color:#c0392b;'>בלי סוכן" .
+                " <span style='color:#8A8A8A; font-weight:normal; font-size:10pt;'>(" . ($agent->tasks_count == 1 ? "משימה אחת" : intval($agent->tasks_count) . " משימות") . " - יש לשייך לסוכן)</span></div>";
+            $html .= drow_html_tasks(array("no_agent" => true));
             continue;
         }
-        $html .= "<div style='font-size:12pt; font-weight:bold; margin:14px 0 6px 0;'>" . pdf_esc($agent->name ?: "בלי סוכן") .
+        $html .= "<div style='font-size:12pt; font-weight:bold; margin:14px 0 6px 0;'>" . pdf_esc($agent->name) .
             " <span style='color:#8A8A8A; font-weight:normal; font-size:10pt;'>(" . ($agent->tasks_count == 1 ? "משימה אחת" : intval($agent->tasks_count) . " משימות") . ")</span></div>";
         $html .= drow_html_tasks(array("agent_id" => $agent->id));
     }

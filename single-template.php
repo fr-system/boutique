@@ -37,9 +37,9 @@ else{//edit || readonly
     $result = get_data_table($table_name,array(array("filter_field" => "id", "filter_value"=>$id)));
     if(count($result)>0){
         $single = $result[0];
-        //שם המשתמש לא נשמר בטבלת הסוכנים - מביאים מהיוזר
-        //אם הסוכן מקושר ליוזר לא שלו (מנהל, ספק, יוזר של רשומה אחרת) - לא מציגים את שם המשתמש הזר; בשמירה ייווצר לו יוזר משלו
-        if($table_name == "agents" && !empty($single->user_id) && !get_bad_user_link(intval($single->user_id), "agents", intval($single->id))){
+        //שם המשתמש לא נשמר בטבלת הסוכנים/הספקים - מביאים מהיוזר
+        //אם הרשומה מקושרת ליוזר לא שלה (מנהל, תפקיד אחר, יוזר של רשומה אחרת) - לא מציגים את שם המשתמש הזר; בשמירה ייווצר לה יוזר משלה
+        if(in_array($table_name, USER_EMAIL_TABLES) && !empty($single->user_id) && !get_bad_user_link(intval($single->user_id), $table_name, intval($single->id))){
             $agent_user = get_userdata($single->user_id);
             $single->username = $agent_user ? $agent_user->user_login : "";
         }

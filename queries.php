@@ -116,6 +116,16 @@ function save_single_data()
             wp_die();
         }
     }
+    //מחיקת סוכן שיש לו משימות פתוחות - חסומה: המחיקה מרוקנת את הסוכן במשימות (linked_tables), והן נשארו בלי אף אחד שאחראי עליהן
+    if ($table_name == "agents" && $is_remove && !empty($_POST["id"])) {
+        global $wpdb;
+        $open_tasks = intval($wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM {$wpdb->prefix}tasks WHERE agent_id = %d AND status_id != 1", intval($_POST["id"]))));
+        if ($open_tasks > 0) {
+            $tasks_text = $open_tasks == 1 ? "משימה פתוחה אחת" : "{$open_tasks} משימות פתוחות";
+            echo json_encode(array("status" => "failed", "msg" => "לא ניתן למחוק את הסוכן: יש לו {$tasks_text}.\nיש להעביר אותן לסוכן אחר או לסמן אותן כ\"בוצע\", ואז למחוק."));
+            wp_die();
+        }
+    }
     //טבלאות עזר (ערים, אזורים, נושאים, סיבות החזרה) - הערך המוצג (העמודה הראשונה) חובה, בלי רווחים בלבד
     if (isset(BOUTIQUE_LISTS[$table_name]) && !$is_remove) {
         $main_column = BOUTIQUE_LISTS[$table_name]["columns"][0];
@@ -128,8 +138,8 @@ function save_single_data()
         $_POST[$main_column["field_name"]] = wp_slash($main_value);
     }
     if (($table_name == "agents" || $table_name == "suppliers") && !$is_remove)  {
-        //שם משתמש וסיסמה - לסוכנים בלבד. נשמרים רק ביוזר, לא בטבלה
-        $raw_username = $table_name == "agents" && isset($_POST["username"]) ? trim(wp_unslash($_POST["username"])) : "";
+        //שם משתמש - לסוכנים ולספקים, סיסמה - לסוכנים בלבד. נשמרים רק ביוזר, לא בטבלה
+        $raw_username = isset($_POST["username"]) ? trim(wp_unslash($_POST["username"])) : "";
         $username = sanitize_user($raw_username, true);
         $password = $table_name == "agents" && isset($_POST["password"]) ? wp_unslash($_POST["password"]) : "";
         unset($_POST["username"], $_POST["password"]);
@@ -181,42 +191,82 @@ function save_single_data()
             global $wpdb;
             $user_id = intval($_POST["user_id"]);
             $user = get_userdata($user_id);
-            $change_login = false;
-            $user_email = $_POST["email"];
-            if ($table_name == "agents" && $user) {
-                if (empty($_POST["email"])) {
-                    echo json_encode(array("status" => "failed", "msg" => "יש להזין מייל"));
+            $new_email = trim(wp_unslash($_POST["email"] ?? ""));
+            if (empty($new_email)) {
+                echo json_encode(array("status" => "failed", "msg" => "יש להזין מייל"));
+                die();
+            }
+            $old_user_email = trim((string)$user->user_email);
+            $single_name = BOUTIQUE_TABLES[$table_name]["single"];
+
+            if ($old_user_email !== "" && strcasecmp($old_user_email, $new_email) != 0) {
+                //המייל השתנה ולמשתמש יש את המייל הקודם: נוצר משתמש חדש עם המייל החדש (כל הבדיקות של סוכן/ספק חדש),
+                //והמשתמש הקודם נמחק רק אחרי שהשמירה הצליחה
+                $old_login = $user->user_login;
+                //שם המשתמש של היוזר החדש: אם השם היה המייל הקודם (או שלא הוזן) - המייל החדש. שם משלו - נשאר
+                $new_username = $username;
+                if ($username === "" || (strcasecmp($username, $old_login) == 0 && strcasecmp($old_login, $old_user_email) == 0)) {
+                    $new_username = "";
+                }
+                //אותו שם משתמש כמו הקודם - היוזר הקודם מקבל שם זמני עד שיימחק, כדי שלא תהיה התנגשות
+                if ($new_username !== "" && strcasecmp($new_username, $old_login) == 0) {
+                    $wpdb->update($wpdb->users, array("user_login" => $old_login . "__replaced_" . $user_id), array("ID" => $user_id));
+                    clean_user_cache($user_id);
+                    $renamed_old_user = array("id" => $user_id, "login" => $old_login);
+                }
+                $result = register_new_user1($_POST["name"], $new_email, $table_name, $new_username, $password);
+                if ($result == null || $result["status"] == "failed" || intval($result["user_id"]) == $user_id) {
+                    restore_renamed_user($renamed_old_user ?? null);
+                    if ($result != null && $result["status"] != "failed") {
+                        $result = array("status" => "failed", "msg" => "לא ניתן ליצור משתמש חדש עם המייל החדש");
+                    }
+                    $result["msg"] = "המייל של ה" . $single_name . " השתנה, ולכן צריך ליצור לו משתמש חדש: " . ($result["msg"] ?? "");
+                    echo json_encode($result);
                     die();
                 }
+                $_POST["user_id"] = $result["user_id"];
+                $created_user_id = !empty($result["created"]) ? $result["user_id"] : 0;
+                $replaced_user_id = $user_id;
+                $replaced_user_login = $old_login;
+                $user_notice = "המייל השתנה, ולכן ל" . $single_name . " משתמש חדש: " . ($result["notice"] ?? "");
+            }
+            else {
                 $change_login = !empty($username) && $username != $user->user_login;
                 $username_error = $change_login ? get_username_error($username, $user_id) : "";
                 if ($username_error) {
                     echo json_encode(array("status" => "failed", "msg" => $username_error));
                     die();
                 }
-                //מייל של יוזר אחר - נשמר רק בטבלת הסוכנים, היוזר נשאר בלי מייל
+                //מייל של יוזר אחר - נשמר רק ברשומה (סוכן/ספק), היוזר נשאר בלי מייל
+                $user_email = $new_email;
                 $email_owner = email_exists($user_email);
                 if ($email_owner && $email_owner != $user_id) {
                     $user_email = "";
+                    if ($old_user_email === "") {
+                        $user_notice = "המייל שייך למשתמש אחר במערכת, ולכן נשמר רק ב" . $single_name . " והמשתמש נשאר בלי מייל";
+                    }
                 }
-            }
-            $result = wp_update_user([
-                'ID'         => $user_id,
-                'display_name' => $_POST["name"],
-                'last_name'  => $_POST["name"],
-                'user_email' => $user_email,
-            ]);
-            if (is_wp_error($result)) {
-                echo json_encode(array("status" => "failed", "msg" => $result->get_error_message()));
-                die();
-            }
-            //wp_update_user לא משנה user_login - מעדכנים ישירות
-            if ($change_login) {
-                $wpdb->update($wpdb->users, array("user_login" => $username), array("ID" => $user_id));
-                clean_user_cache($user_id);
-            }
-            if (!empty($password)) {
-                wp_set_password($password, $user_id);
+                else if ($old_user_email === "") {
+                    $user_notice = "המייל עודכן גם במשתמש של ה" . $single_name;
+                }
+                $result = wp_update_user([
+                    'ID'         => $user_id,
+                    'display_name' => $_POST["name"],
+                    'last_name'  => $_POST["name"],
+                    'user_email' => $user_email,
+                ]);
+                if (is_wp_error($result)) {
+                    echo json_encode(array("status" => "failed", "msg" => $result->get_error_message()));
+                    die();
+                }
+                //wp_update_user לא משנה user_login - מעדכנים ישירות
+                if ($change_login) {
+                    $wpdb->update($wpdb->users, array("user_login" => $username), array("ID" => $user_id));
+                    clean_user_cache($user_id);
+                }
+                if (!empty($password)) {
+                    wp_set_password($password, $user_id);
+                }
             }
         }
     }
@@ -340,6 +390,8 @@ function save_single_data()
             require_once ABSPATH . 'wp-admin/includes/user.php';
             wp_delete_user($created_user_id);
         }
+        //המשתמש הקודם (מייל שהשתנה) נשאר כמו שהיה - כולל שם המשתמש
+        restore_renamed_user($renamed_old_user ?? null);
         write_log("save_single_data failed ({$table_name}, {$action}): " . implode(" | ", $boutique_query_errors));
         $failed_msg = $action == "remove" ? "המחיקה נכשלה, שום דבר לא נמחק." : "השמירה נכשלה, השינויים לא נשמרו.";
         echo json_encode(array("status" => "failed", "msg" => $failed_msg . " יש לנסות שוב, ואם הבעיה חוזרת לפנות למנהל המערכת"));
@@ -349,11 +401,19 @@ function save_single_data()
 
     //מחיקת היוזרים - רק אחרי שמחיקת הרשומה נשמרה
     $user_notice = $action == "remove" ? delete_users_of_removed_records($removed_user_ids) : ($user_notice ?? "");
-    //סוכן שנוצר לו משתמש חדש - מייל עם שם המשתמש וקישור לבחירת סיסמה (רק אחרי שהשמירה הצליחה)
-    if ($table_name == "agents" && !empty($created_user_id)) {
-        $agent_email = trim(wp_unslash($_POST["email"] ?? ""));
-        $welcome_sent = send_new_agent_welcome_email($created_user_id, $agent_email, !empty($password));
-        $user_notice .= $welcome_sent ? " נשלח לסוכן מייל עם שם המשתמש וקישור לבחירת סיסמה (" . $agent_email . ")." : " לא נשלח לסוכן מייל עם פרטי הכניסה.";
+    //מייל שהשתנה - המשתמש הקודם נמחק עכשיו, אחרי שהרשומה כבר מקושרת למשתמש החדש
+    if (!empty($replaced_user_id)) {
+        $deleted_notice = delete_users_of_removed_records(array($replaced_user_id));
+        $user_notice .= !get_userdata($replaced_user_id)
+            ? ". המשתמש הקודם (" . $replaced_user_login . ") נמחק."
+            : ". " . ($deleted_notice ?: "המשתמש הקודם (" . $replaced_user_login . ") לא נמחק");
+    }
+    //סוכן/ספק שנוצר לו משתמש חדש - מייל עם שם המשתמש וקישור לבחירת סיסמה (רק אחרי שהשמירה הצליחה)
+    if (in_array($table_name, USER_EMAIL_TABLES) && !empty($created_user_id)) {
+        $record_email = trim(wp_unslash($_POST["email"] ?? ""));
+        $single_name = BOUTIQUE_TABLES[$table_name]["single"];
+        $welcome_sent = send_new_agent_welcome_email($created_user_id, $record_email, !empty($password));
+        $user_notice .= $welcome_sent ? " נשלח ל" . $single_name . " מייל עם שם המשתמש וקישור לבחירת סיסמה (" . $record_email . ")." : " לא נשלח ל" . $single_name . " מייל עם פרטי הכניסה.";
     }
     //הודעה אחרי הוספה (מה נוסף, ומה נעשה עם היוזר של סוכן/ספק) ואחרי מחיקה
     $message = "";

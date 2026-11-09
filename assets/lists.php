@@ -124,6 +124,9 @@ const BOUTIQUE_TABLES = array(
         "columns" => [
             ["field_name" => "name", "widget" => "text", "label" => "שם","required"=>true],
             ["field_name" => "email", "widget" => "email", "label" => "דוא\"ל","required"=>true],
+            //שם משתמש - כמו בסוכן: נשמר רק ביוזר. בלי שם משתמש - שם המשתמש הוא המייל
+            ["field_name" => "username", "widget" => "text", "label" => "שם משתמש", "no_autofill" => true, "not_in_query" => true, "hide_in_table" => true,
+                "latin_only" => true, "note" => "אותיות באנגלית, ספרות והתווים . _ - @ בלבד"],
             ["field_name" => "email2", "widget" => "email", "label" => "דוא\"ל"],
             ["field_name" => "email3", "widget" => "email", "label" => "דוא\"ל","hide_in_table" => true],
             ["field_name" => "email4", "widget" => "email", "label" => "דוא\"ל","hide_in_table" => true],

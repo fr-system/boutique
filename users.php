@@ -74,10 +74,10 @@ function register_new_user1($display_name, $email, $role, $username = "", $passw
             return array("status" => "success", "user_id" => $existing->ID,
                 "notice" => "שויך למשתמש קיים במערכת עם המייל הזה (שם משתמש: " . $existing->user_login . ")");
         }
-        //יוזר קיים שאי אפשר לשייך - כדי ליצור יוזר נפרד חובה להזין שם משתמש (קיים רק בטופס סוכן)
+        //יוזר קיים שאי אפשר לשייך - כדי ליצור יוזר נפרד חובה להזין שם משתמש (בטופס סוכן ובטופס ספק)
         if ($existing) {
             $msg = "קיים כבר במערכת משתמש עם המייל הזה";
-            $msg .= $role == "agents" ? ". כדי ליצור משתמש נפרד יש להזין שם משתמש" : ", יש להזין מייל אחר";
+            $msg .= in_array($role, USER_EMAIL_TABLES) ? ". כדי ליצור משתמש נפרד יש להזין שם משתמש" : ", יש להזין מייל אחר";
             return array("status" => "failed", "msg" => $msg);
         }
         //אין יוזר עם המייל - שם המשתמש הוא המייל
@@ -234,6 +234,17 @@ function get_bad_user_link($user_id, $table_name, $record_id) {
         }
     }
     return "";
+}
+
+//מייל של סוכן/ספק שהשתנה ונשאר אותו שם משתמש: היוזר הקודם קיבל שם זמני עד שיימחק.
+//כשהשמירה נכשלת - מחזירים לו את השם המקורי
+function restore_renamed_user($renamed) {
+    global $wpdb;
+    if (empty($renamed)) {
+        return;
+    }
+    $wpdb->update($wpdb->users, array("user_login" => $renamed["login"]), array("ID" => intval($renamed["id"])));
+    clean_user_cache(intval($renamed["id"]));
 }
 
 //האם היוזר משויך לרשומה כלשהי (סוכן/ספק)
