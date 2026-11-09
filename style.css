@@ -972,3 +972,64 @@ td.td-buttons a.button {
 .grid-display > .input-label {
     align-self: start;
 }
+/* תאריך בתבנית ישראלית בטבלאות (b-functions.php - il-date) */
+.il-date {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    width: 140px;
+    margin: 0 6px;
+}
+.il-date .il-date-text {
+    width: 100%;
+    padding-left: 32px;
+}
+.il-date .il-date-icon {
+    position: absolute;
+    left: 5px;
+    display: flex;
+    align-items: center;
+}
+.il-date .il-date-icon svg {
+    width: 22px;
+    height: 22px;
+}
+.il-date .il-date-icon svg path, .il-date .il-date-icon svg rect {
+    stroke: var(--b-global-color-dark-green);
+}
+.il-date .il-date-icon:hover svg path, .il-date .il-date-icon:hover svg rect {
+    stroke: var(--b-global-color-gold);
+}
+.il-date .il-date-icon.readonly {
+    pointer-events: none;
+    opacity: 0.5;
+}
+.il-date .il-date-native {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    border: 0;
+    opacity: 0;
+    pointer-events: none;
+}
+.il-date .il-date-text.il-date-invalid {
+    border-color: #c0392b !important;
+    color: #c0392b;
+}
+/* תאריך: type=search כדי שהדפדפן לא יציע השלמה אוטומטית (דוא"ל וכו') - בלי ה-X של שדה חיפוש.
+   מבנה התאריך (placeholder) מוצג רק במעבר עכבר או בזמן הקלדה */
+.il-date .il-date-text::-webkit-search-cancel-button,
+.il-date .il-date-text::-webkit-search-decoration {
+    -webkit-appearance: none;
+    appearance: none;
+}
+.il-date .il-date-text::placeholder {
+    color: transparent;
+}
+.il-date:hover .il-date-text::placeholder,
+.il-date .il-date-text:focus::placeholder {
+    color: #9a9a9a;
+}

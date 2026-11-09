@@ -779,3 +779,63 @@ function getButtonsTable(tableName,currentUrl ){
 }
 
 
+
+//תאריך בתבנית ישראלית בטבלאות (b-functions.php - il-date): תיבת טקסט dd/mm/yyyy + אייקון לוח שנה + שדה תאריך נסתר עם הערך שנשמר (Y-m-d)
+function ilDateToDisplay(ymd) {
+    var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(ymd || "");
+    return m ? m[3] + "/" + m[2] + "/" + m[1] : "";
+}
+
+//מקבל 9/11/2026, 09.11.26, 9-11-2026, 09112026. מחזיר Y-m-d, "" לריק, או null לתאריך לא תקין
+function ilDateParse(text) {
+    text = jQuery.trim(text || "");
+    if (text === "") {
+        return "";
+    }
+    var m = /^(\d{1,2})[\/.\-](\d{1,2})[\/.\-](\d{2}|\d{4})$/.exec(text) || /^(\d{2})(\d{2})(\d{4})$/.exec(text);
+    if (!m) {
+        return null;
+    }
+    var day = parseInt(m[1], 10), month = parseInt(m[2], 10), year = parseInt(m[3], 10);
+    if (m[3].length == 2) {
+        year += 2000;
+    }
+    var date = new Date(year, month - 1, day);
+    if (date.getFullYear() != year || date.getMonth() != month - 1 || date.getDate() != day) {
+        return null;
+    }
+    return year + "-" + String(month).padStart(2, "0") + "-" + String(day).padStart(2, "0");
+}
+
+jQuery(document).on("click", ".il-date-icon", function () {
+    var $wrap = jQuery(this).closest(".il-date");
+    var native = $wrap.find(".il-date-native")[0];
+    if (jQuery(this).hasClass("readonly") || native.readOnly || native.disabled) {
+        return;
+    }
+    try {
+        native.showPicker();
+    } catch (e) {
+        native.focus();
+        native.click();
+    }
+});
+
+//בחירה מלוח השנה - ממלאים את תיבת הטקסט
+jQuery(document).on("change", ".il-date-native", function () {
+    jQuery(this).closest(".il-date").find(".il-date-text").val(ilDateToDisplay(this.value)).removeClass("il-date-invalid");
+});
+
+//הקלדה - מעדכנים את השדה הנסתר. תאריך לא תקין: מסומן באדום והערך הקודם נשאר
+jQuery(document).on("change", ".il-date-text", function () {
+    var $text = jQuery(this);
+    var $native = $text.closest(".il-date").find(".il-date-native");
+    var ymd = ilDateParse($text.val());
+    if (ymd === null) {
+        $text.addClass("il-date-invalid");
+        return;
+    }
+    $text.removeClass("il-date-invalid").val(ilDateToDisplay(ymd));
+    $native.val(ymd);
+    jQuery('input[name=dirty]').val("1");
+});

@@ -278,13 +278,28 @@ function get_column_value($column,$row,$field,$list,$key,$is_readonly=false)
                     $column_value .= "<div class='plus-number-minus flex-display'><span class='minus bold font-25 pointer {$readonly}'>-</span>";
                 }
 
+                $display_date = "";
                 if ($column["widget"] == "date" && !empty($value)) {
                     $date = DateTime::createFromFormat('d/m/Y', $value);
                     $value = $date ? $date->format('Y-m-d') : '';
+                    $display_date = $date ? $date->format('d/m/Y') : '';
                 }
 
-                $column_value .= "<input type='{$type}' class='{$field}' name='rows[{$key}][{$field}]' value='{$value}' {$readonly}" .
-                    (isset($column['un_apostrophe']) && isset($column['sign']) ? "data-a-sign='" . $column['sign'] . "'" : "") . "/>";
+                if ($column["widget"] == "date") {
+                    //תאריך בתבנית ישראלית: תיבת טקסט (dd/mm/yyyy) להקלדה + אייקון לוח שנה שפותח את הבחירה של הדפדפן.
+                    //הערך שנשמר (Y-m-d) בשדה התאריך הנסתר - שדה התאריך של הדפדפן מוצג לפי שפת הדפדפן (mm/dd/yyyy)
+                    $column_value .= "<div class='il-date'>
+                        <input type='search' class='il-date-text' value='{$display_date}' placeholder='dd/mm/yyyy' inputmode='numeric' maxlength='10' autocomplete='off' data-lpignore='true' data-1p-ignore='true' data-form-type='other' {$readonly}/>
+                        <span class='il-date-icon pointer {$readonly}' title='בחירת תאריך'>
+                            <svg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 24 24' fill='none'><rect x='3' y='5' width='18' height='16' rx='2' class='stroke-background-gold' stroke-width='2'/><path d='M3 10H21M8 3V7M16 3V7' class='stroke-background-gold' stroke-width='2' stroke-linecap='round'/></svg>
+                        </span>
+                        <input type='date' class='il-date-native {$field}' name='rows[{$key}][{$field}]' value='{$value}' tabindex='-1' {$readonly}/>
+                    </div>";
+                }
+                else {
+                    $column_value .= "<input type='{$type}' class='{$field}' name='rows[{$key}][{$field}]' value='{$value}' {$readonly}" .
+                        (isset($column['un_apostrophe']) && isset($column['sign']) ? "data-a-sign='" . $column['sign'] . "'" : "") . "/>";
+                }
 
                 if ($column['widget'] == 'number') {
                     $column_value .= "<span class='plus bold font-25 pointer {$readonly}'>+</span></div>";
