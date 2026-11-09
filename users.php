@@ -109,13 +109,8 @@ function register_new_user1($display_name, $email, $role, $username = "", $passw
     if (is_wp_error($user_id))
         return array("status" => "failed", "msg" => $user_id->get_error_message());
 
-    $notice = "נוצר משתמש חדש, שם משתמש: " . $username;
-    if ($existing) {
-        $notice = "קיים כבר במערכת משתמש אחר עם המייל הזה, ולכן " . $notice;
-    }
-    if (empty($password)) {
-        $notice .= ". לא הוגדרה סיסמה - לכניסה ראשונה יש להשתמש ב'שכחתי סיסמא'";
-    }
+    //הודעה קצרה - על הסיסמה מודיעים אחרי שליחת מייל הפתיחה (save_single_data)
+    $notice = "נוצר משתמש: " . $username;
     return array("status" => "success", "user_id" => $user_id, "notice" => $notice, "created" => true);
 }
 
@@ -213,16 +208,16 @@ function get_bad_user_link($user_id, $table_name, $record_id) {
         return "היה מקושר למשתמש שלא קיים";
     }
     if (in_array("administrator", $user->roles)) {
-        return "היה מקושר למשתמש של מנהל המערכת (שלא שונה)";
+        return "היה מקושר למשתמש של מנהל המערכת";
     }
     if (!in_array($table_name, $user->roles)) {
-        return "היה מקושר למשתמש בתפקיד אחר (" . $user->user_login . ", שלא שונה)";
+        return "היה מקושר למשתמש בתפקיד אחר";
     }
     foreach (USER_EMAIL_TABLES as $table) {
         $other = $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM {$wpdb->prefix}{$table} WHERE user_id = %d AND NOT (%s = %s AND id = %d)",
             $user_id, $table, $table_name, $record_id));
         if ($other > 0) {
-            return "היה מקושר למשתמש שמשויך גם לרשומה אחרת (" . $user->user_login . ", שלא שונה)";
+            return "היה מקושר למשתמש שמשויך גם לרשומה אחרת";
         }
     }
     return "";

@@ -1,4 +1,40 @@
 <?php
+//חלונית תזכורות לסוכן (footer.php): משימות פתוחות שלו שתאריך התזכורת שלהן הגיע (היום או לפני).
+//קופצת מלמטה בצד פעם ביום (או כשנוספה תזכורת), לחיצה סוגרת - rivka.js
+function task_reminders_popup()
+{
+    global $wpdb;
+    if (!is_user_logged_in() || !is_agent() || get_option('boutique_tasks_reminder_columns') != 1) {
+        return;
+    }
+    $agent_id = intval(get_id_by_user());
+    if (!$agent_id) {
+        return;
+    }
+    $tasks = get_data_table("tasks", array(
+        array("filter_table" => "tasks", "filter_field" => "agent_id", "filter_value" => $agent_id),
+        array("filter_field" => "status_id", "filter_type" => "!=", "filter_value" => "1"),
+        array("filter_type" => "filter", "filter_field" => "",
+            "filter_value" => "({$wpdb->prefix}tasks.sending_reminder IS NOT NULL AND {$wpdb->prefix}tasks.sending_reminder <= CURDATE())"),
+    ));
+    if (empty($tasks)) {
+        return;
+    }
+    $ids = array_map(function ($task) { return intval($task->id); }, $tasks);
+    ?>
+    <div class="task-reminder-popup" data-key="<?= esc_attr(date('Y-m-d') . ':' . implode(',', $ids)) ?>" title="לחיצה לסגירה">
+        <div class="task-reminder-title bold dark-green font-18">תזכורת<?= count($tasks) > 1 ? ' ל-' . count($tasks) . ' משימות' : ' למשימה' ?></div>
+        <?php foreach ($tasks as $task) { ?>
+            <a class="task-reminder-item not-link" href="<?= esc_url(get_site_url() . '/single?subject=tasks&action=edit&id=' . intval($task->id)) ?>">
+                <span class="bold"><?= esc_html($task->subject_text) ?></span>
+                <?php if (!empty($task->client_name)) { ?><span> - <?= esc_html($task->client_name) ?></span><?php } ?>
+                <?php if (!empty($task->target_date)) { ?><span class="task-reminder-date">יעד: <?= date('d/m/Y', strtotime($task->target_date)) ?></span><?php } ?>
+            </a>
+        <?php } ?>
+    </div>
+    <?php
+}
+
 function get_side_menu()
 {
     $subject =isset($_GET) && isset($_GET["subject"]) ? $_GET["subject"] : "home";

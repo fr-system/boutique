@@ -517,7 +517,7 @@ function drow_html_tasks($attr)
     }
 
     $filters[]=array("filter_field" => "status_id", "filter_type" => "!=", "filter_value" => "1");
-    $filters[]=array("filter_field" => "target_date", "filter_type" => "date", "filter_ratio" => "<","filter_value"=>"CURDATE()");
+    $filters[]=array("filter_field" => "target_date", "filter_type" => "date", "filter_ratio" => (!empty($attr["include_today"]) ? "<=" : "<"),"filter_value"=>"CURDATE()");//דוח לסוכן - כולל היום; סיכום למנהל - רק מה שעבר
     $tasks = get_data_table("tasks",$filters);
     //משימות בלי סוכן: agent_id ריק (הסוכן נמחק) או סוכן שכבר לא קיים
     if (!empty($attr["no_agent"])) {

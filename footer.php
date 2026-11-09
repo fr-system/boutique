@@ -12,6 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 ?>
 
+<?php task_reminders_popup(); ?>
 <?php wp_footer(); ?>
 </main>
 </body>

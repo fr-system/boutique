@@ -839,3 +839,24 @@ jQuery(document).on("change", ".il-date-text", function () {
     $native.val(ymd);
     jQuery('input[name=dirty]').val("1");
 });
+
+//חלונית תזכורות לסוכן (task_reminders_popup ב-b-functions.php): קופצת מלמטה פעם ביום, ושוב אם נוספה תזכורת.
+//לחיצה על החלונית סוגרת; לחיצה על משימה גם פותחת אותה
+jQuery(function () {
+    var $popup = jQuery(".task-reminder-popup");
+    if ($popup.length == 0) {
+        return;
+    }
+    var key = $popup.data("key");
+    var seen = "";
+    try { seen = localStorage.getItem("taskReminderSeen") || ""; } catch (e) {}
+    if (seen == key) {
+        return;
+    }
+    function closePopup() {
+        try { localStorage.setItem("taskReminderSeen", key); } catch (e) {}
+        $popup.removeClass("show");
+    }
+    setTimeout(function () { $popup.addClass("show"); }, 600);
+    $popup.on("click", closePopup);
+});

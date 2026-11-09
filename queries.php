@@ -248,7 +248,7 @@ function save_single_data()
                 die();
             }
             $_POST["user_id"] = $result["user_id"];
-            $user_notice = "ה" . BOUTIQUE_TABLES[$table_name]["single"] . " " . $bad_link . " ונותק ממנו. " . ($result["notice"] ?? "");
+            $user_notice = "ה" . BOUTIQUE_TABLES[$table_name]["single"] . " " . $bad_link . " - " . ($result["notice"] ?? "");
             $created_user_id = !empty($result["created"]) ? $result["user_id"] : 0;
         }
         else if(!empty($_POST["user_id"])){
@@ -292,7 +292,8 @@ function save_single_data()
                 $created_user_id = !empty($result["created"]) ? $result["user_id"] : 0;
                 $replaced_user_id = $user_id;
                 $replaced_user_login = $old_login;
-                $user_notice = "המייל השתנה, ולכן ל" . $single_name . " משתמש חדש: " . ($result["notice"] ?? "");
+                $new_user = get_userdata(intval($result["user_id"]));
+                $user_notice = "המייל השתנה - " . (!empty($result["created"]) ? "נוצר משתמש חדש: " : "שויך למשתמש: ") . ($new_user ? $new_user->user_login : "");
             }
             else {
                 $change_login = !empty($username) && $username != $user->user_login;
@@ -473,15 +474,21 @@ function save_single_data()
     if (!empty($replaced_user_id)) {
         $deleted_notice = delete_users_of_removed_records(array($replaced_user_id));
         $user_notice .= !get_userdata($replaced_user_id)
-            ? ". המשתמש הקודם (" . $replaced_user_login . ") נמחק."
-            : ". " . ($deleted_notice ?: "המשתמש הקודם (" . $replaced_user_login . ") לא נמחק");
+            ? ". המשתמש הקודם נמחק."
+            : ". " . ($deleted_notice ?: "המשתמש הקודם (" . $replaced_user_login . ") לא נמחק") . ".";
     }
     //סוכן/ספק שנוצר לו משתמש חדש - מייל עם שם המשתמש וקישור לבחירת סיסמה (רק אחרי שהשמירה הצליחה)
     if (in_array($table_name, USER_EMAIL_TABLES) && !empty($created_user_id)) {
         $record_email = trim(wp_unslash($_POST["email"] ?? ""));
         $single_name = BOUTIQUE_TABLES[$table_name]["single"];
         $welcome_sent = send_new_agent_welcome_email($created_user_id, $record_email, !empty($password));
-        $user_notice .= $welcome_sent ? " נשלח ל" . $single_name . " מייל עם שם המשתמש וקישור לבחירת סיסמה (" . $record_email . ")." : " לא נשלח ל" . $single_name . " מייל עם פרטי הכניסה.";
+        //שם המשתמש מגיע במייל - בהודעה מציגים אותו רק כשהמייל לא נשלח
+        $created_user = get_userdata($created_user_id);
+        if ($welcome_sent && $created_user) {
+            $user_notice = str_replace(": " . $created_user->user_login, "", $user_notice);
+        }
+        $user_notice = rtrim($user_notice, ". ") . ". ";
+        $user_notice .= $welcome_sent ? "נשלח מייל לבחירת סיסמה." : "לא נשלח מייל - לכניסה ראשונה יש להשתמש ב'שכחתי סיסמה'.";
     }
     //הודעה אחרי הוספה (מה נוסף, ומה נעשה עם היוזר של סוכן/ספק) ואחרי מחיקה
     $message = "";

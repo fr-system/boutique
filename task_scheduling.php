@@ -104,17 +104,17 @@ function send_task_reminders()
     }
 }
 
-//משימות שעבר תאריך היעד שלהן: לכל סוכן המשימות שלו, ולמנהל סיכום של כל הסוכנים.
+//לכל סוכן - המשימות שלו שתאריך היעד שלהן היום או שכבר עבר (הדוח נשלח בבוקר). למנהל - סיכום של המשימות שתאריך היעד שלהן עבר (אתמול ולפני), לפי סוכן
 //במוצאי שבת נכללות גם המשימות של שישי - הדוח כולל את כל המשימות הפתוחות שהתאריך שלהן עבר
 function send_unclosed_tasks($type)
 {
     global $wpdb;
-    $query = "SELECT agent_id FROM {$wpdb->prefix}tasks WHERE status_id != 1 AND target_date < CURDATE() GROUP BY agent_id";
+    $query = "SELECT agent_id FROM {$wpdb->prefix}tasks WHERE status_id != 1 AND target_date <= CURDATE() GROUP BY agent_id";
     $results = run_query($query);
     if (empty($results)) {
         return;
     }
-    $subject = "משימות שעבר תאריך היעד שלהן";
+    $subject = "משימות שהגיע תאריך היעד שלהן";
 
     //לכל סוכן - רק המשימות שלו
     foreach ($results as $result) {
@@ -123,13 +123,13 @@ function send_unclosed_tasks($type)
         if (!$agent_email) {
             continue;
         }
-        $attr = ["report_title"=>"משימות שעבר תאריך היעד", "export" => "archive", "type" => $type, "packet" => ["tasks"], "send_mail" => true, "create_only_fill" => true,"agent_id"=>$result->agent_id];
+        $attr = ["report_title"=>"משימות שהגיע תאריך היעד", "export" => "archive", "type" => $type, "packet" => ["tasks"], "send_mail" => true, "create_only_fill" => true,"agent_id"=>$result->agent_id, "include_today" => true];
         $file = create_pdf($attr);
         if (empty($file)) {
             continue;
         }
         $body = build_email_layout("תזכורת משימות", "שלום " . esc_html($agent->name) . ",",
-            '<div style="font-size:15px; line-height:1.7; color:#444444; margin-bottom:28px;">מצורפות המשימות שלך שעבר תאריך היעד שלהן ועדיין לא נסגרו.<br>אחרי ביצוע משימה יש לעדכן את המצב שלה במערכת.</div>');
+            '<div style="font-size:15px; line-height:1.7; color:#444444; margin-bottom:28px;">מצורפות המשימות שלך שתאריך היעד שלהן היום או שכבר עבר, ועדיין לא נסגרו.<br>אחרי ביצוע משימה יש לעדכן את המצב שלה במערכת.</div>');
         send_mail($agent_email, $subject, $body, ["משימות פתוחות.pdf" => $file]);
         delete_report_file($file);
     }
@@ -142,7 +142,7 @@ function send_unclosed_tasks($type)
     }
     $body = build_email_layout("משימות שלא נסגרו", "שלום,",
         '<div style="font-size:15px; line-height:1.7; color:#444444; margin-bottom:28px;">מצורף סיכום המשימות שעבר תאריך היעד שלהן ועדיין לא נסגרו, לפי סוכן.</div>');
-    send_mail(get_option('admin_email'), $subject . " - סיכום", $body, ["משימות פתוחות - סיכום.pdf" => $file]);
+    send_mail(get_option('admin_email'), "משימות שעבר תאריך היעד שלהן - סיכום", $body, ["משימות פתוחות - סיכום.pdf" => $file]);
     delete_report_file($file);
 }
 function send_orders_today($time)
