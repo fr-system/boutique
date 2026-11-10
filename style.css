@@ -1100,3 +1100,286 @@ input[name="sending_reminder"] {
     font-size: 13px;
     color: #8A8A8A;
 }
+
+/* עמוד הבית - סיכום המשימות של הסוכן (home-page-template.php). הכרטיס בלי גלילה - התוכן קומפקטי והכרטיס גדל לפי התוכן */
+.graphs-charts.agent-tasks-card {
+    height: auto;
+    overflow: visible;
+}
+.agent-tasks-summary {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+.agent-tasks-chart {
+    position: relative;
+    flex: 0 0 130px;
+    width: 130px;
+    height: 130px;
+}
+.agent-tasks-chart-center {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    line-height: 1.15;
+    pointer-events: none;
+}
+.agent-tasks-small {
+    font-size: 1.2rem;
+}
+.agent-tasks-side {
+    flex: 1;
+    min-width: 0;
+}
+.agent-tasks-tiles {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+}
+.agent-tasks-tile {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+    padding: 5px 10px;
+    border-radius: 10px;
+    background-color: var(--b-global-color-light-gray);
+    border-inline-start: 4px solid #C9C9C9;
+    white-space: nowrap;
+}
+.agent-tasks-tile.done {
+    border-inline-start-color: #1A7870;
+}
+.agent-tasks-tile.in-treatment {
+    border-inline-start-color: #ce9c3d;
+}
+.agent-tasks-tile.not-yet-treated {
+    border-inline-start-color: #f8d9a3;
+}
+.agent-tasks-alert {
+    padding: 3px 10px;
+    border-radius: 8px;
+    margin-top: 6px;
+}
+.agent-tasks-alert.overdue {
+    background-color: #FBEAEA;
+    color: #c0392b;
+}
+.agent-tasks-alert.today {
+    background-color: #FDF3E1;
+    color: #8a6418;
+}
+.agent-tasks-empty {
+    padding: 20px;
+    text-align: center;
+    color: #8A8A8A;
+}
+
+/* עמוד הבית - רשימת המשימות הפתוחות (home-page-template.php): כל משימה בשורה-כרטיס עם עמודות קבועות */
+.open-tasks-grid {
+    display: grid;
+    grid-template-columns: 90px minmax(0, 1.2fr) minmax(0, 1fr) minmax(0, 2.5fr) 100px 115px;
+    align-items: center;
+    gap: 12px;
+}
+.open-tasks-grid.with-agent {
+    grid-template-columns: 90px minmax(0, 1fr) minmax(0, 1.2fr) minmax(0, 1fr) minmax(0, 2.5fr) 100px 115px;
+}
+.open-tasks-head {
+    padding: 0 12px 6px 12px;
+    font-size: 1.3rem;
+    color: #8A8A8A;
+}
+.graphs-charts .open-task.open-tasks-grid {
+    background-color: #ffffff;
+    border: 1px solid #EFE6D2;
+    border-radius: 10px;
+    padding: 3px 12px;
+    line-height: 1.2;
+    margin-bottom: 3px;
+    transition: box-shadow 0.15s, border-color 0.15s;
+}
+.graphs-charts .open-task.open-tasks-grid:hover {
+    color: inherit;
+    border-color: var(--b-global-color-gold);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+.open-task-status {
+    display: inline-block;
+    padding: 1px 8px;
+    border-radius: 20px;
+    font-size: 1.3rem;
+    background-color: var(--b-global-color-light-gray);
+}
+.open-task-status.in-treatment {
+    background-color: #F6EBD3;
+    color: #8a6418;
+}
+.open-task-status.not-yet-treated {
+    background-color: var(--b-global-color-light-orange);
+    color: #6b4a12;
+}
+.open-task-importance {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-inline-end: 6px;
+    vertical-align: middle;
+    background-color: #C0DBD9;
+}
+.open-task-importance.importance-1 {
+    background-color: #1A7870;
+}
+.open-task-importance.importance-2 {
+    background-color: #4CD2C6;
+}
+.open-task-details {
+    color: #6F6F6F;
+}
+.open-task-date {
+    display: inline-block;
+    padding: 1px 8px;
+    border-radius: 20px;
+    font-size: 1.3rem;
+    background-color: var(--b-global-color-light-gray);
+}
+.open-task-date.overdue {
+    background-color: #FBEAEA;
+    color: #c0392b;
+    font-weight: 700;
+}
+.open-task-date.today {
+    background-color: #FDF3E1;
+    color: #8a6418;
+    font-weight: 700;
+}
+.open-task-date.none {
+    background-color: transparent;
+    color: #B5B5B5;
+}
+.open-tasks-empty {
+    padding: 20px;
+    text-align: center;
+    color: #8A8A8A;
+}
+
+/* עמוד הבית - מנהל: טבלת משימות לפי סוכן (home-page-template.php). הכותרת והסה"כ נשארים במקום בגלילה */
+.agents-tasks-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+.agents-tasks-table th {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    background-color: #ffffff;
+    font-size: 1.3rem;
+    font-weight: 400;
+    color: #8A8A8A;
+    text-align: start;
+    padding: 0 8px 6px 8px;
+    border-bottom: 1px solid #EFE6D2;
+    white-space: nowrap;
+}
+.agents-tasks-table td {
+    padding: 7px 8px;
+    border-bottom: 1px solid #F3F3F3;
+    white-space: nowrap;
+}
+.agents-tasks-table tbody tr:hover td {
+    background-color: var(--b-global-color-light-gray);
+}
+.agents-tasks-table .num {
+    text-align: center;
+    width: 1%;
+}
+.agents-tasks-table td.zero {
+    color: #C9C9C9;
+}
+.agents-tasks-table td.total {
+    font-weight: 700;
+}
+.agents-tasks-table td.done:not(.zero) {
+    color: #1A7870;
+    font-weight: 700;
+}
+.agents-tasks-table td.in_treatment:not(.zero) {
+    color: #8a6418;
+}
+.agents-tasks-table td.not_yet_treated:not(.zero) {
+    color: #6b4a12;
+}
+.agents-tasks-table td.overdue:not(.zero) {
+    color: #c0392b;
+    font-weight: 700;
+}
+.agents-tasks-table tbody td.overdue:not(.zero) {
+    background-color: #FBEAEA;
+}
+.agents-tasks-table tfoot td {
+    position: sticky;
+    bottom: 0;
+    background-color: var(--b-global-color-light-gray);
+    font-weight: 700;
+    border-top: 1px solid #EFE6D2;
+    border-bottom: none;
+}
+.agents-tasks-table .progress-col {
+    width: 30%;
+    min-width: 120px;
+}
+.tasks-progress {
+    display: inline-block;
+    vertical-align: middle;
+    width: calc(100% - 45px);
+    height: 8px;
+    border-radius: 8px;
+    background-color: #EFEFEF;
+    overflow: hidden;
+}
+.tasks-progress-fill {
+    height: 100%;
+    border-radius: 8px;
+    background-color: #1A7870;
+}
+.tasks-progress-text {
+    display: inline-block;
+    width: 40px;
+    margin-inline-start: 5px;
+    font-size: 1.3rem;
+    font-weight: 700;
+    vertical-align: middle;
+}
+/* תזכורת ברשימת המשימות הפתוחות - אותו פעמון כמו בטבלת המשימות; תזכורת שהגיעה - מודגשת בירוק */
+.open-task-reminder {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 1px 8px;
+    border-radius: 20px;
+    font-size: 1.3rem;
+    background-color: var(--b-global-color-light-gray);
+}
+.open-task-reminder::before {
+    content: "";
+    flex: 0 0 14px;
+    width: 14px;
+    height: 14px;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%231A7870' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9'/%3E%3Cpath d='M10.3 21a1.94 1.94 0 0 0 3.4 0'/%3E%3C/svg%3E") no-repeat center / contain;
+}
+.open-task-reminder.arrived {
+    background-color: var(--b-global-color-light-light-blue);
+    color: #1A7870;
+    font-weight: 700;
+}
+.open-task-reminder.none {
+    background-color: transparent;
+    color: #B5B5B5;
+}
+.open-task-reminder.none::before {
+    display: none;
+}

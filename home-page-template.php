@@ -79,52 +79,141 @@ if(is_agent()) {
                 <div class="font-20 bold">משימות</div>
                 <a class="not-link font-15 dark-green" href="/archive/?subject=tasks">לפירוט המלא -></a>
             </div>
-            <div class="graphs-charts quick-action border-dark-gray">
+            <div class="graphs-charts quick-action border-dark-gray<?= is_agent() ? " agent-tasks-card" : "" ?>">
                 <?php
-                $filters = array();
-                if(is_agent()){
-                    $filters[] = array("filter_field" => "id", "filter_value" => $agent_id);
-                }
-                $agents = get_data_table("agents",$filters);
-                $filters = array(array("filter_field" => "status_id", "filter_value" =>1,"filter_type"=>"!="));
-                if(is_agent()){
-                    $filters[] = array("filter_field" => "agent_id", "filter_table" => "tasks", "filter_value" => $agent_id );
-                }
-
-                $result = get_data_table("tasks",$filters);
-                foreach ($result as $task) {
-                    if (empty($task->agent_id)) continue;
-                    $agent_id = $task->agent_id;
-                    $index = array_search(
-                        $agent_id,
-                        array_map(fn($a) => $a->id, $agents)
-                    );
-
-                    if (!isset($agents[$index]->in_treatment)) {
-                        $agents[$index]->in_treatment = 0;
-                        $agents[$index]->not_yet_treated = 0;
-                    }
-
-                    if($task->status_id == 2){
-                        $agents[$index]->in_treatment++;
-                    }
-                    else if($task->status_id == 3){
-                        $agents[$index]->not_yet_treated++;
-                    }
-                }?>
-                <?php foreach ($agents as $agent){
-                    //write_log("row ".json_encode( $task));
-                    if(isset($agent->in_treatment) && isset($agent->not_yet_treated)){
-                        $in_treatment = $agent->in_treatment> 0 ?  $agent->in_treatment . " בטיפול":"";
-                        $not_yet_treated = $agent->not_yet_treated > 0 ? $agent->not_yet_treated . " טרם טופלו":""
-                    ?>
-                    <div class="font-15 flex-display ">
-                        <span class="bold part-30"><?= $agent->name ?></span>
-                        <span class=""><?= $in_treatment .(!empty($in_treatment) && !empty($not_yet_treated)?" ו ":"") .$not_yet_treated ?></span>
-                    </div>
-                    <?php
-                    }
-                }
+                //סוכן: סיכום כל המשימות שלו - עוגה לפי מצב (בוצע/בטיפול/טרם טופל), כרטיסיות מספרים ושורות התראה
+                if (is_agent()) {
+                    global $wpdb;
+                    $stats = $wpdb->get_row($wpdb->prepare(
+                        "SELECT COUNT(*) AS total,
+                                SUM(status_id = 1) AS done,
+                                SUM(status_id = 2) AS in_treatment,
+                                SUM(status_id = 3) AS not_yet_treated,
+                                SUM(status_id != 1 AND DATE(target_date) < CURDATE()) AS overdue,
+                                SUM(status_id != 1 AND DATE(target_date) = CURDATE()) AS due_today
+                         FROM {$wpdb->prefix}tasks WHERE agent_id = %d", intval(get_id_by_user())));
+                    $total = intval($stats->total ?? 0);
+                    $done = intval($stats->done ?? 0);
+                    $in_treatment = intval($stats->in_treatment ?? 0);
+                    $not_yet_treated = intval($stats->not_yet_treated ?? 0);
+                    $overdue = intval($stats->overdue ?? 0);
+                    $due_today = intval($stats->due_today ?? 0);
+                    $done_percent = $total > 0 ? round($done * 100 / $total) : 0;
+                    if ($total == 0) { ?>
+                        <div class="font-15 agent-tasks-empty">עדיין אין לך משימות</div>
+                    <?php } else { ?>
+                        <div class="agent-tasks-summary">
+                            <div class="agent-tasks-chart">
+                                <canvas id="agentTasksChart"></canvas>
+                                <div class="agent-tasks-chart-center">
+                                    <div class="bold font-20"><?= $total ?></div>
+                                    <div class="agent-tasks-small">משימות</div>
+                                    <div class="agent-tasks-small bold dark-green"><?= $done_percent ?>% בוצעו</div>
+                                </div>
+                            </div>
+                            <div class="agent-tasks-side">
+                                <div class="agent-tasks-tiles">
+                                    <div class="agent-tasks-tile total"><span class="bold font-20"><?= $total ?></span><span class="font-15">קיבלת</span></div>
+                                    <div class="agent-tasks-tile done"><span class="bold font-20"><?= $done ?></span><span class="font-15">בוצעו</span></div>
+                                    <div class="agent-tasks-tile in-treatment"><span class="bold font-20"><?= $in_treatment ?></span><span class="font-15">בטיפול</span></div>
+                                    <div class="agent-tasks-tile not-yet-treated"><span class="bold font-20"><?= $not_yet_treated ?></span><span class="font-15">טרם טופלו</span></div>
+                                </div>
+                                <?php if ($overdue > 0) { ?>
+                                    <div class="agent-tasks-alert overdue font-15">⚠ <?= $overdue == 1 ? "למשימה אחת" : "ל-" . $overdue . " משימות" ?> עבר תאריך היעד</div>
+                                <?php } ?>
+                                <?php if ($due_today > 0) { ?>
+                                    <div class="agent-tasks-alert today font-15">● <?= $due_today == 1 ? "למשימה אחת" : "ל-" . $due_today . " משימות" ?> תאריך היעד היום</div>
+                                <?php } ?>
+                            </div>
+                        </div>
+                        <script>
+                            //Chart.js נטען בהמשך העמוד (גרף המכירות) - מציירים אחרי שהעמוד נטען
+                            document.addEventListener('DOMContentLoaded', function () {
+                                if (typeof Chart === 'undefined') return;
+                                new Chart(document.getElementById('agentTasksChart'), {
+                                    type: 'doughnut',
+                                    data: {
+                                        labels: ['בוצעו', 'בטיפול', 'טרם טופלו'],
+                                        datasets: [{
+                                            data: [<?= $done ?>, <?= $in_treatment ?>, <?= $not_yet_treated ?>],
+                                            backgroundColor: ['#1A7870', '#ce9c3d', '#f8d9a3'],
+                                            borderWidth: 2,
+                                            borderColor: '#ffffff'
+                                        }]
+                                    },
+                                    options: {
+                                        cutout: '72%',
+                                        responsive: true,
+                                        maintainAspectRatio: false,
+                                        plugins: {legend: {display: false}}
+                                    }
+                                });
+                            });
+                        </script>
+                    <?php }
+                } else {
+                    //מנהל: לכל סוכן - כמה משימות קיבל, כמה בוצעו/בטיפול/טרם טופלו, כמה באיחור ואחוז ביצוע. סוכן בלי משימות לא מוצג
+                    global $wpdb;
+                    $agents_stats = $wpdb->get_results(
+                        "SELECT a.id, a.name,
+                                COUNT(t.id) AS total,
+                                SUM(t.status_id = 1) AS done,
+                                SUM(t.status_id = 2) AS in_treatment,
+                                SUM(t.status_id = 3) AS not_yet_treated,
+                                SUM(t.status_id != 1 AND DATE(t.target_date) < CURDATE()) AS overdue
+                         FROM {$wpdb->prefix}agents a
+                         INNER JOIN {$wpdb->prefix}tasks t ON t.agent_id = a.id
+                         GROUP BY a.id, a.name
+                         ORDER BY total DESC, a.name");
+                    $columns = array("total" => "קיבל", "done" => "בוצעו", "in_treatment" => "בטיפול", "not_yet_treated" => "טרם טופלו", "overdue" => "באיחור");
+                    $sums = array_fill_keys(array_keys($columns), 0);
+                    if (empty($agents_stats)) { ?>
+                        <div class="font-15 agent-tasks-empty">עדיין אין משימות לסוכנים</div>
+                    <?php } else { ?>
+                        <table class="agents-tasks-table font-15">
+                            <thead>
+                            <tr>
+                                <th>סוכן</th>
+                                <?php foreach ($columns as $key => $label) { ?><th class="num <?= $key ?>"><?= $label ?></th><?php } ?>
+                                <th class="progress-col">ביצוע</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <?php foreach ($agents_stats as $row) {
+                                foreach ($columns as $key => $label) {
+                                    $row->$key = intval($row->$key);
+                                    $sums[$key] += $row->$key;
+                                }
+                                $percent = $row->total > 0 ? round($row->done * 100 / $row->total) : 0; ?>
+                                <tr>
+                                    <td class="bold"><?= esc_html($row->name) ?></td>
+                                    <?php foreach ($columns as $key => $label) {
+                                        $is_zero = $row->$key == 0 && $key != "total"; ?>
+                                        <td class="num <?= $key ?><?= $is_zero ? " zero" : "" ?>"><?= $is_zero ? "–" : $row->$key ?></td>
+                                    <?php } ?>
+                                    <td class="progress-col">
+                                        <div class="tasks-progress" title="<?= $row->done . " מתוך " . $row->total ?>"><div class="tasks-progress-fill" style="width: <?= $percent ?>%"></div></div>
+                                        <span class="tasks-progress-text"><?= $percent ?>%</span>
+                                    </td>
+                                </tr>
+                            <?php } ?>
+                            </tbody>
+                            <?php if (count($agents_stats) > 1) {
+                                $sum_percent = $sums["total"] > 0 ? round($sums["done"] * 100 / $sums["total"]) : 0; ?>
+                                <tfoot>
+                                <tr>
+                                    <td class="bold">סה"כ</td>
+                                    <?php foreach ($columns as $key => $label) { ?><td class="num <?= $key ?>"><?= $sums[$key] ?></td><?php } ?>
+                                    <td class="progress-col">
+                                        <div class="tasks-progress"><div class="tasks-progress-fill" style="width: <?= $sum_percent ?>%"></div></div>
+                                        <span class="tasks-progress-text"><?= $sum_percent ?>%</span>
+                                    </td>
+                                </tr>
+                                </tfoot>
+                            <?php } ?>
+                        </table>
+                    <?php }
+                }//מנהל
                 ?>
             </div>
 
@@ -151,16 +240,38 @@ if(is_agent()) {
 
                 $result = get_data_table("tasks",$filters,array("open_date" => "desc"));
 
-                //write_log("task ".json_encode($result));
+                //שורת משימה: מצב, (סוכן - רק למנהל), לקוח עם נקודת חשיבות, נושא, פירוט ותאריך יעד (עבר - אדום, היום - כתום)
+                $statuses = array(2 => array("label" => "בטיפול", "class" => "in-treatment"), 3 => array("label" => "טרם טופל", "class" => "not-yet-treated"));
+                $importance = array(1 => "גבוהה", 2 => "בינונית", 3 => "נמוכה");
+                $today = date('Y-m-d');
+                $grid_class = is_agent() ? "open-tasks-grid" : "open-tasks-grid with-agent";
+                if (empty($result)) { ?>
+                    <div class="open-tasks-empty font-15">אין משימות פתוחות</div>
+                <?php } else { ?>
+                    <div class="<?= $grid_class ?> open-tasks-head">
+                        <span>מצב</span>
+                        <?php if (!is_agent()) { ?><span>סוכן</span><?php } ?>
+                        <span>לקוח</span><span>נושא</span><span>פירוט</span><span>תאריך יעד</span><span>תזכורת</span>
+                    </div>
+                <?php }
                 foreach ($result as $task) {
-                    //if (empty($task->agent_id)) continue;
-                    //$agent_id = $task->agent_id;
+                    $status = $statuses[intval($task->status_id)] ?? array("label" => "", "class" => "");
+                    $target = !empty($task->target_date) ? date('Y-m-d', strtotime($task->target_date)) : "";
+                    $date_class = $target === "" ? "none" : ($target < $today ? "overdue" : ($target == $today ? "today" : ""));
+                    $date_text = $target === "" ? "—" : ($target == $today ? "היום" : date('d/m/Y', strtotime($target)));
+                    //תזכורת: פעמון ותאריך; תזכורת שהגיעה (היום או לפני) - מודגשת
+                    $reminder = !empty($task->sending_reminder) ? date('Y-m-d', strtotime($task->sending_reminder)) : "";
+                    $reminder_class = $reminder === "" ? "none" : ($reminder <= $today ? "arrived" : "");
+                    $reminder_text = $reminder === "" ? "—" : ($reminder == $today ? "היום" : date('d/m/Y', strtotime($reminder)));
                     ?>
-                    <a href="single?subject=tasks&action=edit&id=<?=$task->id?>" class="open-task not-link font-15 flex-display margin-bottom-5">
-                        <span class="bold part-10"><?= $task->agent_name ?></span>
-                        <span class="bold part-10"><?= $task->client_name ?></span>
-                        <span class="part-20"><?php echo $task->subject_text ?></span>
-                        <span class=""><?php echo $task->details ?></span>
+                    <a href="<?= esc_url(get_site_url() . '/single?subject=tasks&action=edit&id=' . intval($task->id)) ?>" class="open-task <?= $grid_class ?> not-link font-15">
+                        <span><span class="open-task-status <?= esc_attr($status["class"]) ?>"><?= esc_html($status["label"]) ?></span></span>
+                        <?php if (!is_agent()) { ?><span class="bold"><?= esc_html($task->agent_name) ?></span><?php } ?>
+                        <span class="bold"><span class="open-task-importance importance-<?= intval($task->importance_id) ?>" title="<?= esc_attr("חשיבות " . ($importance[intval($task->importance_id)] ?? "")) ?>"></span><?= esc_html($task->client_name) ?></span>
+                        <span><?= esc_html($task->subject_text) ?></span>
+                        <span class="open-task-details" title="<?= esc_attr($task->details) ?>"><?= esc_html($task->details) ?></span>
+                        <span><span class="open-task-date <?= $date_class ?>"><?= esc_html($date_text) ?></span></span>
+                        <span><span class="open-task-reminder <?= $reminder_class ?>"><?= esc_html($reminder_text) ?></span></span>
                     </a>
                 <?php } ?>
             </div>
