@@ -86,6 +86,8 @@ jQuery(document).ready(function($){
         aSign: '%',
         pSign: 's'
     });
+    //הנחה בשורת מוצר בהזמנה - 2 ספרות אחרי הנקודה (מבצע 11+1, למשל 8.33%)
+    jQuery('td.discount_percent input[data-a-sign="%"]').autoNumeric('update', {mDec: 2});
 
     // שדה שיש בו רק רווחים נחשב ריק (גם בשדות חובה). הבדיקה בלבד - הערך שנשלח לא משתנה. סיסמאות לא נבדקות כך
     jQuery.validator.setDefaults({
@@ -226,9 +228,9 @@ jQuery(document).ready(function($){
                     jQuery('.page.single input[name=discount]').val("");
                     jQuery('.page.single input[name=get]').val("");
                     jQuery('.page.single select[name=product_get]').val("");
+                    jQuery('.page.single input[name=buy]').val("");//11+1 - הסף קבוע (4 ארגזים)
 
-                    if(!jQuery('.page.single input[name=buy]').val() ||
-                        jQuery('input[name="products_buy[]"]:checked').length === 0){
+                    if(jQuery('input[name="products_buy[]"]:checked').length === 0){
                         good = false;
                     }
 
@@ -1054,12 +1056,11 @@ function fill_modal_list(result){
 
 function singleSpecialsPage(){    //מבצעים
 
-    jQuery('.page.single .grid-display ').append('<div class="type-3 hidden" >קבל בקבוק מתנה</div>');
+    jQuery('.page.single .grid-display ').append('<div class="type-3 hidden" >על כל 4 ארגזים: זיכוי בקבוק על כל 12 בקבוקים (מתוך ההזמנה)</div>');
     jQuery('.page.single input[name=discount]').closest("div").after('<div class="type-2 hidden stretch" >או</div>')
 
-    var selectedOption = jQuery(".page.single select[name=supplier_id]").find('option:selected');
-    onSelectSupplier(selectedOption.val());
-    selectedOption = jQuery(".page.single select[name=type]").find('option:selected');
+    //onSelectType טוען גם את מוצרי הספק (onSelectSupplier)
+    var selectedOption = jQuery(".page.single select[name=type]").find('option:selected');
     onSelectType(selectedOption.val());
 
     $.each(jQuery('.page.single').find("select"),function (){
@@ -1078,6 +1079,10 @@ function singleSpecialsPage(){    //מבצעים
 function onSelectSupplier(supplier_id){
     if(supplier_id) {
         var products = jQuery("input[name=products_buy]").val();
+        var productsFilter = "supplier_id = " + parseInt(supplier_id);
+        if (jQuery(".page.single select[name=type]").val() == "3") {//11+1 - רק מוצרים של 12 בקבוקים בארגז
+            productsFilter += " AND units_in_box = 12";
+        }
 
         var postData = [
             {name: "action", value: "get_list_ajax"},
@@ -1085,7 +1090,7 @@ function onSelectSupplier(supplier_id){
             {name: "selector", value: "products_buy"},
             {name: "format", value: "checkboxes"},
             {name: "selected_value", value: products},
-            {name: "filter", value: "supplier_id = " + supplier_id}
+            {name: "filter", value: productsFilter}
         ];
         call_ajax_function(postData, "fill_special_products");
 
@@ -1098,6 +1103,10 @@ function onSelectSupplier(supplier_id){
         ];
         call_ajax_function(postData, "fill_special_products");
     }
+    else {//ספק נמחק מהבחירה - אין מוצרים להציג
+        jQuery(".page.single input[name=products_buy]").closest('div').find(".checkboxes").remove();
+        jQuery(".page.single input[name=products_buy]").val("");
+    }
 }
 
 function fill_special_products(result){
@@ -1105,10 +1114,13 @@ function fill_special_products(result){
         jQuery(".page.single select[name=" + result.selector +"]").eq(0).html(result.options);
     }
     else if(result.checkboxes){
-        jQuery(".page.single [name="+result.selector+"]").closest('div').append(result.checkboxes);
-        if(jQuery('input[name="products_buy[]"]:checked').length === 0) {
-            jQuery("input[name=products_buy]").val("");
-        }
+        //החלפת ספק - הרשימה של הספק הקודם מוחלפת, לא מתווספת אליה
+        var productsContainer = jQuery(".page.single [name="+result.selector+"]").closest('div');
+        productsContainer.find(".checkboxes").remove();
+        productsContainer.append(result.checkboxes);
+        //הבחירה השמורה = רק מה שמסומן ברשימה המוצגת (מוצר שסונן החוצה - ספק אחר / לא 12 בארגז - לא נשמר)
+        const checkedProducts = jQuery('input[name="products_buy[]"]:checked').map(function () {return jQuery(this).val();}).get();
+        jQuery("input[name=products_buy]").val(checkedProducts.length === 0 ? "" : JSON.stringify(checkedProducts));
 
         $(".checkboxes  input[type=checkbox]").on("change",function (){
             const values = $(".checkboxes input[type=checkbox]:checked")
@@ -1160,13 +1172,15 @@ function onSelectType(type_id){
         case "3":
             jQuery('.page.single input[name=price_more]').closest("div").addClass("hidden");
             jQuery('.page.single input[name=discount]').closest("div").addClass("hidden");
-            jQuery('.page.single input[name=buy]').closest("div").removeClass("hidden");
+            jQuery('.page.single input[name=buy]').closest("div").addClass("hidden");//11+1 - הסף קבוע (4 ארגזים)
             jQuery('.page.single input[name=products_buy]').closest("div").removeClass("hidden");
             jQuery('.page.single input[name=get]').closest("div").addClass("hidden");
             jQuery('.page.single select[name=product_get]').closest("div").addClass("hidden");
             jQuery('.page.single .type-3').removeClass("hidden");
             break;
     }
+    //רשימת המוצרים תלויה בסוג המבצע (11+1 - רק 12 בקבוקים בארגז), לכן נטענת מחדש
+    onSelectSupplier(jQuery(".page.single select[name=supplier_id]").val());
 }
 
 

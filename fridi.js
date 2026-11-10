@@ -72,6 +72,41 @@ function filterOrderProdoctsRowsToSave() {
     });
     rows.find('td input').prop('disabled', true);
 }
+
+//מבצע 11+1 (סוג 3): על כל 4 ארגזים מזדכים על בקבוק אחד מכל 12 - מתוך ההזמנה, בלי בקבוקים נוספים
+const ELEVEN_PLUS_ONE_MIN_BOXES = 4;
+const ELEVEN_PLUS_ONE_GROUP = 12;
+
+function hasElevenPlusOne(product) {
+    if (typeof promotionsByProduct === 'undefined') {//לא בעמוד הזמנה
+        return false;
+    }
+    var product_id = parseInt(product.find(".product_id span").text() || 0);
+    return (promotionsByProduct[product_id] ?? []).some(pro => pro.type == "3");
+}
+
+//כותב את ההנחה בשורת המוצר ומחזיר את מספר הבקבוקים לזיכוי (0 אם המבצע לא חל)
+function applyElevenPlusOne(product, units) {
+    if (product.hasClass('bonus') || product.hasClass('promo') || !hasElevenPlusOne(product)) {
+        return 0;
+    }
+    var unitsInBox = parseInt(product.find('.units_in_box span').text()) || 0;
+    if (unitsInBox != ELEVEN_PLUS_ONE_GROUP) {//המבצע רק על מוצרים של 12 בקבוקים בארגז
+        return 0;
+    }
+    var discountInput = product.find('.discount_percent input');
+    //הזיכוי רק על קבוצות שלמות של 4 ארגזים (ארגז 5-7 מחכים לקבוצה הבאה); בכל קבוצה - בקבוק אחד מכל ארגז
+    var fullGroups = Math.floor(units / (ELEVEN_PLUS_ONE_MIN_BOXES * unitsInBox));
+    var freeUnits = fullGroups * ELEVEN_PLUS_ONE_MIN_BOXES;
+    if (freeUnits > 0) {
+        discountInput.autoNumeric('set', (freeUnits * 100 / units).toFixed(2));
+    } else {
+        //מתחת לסף - ההנחה של המבצע מתבטלת
+        discountInput.val("");
+    }
+    return freeUnits;
+}
+
 function checkPromotions(product, currentValue){
     var sourceKey = product.find(".sort-column").text();
     var supplier_id = parseInt(product.find(".supplier_id span").text() || 0);
@@ -188,28 +223,7 @@ function checkPromotions(product, currentValue){
                     }
                 }
                 break;
-            case "3": //  קנה קבל מאותו מוצר
-                var countPromotions = getCountPromotions(product_id);
-                //כמות המתנה = "מקבלים" כפול מספר הפעמים שנכנסת כמות "קונים" (בעבר תמיד יחידה אחת - 10+2 נתן רק 1)
-                var sameProductToAdd = (countToGet || 1) * parseInt(currentCount / needToBuy);
-                if (currentCount >= needToBuy /*&& currentCount % needToBuy == 0*/) {
-
-                    if (countPromotions == 0 && productPromo.length == 0) {
-                        addProdoctBonus(product, sameProductToAdd, sourceKey);
-                    } else {
-                        //jQuery("tr.promo:has( .product_id input[type=hidden][value=" + product_id + "])").eq(0)
-                        productPromo.find(".count input").val(sameProductToAdd);
-                        productPromo.show();
-                    }
-                }
-                else{
-
-                    if(productPromo.length>0) {
-                        productPromo.find(".count input").val(0);
-                        productPromo.hide() ;
-                        //removeProdoctFromOrder(tr);
-                    }
-                }
+            case "3": //  11+1 - ההנחה נכתבת בשורת המוצר ב-calculatePrice (applyElevenPlusOne), בלי שורת מבצע נוספת
                 break;
         }
     });

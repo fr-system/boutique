@@ -961,16 +961,19 @@ td.td-buttons a.button {
 /* שמירה אוטומטית של הזמנה שנכשלה (script.js - automaticOrderSavingFailed) */
 .saving-automatic .saving-failed { color: #c0392b; font-weight: bold; }
 
-/* בחירת מוצרים במבצע (build_checkboxes) - שתי עמודות */
+/* בחירת מוצרים במבצע (build_checkboxes) - שלוש עמודות, גלילה בתוך הרשימה */
 .checkboxes.flex-display {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     column-gap: 20px;
     row-gap: 2px;
+    max-height: 35vh;
+    overflow-y: auto;
 }
-/* "מהמוצרים:" מעל רשימת המוצרים, והרשימה בכל רוחב השדה */
+/* "מהמוצרים:" מעל רשימת המוצרים, והרשימה בכל רוחב הטופס */
 .input-label.flex-display.products-buy {
     align-items: stretch;
+    grid-column: 1 / -1;
 }
 /* בכל הטפסים: שדה בגובה רגיל, לא נמתח לגובה של שדה גבוה שלידו (רשימת מוצרים, הערות וכו) */
 .grid-display > .input-label {

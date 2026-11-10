@@ -2,7 +2,7 @@
 const SPECIAL_TYPE = array(
     array("value"=>"1","text"=>"קנה קבל"),
     array("value"=>"2","text"=>"קנה מעל"),
-    array("value"=>"3","text"=>"קנה X + 1")
+    array("value"=>"3","text"=>"11+1")
 );
 //"widget" => "hidden" - בעמוד של סינגל לא להכין לו ווידגט
 //"hide_in_table"=>true - בעמוד ארכיב לא להכין לו עמודה בטבלה

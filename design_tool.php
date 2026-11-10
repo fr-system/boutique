@@ -403,12 +403,13 @@ function specials_gallery($list,$attr = array()){
                 <div class="part-10"><?= "<strong>סוג מבצע: </strong>".array_pop($results)["text"]?></div>
                 <?php
                 $html = "";
-                if(!empty($single->buy)) {
+                //11+1 (סוג 3) - הסף קבוע (4 ארגזים), אין "קנה כמות"
+                if(!empty($single->buy) && $type != "3") {
                     $html .= '<div class="buy part-10">' . "<strong>קנה כמות: </strong>" . $single->buy . '</div>';
                 }
                 $products = json_decode($single->products_buy);
 
-                if(!empty($single->buy) && is_array($products)) {
+                if((!empty($single->buy) || $type == "3") && is_array($products)) {
                     $products_res = run_query("SELECT name FROM {$wpdb->prefix}products WHERE id in(" . implode(',', $products) . ")");
                     $products_str = implode(', ', array_column($products_res, 'name'));
                     $html .= '<div class="part-10"><strong>מהמוצרים: </strong>' . $products_str . '</div>';
@@ -430,7 +431,7 @@ function specials_gallery($list,$attr = array()){
                             }
                             break;
                         case "3":
-                            $html .= "קבל בקבוק מתנה";
+                            $html .= "על כל 4 ארגזים: זיכוי בקבוק על כל 12 בקבוקים";
                             break;
                     }
                 echo $html;

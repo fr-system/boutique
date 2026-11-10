@@ -441,8 +441,13 @@ function calculatePrice(product){
     }
    // var total_order = parseInt(jQuery(".page.single input[name=total]").autoNumeric('get')||0);
     var unitPrice = parseFloat(product.find('.order_price input').autoNumeric('get'));
+    //מבצע 11+1 - לפני קריאת ההנחה, כי הוא כותב/מנקה אותה. הסה"כ לפי הבקבוקים שמשלמים עליהם בפועל (האחוז מעוגל, לתצוגה)
+    var freeUnits = applyElevenPlusOne(product, count);
     var discountPercent = parseFloat(product.find('.discount_percent input').autoNumeric('get')||0);
     var calculatedPrice = (unitPrice*count) - (unitPrice*count*discountPercent/100);
+    if (freeUnits > 0) {
+        calculatedPrice = unitPrice * (count - freeUnits);
+    }
     //product.find(".total span").html(calculatedPrice);
     product.find(".total input").autoNumeric('set',calculatedPrice).trigger("change");
     //product.find('td.order_id input').val();
