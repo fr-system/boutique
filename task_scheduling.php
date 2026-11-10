@@ -12,7 +12,7 @@ switch ($argv[1]){
         send_who_needs_pay_today($argv[2]);
         break;
     case "tasks":
-        send_task_reminders();
+        send_agents_tasks_mail();
         send_unclosed_tasks($argv[2]);
         break;
     case "orders":
@@ -208,95 +208,110 @@ function send_who_needs_pay_today($type)
     delete_report_file($file);
 }
 
-//תזכורות: משימות פתוחות שתאריך התזכורת שלהן הגיע (או עבר - למשל שישי ושבת, שבהם לא שולחים) ועוד לא נשלחה עליהן תזכורת.
-//לכל סוכן מייל אחד עם המשימות שלו; משימה בלי סוכן (או סוכן בלי מייל תקין) - למנהל. אחרי שליחה - reminder_sent = 1
-function send_task_reminders()
+//מייל משימות בוקר - מייל אחד לכל סוכן, ובגוף המייל שתי טבלאות:
+//1. תזכורות - משימות פתוחות שתאריך התזכורת שלהן הגיע (או עבר - למשל שישי ושבת, שבהם לא שולחים) ועוד לא נשלחה עליהן תזכורת.
+//   אחרי שליחה - reminder_sent = 1 (שינוי תאריך התזכורת מאפס אותו - save_single_data)
+//2. תאריך יעד - משימות פתוחות שתאריך היעד שלהן היום או שעבר, חוץ ממשימות שיש להן תזכורת מאוחרת יותר (יופיעו כשתגיע התזכורת)
+//   ומשימות שכבר מופיעות בטבלת התזכורות.
+//תזכורת למשימה בלי סוכן (או סוכן בלי מייל תקין) - למנהל, רק טבלת התזכורות. סוכן בלי משימות בשתי הטבלאות - לא מקבל מייל
+function send_agents_tasks_mail()
 {
     global $wpdb;
-    $filters = array(
+    $t = $wpdb->prefix . "tasks";
+    $reminders = get_data_table("tasks", array(
         array("filter_field" => "status_id", "filter_type" => "!=", "filter_value" => "1"),
         array("filter_type" => "filter", "filter_field" => "",
-            "filter_value" => "({$wpdb->prefix}tasks.sending_reminder <= CURDATE() AND {$wpdb->prefix}tasks.reminder_sent = 0)"),
-    );
-    $tasks = get_data_table("tasks", $filters);
-    if (empty($tasks)) {
-        return;
-    }
+            "filter_value" => "({$t}.sending_reminder <= CURDATE() AND {$t}.reminder_sent = 0)"),
+    ));
+    $due = get_data_table("tasks", array(
+        array("filter_field" => "status_id", "filter_type" => "!=", "filter_value" => "1"),
+        array("filter_type" => "filter", "filter_field" => "",
+            "filter_value" => "(DATE({$t}.target_date) <= CURDATE() AND ({$t}.sending_reminder IS NULL OR {$t}.sending_reminder <= CURDATE()))"),
+    ));
+
+    $agents = array();
+    $get_agent = function ($agent_id) use (&$agents) {
+        $agent_id = intval($agent_id);
+        if (!$agent_id) {
+            return null;
+        }
+        if (!array_key_exists($agent_id, $agents)) {
+            $agents[$agent_id] = get_data_table("agents", array(array("filter_field" => "id", "filter_value" => $agent_id)))[0] ?? null;
+        }
+        return $agents[$agent_id];
+    };
 
     //קיבוץ לפי נמען
     $groups = array();
-    foreach ($tasks as $task) {
-        $agent = !empty($task->agent_id) ? (get_data_table("agents", array(array("filter_field" => "id", "filter_value" => intval($task->agent_id))))[0] ?? null) : null;
+    $reminder_ids = array();
+    foreach ((array)$reminders as $task) {
+        $agent = $get_agent($task->agent_id);
         $email = $agent ? get_agent_email($agent) : "";
+        $name = $email ? $agent->name : "";
         if (!$email) {
             $email = get_option('admin_email');
-            $name = "";
-        } else {
-            $name = $agent->name;
         }
         $groups[$email]["name"] = $name;
-        $groups[$email]["tasks"][] = $task;
+        $groups[$email]["reminders"][] = $task;
+        $reminder_ids[intval($task->id)] = true;
+    }
+    foreach ((array)$due as $task) {
+        if (isset($reminder_ids[intval($task->id)])) {
+            continue;
+        }
+        $agent = $get_agent($task->agent_id);
+        $email = $agent ? get_agent_email($agent) : "";
+        if (!$email) {
+            continue;//משימות בלי סוכן מופיעות בסיכום למנהל (send_unclosed_tasks)
+        }
+        $groups[$email]["name"] = $agent->name;
+        $groups[$email]["due"][] = $task;
     }
 
     foreach ($groups as $email => $group) {
-        $rows = "";
-        foreach ($group["tasks"] as $task) {
-            $rows .= '<tr>
-                <td style="padding:8px 10px; border-bottom:1px solid #EFE6D2; font-weight:700;">' . esc_html($task->subject_text) . '</td>
-                <td style="padding:8px 10px; border-bottom:1px solid #EFE6D2;">' . esc_html($task->client_name) . '</td>
-                <td style="padding:8px 10px; border-bottom:1px solid #EFE6D2;">' . nl2br(esc_html($task->details)) . '</td>
-                <td style="padding:8px 10px; border-bottom:1px solid #EFE6D2; white-space:nowrap;">' . (!empty($task->target_date) ? date('d/m/Y', strtotime($task->target_date)) : '') . '</td>
-            </tr>';
+        $content = "";
+        if (!empty($group["reminders"])) {
+            $title = $group["name"] === "" ? "תזכורות למשימות שאין להן סוכן עם מייל תקין" : "תזכורות להיום";
+            $content .= tasks_mail_table($title, $group["reminders"]);
         }
-        $intro = count($group["tasks"]) == 1 ? "תזכורת למשימה שלך:" : "תזכורת למשימות שלך:";
-        if ($group["name"] === "") {
-            $intro = "תזכורת למשימות שאין להן סוכן עם מייל תקין:";
+        if (!empty($group["due"])) {
+            $content .= tasks_mail_table("תאריך היעד היום או שכבר עבר", $group["due"], "#c0392b");
         }
-        $content = '<div style="font-size:15px; line-height:1.7; color:#444444; margin-bottom:16px;">' . $intro . '</div>
-            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="font-size:14px; color:#1A1A1A; text-align:right; margin-bottom:24px;">
-                <tr style="background-color:#FAF7F0;"><th style="padding:8px 10px;">נושא</th><th style="padding:8px 10px;">לקוח</th><th style="padding:8px 10px;">פירוט</th><th style="padding:8px 10px;">תאריך יעד</th></tr>
-                ' . $rows . '
-            </table>
-            <div style="font-size:13px; line-height:1.7; color:#8A8A8A; margin-bottom:28px;">אחרי ביצוע משימה יש לעדכן את המצב שלה במערכת.</div>';
-        $body = build_email_layout("תזכורת משימות", "שלום" . ($group["name"] !== "" ? " " . esc_html($group["name"]) : "") . ",", $content);
-        if (send_mail($email, "תזכורת משימות - " . date('d/m/y'), $body)) {
-            $ids = array_map(function ($task) { return intval($task->id); }, $group["tasks"]);
-            $wpdb->query("UPDATE {$wpdb->prefix}tasks SET reminder_sent = 1 WHERE id IN (" . implode(',', $ids) . ")");
+        $content .= '<div style="font-size:13px; line-height:1.7; color:#8A8A8A; margin:8px 0 28px 0;">אחרי ביצוע משימה יש לעדכן את המצב שלה במערכת.</div>';
+        $body = build_email_layout("המשימות שלך להיום", "שלום" . ($group["name"] !== "" ? " " . esc_html($group["name"]) : "") . ",", $content);
+        if (send_mail($email, "משימות להיום - " . date('d/m/y'), $body) && !empty($group["reminders"])) {
+            $ids = array_map(function ($task) { return intval($task->id); }, $group["reminders"]);
+            $wpdb->query("UPDATE {$t} SET reminder_sent = 1 WHERE id IN (" . implode(',', $ids) . ")");
         }
     }
 }
 
-//לכל סוכן - המשימות שלו שתאריך היעד שלהן היום או שכבר עבר (הדוח נשלח בבוקר). למנהל - סיכום של המשימות שתאריך היעד שלהן עבר (אתמול ולפני), לפי סוכן
+//טבלת משימות למייל (inline style): נושא, לקוח, פירוט, תאריך יעד וכפתור למעבר למשימה במערכת
+function tasks_mail_table($title, $tasks, $color = "#1A7870")
+{
+    $cell = 'padding:8px 10px; border-bottom:1px solid #EFE6D2;';
+    $html = '<div style="font-size:16px; font-weight:700; color:' . $color . '; margin:18px 0 8px 0;">' . esc_html($title)
+        . ' <span style="font-size:13px; font-weight:400; color:#8A8A8A;">(' . (count($tasks) == 1 ? "משימה אחת" : count($tasks) . " משימות") . ')</span></div>'
+        . '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="font-size:14px; color:#1A1A1A; text-align:right; border:1px solid #EFE6D2; border-radius:8px; border-collapse:separate; margin-bottom:8px;">'
+        . '<tr style="background-color:#FAF7F0;"><th style="' . $cell . '">נושא</th><th style="' . $cell . '">לקוח</th><th style="' . $cell . '">פירוט</th>'
+        . '<th style="' . $cell . ' text-align:center;">תאריך יעד</th><th style="' . $cell . '"></th></tr>';
+    foreach ($tasks as $n => $task) {
+        $url = get_site_url() . '/single?subject=tasks&action=edit&id=' . intval($task->id);
+        $html .= '<tr' . ($n % 2 ? ' style="background-color:#FCFBF8;"' : '') . '>'
+            . '<td style="' . $cell . ' font-weight:700;">' . esc_html($task->subject_text) . '</td>'
+            . '<td style="' . $cell . '">' . esc_html($task->client_name) . '</td>'
+            . '<td style="' . $cell . '">' . nl2br(esc_html($task->details)) . '</td>'
+            . '<td style="' . $cell . ' text-align:center; white-space:nowrap;">' . (!empty($task->target_date) ? date('d/m/Y', strtotime($task->target_date)) : '') . '</td>'
+            . '<td style="' . $cell . ' text-align:center; white-space:nowrap;"><a href="' . esc_url($url) . '" style="display:inline-block; padding:5px 12px; background-color:' . $color . '; color:#ffffff; border-radius:6px; text-decoration:none; font-size:13px;">למשימה</a></td>'
+            . '</tr>';
+    }
+    return $html . '</table>';
+}
+
+//למנהל - סיכום של המשימות שתאריך היעד שלהן עבר (אתמול ולפני), לפי סוכן. הסוכנים מקבלים את המשימות שלהם בגוף המייל - send_agents_tasks_mail
 //במוצאי שבת נכללות גם המשימות של שישי - הדוח כולל את כל המשימות הפתוחות שהתאריך שלהן עבר
 function send_unclosed_tasks($type)
 {
-    global $wpdb;
-    $query = "SELECT agent_id FROM {$wpdb->prefix}tasks WHERE status_id != 1 AND target_date <= CURDATE() GROUP BY agent_id";
-    $results = run_query($query);
-    if (empty($results)) {
-        return;
-    }
-    $subject = "משימות שהגיע תאריך היעד שלהן";
-
-    //לכל סוכן - רק המשימות שלו
-    foreach ($results as $result) {
-        $agent = get_data_table("agents", array(array("filter_field" => "id", "filter_value" => intval($result->agent_id))))[0] ?? null;
-        $agent_email = $agent ? get_agent_email($agent) : "";
-        if (!$agent_email) {
-            continue;
-        }
-        $attr = ["report_title"=>"משימות שהגיע תאריך היעד", "export" => "archive", "type" => $type, "packet" => ["tasks"], "send_mail" => true, "create_only_fill" => true,"agent_id"=>$result->agent_id, "include_today" => true];
-        $file = create_pdf($attr);
-        if (empty($file)) {
-            continue;
-        }
-        $body = build_email_layout("תזכורת משימות", "שלום " . esc_html($agent->name) . ",",
-            '<div style="font-size:15px; line-height:1.7; color:#444444; margin-bottom:28px;">מצורפות המשימות שלך שתאריך היעד שלהן היום או שכבר עבר, ועדיין לא נסגרו.<br>אחרי ביצוע משימה יש לעדכן את המצב שלה במערכת.</div>');
-        send_mail($agent_email, $subject, $body, ["משימות פתוחות.pdf" => $file]);
-        delete_report_file($file);
-    }
-
-    //למנהל - סיכום של כל הסוכנים
     $attr = ["report_title"=>"משימות שעבר תאריך היעד", "export" => "archive", "type" => $type, "packet" => ["tasks_by_agent"], "send_mail" => true, "create_only_fill" => true];
     $file = create_pdf($attr);
     if (empty($file)) {
