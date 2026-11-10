@@ -167,6 +167,7 @@ function pdf_style()
         .info-v { padding: 3px 0 3px 14px; vertical-align: top; }
 
         .data-th { background-color: #1A1A1A; color: #FFFFFF; font-weight: bold; padding: 7px 8px; text-align: right; }
+        .data-th-soft { background-color: #FAF7F0; color: #8A6A1F; font-weight: bold; font-size: 9pt; padding: 3px 8px; text-align: right; border-top: 1px solid #EFE6D2; border-bottom: 1px solid #EFE6D2; }
         .data-td { padding: 6px 8px; border-bottom: 1px solid #ECE9E2; text-align: right; vertical-align: top; }
         .data-alt { background-color: #FAF8F4; }
         .num { text-align: left; white-space: nowrap; }
@@ -273,11 +274,12 @@ function pdf_info_boxes($right_box, $left_box)
 }
 
 //טבלת נתונים עם כותרת כהה ושורות לסירוגין. $rows - שורות של HTML מוכן, $classes - מחלקה לכל עמודה (num / center / idx)
-function pdf_data_table($headers, $rows, $classes = array())
+//$th_class: מחלקת שורת הכותרות - data-th (שחורה) כברירת מחדל, data-th-soft לכותרת בהירה ונמוכה (טבלאות המשימות)
+function pdf_data_table($headers, $rows, $classes = array(), $th_class = "data-th")
 {
     $html = "<table width='100%' style='border-collapse:collapse;'><thead><tr>";
     foreach ($headers as $i => $header) {
-        $html .= "<th class='data-th " . ($classes[$i] ?? "") . "'>" . pdf_esc($header) . "</th>";
+        $html .= "<th class='" . $th_class . " " . ($classes[$i] ?? "") . "'>" . pdf_esc($header) . "</th>";
     }
     $html .= "</tr></thead><tbody>";
     foreach ($rows as $r => $row) {
@@ -537,7 +539,7 @@ function drow_html_tasks($attr)
         );
     }
 /*    <strong>חשיבות: </strong><span>{$task->importance}</span><br>*/
-    return pdf_data_table(array("נושא", "לקוח", "פירוט", "תאריך יעד"), $rows, array("", "", "", "center"));
+    return pdf_data_table(array("נושא", "לקוח", "פירוט", "תאריך יעד"), $rows, array("", "", "", "center"), "data-th-soft");
 }
 
 //סיכום למנהל - טבלת משימות נפרדת לכל סוכן, עם שם הסוכן ומספר המשימות
