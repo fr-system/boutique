@@ -23,16 +23,19 @@ switch ($argv[1]){
         break;
 }
 
-//סיכום יומי לכל סוכן (תזמון ב-19:00): רק הזמנות שהסוכן עצמו הקים (user_opens), מהסיכום הקודם עד עכשיו -
+//סיכום יומי לכל סוכן (תזמון ב-21:00): רק הזמנות שהסוכן עצמו הקים (user_opens), מהסיכום הקודם עד עכשיו -
 //טבלה לפי חנות וטבלה לפי יקב (ספק), ותעודות ההחזרה בטבלה נפרדת. סוכן בלי הזמנות והחזרות - לא מקבל מייל.
-//ביום ראשון - מחמישי ב-19:00 (בשישי ובשבת לפני 20:00 לא שולחים)
+//ביום ראשון - מחמישי ב-21:00. במוצאי שבת לא שולחים (הבדיקה הכללית למעלה עוצרת רק עד 20:00), כדי שיום ראשון יכסה את שישי ושבת
 function send_agents_daily_summary()
 {
+    if (date('w') == 6) {
+        return;
+    }
     global $wpdb;
     $p = $wpdb->prefix;
-    $from = date('w') == 0 ? "CURDATE() - INTERVAL 3 DAY + INTERVAL 19 HOUR" : "CURDATE() - INTERVAL 1 DAY + INTERVAL 19 HOUR";
-    $to = "CURDATE() + INTERVAL 19 HOUR";
-    $range_text = date('w') == 0 ? "מחמישי 19:00 עד היום 19:00" : "מאתמול 19:00 עד היום 19:00";
+    $from = date('w') == 0 ? "CURDATE() - INTERVAL 3 DAY + INTERVAL 21 HOUR" : "CURDATE() - INTERVAL 1 DAY + INTERVAL 21 HOUR";
+    $to = "CURDATE() + INTERVAL 21 HOUR";
+    $range_text = date('w') == 0 ? "מחמישי 21:00 עד היום 21:00" : "מאתמול 21:00 עד היום 21:00";
 
     $agents = $wpdb->get_results("SELECT id, name, email, user_id FROM {$p}agents WHERE user_id > 0");
     foreach ($agents as $agent) {
