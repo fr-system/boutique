@@ -638,9 +638,11 @@ function get_data_table($table_name, $filters=null, $orderby = null, $join_filte
     }
 
     if($orderby != null){
+        $order_parts = array();
         foreach ($orderby as $key=>$order) {
-            $query .= " ORDER BY " . $key ." ".($order ?? '');
+            $order_parts[] = $key ." ".($order ?? '');
         }
+        $query .= " ORDER BY " . implode(", ", $order_parts);
     }
 
     //echo $query;

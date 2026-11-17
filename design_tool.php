@@ -52,7 +52,8 @@ function get_single_view($table_name, $single, $attr)
                     $target_table_rows = array();
                     $sub_table_id = null;
                     if(isset($column["target_table"])) {
-                        $target_table_rows = get_data_table($column["target_table"], $filters,array("name"=>"asc"));
+                        $target_table_rows = get_data_table($column["target_table"], $filters,
+                            $column["target_table"] == "products" ? array("supplier_name"=>"asc","name"=>"asc") : array("name"=>"asc"));//מוצרים - מקובצים לפי ספק
                         $sub_table_id = substr($column["target_table"], 0, -1) . "_id";
                     }
 

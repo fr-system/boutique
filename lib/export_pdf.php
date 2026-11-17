@@ -342,7 +342,13 @@ function pdf_order_document($order_id, $supplier_id = null)
     if($supplier_id){
         $filters[] = array("filter_field" => "supplier_id", "filter_value" => intval($supplier_id));
     }
-    $products = get_data_table("order_products", $filters);
+    //מוצרים מקובצים לפי ספק (שם הספק), בתוך כל ספק לפי שם המוצר, ושורת בונוס/מבצע אחרי המוצר שלה
+    global $wpdb;
+    $products = get_data_table("order_products", $filters, array(
+        "(SELECT s.name FROM {$wpdb->prefix}suppliers s WHERE s.id = {$wpdb->prefix}products.supplier_id)" => "asc",
+        "{$wpdb->prefix}products.name" => "asc",
+        "{$wpdb->prefix}order_products.bonus" => "asc",
+    ));
 
     $rows = array();
     $products_total = 0;
