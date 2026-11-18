@@ -102,6 +102,24 @@ function get_archive_table($table_name,$data,$attr)
     return $html;
 }
 
+//ערך גולמי למיון ב-DataTables (data-order): תאריכים מוצגים כ-d/m/Y וסכומים עם סימן (₪ / %),
+//ולכן בלי זה DataTables ממיין אותם כמחרוזת (תאריך לפי היום, סכום לפי הספרה הראשונה)
+function get_column_order_attr($column, $row, $field){
+    if (isset($column["create_input"])) {
+        return '';
+    }
+    $raw = $row->$field ?? '';
+    if ($column["widget"] == "date" || $column["widget"] == "datetime-local") {
+        $timestamp = empty($raw) ? false : strtotime($raw);
+        return ' data-order="' . ($timestamp === false ? 0 : $timestamp) . '"';
+    }
+    if (isset($column["sign"])) {
+        $number = str_replace(',', '', (string)$raw);
+        return ' data-order="' . (is_numeric($number) ? $number : 0) . '"';
+    }
+    return '';
+}
+
 function get_tr_data($table_name, $data, $key,$attr){
 
     $is_list = false;
@@ -228,7 +246,7 @@ function get_tr_data($table_name, $data, $key,$attr){
             if(!empty($row->bonus) && $column["field_name"] =="name"){
                 $column_value .=$row->bonus =="bonus" ? ' - בונוס' : ' - מבצע' ;
             }
-            $html .= '<td class="' . $column["field_name"] .'">' . $column_value. '</td>';
+            $html .= '<td class="' . $column["field_name"] .'"' . get_column_order_attr($column, $row, $column["field_name"]) . '>' . $column_value. '</td>';
         }
     }
 
@@ -260,7 +278,7 @@ function get_tr_data($table_name, $data, $key,$attr){
             $class_td = " hidden-col ";
         }
         $hidden = "";//(isset($column["widget"]) && $column["widget"]== "hidden"?' hidden':'');
-        $html .= '<td ' . $data_id . ' class="' . $field .$class_td .'">' . $column_value . '</td>';
+        $html .= '<td ' . $data_id . ' class="' . $field .$class_td .'"' . get_column_order_attr($column, $row, $field) . '>' . $column_value . '</td>';
     }
 
     if(isset($page_info["actions"])) {
