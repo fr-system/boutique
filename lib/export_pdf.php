@@ -376,6 +376,7 @@ function pdf_order_document($order_id, $supplier_id = null)
     $meta = array("מס' הזמנה" => $order->id, "תאריך" => date('d/m/Y H:i', strtotime($order->order_date)));
     $client_rows = array(
         "שם הלקוח" => $client->name ?? $order->client_name,
+        "ח\"פ" => $client->BnNumber ?? "",
         "סניף" => $order->clients_branche_name ?? "",
         "כתובת" => $client ? pdf_client_address($client) : "",
         "נייד" => $client->mobile ?? "",

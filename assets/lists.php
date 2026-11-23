@@ -14,6 +14,7 @@ const BOUTIQUE_TABLES = array(
         "columns" => array(
             array("field_name" => "name", "widget" => "text", "label" => "שם הלקוח","required"=>true),
             array("field_name" => "mobile", "widget" => "text", "label" => "נייד","required"=>true),
+            array("field_name" => "mobile2", "widget" => "text", "label" => "טלפון נוסף","hide_in_table"=>true),
             array("field_name" => "BnNumber", "widget" => "text", "label" => "ח\"פ","required"=>true,"hide_in_table"=>true),
             array("field_name" => "address", "widget" => "text", "label" => "כתובת","hide_in_table"=>true),
             array("field_name" => "city_id", "widget" => "select", "join_table" => "cities", "join_value" => "name", "label" => "עיר", "add_option"=>true),

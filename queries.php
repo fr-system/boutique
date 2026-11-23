@@ -46,6 +46,29 @@ function boutique_ensure_tasks_reminder_columns()
     }
 }
 
+//עמודת טלפון נוסף בטבלת הלקוחות - נוספת פעם אחת לכל מסד (בדיקות/ייצור) בטעינה הראשונה אחרי העדכון
+add_action('init', 'boutique_ensure_clients_mobile2_column');
+function boutique_ensure_clients_mobile2_column()
+{
+    if (get_option('boutique_clients_mobile2_column') == 1) {
+        return;
+    }
+    global $wpdb;
+    $table = $wpdb->prefix . 'clients';
+    if (!$wpdb->get_var("SHOW TABLES LIKE '{$table}'")) {
+        return;
+    }
+    if (!$wpdb->get_var("SHOW COLUMNS FROM {$table} LIKE 'mobile2'")) {
+        $wpdb->query("ALTER TABLE {$table} ADD mobile2 VARCHAR(50) NULL AFTER mobile");
+    }
+    if ($wpdb->get_var("SHOW COLUMNS FROM {$table} LIKE 'mobile2'")) {
+        update_option('boutique_clients_mobile2_column', 1, true);
+    }
+    else {
+        write_log("boutique_ensure_clients_mobile2_column failed: " . $wpdb->last_error);
+    }
+}
+
 function pre_action_query($table_name, $row)
 {
     $update = array();
