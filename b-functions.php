@@ -718,7 +718,10 @@ function get_obligation_client_id($client_id)
     $filters = array();
     $filters[]=array("filter_field" => "client_id", "filter_value" => $client_id);
     $filters[]=array("filter_field" => "payment_date", "filter_type" => "null");
-    $filters[]=array("filter_field" => "payment_until", "filter_type" => "date", "filter_ratio" => "<","filter_value"=>"NOW()");
+    //CURDATE ולא NOW - חשבונית שמועד התשלום שלה היום עוד לא באיחור (כמו בדוח החיוב)
+    $filters[]=array("filter_field" => "payment_until", "filter_type" => "date", "filter_ratio" => "<","filter_value"=>"CURDATE()");
+    //רק חשבוניות חיוב - כמו בדוח החיוב ובחובות הפתוחים בעמוד הבית. זיכוי אי אפשר לסמן כמנוצל, ולכן אין לו מקום בחישוב החוב
+    $filters[]=array("filter_field" => "doc_type", "filter_value" => "1");
     $result = get_data_table("collection", $filters);
     //write_log("eres ".json_encode($result));
     return $result;

@@ -184,6 +184,10 @@ else{
 
                 <?php }
                 if($table_name == "orders" ){
+                     //סימון להזמנה שאושרה - ה-JS פותח אותה בהצגת עגלה בלי כפתור חזרה להזמנה (isOrderDone)
+                     if(!empty($single->done)){
+                         echo '<span id="order-done" hidden></span>';
+                     }
                      if(!isset($single->done) || !$single->done){?>
                             <button type="button" class="hidden order-confirmation flex-display center align-center background-white dark-green bold font-18">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 16 16" fill="none">

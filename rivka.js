@@ -474,6 +474,11 @@ function startingDataTable(){
     var currentUrl = window.location.pathname;
     var single = currentUrl.includes('single');
 
+    //הזמנה שאושרה - נפתחת ישר בהצגת עגלה (רק המוצרים שהוזמנו), ואין כפתור חזרה להזמנה
+    if (tableName == "orders" && single && isOrderDone()) {
+        cartMode = true;
+    }
+
     $.fn.dataTable.ext.search.push(function (settings, data, dataIndex) {
         if (!cartMode) {
             return true;
@@ -709,7 +714,15 @@ function onFilterGalery(){
 
 }
 
+//האם ההזמנה שבעמוד אושרה (הסימון מ-single-template.php)
+function isOrderDone() {
+    return jQuery("#order-done").length > 0;
+}
+
 function getButtonsTable(tableName,currentUrl ){
+    if(tableName == "orders" && currentUrl.includes('single') && isOrderDone()) {
+        return [];
+    }
     if(tableName == "orders" && currentUrl.includes('single')) {
         return [
             {

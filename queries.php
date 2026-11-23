@@ -46,26 +46,48 @@ function boutique_ensure_tasks_reminder_columns()
     }
 }
 
-//עמודת טלפון נוסף בטבלת הלקוחות - נוספת פעם אחת לכל מסד (בדיקות/ייצור) בטעינה הראשונה אחרי העדכון
-add_action('init', 'boutique_ensure_clients_mobile2_column');
-function boutique_ensure_clients_mobile2_column()
+//עמודות חדשות בטבלאות - נוספות פעם אחת לכל מסד (בדיקות/ייצור) בטעינה הראשונה אחרי העדכון.
+//עמודה חדשה: להוסיף ל-$columns (לפי טבלה) ולהעלות את מספר הגרסה ב-$version
+add_action('init', 'boutique_ensure_table_columns');
+function boutique_ensure_table_columns()
 {
-    if (get_option('boutique_clients_mobile2_column') == 1) {
+    $version = 3;
+    $columns = array(
+        "clients" => array(
+            "mobile2" => "VARCHAR(50) NULL AFTER mobile",//טלפון נוסף
+            "business_name" => "VARCHAR(255) NULL AFTER name",//שם העסק
+        ),
+        "suppliers" => array(
+            "bank_number" => "VARCHAR(10) NULL",//מספר בנק (מהרשימה BANKS)
+            "bank_branch" => "VARCHAR(10) NULL AFTER bank_number",//מספר סניף
+            "bank_account" => "VARCHAR(30) NULL AFTER bank_branch",//מספר חשבון
+        ),
+    );
+    if (intval(get_option('boutique_table_columns_version')) >= $version) {
         return;
     }
     global $wpdb;
-    $table = $wpdb->prefix . 'clients';
-    if (!$wpdb->get_var("SHOW TABLES LIKE '{$table}'")) {
-        return;
+    $missing = array();
+    foreach ($columns as $table_name => $table_columns) {
+        $table = $wpdb->prefix . $table_name;
+        if (!$wpdb->get_var("SHOW TABLES LIKE '{$table}'")) {
+            $missing[] = $table_name;
+            continue;
+        }
+        foreach ($table_columns as $column => $definition) {
+            if (!$wpdb->get_var("SHOW COLUMNS FROM {$table} LIKE '{$column}'")) {
+                $wpdb->query("ALTER TABLE {$table} ADD {$column} {$definition}");
+            }
+            if (!$wpdb->get_var("SHOW COLUMNS FROM {$table} LIKE '{$column}'")) {
+                $missing[] = $table_name . "." . $column;
+            }
+        }
     }
-    if (!$wpdb->get_var("SHOW COLUMNS FROM {$table} LIKE 'mobile2'")) {
-        $wpdb->query("ALTER TABLE {$table} ADD mobile2 VARCHAR(50) NULL AFTER mobile");
-    }
-    if ($wpdb->get_var("SHOW COLUMNS FROM {$table} LIKE 'mobile2'")) {
-        update_option('boutique_clients_mobile2_column', 1, true);
+    if (empty($missing)) {
+        update_option('boutique_table_columns_version', $version, true);
     }
     else {
-        write_log("boutique_ensure_clients_mobile2_column failed: " . $wpdb->last_error);
+        write_log("boutique_ensure_table_columns failed (" . implode(", ", $missing) . "): " . $wpdb->last_error);
     }
 }
 

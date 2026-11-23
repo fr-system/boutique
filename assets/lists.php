@@ -4,6 +4,25 @@ const SPECIAL_TYPE = array(
     array("value"=>"2","text"=>"קנה מעל"),
     array("value"=>"3","text"=>"11+1")
 );
+//בנקים בישראל - קוד הבנק לפי בנק ישראל, ושם הבנק. נשמר רק הקוד (suppliers.bank_number)
+const BANKS = array(
+    array("value"=>"4","text"=>"04 - בנק יהב"),
+    array("value"=>"9","text"=>"09 - בנק הדואר"),
+    array("value"=>"10","text"=>"10 - בנק לאומי"),
+    array("value"=>"11","text"=>"11 - בנק דיסקונט"),
+    array("value"=>"12","text"=>"12 - בנק הפועלים"),
+    array("value"=>"14","text"=>"14 - בנק אוצר החייל"),
+    array("value"=>"17","text"=>"17 - בנק מרכנתיל דיסקונט"),
+    array("value"=>"18","text"=>"18 - וואן זירו"),
+    array("value"=>"20","text"=>"20 - בנק מזרחי טפחות"),
+    array("value"=>"22","text"=>"22 - סיטיבנק"),
+    array("value"=>"23","text"=>"23 - HSBC"),
+    array("value"=>"31","text"=>"31 - הבנק הבינלאומי"),
+    array("value"=>"34","text"=>"34 - בנק ערבי ישראלי"),
+    array("value"=>"46","text"=>"46 - בנק מסד"),
+    array("value"=>"52","text"=>"52 - בנק פועלי אגודת ישראל"),
+    array("value"=>"54","text"=>"54 - בנק ירושלים"),
+);
 //"widget" => "hidden" - בעמוד של סינגל לא להכין לו ווידגט
 //"hide_in_table"=>true - בעמוד ארכיב לא להכין לו עמודה בטבלה
 const BOUTIQUE_TABLES = array(
@@ -13,6 +32,7 @@ const BOUTIQUE_TABLES = array(
         "male_female" => "male",
         "columns" => array(
             array("field_name" => "name", "widget" => "text", "label" => "שם הלקוח","required"=>true),
+            array("field_name" => "business_name", "widget" => "text", "label" => "שם העסק"),
             array("field_name" => "mobile", "widget" => "text", "label" => "נייד","required"=>true),
             array("field_name" => "mobile2", "widget" => "text", "label" => "טלפון נוסף","hide_in_table"=>true),
             array("field_name" => "BnNumber", "widget" => "text", "label" => "ח\"פ","required"=>true,"hide_in_table"=>true),
@@ -136,6 +156,10 @@ const BOUTIQUE_TABLES = array(
             ["field_name" => "mobile", "widget" => "text", "label" => "נייד"],
             ["field_name" => "address", "widget" => "text", "label" => "כתובת"],
             ["field_name" => "city_id","widget" => "select", "join_table" => "cities", "join_value" => "name", "label" => "עיר" ,"add_option"=>true],
+            //פרטי חשבון בנק
+            ["field_name" => "bank_number", "widget" => "select", "label" => "בנק", "options" => BANKS, "hide_in_table" => true, "hide_in_pdf" => true],
+            ["field_name" => "bank_branch", "widget" => "text", "label" => "מספר סניף", "hide_in_table" => true, "hide_in_pdf" => true],
+            ["field_name" => "bank_account", "widget" => "text", "label" => "מספר חשבון", "hide_in_table" => true, "hide_in_pdf" => true],
             ["field_name" => "notes", "widget" => "textarea", "label" => "הערות","hide_in_table" => true],
             ["field_name" => "user_id", "widget" => "hidden"],
         ],

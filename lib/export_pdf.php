@@ -316,6 +316,33 @@ function pdf_user_name($user_id)
     return $user ? $user->display_name : "";
 }
 
+//פרטי חשבון בנק של ספק בשורה אחת: "בנק הפועלים (12) · סניף 123 · חשבון 456789". ריק אם לא מולאו
+function pdf_bank_details($supplier)
+{
+    if (!$supplier) {
+        return "";
+    }
+    $parts = array();
+    if (!empty($supplier->bank_number)) {
+        $bank_name = "";
+        foreach (BANKS as $bank) {
+            if ($bank["value"] == $supplier->bank_number) {
+                //בטקסט של הרשימה הקוד בהתחלה ("12 - בנק הפועלים") - כאן רק השם
+                $bank_name = preg_replace('/^\d+\s*-\s*/u', '', $bank["text"]);
+                break;
+            }
+        }
+        $parts[] = ($bank_name ?: "בנק") . " (" . $supplier->bank_number . ")";
+    }
+    if (!empty($supplier->bank_branch)) {
+        $parts[] = "סניף " . $supplier->bank_branch;
+    }
+    if (!empty($supplier->bank_account)) {
+        $parts[] = "חשבון " . $supplier->bank_account;
+    }
+    return implode(" · ", $parts);
+}
+
 function pdf_client_address($client)
 {
     return trim(($client->address ?? "") . ", " . ($client->citie_name ?? ""), ", ");
@@ -469,13 +496,44 @@ function drow_html_billing($attr)
     $filters = array();
     $filters[]=array("filter_field" => "client_id", "filter_value" => intval($attr["client_id"]));
     $filters[]=array("filter_field" => "payment_date", "filter_type" => "null");
-    $filters[]=array("filter_field" => "payment_until", "filter_type" => "date", "filter_ratio" => "<","filter_value"=>"NOW()");
+    //CURDATE ולא NOW - חשבונית שמועד התשלום שלה היום עוד לא באיחור
+    $filters[]=array("filter_field" => "payment_until", "filter_type" => "date", "filter_ratio" => "<","filter_value"=>"CURDATE()");
     $filters[]=array("filter_field" => "doc_type", "filter_value" => "1");
 
-    $invoices = get_data_table("collection", $filters);
+    //מהחשבונית שמועד התשלום שלה הכי ישן
+    global $wpdb;
+    $invoices = get_data_table("collection", $filters, array(
+        "{$wpdb->prefix}collection.payment_until" => "asc",
+        "{$wpdb->prefix}collection.doc_number" => "asc",
+    ));
+    //בלי חשבוניות - בלי דוח. create_only_fill לא מזהה טבלה ריקה כאן, כי אחריה יש עוד שורות (pdf_totals)
+    if (empty($invoices)) {
+        return "";
+    }
+    //פרטי חשבון הבנק של הספקים שבדוח - שאילתה אחת לכל הספקים
+    $supplier_ids = array_unique(array_filter(array_map('intval', array_column($invoices, 'supplier_id'))));
+    $suppliers_bank = array();
+    if ($supplier_ids) {
+        foreach (run_query("SELECT id, bank_number, bank_branch, bank_account FROM {$wpdb->prefix}suppliers WHERE id IN (" . implode(",", $supplier_ids) . ")") as $supplier) {
+            $suppliers_bank[$supplier->id] = $supplier;
+        }
+    }
+    $today = new DateTime(pdf_now('Y-m-d'));
     $total = 0;
+    $rows = array();
     foreach ($invoices as $invoice) {
         $total += pdf_number($invoice->obligation);
+        $days_late = $invoice->payment_until ? (new DateTime(date('Y-m-d', strtotime($invoice->payment_until))))->diff($today)->days : "";
+        //שם הספק, ומתחתיו פרטי החשבון שאליו משלמים את החשבונית
+        $bank = pdf_bank_details($suppliers_bank[intval($invoice->supplier_id)] ?? null);
+        $rows[] = array(
+            pdf_esc($invoice->doc_number),
+            pdf_esc($invoice->supplier_name) . ($bank !== "" ? "<div style='font-size:8.5pt; color:#6B6B6B;'>" . pdf_esc($bank) . "</div>" : ""),
+            $invoice->date ? date('d/m/Y', strtotime($invoice->date)) : "",
+            $invoice->payment_until ? date('d/m/Y', strtotime($invoice->payment_until)) : "",
+            $days_late,
+            pdf_money($invoice->obligation),
+        );
     }
 
     $html = pdf_title_row("דוח חיוב", "חשבוניות שמועד התשלום שלהן עבר", array("תאריך" => pdf_now('d/m/Y')));
@@ -492,7 +550,8 @@ function drow_html_billing($attr)
             "סה\"כ לתשלום" => pdf_money($total),
         ))
     );
-    $html .= draw_table_pdf("collection", $filters);
+    $html .= pdf_data_table(array("מס' חשבונית", "ספק ופרטי חשבון לתשלום", "תאריך", "לתשלום עד", "ימי איחור", "סכום"), $rows,
+        array("", "", "center", "center", "center", "num"));
     $html .= pdf_totals(array(), "סה\"כ לתשלום", pdf_money($total));
     return $html;
 }
