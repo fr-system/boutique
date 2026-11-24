@@ -5,13 +5,8 @@ if(!is_user_logged_in()){
 ?>
 <?php get_header();?>
 <section class="page" data-single="">
-    <?php archive_header("lists",false,array("new_single"=>"חדש"));    ?>
-        <ul id="list" class="tables-list font-17 grow"><?php
-            foreach (BOUTIQUE_LISTS as $list_name => $B_LIST){
-               echo "<li class='pointer' data-list-name='{$list_name}'>{$B_LIST["title"]}</li>";
-            }
-            ?>
-        </ul>
+    <?php //הלשוניות של הטבלאות (tables-list) נבנות בכותרת, ליד כפתור ההוספה - archive_header
+    archive_header("lists",false,array("new_single"=>"חדש"));    ?>
     <div class="flex-display">
         <div class="part-80 list-area">
             <!--<table name="" class="list-table dataTable ">-->

@@ -3,10 +3,21 @@ require("xlsxwriter.class.php");
 require_once( dirname( dirname( dirname( dirname( dirname( __FILE__ ) ) ) ) ) . '/wp-load.php' );
 
 if(isset($_GET['export'])) {
+	//רק למשתמש מחובר
+	if (!is_user_logged_in()) {
+		wp_die("יש להתחבר למערכת", "", array("response" => 403));
+	}
 	switch (fixXSS ($_GET['export'])) {
 		case 'archive':
 			$table_name = $_GET["subject"];
-			$packet = get_data_to_export($table_name,"xlsx",array());
+			//אותו סינון ומיון כמו בעמוד הארכיב
+			//השורות שמוצגות בעמוד אחרי סינון - נשלחות בטופס POST (rivka.js, export-link)
+			$params = $_GET;
+			if (isset($_POST["ids"])) {
+				$params["ids"] = $_POST["ids"];
+			}
+			$archive = get_archive_filters($table_name, $params);
+			$packet = get_data_to_export($table_name,"xlsx",$archive["filters"],$archive["orderby"]);
 			$headers = $packet["headers"];
 			$data = $packet["data"];
 			break;

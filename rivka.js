@@ -2,6 +2,41 @@ var table;
 let cartMode = false;
 const tableName = getParameterByName("subject")
 
+//הדפסה/ייצוא מעמוד ארכיב: נשלחות השורות שמוצגות (ids), לפי הסדר שבעמוד - כך הסינון, החיפוש והמיון שבעמוד נשמרים.
+//ה-ids נשלחים בטופס POST ולא בכתובת - ברשימה ארוכה הכתובת עוברת את מגבלת האורך של השרת.
+//בגלריה - רק כשיש סינון; בלי סינון - הקישור הרגיל, והשרת מדפיס את כל הרשימה (get_archive_filters)
+jQuery(document).on('click', '.export-link', function (e) {
+    var ids = null;
+    if (table && jQuery.fn.dataTable && jQuery.fn.dataTable.isDataTable('.dataTable')) {
+        //טבלה - תמיד השורות שמוצגות ובסדר שבעמוד, כדי שגם מיון (לחיצה על כותרת עמודה) יודפס כמו שהוא
+        ids = table.rows({search: 'applied', order: 'applied'}).nodes().to$()
+            .map(function () { return jQuery(this).data('id'); }).get();
+    }
+    else if (jQuery('.archive-gallery .single').length) {
+        //גלריה (מוצרים, מבצעים) - הכרטיסים שלא הוסתרו בסינון
+        var all = jQuery('.archive-gallery .single');
+        var visible = all.filter(function () { return jQuery(this).css('display') !== 'none'; });
+        if (visible.length < all.length) {
+            ids = visible.map(function () { return jQuery(this).data('id'); }).get();
+        }
+    }
+    else {
+        return;
+    }
+    var url = new URL(this.href);
+    url.searchParams.delete('ids');//ids ישנים בקישור (מהחיפוש בגלריה - searchElements)
+    this.href = url.toString();
+    if (ids === null) {
+        return;
+    }
+    e.preventDefault();
+    var form = jQuery('<form>', {method: 'post', action: this.href, target: this.target || '_blank'}).hide()
+        .append(jQuery('<input>', {type: 'hidden', name: 'ids', value: ids.join(',')}));
+    jQuery('body').append(form);
+    form.trigger('submit');
+    form.remove();
+});
+
 function fillClientDetails(results){
     if(results.branches){
         var disabled = jQuery("input.orders_id[name=id]").val() ?" disabled ":"";

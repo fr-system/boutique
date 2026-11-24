@@ -265,6 +265,8 @@ function save_single_data()
         if (!empty($_POST["id"])) {
             $existing = get_data_table($table_name, array(array("filter_field" => "id", "filter_value" => intval($_POST["id"]))));
             $_POST["user_id"] = count($existing) > 0 ? $existing[0]->user_id : "";
+            //המייל שהיה שמור ברשומה - לפיו יודעים אם המשתמש שינה את המייל בטופס
+            $old_record_email = count($existing) > 0 ? trim((string)$existing[0]->email) : "";
         }
 
         //אין להוסיף או לעדכן סוכן/ספק עם מייל של מנהל
@@ -308,7 +310,10 @@ function save_single_data()
             $old_user_email = trim((string)$user->user_email);
             $single_name = BOUTIQUE_TABLES[$table_name]["single"];
 
-            if ($old_user_email !== "" && strcasecmp($old_user_email, $new_email) != 0) {
+            //המייל השתנה רק אם הוא שונה מהמייל שהיה שמור ברשומה. אם המייל ביוזר שונה אבל בטופס לא שינו -
+            //לא יוצרים משתמש חדש (היוזר מתעדכן למייל של הרשומה בהמשך, אם המייל לא שייך ליוזר אחר)
+            $email_changed = strcasecmp($old_record_email ?? "", $new_email) != 0;
+            if ($email_changed && $old_user_email !== "" && strcasecmp($old_user_email, $new_email) != 0) {
                 //המייל השתנה ולמשתמש יש את המייל הקודם: נוצר משתמש חדש עם המייל החדש (כל הבדיקות של סוכן/ספק חדש),
                 //והמשתמש הקודם נמחק רק אחרי שהשמירה הצליחה
                 $old_login = $user->user_login;

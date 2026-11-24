@@ -413,6 +413,15 @@ section.page .dt-layout-table .dt-layout-cell{
     height: 70vh;
     overflow-y: auto;
 }
+/* עמוד ארכיב - יותר רוחב לטבלה: שוליים צרים בצדדים, וטבלה שעדיין רחבה מדי נגללת לצדדים בתוך האזור שלה.
+   min-width: 0 - בלי זה פריט flex לא מצטמצם מתחת לרוחב הטבלה ודוחף את העמוד */
+section.page.archive-page{
+    padding: 2vh 1vw;
+    min-width: 0;
+}
+section.page.archive-page .dt-layout-table .dt-layout-cell{
+    overflow-x: auto;
+}
 section.page.single .dt-layout-table .dt-layout-cell{
     height: 40vh;
 }
@@ -798,6 +807,11 @@ ul.tables-list li.selected {
     color: white;
 }
 
+/* בכותרת העמוד, ליד כפתור ההוספה - בלי השוליים של רשימה */
+.archive-actions ul.tables-list{
+    margin: 0;
+    padding: 0;
+}
 ul.tables-list li{
      display: inline;
      padding: 10px 18px;
@@ -821,7 +835,6 @@ ul.tables-list li:last-child{
     height: 40px;
  }
 .list-table .td-action{
-    width: 10%;
     padding-top: 5px;
 }
 .modal button.btn-close{
@@ -876,6 +889,14 @@ td.td-action {
     padding-right: 10px !important;
     text-align: center;
     white-space: nowrap;
+}
+/* עמודות האייקונים תמיד צרות ברוחב האייקון: width 1% + nowrap - הדפדפן נותן להן רק את מה שהתוכן צריך,
+   והרוחב הנוסף של הטבלה (כשיש מעט עמודות) הולך לעמודות הנתונים */
+table.dataTable th.td-action,
+table.dataTable td.td-action,
+.list-table th.td-action,
+.list-table td.td-action {
+    width: 1% !important;
 }
 
 /* כפתורי הפעולות בשורות הטבלה (הזמנות, משימות, דוח חיוב) - הכיתוב תמיד בשורה אחת, והעמודה מתרחבת לפיו */

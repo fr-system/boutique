@@ -811,64 +811,155 @@ function checking_duplicates()
     }
 }
 
-function get_data_to_export($table_name,$file_type,$filters)
+//הסינון והמיון של עמוד ארכיב - משותף לעמוד עצמו ולהדפסה/לייצוא שלו, כדי שיודפס בדיוק מה שמוצג בעמוד.
+//$params - הפרמטרים של העמוד (subject, ו-id של לקוח בהזמנות/משימות של לקוח, payed בחשבוניות ששולמו)
+function get_archive_filters($table_name, $params)
+{
+    global $wpdb;
+    $filters = array();
+    $orderby = null;
+    $add_text = null;
+    $client_id = null;
+    $blocked = null;
+
+    //הזמנות/משימות של לקוח מסוים (מהכפתור בטבלת הלקוחות: archive?subject=orders&id=...)
+    if (($table_name == "orders" || $table_name == "tasks") && !empty($params["id"])) {
+        $client_id = intval($params["id"]);
+        $client = run_query("SELECT name, blocked FROM {$wpdb->prefix}clients WHERE id = " . $client_id)[0] ?? null;
+        $add_text = " של " . ($client->name ?? "");
+        $blocked = $client->blocked ?? null;
+        $filters[] = array("filter_field" => "client_id", "filter_value" => $client_id);
+    }
+    if ($table_name == "collection") {
+        if (isset($params["payed"])) {
+            $filters[] = array("filter_field" => "payment_date", "filter_type" => "not_null");
+            $add_text = " ששולמו";
+        } else {
+            $filters[] = array("filter_field" => "payment_date", "filter_type" => "null");
+        }
+        if (is_supplier()) {
+            $filters[] = array("filter_field" => "supplier_id", "filter_value" => get_id_by_user());
+        }
+    }
+
+    if (is_agent()) {
+        $agent_id = get_id_by_user();
+        if ($table_name == "clients") {
+            $filters[] = array("filter_field" => "agent_id", "filter_value" => $agent_id);
+        }
+        if ($table_name == "tasks") {
+            $filters[] = array("filter_table" => "tasks", "filter_field" => "agent_id", "filter_value" => $agent_id);
+        }
+        if ($table_name == "orders") {
+            //ההזמנות של הלקוחות שלו, וגם הזמנות שהוא פתח ללקוח של סוכן אחר
+            $filters[] = array("filter_type" => "filter", "filter_field" => "",
+                "filter_value" => "({$wpdb->prefix}clients.agent_id = " . intval($agent_id) . " OR {$wpdb->prefix}orders.user_opens = " . get_current_user_id() . ")");
+        }
+        if ($table_name == "collection") {
+            $filters[] = array("filter_table" => "clients", "filter_field" => "agent_id", "filter_value" => $agent_id);
+        }
+    }
+
+    if ($table_name == "orders") {
+        //ברירת מחדל: ההזמנות החדשות למעלה
+        $orderby = array("{$wpdb->prefix}orders.order_date" => "DESC", "{$wpdb->prefix}orders.id" => "DESC");
+    }
+
+    //הדפסה/ייצוא כשבעמוד יש סינון או חיפוש (נעשים בדפדפן): ה-JS שולח את השורות שמוצגות (ids), לפי הסדר שבעמוד.
+    //בנוסף לסינונים שלמעלה - כך אי אפשר לקבל דרך ids שורות שאין הרשאה לראות. ids ריק - שום שורה לא מוצגת
+    if (isset($params["ids"])) {
+        $ids = array_values(array_unique(array_filter(array_map('intval', explode(",", (string)$params["ids"])))));
+        if (empty($ids)) {
+            $filters[] = array("filter_type" => "filter", "filter_field" => "", "filter_value" => "1 = 0");
+        } else {
+            $id_column = "{$wpdb->prefix}{$table_name}.id";
+            $filters[] = array("filter_type" => "filter", "filter_field" => "", "filter_value" => "{$id_column} IN (" . implode(",", $ids) . ")");
+            $orderby = array("FIELD({$id_column}, " . implode(",", $ids) . ")" => "");
+        }
+    }
+
+    return array("filters" => $filters, "orderby" => $orderby, "add_text" => $add_text, "client_id" => $client_id, "blocked" => $blocked);
+}
+
+//הפרמטרים של עמוד הארכיב שצריך להעביר לקישורי ההדפסה והייצוא (בלי subject, שכבר בקישור)
+function get_archive_export_params()
+{
+    $params = array();
+    if (!empty($_GET["id"])) {
+        $params["id"] = intval($_GET["id"]);
+    }
+    if (isset($_GET["payed"])) {
+        $params["payed"] = 1;
+    }
+    return $params ? "&" . http_build_query($params) : "";
+}
+
+//האם להציג עמודה בהדפסה/בייצוא. ב-PDF - רק העמודות שמוצגות בטבלה בעמוד (בלי hide_in_table), באקסל - כל העמודות
+function is_export_column($column, $file_type, $exist_client_filter, $exist_agent_filter)
+{
+    $label = $column["label"] ?? $column["th_label"] ?? null;
+    if (!isset($column['field_name']) || $label === null) {
+        return false;
+    }
+    if ($file_type == "pdf" && (isset($column["hide_in_pdf"]) || isset($column["hide_in_table"]) || $column["widget"] == "image")) {
+        return false;
+    }
+    if ($column['field_name'] == "client_id" && $exist_client_filter) {
+        return false;
+    }
+    //כמו בטבלה: לסוכן אין עמודת סוכן, וגם כשהרשימה כבר מסוננת לפי סוכן
+    if ($column['field_name'] == "agent_id" && ($exist_agent_filter || is_agent())) {
+        return false;
+    }
+    return true;
+}
+
+//שם השדה בשורה מ-get_data_table - כמו בטבלה בעמוד (get_tr_data)
+function get_export_field($column)
+{
+    if (isset($column['join_table']) && !isset($column['type'])) {
+        return substr($column['join_table'], 0, -1) . (isset($column['join_value']) ? "_" . $column['join_value'] : '');
+    }
+    return $column["field_name"];
+}
+
+function get_data_to_export($table_name, $file_type, $filters, $orderby = null)
 {
     $page_info = BOUTIQUE_TABLES[$table_name];
-    $list = get_data_table ($table_name,$filters);
+    $list = get_data_table($table_name, $filters, $orderby);
     $exist_client_filter = !empty(array_filter($filters, function($filter) {
         return isset($filter['filter_field']) && $filter['filter_field'] === 'client_id';
     }));
-
     $exist_agent_filter = !empty(array_filter($filters, function($filter) {
-        return isset($filter['filter_field']) && str_contains($filter['filter_field'],"agent_id");
+        return isset($filter['filter_field']) && str_contains($filter['filter_field'], "agent_id");
     }));
-    //$fname = $page_info["title"];
-    $headers = [];
-    if(isset($page_info["more_columns_in_table"])) {
-        foreach ($page_info["more_columns_in_table"] as $column) {
-            if (!isset($column['field_name']) || !isset($column["label"]) || $file_type == "pdf" && (isset($column["hide_in_pdf"]) || $column["widget"] == "image")) {
-                continue;
-            }
 
-            $headers[$column["label"]] = get_column_type($column["widget"]);
+    $columns = array_merge($page_info["more_columns_in_table"] ?? array(), $page_info["columns"]);
+    $columns = array_values(array_filter($columns, function ($column) use ($file_type, $exist_client_filter, $exist_agent_filter) {
+        return is_export_column($column, $file_type, $exist_client_filter, $exist_agent_filter);
+    }));
+
+    //הכותרות הן מפתחות במערך - לכותרת שחוזרת (למשל כמה עמודות "דוא"ל" בספקים) מוסיפים רווח בסוף,
+    //אחרת הכותרות מתאחדות והערכים בשורות זזים מתחת לכותרות הלא נכונות
+    $headers = array();
+    foreach ($columns as $column) {
+        $label = $column["label"] ?? $column["th_label"];
+        while (isset($headers[$label])) {
+            $label .= " ";
         }
+        $headers[$label] = get_column_type($column["widget"]);
     }
 
-    foreach ($page_info["columns"] as $column) {
-        if (!isset($column['field_name']) || !isset($column["label"]) || $file_type == "pdf" && (isset($column["hide_in_pdf"])|| $column["widget"] == "image")) { continue; }
-        if($column['field_name'] == "client_id" && $exist_client_filter)continue;
-        if($column['field_name'] == "agent_id" && $exist_agent_filter)continue;
-        $headers[$column["label"]] = get_column_type ($column["widget"]);
-    }
-
-    $data = [];
+    $data = array();
     foreach ($list as $item) {
-        $row = [];
-        if(isset($page_info["more_columns_in_table"])) {
-            foreach ($page_info["more_columns_in_table"] as $column) {
-                if (!isset($column['field_name']) || !isset($column["label"]) || $file_type == "pdf" && (isset($column["hide_in_pdf"]) || $column["widget"] == "image")) continue;
-                $field = isset($column['join_table']) ? substr($column['join_table'], 0, -1) . "_" . $column['join_value'] : $column["field_name"];
-                $column_value = get_value($column, $item, $field);
-                $row[] = $column_value;
-            }
-        }
-
-        foreach ($page_info["columns"] as $column) {
-            if (!isset($column['field_name']) || !isset($column["label"]) || $file_type == "pdf" && (isset($column["hide_in_pdf"])|| $column["widget"] == "image" )) continue;
-            if($column['field_name'] == "client_id" && $exist_client_filter)continue;
-            if($column['field_name'] == "agent_id"  && $exist_agent_filter)continue;
-
-            $field = isset($column['join_table']) ? substr($column['join_table'], 0, -1) . "_" . $column['join_value'] : $column["field_name"];
-
-            $column_value = get_value($column, $item, $field);
-            $row[] = $column_value;
-
+        $row = array();
+        foreach ($columns as $column) {
+            $row[] = get_value($column, $item, get_export_field($column));
         }
         $data[] = $row;
     }
 
-    return array("headers"=>$headers,"data"=>$data);
-
+    return array("headers" => $headers, "data" => $data);
 }
 
 function  get_column_type($widget)
@@ -883,33 +974,54 @@ function  get_column_type($widget)
     }
 }
 
+//ערך של תא בהדפסה/בייצוא - טקסט בלבד, כמו מה שמוצג בטבלה בעמוד
 function get_value($column,$row,$field)
-{		$column_value = "";
+{
+    //שם משתמש לא נשמר בטבלה (not_in_query) - מהיוזר המקושר
+    if ($column["field_name"] == "username") {
+        $user = !empty($row->user_id) ? get_userdata(intval($row->user_id)) : null;
+        return $user ? $user->user_login : "";
+    }
+    $value = $row->$field ?? null;
+    $column_value = "";
     switch ($column["widget"]) {
         case "select":
-            $column_value = $row->$field;
-            break;
-        case "radio":
-        case "status":
-        case "toggle":
-            $column_value = $column["values"][$row->$field]["label"];
+            if (isset($column["options"])) {
+                //רשימה קבועה (למשל בנק, תנאי תשלום) - הטקסט של האפשרות ולא הקוד
+                foreach ($column["options"] as $option) {
+                    if ($option["value"] == $value) {
+                        $column_value = $option["text"];
+                        break;
+                    }
+                }
+            } else {
+                $column_value = $value;
+            }
             break;
         case "date":
         case "datetime-local":
-            if ($row->$field) {
-                $timestamp = strtotime($row->$field); // המרת התאריך לאטימות זמן
+            if ($value) {
                 $format = 'd/m/Y';
                 if ($column["widget"] == "datetime-local") {
                     $format .= " H:i";
                 }
-                $column_value = date($format, $timestamp);
+                $column_value = date($format, strtotime($value));
             }
             break;
         default:
-            $column_value = isset($column['list_name']) && isset($list[$row->$field]) ? $list[$row->$field] :
-                /*(isset($column['b'])? $row->$field ." בונוס"  : */$row->$field;//);//לשאול אם יש עמטדה בונוס ולכתוב שזה מוצר בונוס או מבצע?
+            if (isset($column["values"])) {
+                //radio / status / toggle, וגם עמודות כמו "החזרה" - התווית של הערך
+                $column_value = ($value !== null && $value !== "") ? ($column["values"][$value]["label"] ?? "") : "";
+            } else if (isset($column["type"]) && $column["type"] == "user") {
+                //מקים / מאשר ההזמנה - שם המשתמש ולא המספר שלו
+                $user = !empty($value) ? get_userdata(intval($value)) : null;
+                $column_value = $user ? $user->display_name : "";
+            } else {
+                $column_value = $value;
+            }
             break;
     }
+    $column_value = (string)$column_value;
 
     if(isset($column["sign"]) && $column_value!=""){
         $column_value.=" ".$column["sign"];

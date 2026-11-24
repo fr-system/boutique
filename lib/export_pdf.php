@@ -7,9 +7,16 @@ const PDF_OWN_TITLE_PACKETS = array("billing", "orders_today");
 
 //export_pdf.php?file=pdf&export=single&subject='.$table_name.'&id=' . $row->id
 if(isset($_GET['export']) && isset($_GET['file']) && $_GET['file'] == "pdf") {
-    //write_log("!!!!");
-
-    create_pdf($_GET);
+    //גישה ישירה לקובץ (הדפסה מהמערכת) - רק למשתמש מחובר. קריאות פנימיות (מיילים, cron) לא עוברות כאן
+    if (!is_user_logged_in()) {
+        wp_die("יש להתחבר למערכת", "", array("response" => 403));
+    }
+    $attr = $_GET;
+    //השורות שמוצגות בעמוד אחרי סינון - נשלחות בטופס POST (rivka.js, export-link)
+    if (isset($_POST["ids"])) {
+        $attr["ids"] = $_POST["ids"];
+    }
+    create_pdf($attr);
 }
 
 function create_pdf($attr)
@@ -85,8 +92,13 @@ function create_pdf($attr)
             break;
         case 'archive':
             $filters = array();
+            $orderby = null;
             if($table_name){
-                $report_title = BOUTIQUE_TABLES[$table_name]["title"];
+                //אותו סינון ומיון כמו בעמוד הארכיב (סוכן - רק שלו, לקוח מסוים, חשבוניות ששולמו וכו')
+                $archive = get_archive_filters($table_name, $attr);
+                $filters = $archive["filters"];
+                $orderby = $archive["orderby"];
+                $report_title = BOUTIQUE_TABLES[$table_name]["title"] . ($archive["add_text"] ?? "");
             }
             else if(isset($attr["report_title"])){
                 $report_title = $attr["report_title"];
@@ -101,7 +113,7 @@ function create_pdf($attr)
             }*/
             $html .= pdf_title_row($report_title, "", array("תאריך" => pdf_now('d/m/Y')));
             if ($table_name) {
-                $html .= draw_table_pdf($table_name,$filters);
+                $html .= draw_table_pdf($table_name,$filters,$orderby);
             }
             else {
                 //דוח בלי טבלה (למשל משימות שלא נסגרו) - החלקים לפי packet
@@ -350,10 +362,14 @@ function pdf_client_address($client)
 
 // ===================== המסמכים =====================
 
-function draw_table_pdf($table_name, $filters)
+function draw_table_pdf($table_name, $filters, $orderby = null)
 {
-    $packet = get_data_to_export($table_name,"pdf",$filters);
-    return pdf_data_table(array_keys($packet["headers"]), $packet["data"]);
+    $packet = get_data_to_export($table_name,"pdf",$filters,$orderby);
+    //התאים נכנסים ל-HTML כמו שהם - הערכים הם טקסט (שמות, הערות), ולכן מוגנים
+    $rows = array_map(function ($row) {
+        return array_map('pdf_esc', $row);
+    }, $packet["data"]);
+    return pdf_data_table(array_keys($packet["headers"]), $rows);
 }
 
 //מסמך הזמנה - למנהל, לסוכן ולהדפסה. עם $supplier_id - הזמנת רכש לספק, רק עם המוצרים שלו
