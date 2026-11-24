@@ -169,6 +169,13 @@ else{
                         </a>
                 <?php }
                 }
+                //איפוס סיסמה לסוכן/ספק - רק למנהל, ורק כשהרשומה מקושרת ליוזר תקין (username מתמלא רק אז)
+                if(in_array($table_name, USER_EMAIL_TABLES) && $action != "new" && is_manager() && !empty($single->username)){ ?>
+                    <button type="button" class="reset-user-password flex-display center align-center background-white dark-green bold font-18"
+                            data-table="<?= $table_name ?>" data-id="<?= intval($id) ?>">
+                        <span>איפוס סיסמא</span>
+                    </button>
+                <?php }
                 if($table_name == "clients" && $action != "new"){
                     $block_text = "חסום לקוח";
                     if($single->blocked == 1){

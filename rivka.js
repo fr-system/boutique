@@ -197,6 +197,18 @@ jQuery(document).ready(function($) {
         call_ajax_function(postData);
     })
 
+    //איפוס סיסמה לסוכן/ספק - נשלח לו מייל עם קישור לבחירת סיסמה חדשה
+    jQuery(".reset-user-password").click(function () {
+        if (!confirm("לשלוח מייל לאיפוס סיסמה?")) {
+            return;
+        }
+        call_ajax_function([
+            {name: "action", value: "send_record_password_reset"},
+            {name: "table_name", value: jQuery(this).data("table")},
+            {name: "id", value: jQuery(this).data("id")},
+        ]);
+    });
+
     startingDataTable();
 
     jQuery("#payment_modal button.ok").click(function () {

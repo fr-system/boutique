@@ -483,6 +483,38 @@ function send_password_reset_link() {
     die;
 }
 
+//כפתור "איפוס סיסמה" בעמוד הסוכן/הספק - המנהל שולח לבעל הרשומה מייל עם קישור לבחירת סיסמה חדשה (כולל שם המשתמש).
+//המייל נשלח למייל של היוזר, ואם אין ליוזר מייל (מייל משותף לכמה יוזרים) - למייל שרשום ברשומה
+add_action('wp_ajax_send_record_password_reset', 'send_record_password_reset');
+function send_record_password_reset() {
+    global $wpdb;
+    if (!is_manager()) {
+        wp_send_json(['status' => 'failed', 'message' => "אין לך הרשאה לאפס סיסמה"]);
+    }
+    $table_name = sanitize_key($_POST['table_name'] ?? '');
+    $id = intval($_POST['id'] ?? 0);
+    $record = in_array($table_name, USER_EMAIL_TABLES) && $id
+        ? $wpdb->get_row($wpdb->prepare("SELECT email, user_id FROM {$wpdb->prefix}{$table_name} WHERE id = %d", $id))
+        : null;
+    if (!$record) {
+        wp_send_json(['status' => 'failed', 'message' => "הרשומה לא נמצאה"]);
+    }
+    $user = !empty($record->user_id) && !get_bad_user_link(intval($record->user_id), $table_name, $id)
+        ? get_userdata(intval($record->user_id)) : null;
+    if (!$user) {
+        wp_send_json(['status' => 'failed', 'message' => "אין משתמש לרשומה הזו. שמירת הרשומה יוצרת לה משתמש"]);
+    }
+    $to = !empty($user->user_email) ? $user->user_email : trim((string)$record->email);
+    if (!is_email($to) || is_admin_email($to)) {
+        wp_send_json(['status' => 'failed', 'message' => "לא רשום מייל תקין למשתמש הזה"]);
+    }
+    $ok = send_mail($to, "איפוס סיסמה בתוכנה של בוטיק כשר", build_reset_password_email(array($user)));
+    if (!$ok) {
+        wp_send_json(['status' => 'failed', 'message' => "שליחת המייל נכשלה, יש לנסות שוב"]);
+    }
+    wp_send_json(['status' => 'success', 'message' => "נשלח מייל לאיפוס סיסמה אל " . esc_html($to)]);
+}
+
 function send_mail($to,$subject,$message,$files = array())
 {
     //$to = "kosherboutique@gmail.com";
