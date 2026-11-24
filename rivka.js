@@ -182,7 +182,10 @@ jQuery(document).ready(function($) {
         //לדעת אם הלקוח שעכשיו יוצרים לו הזמנה הוא מחאר בתשלום לא לאפשר לאשר הזמנה אלא לשלוח לאישור מנהל
         if (getParameterByName("action") == "edit") {
             var selectedOption = getSelectClientId().find('option:selected');
-            onSelectClient(selectedOption.val());
+            //משימה/הזמנה בלי לקוח - אין פרטי לקוח להביא
+            if (selectedOption.val()) {
+                onSelectClient(selectedOption.val());
+            }
             getSelectClientId().prop('disabled', true);
             jQuery("section form input[name=branch]").prop('disabled', true);
             jQuery("section input[name=order_date]").prop('disabled', true);

@@ -684,7 +684,15 @@ function is_needed_apostrophe($widget,$un_apostrophe,$save_as_text)
 add_action('wp_ajax_get_client_details', 'get_client_details');
 function get_client_details($client_id)
 {
-    $client_id = isset($_POST["client_id"]) ? $_POST["client_id"] : $client_id;
+    $client_id = intval(isset($_POST["client_id"]) ? $_POST["client_id"] : $client_id);
+    //בלי לקוח (למשל משימה בלי לקוח) - אין חוב ואין סניפים, ולא שולחים שאילתה עם client_id ריק
+    if (!$client_id) {
+        $res = array("debts" => 0, "obligo" => 0, "branches" => "");
+        if (isset($_POST["client_id"])) {
+            wp_send_json($res);
+        }
+        return $res;
+    }
     //צריך להביא את כל החשבוניות של הלקוח ולחשב את הסכום הכולל
     //ולהביא את כל החשבוניות שהלקוח שילם , ולחשב , אם סכום החשבוניות פחות סכום כל התשלומים קטן מהאובליגו = החוב שמותר ללקוח
 
@@ -698,13 +706,13 @@ function get_client_details($client_id)
         $obligo+=$row->obligation;
     }
 
-    $client = get_data_table("clients", array(array("filter_field" => "id", "filter_value" => $client_id)))[0];
+    $client = get_data_table("clients", array(array("filter_field" => "id", "filter_value" => $client_id)))[0] ?? null;
 
     //$branches = get_data_table("clients_branches", array(array("filter_field" => "main_client_id", "filter_value" => $client_id)));
     $options = build_select_options("clients_branches",($_POST["selected_value"]??null), array("filter"=>" main_client_id = ".$client_id));
 
     $res = array("debts" => $obligo,
-        "obligo" => $client->obligo,
+        "obligo" => $client->obligo ?? 0,
         //"late_payment" =>
         "branches"=>$options);
     if(isset($_POST["client_id"])) {
