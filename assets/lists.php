@@ -18,7 +18,6 @@ const BANKS = array(
     array("value"=>"22","text"=>"22 - סיטיבנק"),
     array("value"=>"23","text"=>"23 - HSBC"),
     array("value"=>"31","text"=>"31 - הבנק הבינלאומי"),
-    array("value"=>"34","text"=>"34 - בנק ערבי ישראלי"),
     array("value"=>"46","text"=>"46 - בנק מסד"),
     array("value"=>"52","text"=>"52 - בנק פועלי אגודת ישראל"),
     array("value"=>"54","text"=>"54 - בנק ירושלים"),
