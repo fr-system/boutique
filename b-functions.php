@@ -911,6 +911,10 @@ function is_export_column($column, $file_type, $exist_client_filter, $exist_agen
     if ($column['field_name'] == "agent_id" && ($exist_agent_filter || is_agent())) {
         return false;
     }
+    //לספק - בלי עמודת ספק (הוא רואה רק את החשבוניות שלו)
+    if ($column['field_name'] == "supplier_id" && is_supplier()) {
+        return false;
+    }
     return true;
 }
 

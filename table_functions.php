@@ -56,7 +56,8 @@ function get_archive_table($table_name,$data,$attr)
         } else {
             if (isset($column["hide_in_table"]) && !$is_list || (!isset($column["label"])&&!isset($column["th_label"])) ||
                 isset($attr["add_text"]) && !empty($attr["add_text"]) && $column["field_name"] == "client_id" ||
-                is_agent () && $column["field_name"] == "agent_id") {
+                is_agent () && $column["field_name"] == "agent_id" ||
+                is_supplier() && $column["field_name"] == "supplier_id") {
                 continue;
             }
         }
@@ -256,7 +257,8 @@ function get_tr_data($table_name, $data, $key,$attr){
         } else {
             if (isset($column["hide_in_table"]) && !$is_list  || (!isset($column["label"])&&!isset($column["th_label"])) ||
                 isset($attr["add_text"]) && !empty($attr["add_text"]) && $column["field_name"] == "client_id" ||
-                is_agent() && $column["field_name"] == "agent_id") {
+                is_agent() && $column["field_name"] == "agent_id" ||
+                is_supplier() && $column["field_name"] == "supplier_id") {
                 continue;
             }
         }
