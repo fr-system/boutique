@@ -427,10 +427,13 @@ function specials_gallery($list,$attr = array()){
                 }
                 $products = json_decode($single->products_buy);
 
-                if((!empty($single->buy) || $type == "3") && is_array($products)) {
-                    $products_res = run_query("SELECT name FROM {$wpdb->prefix}products WHERE id in(" . implode(',', $products) . ")");
+                if((!empty($single->buy) || $type == "3") && is_array($products) && count($products) > 0) {
+                    $products_res = run_query("SELECT name FROM {$wpdb->prefix}products WHERE id in(" . implode(',', array_map('intval', $products)) . ")");
                     $products_str = implode(', ', array_column($products_res, 'name'));
                     $html .= '<div class="part-10"><strong>מהמוצרים: </strong>' . $products_str . '</div>';
+                }
+                else if ($type == "3") {//11+1 בלי מוצרים מסומנים - על כל המוצרים של הספק
+                    $html .= '<div class="part-10"><strong>מהמוצרים: </strong>כל המוצרים של הספק</div>';
                 }
 
                 switch ($type) {
@@ -449,7 +452,7 @@ function specials_gallery($list,$attr = array()){
                             }
                             break;
                         case "3":
-                            $html .= "על כל 4 ארגזים: זיכוי בקבוק על כל 12 בקבוקים";
+                            $html .= "מ-4 ארגזים ומעלה (ביחד מהמוצרים במבצע): על כל ארגז של 12 בקבוקים - בקבוק אחד מתנה";
                             break;
                     }
                 echo $html;

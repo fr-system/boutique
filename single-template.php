@@ -278,7 +278,8 @@ else{
         promotions.forEach(p => {
             if (p.products_buy && p.products_buy!='""' && p.products_buy.trim()!='') {
                 const products = JSON.parse(p.products_buy);
-                if (Array.isArray(products)) {
+                //רשימה ריקה = מבצע לכל המוצרים של הספק
+                if (Array.isArray(products) && products.length > 0) {
                     products.forEach(productId => {
                         (promotionsByProduct[productId] ??= []).push(p);
                     });

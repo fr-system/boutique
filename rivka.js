@@ -139,10 +139,27 @@ function automaticOrderSavingSuccess(result){
     }
 }
 
+//כל שורות טבלת המוצרים בהזמנה - גם שורות שמוסתרות בחיפוש/סינון או בהצגת עגלה.
+//DataTables מוציא שורות מסוננות מהדף, ולכן jQuery("tr...") לא מוצא אותן (מבצעים, שמירה)
+function orderRows() {
+    if (table && jQuery.fn.dataTable && jQuery.fn.dataTable.isDataTable('.dataTable')) {
+        return table.rows().nodes().to$();
+    }
+    return jQuery('.archive-table.order_products tbody tr');
+}
+
+//השדות של שורות המוצרים שמוסתרות עכשיו בחיפוש/סינון - הן לא בטופס שבדף, ובלי זה השינויים בהן לא נשמרים
+function hiddenOrderRowsFields() {
+    if (!table || !jQuery.fn.dataTable || !jQuery.fn.dataTable.isDataTable('.dataTable')) {
+        return [];
+    }
+    return table.rows({search: 'removed'}).nodes().to$().find('input, select, textarea').serializeArray();
+}
+
 //שדה בעמודת ה-id של שורות המוצרים (input.id / input.temp) לפי הערך הנוכחי שלו.
 //לא לפי [value=...]: הסלקטור בודק את הערך שנכתב ב-HTML, ושורות שנוספו או עודכנו בדפדפן (val()) לא נמצאו - והשורה נשמרה שוב
 function findOrderRowInput(className, value) {
-    return jQuery(".archive-table.order_products tbody tr td.id input." + className).filter(function () {
+    return orderRows().find("td.id input." + className).filter(function () {
         return this.value == value;
     });
 }
@@ -354,7 +371,7 @@ function getProductsThisOrder(productId,className){
 }
 function getCountPromotions(productId,className){
     var countPromotions =0;
-    jQuery("tr.promo:has(.product_id input[type=hidden][value="+productId+"])").each(function(k,p){
+    orderRows().filter(".promo").has(".product_id input[type=hidden][value="+productId+"]").each(function(k,p){
         countPromotions += countUnitsForProduct(p);
     });
     return countPromotions;

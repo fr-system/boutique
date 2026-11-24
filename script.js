@@ -229,10 +229,7 @@ jQuery(document).ready(function($){
                     jQuery('.page.single input[name=get]').val("");
                     jQuery('.page.single select[name=product_get]').val("");
                     jQuery('.page.single input[name=buy]').val("");//11+1 - הסף קבוע (4 ארגזים)
-
-                    if(jQuery('input[name="products_buy[]"]:checked').length === 0){
-                        good = false;
-                    }
+                    //בלי מוצרים מסומנים - המבצע על כל המוצרים של הספק (12 בקבוקים בארגז)
 
                     break;
             }
@@ -262,6 +259,12 @@ jQuery(document).ready(function($){
 
         var formData = new FormData($form[0]);
         formData.append('action', 'send_site_forms');
+        //הזמנה: שורות מוצרים שמוסתרות בחיפוש/סינון לא בטופס שבדף - מוסיפים אותן, אחרת השינויים בהן לא נשמרים
+        if ($form.is(getOrderForm())) {
+            jQuery.each(hiddenOrderRowsFields(), function (k, field) {
+                formData.append(field.name, field.value);
+            });
+        }
         //שדות שהוצגו עם שם אחר כדי שכרום לא יציע ערכים שמורים (design_tool.php) - נשלחים בשם האמיתי
         $form.find('[data-real-name]').each(function () {
             formData.delete(this.name);
@@ -919,7 +922,8 @@ function automaticOrderSaving(){
     if (jQuery('input[name=dirty]').val() == "1" && jQuery('input[name=order_date]').val()
         && jQuery('.grid-display select[name=client_id]').val()) {
 
-        var inputs = jQuery('.grid-display .input-label table tr td.count input');
+        //גם שורות שמוסתרות בחיפוש/סינון
+        var inputs = orderRows().find('td.count input');
         var count = jQuery.grep(inputs, function (input, k) {
             return jQuery(input).val() > 0;
         })
@@ -931,7 +935,8 @@ function automaticOrderSaving(){
             filterOrderProdoctsRowsToSave();
 
             //שמירה אוטומטית לעולם לא מוחקת
-            var formData = jQuery.grep($form.serializeArray(), function (field) {
+            //כולל שורות מוצרים שמוסתרות בחיפוש/סינון - הן לא בטופס שבדף
+            var formData = jQuery.grep($form.serializeArray().concat(hiddenOrderRowsFields()), function (field) {
                 return field.name !== "remove";
             });
 
@@ -1056,7 +1061,7 @@ function fill_modal_list(result){
 
 function singleSpecialsPage(){    //מבצעים
 
-    jQuery('.page.single .grid-display ').append('<div class="type-3 hidden" >על כל 4 ארגזים: זיכוי בקבוק על כל 12 בקבוקים (מתוך ההזמנה)</div>');
+    jQuery('.page.single .grid-display ').append('<div class="type-3 hidden" >מ-4 ארגזים ומעלה (ביחד מהמוצרים במבצע): על כל ארגז של 12 בקבוקים - בקבוק אחד מתנה (מתוך ההזמנה)</div>');
     jQuery('.page.single input[name=discount]').closest("div").after('<div class="type-2 hidden stretch" >או</div>')
 
     //onSelectType טוען גם את מוצרי הספק (onSelectSupplier)

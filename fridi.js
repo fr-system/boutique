@@ -64,7 +64,8 @@ function import_from_xlsx(form, data){
 }
 
 function filterOrderProdoctsRowsToSave() {
-    var rows = jQuery('tr').filter(function () {
+    //גם שורות שמוסתרות בחיפוש/סינון - הן נשלחות בשמירה (hiddenOrderRowsFields), ושורה ריקה לא צריכה להישלח
+    var rows = jQuery('tr').add(orderRows()).filter(function () {
         var $row = jQuery(this);
 
         return jQuery.trim($row.find('td.count input').val() || '') === '' &&
@@ -73,36 +74,94 @@ function filterOrderProdoctsRowsToSave() {
     rows.find('td input').prop('disabled', true);
 }
 
-//מבצע 11+1 (סוג 3): על כל 4 ארגזים מזדכים על בקבוק אחד מכל 12 - מתוך ההזמנה, בלי בקבוקים נוספים
+//מבצע 11+1 (סוג 3): כשבהזמנה יש לפחות 4 ארגזים שלמים מהמוצרים של אותו מבצע (ביחד, גם מכמה מוצרים) -
+//בכל שורה בקבוק אחד מתנה על כל ארגז שלם (משלמים על 11 מתוך 12), מתוך ההזמנה. שורה שהוזמנה בבודדים לא נחשבת
 const ELEVEN_PLUS_ONE_MIN_BOXES = 4;
 const ELEVEN_PLUS_ONE_GROUP = 12;
+var elevenPlusOneRefreshing = false;
 
-function hasElevenPlusOne(product) {
+//מבצע ה-11+1 של המוצר (null אם אין)
+function getElevenPlusOnePromotion(product) {
     if (typeof promotionsByProduct === 'undefined') {//לא בעמוד הזמנה
-        return false;
+        return null;
     }
     var product_id = parseInt(product.find(".product_id span").text() || 0);
-    return (promotionsByProduct[product_id] ?? []).some(pro => pro.type == "3");
+    var byProduct = (promotionsByProduct[product_id] ?? []).find(pro => pro.type == "3");
+    if (byProduct) {
+        return byProduct;
+    }
+    //מבצע לספק בלי רשימת מוצרים - חל על כל המוצרים של הספק
+    var supplier_id = parseInt(product.find(".supplier_id span").text() || 0);
+    return (promotionsBySupplier[supplier_id] ?? []).find(pro => pro.type == "3") || null;
+}
+
+//ארגזים שלמים בשורה שנחשבים למבצע: מוצר של 12 בקבוקים בארגז, שהוזמן בארגזים (לא בונוס/מבצע)
+function elevenPlusOneBoxes(product) {
+    if (product.hasClass('bonus') || product.hasClass('promo')) {
+        return 0;
+    }
+    if ((parseInt(product.find('.units_in_box span').text()) || 0) != ELEVEN_PLUS_ONE_GROUP) {
+        return 0;
+    }
+    if (product.find(".order_individual input").val() != "0") {
+        return 0;
+    }
+    return parseInt(product.find('.count input').val()) || 0;
+}
+
+//כל השורות בהזמנה של מוצרים מאותו מבצע - גם שורות שמוסתרות בחיפוש/סינון (orderRows)
+function elevenPlusOneRows(promotion) {
+    return orderRows().filter(function () {
+        var row = jQuery(this);
+        if (row.hasClass('bonus') || row.hasClass('promo')) {
+            return false;
+        }
+        var pro = getElevenPlusOnePromotion(row);
+        return pro && pro.id == promotion.id;
+    });
 }
 
 //כותב את ההנחה בשורת המוצר ומחזיר את מספר הבקבוקים לזיכוי (0 אם המבצע לא חל)
 function applyElevenPlusOne(product, units) {
-    if (product.hasClass('bonus') || product.hasClass('promo') || !hasElevenPlusOne(product)) {
+    if (product.hasClass('bonus') || product.hasClass('promo')) {
         return 0;
     }
-    var unitsInBox = parseInt(product.find('.units_in_box span').text()) || 0;
-    if (unitsInBox != ELEVEN_PLUS_ONE_GROUP) {//המבצע רק על מוצרים של 12 בקבוקים בארגז
+    var promotion = getElevenPlusOnePromotion(product);
+    if (!promotion) {
         return 0;
     }
+    if ((parseInt(product.find('.units_in_box span').text()) || 0) != ELEVEN_PLUS_ONE_GROUP) {//המבצע רק על מוצרים של 12 בקבוקים בארגז
+        return 0;
+    }
+    var rows = elevenPlusOneRows(promotion);
+    var totalBoxes = 0;
+    rows.each(function () {
+        totalBoxes += elevenPlusOneBoxes(jQuery(this));
+    });
+    //מ-4 ארגזים ומעלה (ביחד) - בקבוק על כל ארגז שלם בשורה
+    var freeUnits = totalBoxes >= ELEVEN_PLUS_ONE_MIN_BOXES ? elevenPlusOneBoxes(product) : 0;
     var discountInput = product.find('.discount_percent input');
-    //הזיכוי רק על קבוצות שלמות של 4 ארגזים (ארגז 5-7 מחכים לקבוצה הבאה); בכל קבוצה - בקבוק אחד מכל ארגז
-    var fullGroups = Math.floor(units / (ELEVEN_PLUS_ONE_MIN_BOXES * unitsInBox));
-    var freeUnits = fullGroups * ELEVEN_PLUS_ONE_MIN_BOXES;
-    if (freeUnits > 0) {
+    if (freeUnits > 0 && units > 0) {
         discountInput.autoNumeric('set', (freeUnits * 100 / units).toFixed(2));
     } else {
         //מתחת לסף - ההנחה של המבצע מתבטלת
+        freeUnits = 0;
         discountInput.val("");
+    }
+    //הסף משותף לכל מוצרי המבצע - שינוי בשורה אחת יכול להפעיל או לבטל את המבצע בשורות האחרות.
+    //הדגל מונע לולאה: החישוב של השורות האחרות לא מחשב שוב את כולן
+    if (!elevenPlusOneRefreshing) {
+        elevenPlusOneRefreshing = true;
+        try {
+            rows.not(product).each(function () {
+                var row = jQuery(this);
+                if ((parseInt(row.find('.count input').val()) || 0) > 0) {
+                    calculatePrice(row);
+                }
+            });
+        } finally {
+            elevenPlusOneRefreshing = false;
+        }
     }
     return freeUnits;
 }
@@ -126,7 +185,7 @@ function checkPromotions(product, currentValue){
         var needToBuy = parseInt(pro.buy);
         var countToGet = parseInt(pro.get);
         var product_get = (pro.type == "3" ? product_id : pro.product_get);
-        var productPromo = jQuery("tr.promo td.product_id input[type=hidden][value=" + product_get + "]").closest("tr").first();
+        var productPromo = orderRows().filter(".promo").has("td.product_id input[type=hidden][value=" + product_get + "]").first();
         switch (pro.type) {
             case "1": //  קנה קבל
               /*  if(currentValue ==0){
@@ -143,14 +202,14 @@ function checkPromotions(product, currentValue){
                 }
                 if(Array.isArray(productsInSpecial)) {
                         productsInSpecial.forEach(productId => {
-                            jQuery("tr.in-cart:not(.bonus,.promo):has(.product_id input[type=hidden][value=" + productId + "])").each(function (k, p) {
+                            orderRows().filter(".in-cart:not(.bonus,.promo)").has(".product_id input[type=hidden][value=" + productId + "]").each(function (k, p) {
                                 countProductsInOrder += countUnitsForProduct(p);
                                 //countProductsInOrder += parseInt(jQuery(p).find(".count input").val());
                             });
                         });
                 }
                 else {
-                    jQuery("tr.in-cart:not(.bonus,.promo)").each(function () {
+                    orderRows().filter(".in-cart:not(.bonus,.promo)").each(function () {
                         const row = jQuery(this);
 
                         if (row.find("td.supplier_id span").text().trim() !== pro.supplier_id) {
@@ -160,7 +219,7 @@ function checkPromotions(product, currentValue){
                     });
                 }
                 var countPromotions = getCountPromotions(pro.product_get);
-                var productToGet = jQuery("tr:not(.bonus,.promo) td.product_id input[type=hidden][value=" + pro.product_get + "]").closest("tr").first();
+                var productToGet = orderRows().filter(":not(.bonus,.promo)").has("td.product_id input[type=hidden][value=" + pro.product_get + "]").first();
 
                     var toAdd = countToGet * parseInt(countProductsInOrder / needToBuy);
 
@@ -176,7 +235,7 @@ function checkPromotions(product, currentValue){
             case "2": //  קנה מעל
                 var priceToSupplier = 0;
 
-                jQuery("tr.in-cart:not(.bonus,.promo)").each(function () {
+                orderRows().filter(".in-cart:not(.bonus,.promo)").each(function () {
                     const row = jQuery(this);
 
                     if (row.find("td.supplier_id span").text().trim() !== pro.supplier_id) {
@@ -193,7 +252,7 @@ function checkPromotions(product, currentValue){
                             productPromo.show();
                         }
                         else {
-                            var productToGet = jQuery("tr:not(.bonus,.promo) td.product_id input[type=hidden][value=" + pro.product_get + "]").closest("tr").first();
+                            var productToGet = orderRows().filter(":not(.bonus,.promo)").has("td.product_id input[type=hidden][value=" + pro.product_get + "]").first();
                             //var productToGet = jQuery("tr:not(.bonus,.promo):has(.product_id input[type=hidden][value=" + pro.product_get + "])");
                             addProdoctBonus(productToGet, countToGet, sourceKey);
                         }
